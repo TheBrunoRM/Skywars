@@ -4,12 +4,12 @@
 
 ### Creating an arena:
 
-To create an arena, type **/sw create <arena>**
-After creating the arena, type **/sw config <arena>** to open the configuration menu
-You can configurate most of the values of the arena on the configuration menu
-Make sure to select an **schematic** file
-To load an schematic file, put it inside the **schematics** folder inside the plugin folder
-You can set the arena's schematic through the configuration menu
+To create an arena, type **/sw create <arena>**\
+After creating the arena, type **/sw config <arena>** to open the configuration menu\
+You can configurate most of the values of the arena on the configuration menu\
+Make sure to select an **schematic** file\
+To load an schematic file, put it inside the **schematics** folder inside the plugin folder\
+You can set the arena's schematic through the configuration menu\
 
 ### Creating signs:
 
