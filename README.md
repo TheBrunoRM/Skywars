@@ -15,7 +15,6 @@ You can set the arena's schematic through the configuration menu
 
 To create a sign, make it like this:
 
-
 ![Sign image](https://cdn.discordapp.com/attachments/835594221456064544/876946375110189146/unknown.png)
 
 ## Current features:
