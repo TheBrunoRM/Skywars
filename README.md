@@ -2,7 +2,7 @@
 
 ## How to use
 
-1) Creating an arena:
+### Creating an arena:
 
 To create an arena, type **/sw create <arena>**
 After creating the arena, type **/sw config <arena>** to open the configuration menu
@@ -11,9 +11,11 @@ Make sure to select an **schematic** file
 To load an schematic file, put it inside the **schematics** folder inside the plugin folder
 You can set the arena's schematic through the configuration menu
 
-2) Creating signs:
+### Creating signs:
 
 To create a sign, make it like this:
+
+
 ![Sign image](https://cdn.discordapp.com/attachments/835594221456064544/876946375110189146/unknown.png)
 
 ## Current features:
