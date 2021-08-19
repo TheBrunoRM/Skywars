@@ -4,7 +4,7 @@
 
 ### Creating an arena:
 
-To create an arena, type <span style="color:blue">/sw create <arena></span>\
+To create an arena, type **/sw create <arena>**\
 After creating the arena, type **/sw config <arena>** to open the configuration menu\
 You can configurate most of the values of the arena on the configuration menu\
 Make sure to select an **schematic** file\
