@@ -1,0 +1,16 @@
+status:
+   waiting: Waiting for players...
+   starting: Starting in &a%seconds%s
+   playing: '&a%players% &rplayers remaining'
+   ending: Ending in &a%seconds%s
+
+items:
+   show_context: true
+   context: '&7(Right Click)'
+   select_kit: '&aSelect kit'
+   leave: '&cLeave'
+
+actionbar:
+  waiting: '&eCurrent kit: &a%kit%'
+
+url: www.skywars.com

@@ -1,0 +1,11 @@
+main: me.brunorm.skywars.Skywars
+version: 0.1.1
+name: Skywars
+author: BrunoRM
+softdepend: [WorldEdit]
+api-version: "1.13"
+
+commands:
+   skywars:
+      description: Main Skywars command.
+      aliases: sw

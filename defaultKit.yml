@@ -1,0 +1,17 @@
+# Note:
+# Use 1.13+ item IDs
+# -------------------
+
+# This is the display name of the kit, used in the kits menu
+name: Default kit
+
+# This is the display icon of the kit, used in the kits menu
+icon: IRON_SWORD
+
+# This is the items list that will be given to the player when the game starts
+items:
+- IRON_SWORD
+- GOLDEN_APPLE;2
+
+# This is the price that will be used when players buy the kit
+price: 100

@@ -1,0 +1,16 @@
+# set the main lobby using /sw setmainlobby
+lobby:
+
+# the url that appears on the scoreboard
+url: www.skywars.com
+
+startLines:
+  - "&a&l---------------------------------------------------------"
+  - "                        &f&lSkyWars"
+  - ""
+  - "   &e&lGather resources and equipmenton your island"
+  - "      &e&lin order to eliminate every other player."
+  - "     &e&lGo to the center island for special chests"
+  - "                   &e&lwith special items!"
+  - ""
+  - "&a&l---------------------------------------------------------"
