@@ -162,7 +162,7 @@ public class Arena {
 			StartTimer(ArenaStatus.STARTING);
 		}
 
-		return false;
+		return true;
 	}
 
 	void MakeSpectator(SkywarsPlayer p) {
