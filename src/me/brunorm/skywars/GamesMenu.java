@@ -42,7 +42,7 @@ public class GamesMenu implements Listener {
 		PlayerInventoryManager.setInventory(player, inventory);
 		ItemStack item = new ItemStack(XMaterial.BOW.parseItem());
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName("§aclick to join random game");
+		meta.setDisplayName(Messager.color("&aclick to join random game"));
 		List<String> lore = new ArrayList<String>();
 		lore.add(Messager.color("&eliterally just click this"));
 		lore.add(Messager.color("&eto join the game that"));

@@ -26,7 +26,7 @@ public class KitsMenu implements Listener {
 		for (Kit kit : Skywars.get().getKits()) {
 			ItemStack item = kit.getIcon();
 			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName("§a" + kit.getName());
+			meta.setDisplayName(Messager.color("&a" + kit.getName()));
 			List<String> lore = new ArrayList<String>();
 			lore.add(Messager.color("&eClick to select!"));
 			meta.setLore(lore);

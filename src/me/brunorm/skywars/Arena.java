@@ -308,13 +308,16 @@ public class Arena {
 								5, 1f);
 						if (time == 10) {
 							if (this.time == 10) {
-								Skywars.get().NMS().sendTitle(player.getPlayer(), "§e10 seconds",
-										"§eRight-click the bow to select a kit!", 0, 50, 0);
+								Skywars.get().NMS().sendTitle(player.getPlayer(), Messager.color("&e10 seconds"),
+										Messager.color("&eRight-click the bow to select a kit!"), 0, 50, 0);
 							}
 						} else if (time <= 5 || time % 5 == 0) {
 							player.getPlayer().sendMessage(
 									Messager.colorFormat("&eThe game starts in &c%s &esecond(s)!", this.time));
-							Skywars.get().NMS().sendTitle(player.getPlayer(), "§c" + this.time, "§ePrepare to fight!",
+							Skywars.get().NMS().sendTitle(
+									player.getPlayer(),
+									Messager.color("&c" + this.time),
+									Messager.color("&ePrepare to fight!"),
 									0, 50, 0);
 						}
 					}

@@ -19,22 +19,21 @@ import org.bukkit.scoreboard.ScoreboardManager;
 public class SkywarsScoreboard {
 
 	static String url = getUrl();
-	
+
 	public static String format(String text, Arena arena, SkywarsPlayer player) {
-	    Date date = new Date();  
-	    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");  
-	    String strDate= formatter.format(date);
-	    
-	    List<SkywarsPlayer> players = new ArrayList<>(arena.getPlayers());
-        players.removeIf(p -> p.isSpectator());
-        
+		Date date = new Date();
+		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+		String strDate = formatter.format(date);
+
+		List<SkywarsPlayer> players = new ArrayList<>(arena.getPlayers());
+		players.removeIf(p -> p.isSpectator());
+
 		text = text.replaceAll(getVariableCode("map"), arena.getName())
 				.replaceAll(getVariableCode("players"), Integer.toString(players.size()))
 				.replaceAll(getVariableCode("maxplayers"), Integer.toString(arena.getMaxPlayers()))
 				.replaceAll(getVariableCode("status"), getStatus(arena))
 				.replaceAll(getVariableCode("kills"), Integer.toString(player.getKills()))
-				.replaceAll(getVariableCode("date"), strDate)
-				.replaceAll(getVariableCode("url"), url);
+				.replaceAll(getVariableCode("date"), strDate).replaceAll(getVariableCode("url"), url);
 		return ChatColor.translateAlternateColorCodes('&', text);
 	}
 
@@ -45,10 +44,12 @@ public class SkywarsScoreboard {
 	public static String getUrl() {
 		FileConfiguration config = Skywars.get().getConfig();
 		url = config.getString("url");
-		if(url != null) return url;
-		else return "www.skywars.com";
+		if (url != null)
+			return url;
+		else
+			return "www.skywars.com";
 	}
-	
+
 	public static String getStatus(Arena arena) {
 		YamlConfiguration config = Skywars.get().langConfig;
 		String status;
@@ -62,7 +63,7 @@ public class SkywarsScoreboard {
 			status = config.getString("status.ending").replaceAll(getVariableCode("seconds"),
 					Integer.toString(arena.countdown));
 		}
-		
+
 		return status;
 	}
 
@@ -79,7 +80,7 @@ public class SkywarsScoreboard {
 		Scoreboard board = manager.getNewScoreboard();
 		// Team team = board.registerNewTeam("teamname");
 		Objective objective = board.registerNewObjective("test", "dummy");
-		
+
 		objective.setDisplayName(Messager.color(config.getString("title")));
 		objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
@@ -114,7 +115,7 @@ public class SkywarsScoreboard {
 			if (text == null)
 				continue;
 			if (text.equals(""))
-				text = "§" + colorSymbols[textIndex];
+				text = Messager.color("&" + colorSymbols[textIndex]);
 			Score score = objective.getScore(text);
 			score.setScore(i);
 			textIndex++;

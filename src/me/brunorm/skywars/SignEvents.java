@@ -20,8 +20,8 @@ public class SignEvents implements Listener {
 			if(arenaName != null) {
 				Arena arena = Skywars.get().getArena(arenaName);
 				if(arena != null) {
-					event.setLine(1, "§e[§bSkyWars§e]");
-					event.setLine(2, String.format("§a%s", arenaName));
+					event.setLine(1, Messager.color("&e[&bSkyWars&e]"));
+					event.setLine(2, Messager.color(String.format("&a%s", arenaName)));
 				} else System.out.println("null arena " + arenaName);
 			} else System.out.println("null arena name");
 		} else System.out.println("line is not skywars: " + event.getLine(1));
@@ -36,7 +36,7 @@ public class SignEvents implements Listener {
 					|| event.getClickedBlock().getType() == XMaterial.OAK_WALL_SIGN.parseMaterial()) {
 				if(player.isSneaking() && player.getGameMode() == GameMode.CREATIVE) return;
 				Sign sign = (Sign) event.getClickedBlock().getState();
-				if (sign.getLine(1).equals("§e[§bSkyWars§e]")) {
+				if (sign.getLine(1).equals(Messager.color("&e[&bSkyWars&e]"))) {
 					String arenaName = sign.getLine(2);
 					if (arenaName != null) {
 						Arena newArena = Skywars.get().getArena(ChatColor.stripColor(arenaName));
