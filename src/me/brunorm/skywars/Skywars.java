@@ -329,7 +329,8 @@ public class Skywars extends JavaPlugin {
 					 */
 					if(arena.autoDetectSpawns) {
 						arena.CalculateSpawns();
-					} else {					
+					} else {
+						System.out.println("Loading spawns from config for arena " + arena.name);
 						for (int i = 0; i < arena.getMaxPlayers(); i++) {
 							if (config.get(String.format("spawn.%s", i)) == null)
 								continue;
@@ -341,10 +342,10 @@ public class Skywars extends JavaPlugin {
 						}
 					}
 				}
-			}
+			} else System.out.println("Warning: world not set for arena " + arena.name);
 			// add arena to the arena list
 			arenas.add(arena);
-			System.out.println("added arena " + arena.getName());
+			System.out.println("Loaded arena " + arena.getName());
 		}
 	}
 

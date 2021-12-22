@@ -534,7 +534,7 @@ public class Arena {
 		World world = location.getWorld();
 		Vector offset = loadedSchematic.getOffset();
 		ListTag tileEntities = loadedSchematic.getTileEntities();
-		System.out.println("Auto detecting spawns!");
+		System.out.println("Auto detecting spawns for arena " + this.name);
 
 		ArrayList<Location> remainingSpawns = new ArrayList<Location>();
 

@@ -2,7 +2,9 @@
 lobby:
 
 # the url that appears on the scoreboard
-url: www.skywars.com
+url: www.example.com
+
+signsEnabled: true
 
 startLines:
   - "&a&l---------------------------------------------------------"

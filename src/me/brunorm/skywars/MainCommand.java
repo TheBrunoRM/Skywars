@@ -214,7 +214,7 @@ public class MainCommand implements CommandExecutor {
 				}
 				if (args[0].equalsIgnoreCase("setmainlobby")) {
 					plugin.setLobby(player.getLocation());
-					//plugin.saveConfig();
+					plugin.saveConfig();
 					player.sendMessage("main lobby set");
 				}
 				/*
