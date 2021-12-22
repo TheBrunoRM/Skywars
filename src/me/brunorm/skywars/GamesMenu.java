@@ -24,12 +24,12 @@ public class GamesMenu implements Listener {
 		Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena != null) {
 			if (player.getItemInHand().getType() == XMaterial.BOW.parseMaterial()) {
-				if (arena.getStatus() == ArenaStatus.STARTING) {					
+				if (arena.getStatus() != ArenaStatus.PLAYING) {		
 					KitsMenu.open(player);
 				}
 			}
 			if (player.getItemInHand().getType() == XMaterial.RED_BED.parseMaterial()) {
-				if (arena.getStatus() == ArenaStatus.STARTING
+				if (arena.getStatus() != ArenaStatus.PLAYING
 						|| arena.getPlayer(player).isSpectator()) {
 					arena.LeavePlayer(arena.getPlayer(player));
 				}

@@ -2,6 +2,7 @@ package me.brunorm.skywars;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -95,6 +96,20 @@ public class MainCommand implements CommandExecutor {
 				if(args[0].equalsIgnoreCase("nms")) {
 					player.sendMessage("NMS test sent");
 					Skywars.get().NMS().sendTitle(player, "Hello!", "This is a NMS test");
+				}
+				if(args[0].equalsIgnoreCase("worldname")) {
+					if(arena.getWorldName() != null)
+						player.sendMessage(arena.getWorldName());
+					else
+						player.sendMessage("not set");
+				}
+				if(args[0].equalsIgnoreCase("worlds")) {
+					player.sendMessage(String.join(", ",
+						Bukkit.getServer().getWorlds().stream().map(world -> world.getName())
+							.collect(Collectors.toList())));
+				}
+				if(args[0].equalsIgnoreCase("where")) {
+					player.sendMessage(player.getWorld().getName());
 				}
 				if(args[0].equalsIgnoreCase("tp")) {
 					player.teleport(arena.getLocation());
@@ -234,7 +249,7 @@ public class MainCommand implements CommandExecutor {
 					String nameArena = args[2];
 					Arena arenaSpawn = plugin.getArena(nameArena);
 					if (arenaSpawn == null) {
-						player.sendMessage(String.format("No arena found by '%s'", name));
+						player.sendMessage(String.format("No arena found by '%s'", nameArena));
 						return false;
 					}
 					if(args[1].equalsIgnoreCase("list")) {
@@ -258,7 +273,7 @@ public class MainCommand implements CommandExecutor {
 						sender.sendMessage(arenaSpawnLocation == null ? "spawn is null" : "spawn exists");
 					}
 					if (args[1].equalsIgnoreCase("set")) {
-						arenaSpawn.saveSpawn(spawn, player.getLocation());
+						arenaSpawn.setSpawn(spawn, player.getLocation());
 						player.sendMessage(String.format("Set spawn %s of arena '%s' to your current location", spawn,
 								arenaSpawn.getName()));
 					}

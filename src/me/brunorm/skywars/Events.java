@@ -38,15 +38,14 @@ public class Events implements Listener {
 				Arena arena = Skywars.get().getPlayerArena(player);
 				if (arena != null) {
 					SkywarsPlayer swPlayer = arena.getPlayer(player.getName());
-					if(arena.getStatus() == ArenaStatus.ENDING) {
-						event.setCancelled(true);
-					}
 					if(arena.getStatus() == ArenaStatus.PLAYING) {
 						if (event.getCause() == DamageCause.VOID || health - damage <= 0) {
 							event.setCancelled(true);
 							System.out.println("player died on skywars");
 							arena.MakeSpectator(swPlayer);
 						}
+					} else {						
+						event.setCancelled(true);
 					}
 					if (event.getCause() == DamageCause.VOID) {
 						player.setAllowFlight(false);
@@ -61,25 +60,18 @@ public class Events implements Listener {
 			}
 		}
 	}
-
+	
 	@EventHandler
-	void onEntityDamage(EntityDamageByEntityEvent event) {
+	void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
 		Entity entity = event.getEntity();
-		if (entity instanceof LivingEntity) {
-			if (entity instanceof Player) {
-				Player player = (Player) entity;
-				Arena playerArena = Skywars.get().getPlayerArena(player);
-				if (playerArena != null) {
-					System.out.println("the player is in an arena");
-					Player attacker = (Player) event.getDamager();
-					Arena attackerArena = Skywars.get().getPlayerArena(player);
-					if (attackerArena != null) {
-						System.out.println("the attacker is in an arena");
-						if (attackerArena.getPlayer(attacker).isSpectator()) {
-							System.out.println("the attacker is spectator");
-							event.setCancelled(true);
-						}
-					}
+		if (entity instanceof Player) {
+			Player player = (Player) entity;
+			Arena playerArena = Skywars.get().getPlayerArena(player);
+			Player attacker = (Player) event.getDamager();
+			Arena attackerArena = Skywars.get().getPlayerArena(player);
+			if (playerArena != null && playerArena == attackerArena) {
+				if (attackerArena.getPlayer(attacker).isSpectator()) {
+					event.setCancelled(true);
 				}
 			}
 		}
@@ -111,7 +103,7 @@ public class Events implements Listener {
 		if (arena != null) {
 			SkywarsPlayer swp = arena.getPlayer(player);
 			if (swp != null) {
-				if (arena.getStatus() == ArenaStatus.STARTING || swp.isSpectator()) {
+				if (arena.getStatus() != ArenaStatus.PLAYING || swp.isSpectator()) {
 					event.setCancelled(true);
 				} else {
 					arena.droppedItems.add(event.getItemDrop());
@@ -127,7 +119,7 @@ public class Events implements Listener {
 		if (arena != null) {
 			SkywarsPlayer swp = arena.getPlayer(player);
 			if (swp != null) {
-				if (arena.getStatus() == ArenaStatus.STARTING || swp.isSpectator()) {
+				if (arena.getStatus() != ArenaStatus.PLAYING || swp.isSpectator()) {
 					event.setCancelled(true);
 				}
 			}
@@ -138,12 +130,14 @@ public class Events implements Listener {
 	void onPickUp(PlayerPickupItemEvent event) {
 		Player player = event.getPlayer();
 		Arena arena = Skywars.get().getPlayerArena(player);
-		if (arena != null) {
+		
+		if(arena != null) {
 			SkywarsPlayer swp = arena.getPlayer(player);
 			if (swp != null) {
-				if (arena.getStatus() == ArenaStatus.STARTING || swp.isSpectator()) {
+				if (arena.getStatus() != ArenaStatus.PLAYING
+						|| swp.isSpectator()
+						|| !arena.droppedItems.contains(event.getItem()))
 					event.setCancelled(true);
-				}
 			}
 		}
 	}

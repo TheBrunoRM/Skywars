@@ -132,6 +132,8 @@ public class Arena {
 		if (spawn == null) {
 			player.sendMessage(String.format("spawn %s of arena %s not set", index, this.getName()));
 			return false;
+		} else {
+			System.out.println("Player spawn: " + spawn);
 		}
 		SkywarsPlayer swPlayer = new SkywarsPlayer(player, this);
 		YamlConfiguration playerConfig = Skywars.get().getPlayerConfig(player);
@@ -436,11 +438,7 @@ public class Arena {
 	public HashMap<Integer, Location> getSpawns() {
 		return spawns;
 	}
-
-	void saveSpawn(int index, Location location) {
-		saveLocationConfig(String.format("spawn.%s", index), setSpawn(index, location));
-	}
-
+	
 	Location setSpawn(int index, Location location) {
 		if (location == null)
 			return null;
@@ -448,6 +446,7 @@ public class Arena {
 		location.setY(Math.floor(location.getY()));
 		location.setZ(Math.floor(location.getZ()) + 0.5f);
 		this.spawns.put(index, location);
+		saveLocationConfig(String.format("spawn.%s", index), location);
 		return location;
 	}
 
@@ -568,7 +567,7 @@ public class Arena {
 				}
 			}
 			remainingSpawns.remove(closest);
-			spawns.put(i, closest);
+			spawns.put(i, closest.add(new Vector(0, 0.5, 0)));
 		}
 		
 		for(int i = 0; i < spawns.size(); i++) {

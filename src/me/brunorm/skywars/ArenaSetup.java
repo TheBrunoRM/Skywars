@@ -70,7 +70,7 @@ public class ArenaSetup implements Listener {
 			float t = (float) n / (arena.getMaxPlayers() - 1);
 			player.playSound(player.getLocation(), Sounds.NOTE_PLING.bukkitSound(), 3, 1 + t);
 			if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
-				arena.saveSpawn(n, block.getLocation().add(new Vector(0.5, 1, 0.5)));
+				arena.setSpawn(n, block.getLocation().add(new Vector(0.5, 1, 0.5)));
 				Skywars.get().NMS().sendTitle(player, "", String.format("&eSpawn %s set!", n));
 				if (n > arena.getMaxPlayers()) {
 					player.sendMessage(Messager.colorFormat("&cWarning: spawn overload! &6Max players is set to &b%s&6!"));

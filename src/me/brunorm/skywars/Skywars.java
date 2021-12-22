@@ -341,7 +341,8 @@ public class Skywars extends JavaPlugin {
 							arena.setSpawn(i, location);
 						}
 					}
-				}
+				} else System.out.println("Warning: could not get world by "
+					+ arena.getWorldName() + " for arena " + arena.name);
 			} else System.out.println("Warning: world not set for arena " + arena.name);
 			// add arena to the arena list
 			arenas.add(arena);
