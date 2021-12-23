@@ -76,7 +76,7 @@ public class Events implements Listener {
 			}
 		}
 	}
-
+	
 	@EventHandler
 	void onFoodLevelChange(FoodLevelChangeEvent event) {
 		Entity entity = event.getEntity();
@@ -136,7 +136,8 @@ public class Events implements Listener {
 			if (swp != null) {
 				if (arena.getStatus() != ArenaStatus.PLAYING
 						|| swp.isSpectator()
-						|| !arena.droppedItems.contains(event.getItem()))
+						//|| !arena.droppedItems.contains(event.getItem())
+					)
 					event.setCancelled(true);
 			}
 		}

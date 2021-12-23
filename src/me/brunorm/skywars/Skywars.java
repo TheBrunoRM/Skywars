@@ -97,7 +97,7 @@ public class Skywars extends JavaPlugin {
 		loadArenas();
 		loadKits();
 		// done
-		Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
+		Bukkit.getConsoleSender().sendMessage(Messager.color(
 				String.format("%s &ahas been enabled: &bv%s", prefix, version)));
 
 		Bukkit.getScheduler().runTaskTimer(Skywars.get(), new Runnable() {
@@ -122,6 +122,14 @@ public class Skywars extends JavaPlugin {
 			player.getInventory().removeItem(ArenaSetup.item);
 			SkywarsUtils.TeleportToLobby(player);
 		});
+		System.out.println("Stopping arenas...");
+		for (Arena arena : arenas) {
+			if(arena.getStatus() == ArenaStatus.PLAYING
+					|| arena.getStatus() == ArenaStatus.ENDING) {
+				arena.getConfig().set("restartNeeded", true);
+				arena.saveConfigFile(arena.getFile());
+			}
+		}
 	}
 
 	public NMSHandler NMS() {
@@ -347,6 +355,12 @@ public class Skywars extends JavaPlugin {
 			// add arena to the arena list
 			arenas.add(arena);
 			System.out.println("Loaded arena " + arena.getName());
+			if(config.getBoolean("restartNeeded")) {
+				System.out.println("Needed to restart arena " + arena.getName());
+				arena.Clear();
+				config.set("restartNeeded", null);
+				arena.saveConfigFile();
+			}
 		}
 	}
 

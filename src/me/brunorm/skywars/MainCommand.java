@@ -12,6 +12,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import com.cryptomorin.xseries.XMaterial;
@@ -103,6 +104,12 @@ public class MainCommand implements CommandExecutor {
 					else
 						player.sendMessage("not set");
 				}
+				if(args[0].equalsIgnoreCase("deleteplayer")) {
+					if(player != null && player instanceof Entity) {
+						Entity entity = (Entity) player;
+						entity.remove();
+					}
+				}
 				if(args[0].equalsIgnoreCase("worlds")) {
 					player.sendMessage(String.join(", ",
 						Bukkit.getServer().getWorlds().stream().map(world -> world.getName())
@@ -170,7 +177,7 @@ public class MainCommand implements CommandExecutor {
 					GamesMenu.OpenMenu(player);
 				}
 				if(args[0].equalsIgnoreCase("restart")) {
-					arena.Restart();
+					arena.Clear();
 				}
 				if (args[0].equalsIgnoreCase("forcestart")) {
 					if (playerArena != null) {

@@ -14,6 +14,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -38,7 +39,7 @@ public class Arena {
 	YamlConfiguration config;
 	ArenaStatus status;
 	String worldName;
-	String schematic;
+	String schematicFilename;
 	Schematic loadedSchematic;
 	Location location;
 	boolean full;
@@ -105,10 +106,18 @@ public class Arena {
 				saveLocationConfig("spawn." + i, spawn);
 			}
 		}
+		saveConfigFile(arenaFile);
+	}
+	
+	public void saveConfigFile() {
+		saveConfigFile(getFile());
+	}
+	
+	public void saveConfigFile(File file) {
 		try {
-			config.save(arenaFile);
+			config.save(file);
 		} catch (IOException e) {
-			// System.out.println("couldn't save file");
+			System.out.println("couldn't save config file for arena " + this.name);
 		}
 	}
 
@@ -237,17 +246,13 @@ public class Arena {
 		}
 		SkywarsUtils.ClearPlayer(player.getPlayer());
 		SkywarsUtils.TeleportToLobby(player.getPlayer());
-		if (this.getStatus() == ArenaStatus.STARTING &&
-				!forcedStart && getCurrentPlayers() < getMinPlayers()) {
+		if ((this.getStatus() == ArenaStatus.STARTING &&
+				!forcedStart && getCurrentPlayers() < getMinPlayers()) || getCurrentPlayers() <= 0) {
 			setStatus(ArenaStatus.WAITING);
 			for (SkywarsPlayer players : getPlayers()) {
 				players.getPlayer().sendMessage("countdown stopped, not enough players");
 			}
 			cancelTimer();
-		}
-		if (getCurrentPlayers() <= 0) {
-			System.out.println("stopping game because there are no more players");
-			StopGame();
 		}
 	}
 
@@ -376,23 +381,37 @@ public class Arena {
 	boolean StopGame() {
 		if (!(getStatus() == ArenaStatus.PLAYING || getStatus() == ArenaStatus.ENDING))
 			return false;
-		Restart();
-		return true;
-	}
-
-	void Restart() {
 		cancelTimer();
-		System.out.println("now stopping the game");
 		for(int i = 0; i < getPlayers().size(); i++) {
 			LeavePlayer(getPlayer(0));
 		}
+		Clear();
+		setStatus(ArenaStatus.WAITING);
+		return true;
+	}
+
+	void Clear() {
+		System.out.println("Stopping arena " + this.name);
 		for(Item i : droppedItems) {
 			i.remove();
 		}
 		droppedItems.clear();
+		if(getWorldName() != null) {			
+			if(loadedSchematic == null) loadSchematic();
+			for(Entity i : Bukkit.getWorld(getWorldName()).getEntities()) {
+				if(i instanceof Item
+						&& i.getLocation().getX()>getLocation().getX()-loadedSchematic.getWidth()/2
+						&& i.getLocation().getX()<getLocation().getX()+loadedSchematic.getWidth()/2
+						&& i.getLocation().getY()>getLocation().getY()-loadedSchematic.getHeight()/2
+						&& i.getLocation().getY()<getLocation().getY()+loadedSchematic.getHeight()/2
+						&& i.getLocation().getZ()>getLocation().getZ()-loadedSchematic.getLength()/2
+						&& i.getLocation().getZ()<getLocation().getZ()+loadedSchematic.getLength()/2) {
+					i.remove();
+				}
+			}
+		}
 		chests.clear();
 		PasteSchematic();
-		setStatus(ArenaStatus.WAITING);
 	}
 
 	String getName() {
@@ -414,7 +433,7 @@ public class Arena {
 			problems.add("Main lobby not set");
 		if (maxPlayers <= 0)
 			problems.add("Max players not set");
-		if (schematic == null)
+		if (schematicFilename == null)
 			problems.add("Schematic not set");
 		if (location == null)
 			problems.add("No location set");
@@ -450,9 +469,9 @@ public class Arena {
 	Location setSpawn(int index, Location location) {
 		if (location == null)
 			return null;
-		location.setX(Math.floor(location.getX()) + 0.5f);
-		location.setY(Math.floor(location.getY()));
-		location.setZ(Math.floor(location.getZ()) + 0.5f);
+		location.setX(Math.floor(location.getBlockX()) + 0.5f);
+		location.setY(Math.floor(location.getBlockY()));
+		location.setZ(Math.floor(location.getBlockX()) + 0.5f);
 		this.spawns.put(index, location);
 		saveLocationConfig(String.format("spawn.%s", index), location);
 		return location;
@@ -516,7 +535,7 @@ public class Arena {
 	}
 
 	public void PasteSchematic() {
-		if (schematic == null) {
+		if (schematicFilename == null) {
 			System.out.println("tried to paste schematic, but schematic is not set!");
 			return;
 		}
@@ -524,7 +543,9 @@ public class Arena {
 			System.out.println("tried to paste schematic, but location is not set!");
 			return;
 		}
+		System.out.println("Loading schematic for " + this.name);
 		loadSchematic();
+		System.out.println("Pasting schematic for " + this.name);
 		SchematicHandler.pasteSchematic(location, loadedSchematic);
 
 		if (autoDetectSpawns) {
@@ -533,7 +554,7 @@ public class Arena {
 	}
 
 	public void CalculateSpawns() {
-		loadSchematic();
+		if(loadedSchematic == null) loadSchematic();
 		for (int i = 0; i < getSpawns().values().size(); i++) {
 			removeSpawn(0);
 		}
@@ -543,39 +564,39 @@ public class Arena {
 		ListTag tileEntities = loadedSchematic.getTileEntities();
 		System.out.println("Auto detecting spawns for arena " + this.name);
 
-		ArrayList<Location> remainingSpawns = new ArrayList<Location>();
+		ArrayList<Location> beaconLocations = new ArrayList<Location>();
 
 		for (Tag tag : tileEntities.getValue()) {
 			@SuppressWarnings("unchecked")
 			Map<String, Tag> values = (Map<String, Tag>) tag.getValue();
 			if (values.get("id").getValue().equals("Beacon")) {
 				Location loc = calculatePositionWithOffset(values, world, offset)
-					.add(new Vector(0,1,0));
-				remainingSpawns.add(loc);
+					.add(new Vector(0.5,1,0.5));
+				beaconLocations.add(loc);
 				// saveSpawn(getSpawns().size(), loc);
 			}
 		}
 		
-		System.out.println("calculating " + remainingSpawns.size() + " spawns");
+		System.out.println("calculating " + beaconLocations.size() + " spawns");
 		
-		int total = remainingSpawns.size();
+		int total = beaconLocations.size();
 		
 		// set the first spawn
-		spawns.put(0, remainingSpawns.get(0));
-		remainingSpawns.remove(0);
+		spawns.put(0, beaconLocations.get(0));
+		beaconLocations.remove(0);
 		
 		for(int i = 1; i < total; i++) {
 			System.out.println("calculating spawn " + i);
 			Location previousSpawn = spawns.get(i-1);
-			if(remainingSpawns.size() <= 1) break;
-			Location closest = remainingSpawns.get(0);
-			for(Location currentSpawn : remainingSpawns) {
+			if(beaconLocations.size() <= 1) break;
+			Location closest = beaconLocations.get(0);
+			for(Location currentSpawn : beaconLocations) {
 				if(distance(previousSpawn, currentSpawn) < distance(previousSpawn, closest)) {
 					closest = currentSpawn;
 				}
 			}
-			remainingSpawns.remove(closest);
-			spawns.put(i, closest.add(new Vector(0, 0.5, 0)));
+			beaconLocations.remove(closest);
+			spawns.put(i, closest);
 		}
 		
 		for(int i = 0; i < spawns.size(); i++) {
@@ -613,14 +634,20 @@ public class Arena {
 		int x = (int) values.get("x").getValue();
 		int y = (int) values.get("y").getValue();
 		int z = (int) values.get("z").getValue();
-		return new Location(world, x + this.location.getX() + offset.getX(),
+		return new Location(world,
+			x + this.location.getX() + offset.getX(),
 			y + this.location.getY() + offset.getY(),
 			z + this.location.getZ() + offset.getZ());
 	}
 
 	void loadSchematic() {
+		File schematicFile = Skywars.get().getSchematicFile(schematicFilename);
+		if(schematicFile == null) {
+			System.out.println("Could not get schematic file! (Maybe it doesnt exist?)");
+			return;
+		}
 		try {
-			loadedSchematic = SchematicHandler.loadSchematic(Skywars.get().getSchematicFile(schematic));
+			loadedSchematic = SchematicHandler.loadSchematic(schematicFile);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("Could not load schematic!");
@@ -705,11 +732,11 @@ public class Arena {
 	}
 
 	public String getSchematic() {
-		return schematic;
+		return schematicFilename;
 	}
 
 	public void setSchematic(String schematic) {
-		this.schematic = schematic;
+		this.schematicFilename = schematic;
 	}
 
 	public Location getLocation() {
