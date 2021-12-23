@@ -377,7 +377,11 @@ public class Skywars extends JavaPlugin {
 				// third layer
 				{ -1, 2, 0 }, { 1, 2, 0 }, { 0, 2, -1 }, { 0, 2, 1 },
 				// base and top
-				{ 0, -1, 0 }, { 0, 3, 0 } //
+				{ 0, -1, 0 }, { 0, 3, 0 }, //
+				// base joints
+				{ -1, -1, 0 }, { 1, -1, 0 }, { 0, -1, -1 }, { 0, -1, 1 },
+				// top joints
+				{ -1, 3, 0 }, { 1, 3, 0 }, { 0, 3, -1 }, { 0, 3, 1 },
 		};
 		for (int i = 0; i < blocks.length; i++) {
 			int[] relative = blocks[i];
@@ -389,16 +393,17 @@ public class Skywars extends JavaPlugin {
 		}
 	}
 
-	String[] startLines = {
-		"&a&l---------------------------------------------------------",
-		"                        &f&lSkyWars",
+	public static String[] startLines = {
+		"&a-------------------------------------------------",
 		"",
-		"   &e&lGather resources and equipmenton your island",
-		"      &e&lin order to eliminate every other player.",
-		"     &e&lGo to the center island for special chests",
-		"                   &e&lwith special items!",
+		"                                &f&lSkyWars",
 		"",
-		"&a&l---------------------------------------------------------"
+		"     &e&lGather resources and equipment on your island",
+		"         &e&lin order to eliminate every other player.",
+		"       &e&lGo to the center island for special chests",
+		"                         &e&lwith special items!",
+		"",
+		"&a-------------------------------------------------"
 	};
 	
 	// kits
@@ -428,7 +433,8 @@ public class Skywars extends JavaPlugin {
 		ArrayList<Arena> sortedArenas = getSortedArenas();
 		for (Arena arena : sortedArenas) {
 			if (!arena.isFull()) {
-				if (arena.getStatus() == ArenaStatus.WAITING || arena.getStatus() == ArenaStatus.STARTING) {
+				if (arena.getStatus() == ArenaStatus.WAITING
+						|| arena.getStatus() == ArenaStatus.STARTING) {
 					return arena;
 				}
 			}

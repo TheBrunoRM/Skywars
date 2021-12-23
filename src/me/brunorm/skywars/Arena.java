@@ -375,6 +375,15 @@ public class Arena {
 			player.getPlayer().playSound(player.getPlayer().getLocation(), Sounds.NOTE_PLING.bukkitSound(), 0.5f, 1f);
 			player.getPlayer().playSound(player.getPlayer().getLocation(), Sounds.PORTAL_TRIGGER.bukkitSound(), 0.5f,
 					5f);
+			
+			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
+				@Override
+				public void run() {
+					for(String l : Skywars.startLines) {
+						player.getPlayer().sendMessage(Messager.color(l));
+					}
+				}
+			}, 20);
 		}
 	}
 	
@@ -412,6 +421,9 @@ public class Arena {
 		}
 		chests.clear();
 		PasteSchematic();
+		for (Location spawn : getSpawns().values()) {
+			Skywars.createCase(spawn, XMaterial.RED_STAINED_GLASS.parseMaterial());
+		}
 	}
 
 	String getName() {
@@ -555,10 +567,18 @@ public class Arena {
 
 	public void CalculateSpawns() {
 		if(loadedSchematic == null) loadSchematic();
-		for (int i = 0; i < getSpawns().values().size(); i++) {
-			removeSpawn(0);
-		}
+		
+		// clear spawns
 		spawns.clear();
+		config.set("spawn", null);
+		saveConfigFile();
+		
+		/*
+		for (int i = 0; i < getSpawns().values().size(); i++) {
+		removeSpawn(0);
+		}
+		*/
+		
 		World world = location.getWorld();
 		Vector offset = loadedSchematic.getOffset();
 		ListTag tileEntities = loadedSchematic.getTileEntities();
@@ -573,23 +593,28 @@ public class Arena {
 				Location loc = calculatePositionWithOffset(values, world, offset)
 					.add(new Vector(0.5,1,0.5));
 				beaconLocations.add(loc);
-				// saveSpawn(getSpawns().size(), loc);
 			}
 		}
 		
-		System.out.println("calculating " + beaconLocations.size() + " spawns");
+		System.out.println("calculating spawns for " + beaconLocations.size() + " beacons");
 		
-		int total = beaconLocations.size();
+		int totalBeacons = beaconLocations.size();
+		// saving the value
 		
 		// set the first spawn
 		spawns.put(0, beaconLocations.get(0));
 		beaconLocations.remove(0);
 		
-		for(int i = 1; i < total; i++) {
+		for(int i = 1; i < totalBeacons+1; i++) {
 			System.out.println("calculating spawn " + i);
 			Location previousSpawn = spawns.get(i-1);
-			if(beaconLocations.size() <= 1) break;
 			Location closest = beaconLocations.get(0);
+			if(closest != null && beaconLocations.size() <= 1) {
+				// setting the last spawn here since
+				// it doesnt have any neigbours because its the last one
+				spawns.put(i, closest);
+				break;
+			}
 			for(Location currentSpawn : beaconLocations) {
 				if(distance(previousSpawn, currentSpawn) < distance(previousSpawn, closest)) {
 					closest = currentSpawn;
