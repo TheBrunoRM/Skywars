@@ -19,6 +19,7 @@ import org.bukkit.scoreboard.ScoreboardManager;
 public class SkywarsScoreboard {
 
 	static String url = getUrl();
+	static String[] colorSymbols = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "f" };
 
 	public static String format(String text, Arena arena, SkywarsPlayer player) {
 		Date date = new Date();
@@ -58,7 +59,7 @@ public class SkywarsScoreboard {
 			status = config.getString("status.starting").replaceAll(getVariableCode("seconds"),
 					Integer.toString(arena.countdown));
 		} else if (arena.getStatus() == ArenaStatus.WAITING) {
-			status = config.getString("status.starting");
+			status = config.getString("status.waiting");
 		} else {
 			status = config.getString("status.ending").replaceAll(getVariableCode("seconds"),
 					Integer.toString(arena.countdown));
@@ -83,8 +84,7 @@ public class SkywarsScoreboard {
 
 		objective.setDisplayName(Messager.color(config.getString("title")));
 		objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-
-		String[] colorSymbols = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "f" };
+		
 		ArrayList<String> texts = new ArrayList<String>();
 
 		Arena arena = Skywars.get().getPlayerArena(player);

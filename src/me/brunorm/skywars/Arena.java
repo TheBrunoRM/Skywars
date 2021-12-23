@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -236,7 +237,8 @@ public class Arena {
 		}
 		SkywarsUtils.ClearPlayer(player.getPlayer());
 		SkywarsUtils.TeleportToLobby(player.getPlayer());
-		if (this.getStatus() == ArenaStatus.STARTING && !forcedStart && getPlayers().size() < getMinPlayers()) {
+		if (this.getStatus() == ArenaStatus.STARTING &&
+				!forcedStart && getCurrentPlayers() < getMinPlayers()) {
 			setStatus(ArenaStatus.WAITING);
 			for (SkywarsPlayer players : getPlayers()) {
 				players.getPlayer().sendMessage("countdown stopped, not enough players");
@@ -295,7 +297,7 @@ public class Arena {
 				public void run() {
 					this.time--;
 					countdown = time;
-
+					
 					if (this.time == 0) {
 						StartGame();
 						cancelTimer();
@@ -403,6 +405,9 @@ public class Arena {
 
 	ArrayList<String> getProblems() {
 		ArrayList<String> problems = new ArrayList<String>();
+		if(!Bukkit.getServer().getWorlds().stream().map(world -> world.getName())
+				.collect(Collectors.toList()).contains(getWorldName()))
+			problems.add("World " + getWorldName() +" does not exist");
 		if (getSpawn(getPlayers().size()) == null)
 			problems.add(String.format("Spawn %s not set", getPlayers().size()));
 		if (Skywars.get().getLobby() == null)
