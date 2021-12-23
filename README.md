@@ -22,6 +22,12 @@ To create a sign, make it like this:
   - kits
   - easy map setup menu
 
-## Future updates:
+## To do:
   - custom language file
   - lots of configuration options
+  - game events (chest refills, etc)
+  - party options (?)
+  - team games
+  - code optimization
+  - 1.13+ compatible
+  - coins (?)
