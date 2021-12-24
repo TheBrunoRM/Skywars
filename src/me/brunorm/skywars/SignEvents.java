@@ -46,10 +46,15 @@ public class SignEvents implements Listener {
 							player.sendMessage(String.format("arena %s not found", arenaName));
 					}
 				}
-				if (sign.getLine(1).equals("click")) {
+				if (sign.getLine(1).equals("random")) {
 					if (sign.getLine(2).equals("skywars")) {
 						Arena randomArena = Skywars.get().getRandomJoinableArena();
 						randomArena.JoinPlayer(player);
+					}
+				}
+				if (sign.getLine(1).equals("play")) {
+					if (sign.getLine(2).equals("skywars")) {
+						ArenaMenu.open(player);
 					}
 				}
 			}

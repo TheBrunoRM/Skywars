@@ -1,0 +1,59 @@
+minPlayers: 2
+maxPlayers: 12
+disabled: false
+restartNeeded: true
+schematic: mini_trees.schematic
+worldName: world
+location:
+  x: 200
+  y: 150
+  z: 200
+spawn:
+  '0':
+    x: -6
+    y: 7
+    z: -20
+  '1':
+    x: -15
+    y: 7
+    z: -15
+  '2':
+    x: -20
+    y: 7
+    z: -5
+  '3':
+    x: -20
+    y: 7
+    z: 6
+  '4':
+    x: -15
+    y: 7
+    z: 15
+  '5':
+    x: -5
+    y: 7
+    z: 20
+  '6':
+    x: 6
+    y: 7
+    z: 20
+  '7':
+    x: 15
+    y: 7
+    z: 15
+  '8':
+    x: 20
+    y: 7
+    z: 5
+  '9':
+    x: 20
+    y: 7
+    z: -6
+  '10':
+    x: 15
+    y: 7
+    z: -15
+  '11':
+    x: 5
+    y: 7
+    z: -20

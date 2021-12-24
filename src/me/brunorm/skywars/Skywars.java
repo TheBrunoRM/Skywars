@@ -1,11 +1,16 @@
 package me.brunorm.skywars;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -37,6 +42,7 @@ public class Skywars extends JavaPlugin {
 	public String prefix = ChatColor.translateAlternateColorCodes('&', String.format("&6[&e%s&6]", name));
 	static String arenasPath;
 	static String kitsPath;
+	static String schematicsPath;
 	// config.yml
 	public static FileConfiguration config;
 	public YamlConfiguration scoreboardConfig;
@@ -67,11 +73,13 @@ public class Skywars extends JavaPlugin {
 	}
 
 	public void onEnable() {
+		
 		// set stuff
 		plugin = this;
 		config = getConfig();
 		arenasPath = getDataFolder() + "/arenas";
 		kitsPath = getDataFolder() + "/kits";
+		schematicsPath = getDataFolder() + "/schematics";
 
 		// load lobby
 		if (config.get("lobby") != null) {
@@ -127,7 +135,7 @@ public class Skywars extends JavaPlugin {
 			if(arena.getStatus() == ArenaStatus.PLAYING
 					|| arena.getStatus() == ArenaStatus.ENDING) {
 				arena.getConfig().set("restartNeeded", true);
-				arena.saveConfigFile(arena.getFile());
+				arena.saveConfig();
 			}
 		}
 	}
@@ -143,7 +151,6 @@ public class Skywars extends JavaPlugin {
 	public void Reload() {
 		onDisable();
 		loadConfig();
-		arenas.clear();
 		loadArenas();
 		kits.clear();
 		loadKits();
@@ -156,7 +163,7 @@ public class Skywars extends JavaPlugin {
 			try {
 				playersFile.createNewFile();
 			} catch (IOException e) {
-				System.out.println("couldn't create file");
+				System.out.println("couldn't create players.yml");
 			}
 		}
 	}
@@ -202,20 +209,19 @@ public class Skywars extends JavaPlugin {
 	}
 	
 	public File loadConfigFile(String name) {
-		return loadConfigFile(name, null);
+		return loadConfigFile(name, name);
 	}
 	
 	public File loadConfigFile(String name, String defaultFileName) {
-		if(defaultFileName == null) defaultFileName = name;
 		File file = new File(getDataFolder(), name);
 		if (!file.exists()) {
-			setupDefaultConfigFile(file, defaultFileName);
+			copyDefaultContentsToFile(defaultFileName, file);
 		}
-		createMissingKeys(file, defaultFileName);
+		createMissingKeys(defaultFileName, file);
 		return file;
 	}
 	
-	public void createMissingKeys(File file, String defaultFileName) {
+	public void createMissingKeys(String defaultFileName, File file) {
 		try {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			Reader defaultConfigStream =
@@ -234,26 +240,19 @@ public class Skywars extends JavaPlugin {
 		}
 	}
 	
-	public void setupDefaultConfigFile(File file, String defaultFileName) {
+	public void copyDefaultContentsToFile(String defaultFileName, File file) {
 		try {
 			if(!file.exists()) file.createNewFile();
-		    //IOUtils.copy(new InputStreamReader(getResource(defaultFileName), "UTF-8"),
-		    //		new FileOutputStream(file));
-			/*
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-			Reader defaultConfigStream =
-					new InputStreamReader(getResource(defaultFileName), "UTF-8");
-			YamlConfiguration defaultConfig =
-					YamlConfiguration.loadConfiguration(defaultConfigStream);
-			config.setDefaults(defaultConfig);
-			config.options().copyDefaults(true);
-		    config.save(file);
-			*/
+			try {
+				copyInputStreamToFile(getResource(defaultFileName), file);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
 	
 	public void loadKits() {
 		File folder = new File(kitsPath);
@@ -262,11 +261,11 @@ public class Skywars extends JavaPlugin {
 		}
 		if(folder.listFiles().length <= 0) {
 			System.out.println("Created default kit");
-			setupDefaultConfigFile(new File(kitsPath, "default.yml"), "defaultKit.yml");
+			copyDefaultContentsToFile("kits/default.yml", new File(kitsPath, "default.yml"));
 		}
 		for (File file : folder.listFiles()) {
 			String name = file.getName().replaceFirst("[.][^.]+$", "");
-			createMissingKeys(file, "defaultKit.yml");
+			createMissingKeys("kits/default.yml", file);
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			
 			// create kit and set values from config
@@ -295,15 +294,44 @@ public class Skywars extends JavaPlugin {
 			
 			// add kit to the arena list
 			kits.add(kit);
-			System.out.println("added kit " + kit.getName());
+			System.out.println("Loaded kit " + kit.getName());
 		}
 	}
+	
+    public static final int DEFAULT_BUFFER_SIZE = 8192;
+	
+    private static void copyInputStreamToFile(InputStream inputStream, File file)
+            throws IOException {
 
+        // append = false
+        try (FileOutputStream outputStream = new FileOutputStream(file, false)) {
+            int read;
+            byte[] bytes = new byte[DEFAULT_BUFFER_SIZE];
+            while ((read = inputStream.read(bytes)) != -1) {
+                outputStream.write(bytes, 0, read);
+            }
+        }
+
+    }
 	
 	public void loadArenas() {
+		arenas.clear();
 		File folder = new File(arenasPath);
 		if (!folder.exists()) {
-			folder.mkdirs();
+			folder.mkdir();
+		}
+		File defaultArenaFile = new File(arenasPath, "MiniTrees.yml");
+		if(folder.listFiles().length <= 0) {
+			System.out.println("Created default arena");
+			defaultArenaFile = new File(arenasPath, "MiniTrees.yml");
+			copyDefaultContentsToFile("arenas/MiniTrees.yml", defaultArenaFile);
+		}
+		File schematics = new File(schematicsPath);
+		if(!schematics.exists()) schematics.mkdir();
+		if(schematics.listFiles().length <= 0) {
+			System.out.println("copying default schematic");
+			copyDefaultContentsToFile("schematics/mini_trees.schematic",
+					new File(schematicsPath, "mini_trees.schematic"));
 		}
 		for (File arenaFile : folder.listFiles()) {
 			String name = arenaFile.getName().replaceFirst("[.][^.]+$", "");
@@ -312,9 +340,30 @@ public class Skywars extends JavaPlugin {
 			Arena arena = new Arena(name);
 			arena.setFile(arenaFile);
 			arena.setConfig(config);
-			arena.setWorldName(config.getString("worldName"));
+			if(defaultArenaFile == null) {				
+				arena.setWorldName(config.getString("worldName"));
+			} else {
+				Properties props = new Properties();
+				try {
+					props.load(new FileReader("server.properties"));
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				String levelName = props.getProperty("level-name");
+				if(levelName != null) {
+					System.out.println("Got world name from server.properties: " + levelName);
+					arena.setWorldName(levelName);
+				} else {
+					String firstWorld = Bukkit.getServer().getWorlds().get(0).getName();
+					System.out.println("Got world name from first world");
+					arena.setWorldName(firstWorld);
+				}
+			}
 			arena.setStatus(config.getBoolean("disabled") ? ArenaStatus.DISABLED : ArenaStatus.WAITING);
-			arena.autoDetectSpawns = config.getBoolean("autoDetectSpawns");
 			if (arena.getWorldName() != null && config.get("location") != null) {
 				double x = config.getDouble("location.x");
 				double y = config.getDouble("location.y");
@@ -335,19 +384,15 @@ public class Skywars extends JavaPlugin {
 					 * config.getDouble("lobby.z"); Location lobby = new Location(world,x,y,z);
 					 * arena.setLobby(lobby); }
 					 */
-					if(arena.autoDetectSpawns) {
-						arena.CalculateSpawns();
-					} else {
-						System.out.println("Loading spawns from config for arena " + arena.name);
-						for (int i = 0; i < arena.getMaxPlayers(); i++) {
-							if (config.get(String.format("spawn.%s", i)) == null)
-								continue;
-							double x = config.getDouble(String.format("spawn.%s.x", i));
-							double y = config.getDouble(String.format("spawn.%s.y", i));
-							double z = config.getDouble(String.format("spawn.%s.z", i));
-							Location location = new Location(world, x, y, z);
-							arena.setSpawn(i, location);
-						}
+					System.out.println("Loading spawns from config for arena " + arena.name);
+					for (int i = 0; i < arena.getMaxPlayers(); i++) {
+						if (config.get(String.format("spawn.%s", i)) == null)
+							continue;
+						double x = config.getDouble(String.format("spawn.%s.x", i));
+						double y = config.getDouble(String.format("spawn.%s.y", i));
+						double z = config.getDouble(String.format("spawn.%s.z", i));
+						Location location = new Location(world, x, y, z);
+						arena.spawns.put(i, location);
 					}
 				} else System.out.println("Warning: could not get world by "
 					+ arena.getWorldName() + " for arena " + arena.name);
@@ -356,10 +401,10 @@ public class Skywars extends JavaPlugin {
 			arenas.add(arena);
 			System.out.println("Loaded arena " + arena.getName());
 			if(config.getBoolean("restartNeeded")) {
-				System.out.println("Needed to restart arena " + arena.getName());
+				Bukkit.getConsoleSender().sendMessage(Messager.color("&c&lNeeded to restart arena " + arena.getName()));
 				arena.Clear();
 				config.set("restartNeeded", null);
-				arena.saveConfigFile();
+				arena.saveConfig();
 			}
 		}
 	}
@@ -446,7 +491,7 @@ public class Skywars extends JavaPlugin {
 		if (getArena(name) != null)
 			return;
 		Arena arena = new Arena(name);
-		arena.saveConfig();
+		arena.saveParametersInConfig();
 		//loadArenas();
 		arenas.add(arena);
 	}
@@ -461,7 +506,7 @@ public class Skywars extends JavaPlugin {
 
 	public Arena getArena(String name) {
 		for (int i = 0; i < arenas.size(); i++) {
-			if (arenas.get(i).getName().equals(name)) {
+			if (arenas.get(i).getName().equalsIgnoreCase(name)) {
 				return arenas.get(i);
 			}
 		}
@@ -522,8 +567,8 @@ public class Skywars extends JavaPlugin {
 		if(!folder.exists()) folder.mkdir();
 		File file = new File(getDataFolder() + "/players", player.getUniqueId() + ".yml");
 		if(!file.exists())
-			setupDefaultConfigFile(file, "defaultPlayer.yml");
-		createMissingKeys(file, "defaultPlayer.yml");
+			copyDefaultContentsToFile("players/default.yml", file);
+		createMissingKeys("players/default.yml", file);
 		return YamlConfiguration.loadConfiguration(file);
 	}
 	

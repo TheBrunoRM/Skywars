@@ -32,12 +32,15 @@ public class ArenaSetupMenu implements Listener {
 	static String spawnName = "&e&lSpawn Setup";
 	static String schematicName = "&e&lSchematic: &a&l%s";
 	static String statusName = "&e&lStatus: %s";
+	static String calculateSpawnsName = "&6&lCalculate spawns";
+	static String regenerateCasesName = "&6&lRegenerate cases";
+	static String pasteSchematicName = "&6&lPaste schematic";
 
 	static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();
 	static HashMap<Player, Location> playerLocations = new HashMap<Player, Location>();
 	static HashMap<Player, Arena> currentArenas = new HashMap<Player, Arena>();
-	File schematicsFolder = new File(Skywars.get().getDataFolder() + "/schematics");
-
+	File schematicsFolder = new File(Skywars.schematicsPath);
+	
 	static void OpenSchematicsMenu(Player player) {
 		File folder = new File(Skywars.get().getDataFolder() + "/schematics");
 		Inventory inventory = Bukkit.createInventory(null, 9 * 6, Messager.color("&aSchematic files"));
@@ -153,6 +156,32 @@ public class ArenaSetupMenu implements Listener {
 		spawnMeta.setLore(spawnLore);
 		spawn.setItemMeta(spawnMeta);
 		inventory.setItem(16, spawn);
+
+		List<String> calculateSpawnsLore = new ArrayList<String>();
+		calculateSpawnsLore.add(Messager.color("&cThis will override current spawns."));
+		
+		ItemStack calculateSpawns = new ItemStack(XMaterial.BEACON.parseItem());
+		ItemMeta calculateSpawnsMeta = calculateSpawns.getItemMeta();
+		calculateSpawnsMeta.setDisplayName(Messager.color(calculateSpawnsName));
+		calculateSpawnsMeta.setLore(calculateSpawnsLore);
+		calculateSpawns.setItemMeta(calculateSpawnsMeta);
+		inventory.setItem(19, calculateSpawns);
+		
+		List<String> pasteSchematicLore = new ArrayList<String>();
+		pasteSchematicLore.add(Messager.color("&cThis will regenerate the map."));
+		
+		ItemStack pasteSchematic = new ItemStack(XMaterial.WOODEN_AXE.parseItem());
+		ItemMeta pasteSchematicMeta = pasteSchematic.getItemMeta();
+		pasteSchematicMeta.setDisplayName(Messager.color(pasteSchematicName));
+		pasteSchematicMeta.setLore(pasteSchematicLore);
+		pasteSchematic.setItemMeta(pasteSchematicMeta);
+		inventory.setItem(20, pasteSchematic);
+		
+		ItemStack regenerateCases = new ItemStack(XMaterial.GLASS.parseItem());
+		ItemMeta regenerateCasesMeta = pasteSchematic.getItemMeta();
+		regenerateCasesMeta.setDisplayName(Messager.color(regenerateCasesName));
+		regenerateCases.setItemMeta(regenerateCasesMeta);
+		inventory.setItem(18, regenerateCases);
 	}
 	
 	static void OpenConfigurationMenu(Player player, Arena arena) {
@@ -169,9 +198,9 @@ public class ArenaSetupMenu implements Listener {
 		if (location == null)
 			return Messager.colorFormat(positionName, "none");
 		String coords = String.format("%s, %s, %s",
-				Math.floor(location.getX()),
-				Math.floor(location.getY()),
-				Math.floor(location.getZ()));
+				Math.floor(location.getBlockX()),
+				Math.floor(location.getBlockY()),
+				Math.floor(location.getBlockZ()));
 		return Messager.colorFormat(positionName, coords);
 	}
 
@@ -206,9 +235,9 @@ public class ArenaSetupMenu implements Listener {
 				System.out.println("world changed to " + currentArena.getWorldName());
 			}
 			if (name.equals(locationName(currentArena.getLocation()))) {
-				double x = Math.round(player.getLocation().getX())+0.5f;
-				double y = Math.round(player.getLocation().getY())+0.5f;
-				double z = Math.round(player.getLocation().getZ())+0.5f;
+				double x = Math.round(player.getLocation().getBlockX());
+				double y = Math.round(player.getLocation().getBlockY());
+				double z = Math.round(player.getLocation().getBlockZ());
 				World world = player.getWorld();
 				Location location = new Location(world, x, y, z);
 				currentArena.setLocation(location);
@@ -251,6 +280,18 @@ public class ArenaSetupMenu implements Listener {
 						.color("&e&lYou can &c&lright-click &e&la block to &c&lremove &4&lthe last spawn you set"));
 				player.sendMessage(Messager.color("&e&lTo exit, &b&ldrop the blaze rod"));
 			}
+			if(name.equals(Messager.color(calculateSpawnsName))) {
+				currentArena.CalculateSpawns();
+				player.sendMessage("Spawns have been calculated and saved.");
+			}
+			if(name.equals(Messager.color(pasteSchematicName))) {
+				currentArena.PasteSchematic();
+				player.sendMessage("Pasted schematic.");
+			}
+			if(name.equals(Messager.color(regenerateCasesName))) {
+				currentArena.ResetCases();
+				player.sendMessage("Regenerated cases.");
+			}
 			String currentSchematic = currentArena.getSchematic();
 			if(currentSchematic == null) currentSchematic = "none";
 			if(name.equals(Messager.colorFormat(schematicName, currentSchematic))) {
@@ -265,7 +306,6 @@ public class ArenaSetupMenu implements Listener {
 					currentArena.status != ArenaStatus.DISABLED ? "&a&lENABLED" : "&c&lDISABLED"))) {
 				currentArena.setStatus(
 						currentArena.status != ArenaStatus.DISABLED ? ArenaStatus.DISABLED : ArenaStatus.WAITING);
-				UpdateInventory(inventory, player);
 				System.out.println("status changed to " + currentArena.getStatus());
 			}
 			
@@ -279,7 +319,7 @@ public class ArenaSetupMenu implements Listener {
 				}
 			}
 			
-			currentArena.saveConfig();
+			//currentArena.saveConfig();
 			
 			inventories.forEach((p, inv) -> {
 				if(inv == inventory) {					

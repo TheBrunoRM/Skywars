@@ -67,7 +67,7 @@ public class SkywarsUtils {
 		if (url != null)
 			return url;
 		else
-			return "www.skywars.com";
+			return "www.example.com";
 	}
 
 	public static String getStatus(Arena arena) {
@@ -132,6 +132,8 @@ public class SkywarsUtils {
 		player.setMaxHealth(20);
 		player.setFlying(false);
 		player.setAllowFlight(false);
+		if(player.getFireTicks() > 0)
+			player.setFireTicks(0);
 
 		// clear potion effects
 		for (PotionEffect e : player.getActivePotionEffects()) {

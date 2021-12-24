@@ -134,6 +134,14 @@ public class MainCommand implements CommandExecutor {
 					plugin.saveConfig();
 					sender.sendMessage("set");
 				}
+				if(args[0].equalsIgnoreCase("savearenaconfig")) {
+					arena.saveParametersInConfig();
+					sender.sendMessage("saved");
+				}
+				if(args[0].equalsIgnoreCase("reloadarenas")) {
+					Skywars.get().loadArenas();
+					sender.sendMessage("reloaded arenas");
+				}
 				if(args[0].equalsIgnoreCase("reload")) {
 					Skywars.get().Reload();
 				}
@@ -162,6 +170,10 @@ public class MainCommand implements CommandExecutor {
 				if (args[0].equalsIgnoreCase("testschem")) {
 					arena.PasteSchematic();
 					player.sendMessage("pasted");
+				}
+				if (args[0].equalsIgnoreCase("resetcases")) {
+					arena.ResetCases();
+					player.sendMessage("regenerated");
 				}
 				if (args[0].equalsIgnoreCase("players")) {
 					if (arena != null) {
@@ -338,30 +350,30 @@ public class MainCommand implements CommandExecutor {
 				}
 				if (args[0].equalsIgnoreCase("enable")) {
 					arena.setStatus(ArenaStatus.WAITING);
-					arena.saveConfig();
+					arena.saveParametersInConfig();
 					sender.sendMessage(String.format("Enabled arena '%s'", arena.getName()));
 				}
 				if (args[0].equalsIgnoreCase("disable")) {
 					arena.setStatus(ArenaStatus.DISABLED);
-					arena.saveConfig();
+					arena.saveParametersInConfig();
 					sender.sendMessage(String.format("Disabled arena '%s'", arena.getName()));
 				}
 				if (args[0].equalsIgnoreCase("minplayers")) {
 					int n = Integer.parseInt(args[2]);
 					arena.setMinPlayers(n);
-					arena.saveConfig();
+					arena.saveParametersInConfig();
 					sender.sendMessage(String.format("min players set to %s", n));
 				}
 				if (args[0].equalsIgnoreCase("maxplayers")) {
 					int n = Integer.parseInt(args[2]);
 					arena.setMaxPlayers(n);
-					arena.saveConfig();
+					arena.saveParametersInConfig();
 					sender.sendMessage(String.format("max players set to %s", n));
 				}
 				if (args[0].equalsIgnoreCase("world")) {
 					World world = player.getWorld();
 					arena.setWorldName(world.getName());
-					arena.saveConfig();
+					arena.saveParametersInConfig();
 					sender.sendMessage(String.format("arena world set to %s", world.getName()));
 				}
 				if (args[0].equalsIgnoreCase("position")) {
@@ -388,7 +400,7 @@ public class MainCommand implements CommandExecutor {
 					}
 					Location location = new Location(world, x, y, z);
 					arena.setLocation(location);
-					arena.saveConfig();
+					arena.saveParametersInConfig();
 					player.sendMessage(String.format("set location of %s to %s %s %s in world %s", arena.getName(),
 							location.getX(), location.getY(), location.getZ(), location.getWorld().getName()));
 				}
@@ -403,7 +415,7 @@ public class MainCommand implements CommandExecutor {
 							return false;
 						}
 						arena.setSchematic(schematic);
-						arena.saveConfig();
+						arena.saveParametersInConfig();
 						sender.sendMessage(String.format("arena schematic set to %s", arena.getSchematic()));
 					} else {
 						if (arena.getSchematic() == null) {
