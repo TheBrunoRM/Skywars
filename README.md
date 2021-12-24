@@ -2,13 +2,15 @@
 
 ## How to use
 
-Firstly, you will need to set the main lobby by using **/sw setmainlobby**
+Firstly, you will need to set the main lobby by using **/sw setmainlobby**\
+The plugin comes with a default arena and kit.\
+After setting the main lobby, you should be able to play.\
 
-### Playing:
+### How to play:
 
-To play, type **/sw play** to open the arenas menu and select an arena to join in.\
-You can type **/sw start** to start the game countdown.\
-You can type **/sw forcestart** to start the game immediately.\
+Type **/sw play** to open the arenas menu and click an arena to join.\
+Type **/sw start** to start the game countdown.\
+Type **/sw forcestart** to start the game immediately.\
 
 ### Creating an arena:
 
