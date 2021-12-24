@@ -4,7 +4,7 @@
 
 ### Playing:
 
-To play, type **/sw play** to open the arenas menu and select an arena to play on.
+To play, type **/sw play** to open the arenas menu and select an arena to join in.
 
 ### Creating an arena:
 
