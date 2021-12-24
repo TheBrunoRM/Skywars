@@ -77,8 +77,7 @@ public class ArenaMenu implements Listener {
 		if (event.getInventory().equals(inventory)) {
 			event.setCancelled(true);
 			ItemStack clicked = event.getCurrentItem();
-			if (clicked.getItemMeta() == null)
-				return;
+			if (clicked == null || clicked.getItemMeta() == null) return;
 			String name = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
 			Arena arena = Skywars.get().getArena(name);
 			if(arena != null) {
