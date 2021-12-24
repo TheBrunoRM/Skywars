@@ -2,6 +2,8 @@
 
 ## How to use
 
+Firstly, you will need to set the main lobby by using **/sw setmainlobby**
+
 ### Playing:
 
 To play, type **/sw play** to open the arenas menu and select an arena to join in.
