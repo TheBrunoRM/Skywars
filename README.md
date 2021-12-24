@@ -2,6 +2,10 @@
 
 ## How to use
 
+### Playing:
+
+To play, type **/sw play** to open the arenas menu and select an arena to join in.
+
 ### Creating an arena:
 
 To create an arena, type **/sw create <arena>**\
