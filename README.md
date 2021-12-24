@@ -6,7 +6,9 @@ Firstly, you will need to set the main lobby by using **/sw setmainlobby**
 
 ### Playing:
 
-To play, type **/sw play** to open the arenas menu and select an arena to join in.
+To play, type **/sw play** to open the arenas menu and select an arena to join in.\
+You can type **/sw start** to start the game countdown.\
+You can type **/sw forcestart** to start the game immediately.\
 
 ### Creating an arena:
 
