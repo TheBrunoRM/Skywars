@@ -2,7 +2,7 @@
 
 ## How to install
 
-To install the plugin, put it in your server's **plugins** folder.\
+To install the plugin, drag the .jar file to your server's **plugins** folder.\
 The plugin does not need any other dependencies as it should work by itself.\
 You can start the server after installing the plugin.
 
