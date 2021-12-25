@@ -16,3 +16,5 @@ startLines:
   - "                   &e&lwith special items!"
   - ""
   - "&a&l---------------------------------------------------------"
+
+disabledCommands: []

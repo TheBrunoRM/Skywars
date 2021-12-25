@@ -6,6 +6,8 @@ softdepend: [WorldEdit]
 api-version: "1.13"
 
 commands:
-   skywars:
-      description: Main Skywars command.
-      aliases: sw
+  skywars:
+    description: Main Skywars command.
+    aliases: sw
+  where:
+    description: Tells you where you are.

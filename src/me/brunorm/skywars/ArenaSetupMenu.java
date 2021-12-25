@@ -185,7 +185,7 @@ public class ArenaSetupMenu implements Listener {
 		inventory.setItem(18, regenerateCases);
 	}
 	
-	static void OpenConfigurationMenu(Player player, Arena arena) {
+	public static void OpenConfigurationMenu(Player player, Arena arena) {
 		currentArenas.put(player, arena);
 		Inventory inventory = Bukkit.createInventory(null, 9 * 3, Messager.color("&a&l" + arena.getName()));
 		inventories.put(player, inventory);

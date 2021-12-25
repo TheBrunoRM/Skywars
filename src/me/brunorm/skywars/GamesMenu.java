@@ -39,7 +39,7 @@ public class GamesMenu implements Listener {
 		}
 	}
 	
-	static void OpenMenu(Player player) {
+	public static void OpenMenu(Player player) {
 		Inventory inventory = Bukkit.createInventory(null, 9 * 3, "Skywars");
 		PlayerInventoryManager.setInventory(player, inventory);
 		ItemStack item = new ItemStack(XMaterial.BOW.parseItem());

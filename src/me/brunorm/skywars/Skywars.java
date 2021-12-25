@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
@@ -18,6 +19,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -29,6 +31,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.cryptomorin.xseries.XMaterial;
 
 import me.brunorm.skywars.API.NMSHandler;
+import me.brunorm.skywars.commands.MainCommand;
+import me.brunorm.skywars.commands.WhereCommand;
 import me.brunorm.skywars.events.DisableWeather;
 import me.brunorm.skywars.events.Events;
 import me.brunorm.skywars.events.MessageSound;
@@ -114,6 +118,8 @@ public class Skywars extends JavaPlugin {
 		// done
 		Bukkit.getConsoleSender().sendMessage(Messager.color(
 				String.format("%s &ahas been enabled: &bv%s", prefix, version)));
+		//Bukkit.getConsoleSender().sendMessage(Messager.color(
+		//		String.format("%s &eis running on &b%s", prefix, serverPackageVersion)));
 
 		Bukkit.getScheduler().runTaskTimer(Skywars.get(), new Runnable() {
 			@Override
@@ -156,7 +162,6 @@ public class Skywars extends JavaPlugin {
 	}
 	
 	public void Reload() {
-		onDisable();
 		loadConfig();
 		loadArenas();
 		kits.clear();
@@ -195,7 +200,17 @@ public class Skywars extends JavaPlugin {
 
 	// commands
 	public void loadCommands() {
-		this.getCommand("skywars").setExecutor(new MainCommand(this));
+		HashMap<String, CommandExecutor> cmds = new HashMap<String, CommandExecutor>();
+		cmds.put("skywars", new MainCommand(this));
+		cmds.put("where", new WhereCommand(this));
+		for(String cmd : cmds.keySet()) {
+			if(!getConfig().getStringList("disabledCommands").contains(cmd)) {
+				Bukkit.getConsoleSender().sendMessage(
+					Messager.colorFormat("%s &eLoading command &a%s&e...", prefix, cmd));
+				this.getCommand(cmd).setExecutor(cmds.get(cmd));
+			} else Bukkit.getConsoleSender().sendMessage(
+				Messager.colorFormat("%s &7Skipping command &c%s&e...", prefix, cmd));
+		}
 	}
 
 	// config file
@@ -429,7 +444,7 @@ public class Skywars extends JavaPlugin {
 				// third layer
 				{ -1, 2, 0 }, { 1, 2, 0 }, { 0, 2, -1 }, { 0, 2, 1 },
 				// base and top
-				{ 0, -1, 0 }, { 0, 3, 0 }, //
+				{ 0, -1, 0 }, { 0, 3, 0 },
 				// base joints
 				{ -1, -1, 0 }, { 1, -1, 0 }, { 0, -1, -1 }, { 0, -1, 1 },
 				// top joints
@@ -444,19 +459,6 @@ public class Skywars extends JavaPlugin {
 			}
 		}
 	}
-
-	public static String[] startLines = {
-		"&a-------------------------------------------------",
-		"",
-		"                                &f&lSkyWars",
-		"",
-		"     &e&lGather resources and equipment on your island",
-		"         &e&lin order to eliminate every other player.",
-		"       &e&lGo to the center island for special chests",
-		"                         &e&lwith special items!",
-		"",
-		"&a-------------------------------------------------"
-	};
 	
 	// kits
 	
