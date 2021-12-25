@@ -1,4 +1,4 @@
-package me.brunorm.skywars;
+package me.brunorm.skywars.events;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -10,6 +10,11 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import com.cryptomorin.xseries.XMaterial;
+
+import me.brunorm.skywars.ArenaMenu;
+import me.brunorm.skywars.Messager;
+import me.brunorm.skywars.Skywars;
+import me.brunorm.skywars.structures.Arena;
 
 public class SignEvents implements Listener {
 	

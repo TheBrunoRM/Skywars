@@ -1,4 +1,4 @@
-package me.brunorm.skywars;
+package me.brunorm.skywars.structures;
 
 import org.bukkit.entity.Player;
 
@@ -32,7 +32,7 @@ public class SkywarsPlayer {
 		this.arena = arena;
 	}
 	
-	Player getPlayer() {
+	public Player getPlayer() {
 		return player;
 	}
 	

@@ -17,6 +17,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.cryptomorin.xseries.XMaterial;
 
+import me.brunorm.skywars.structures.Arena;
+
 public class ArenaMenu implements Listener {
 	
 	static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();

@@ -83,17 +83,17 @@ public class TitleBar {
             Field connectionField = packets.getConnection(packets.getCraftPlayer(player));
             Object connection = connectionField.get(packets.getCraftPlayer(player));
             Class<?> titlePacket = packets.getNMS("PacketPlayOutTitle");
-            Method send = connection.getClass ().getMethod ("sendPacket", packets.packetClass);
+            Method send = connection.getClass().getMethod ("sendPacket", packets.packetClass);
             if (this.title != null) {
                 Object title = packets.getChatSerA().invoke(this.title);
-                Constructor<?> titleC = titlePacket.getConstructor(titlePacket.getDeclaredClasses ()[0], packets.iChat, int.class, int.class, int.class);
-                Object sendTitle = titleC.newInstance (titlePacket.getDeclaredClasses ()[0].getEnumConstants ()[0], title, this.fadeIn, this.stay, this.fadeOut);
+                Constructor<?> titleC = titlePacket.getConstructor(titlePacket.getDeclaredClasses()[0], packets.iChat, int.class, int.class, int.class);
+                Object sendTitle = titleC.newInstance(titlePacket.getDeclaredClasses()[0].getEnumConstants()[0], title, this.fadeIn, this.stay, this.fadeOut);
                 send.invoke(connection, sendTitle);
             }
             if (this.subTitle != null) {
                 Object subTitle = packets.chatSerA.invoke (this.subTitle);
                 Constructor<?> subTitleC = titlePacket.getConstructor(titlePacket.getDeclaredClasses()[0], packets.iChat);
-                Object sendSubTitle = subTitleC.newInstance (titlePacket.getDeclaredClasses ()[0].getEnumConstants ()[1], subTitle);
+                Object sendSubTitle = subTitleC.newInstance(titlePacket.getDeclaredClasses()[0].getEnumConstants()[1], subTitle);
                 send.invoke(connection, sendSubTitle);
             }
         } catch (Exception exception) {

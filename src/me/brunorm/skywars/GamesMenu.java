@@ -15,6 +15,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.cryptomorin.xseries.XMaterial;
 
+import me.brunorm.skywars.structures.Arena;
+
 public class GamesMenu implements Listener {
 	
 	@SuppressWarnings("deprecation")

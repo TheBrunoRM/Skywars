@@ -20,6 +20,8 @@ import com.cryptomorin.xseries.XMaterial;
 import me.brunorm.skywars.API.NMSHandler;
 import me.brunorm.skywars.schematics.Schematic;
 import me.brunorm.skywars.schematics.SchematicHandler;
+import me.brunorm.skywars.structures.Arena;
+import me.brunorm.skywars.structures.SkywarsPlayer;
 import mrblobman.sounds.Sounds;
 
 public class MainCommand implements CommandExecutor {
@@ -199,7 +201,7 @@ public class MainCommand implements CommandExecutor {
 				if (args[0].equalsIgnoreCase("start")) {
 					if (playerArena != null) {
 						if(playerArena.getStatus() == ArenaStatus.WAITING &&
-								playerArena.task == null) {
+								playerArena.getTask() == null) {
 							playerArena.forcedStart = true;
 							playerArena.forcedStartPlayer = player;
 							playerArena.StartTimer(ArenaStatus.STARTING);

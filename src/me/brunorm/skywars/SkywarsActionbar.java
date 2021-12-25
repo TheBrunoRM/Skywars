@@ -2,6 +2,9 @@ package me.brunorm.skywars;
 
 import org.bukkit.entity.Player;
 
+import me.brunorm.skywars.structures.Arena;
+import me.brunorm.skywars.structures.SkywarsPlayer;
+
 public class SkywarsActionbar {
 
 	public static void update(Player player) {

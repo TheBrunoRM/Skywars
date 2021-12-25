@@ -11,6 +11,7 @@ import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
+import me.brunorm.skywars.structures.Arena;
 import mrblobman.sounds.Sounds;
 
 public class ArenaSetup implements Listener {

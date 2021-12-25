@@ -29,6 +29,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.cryptomorin.xseries.XMaterial;
 
 import me.brunorm.skywars.API.NMSHandler;
+import me.brunorm.skywars.events.DisableWeather;
+import me.brunorm.skywars.events.Events;
+import me.brunorm.skywars.events.MessageSound;
+import me.brunorm.skywars.events.SignEvents;
+import me.brunorm.skywars.structures.Arena;
+import me.brunorm.skywars.structures.Kit;
+import me.brunorm.skywars.structures.SkywarsPlayer;
 
 @SuppressWarnings("deprecation")
 public class Skywars extends JavaPlugin {
@@ -40,9 +47,9 @@ public class Skywars extends JavaPlugin {
 	public String name = descriptionFile.getName();
 	public List<String> authors = descriptionFile.getAuthors();
 	public String prefix = ChatColor.translateAlternateColorCodes('&', String.format("&6[&e%s&6]", name));
-	static String arenasPath;
-	static String kitsPath;
-	static String schematicsPath;
+	public static String arenasPath;
+	public static String kitsPath;
+	public static String schematicsPath;
 	// config.yml
 	public static FileConfiguration config;
 	public YamlConfiguration scoreboardConfig;
@@ -384,7 +391,7 @@ public class Skywars extends JavaPlugin {
 					 * config.getDouble("lobby.z"); Location lobby = new Location(world,x,y,z);
 					 * arena.setLobby(lobby); }
 					 */
-					System.out.println("Loading spawns from config for arena " + arena.name);
+					System.out.println("Loading spawns from config for arena " + arena.getName());
 					for (int i = 0; i < arena.getMaxPlayers(); i++) {
 						if (config.get(String.format("spawn.%s", i)) == null)
 							continue;
@@ -392,11 +399,11 @@ public class Skywars extends JavaPlugin {
 						double y = config.getDouble(String.format("spawn.%s.y", i));
 						double z = config.getDouble(String.format("spawn.%s.z", i));
 						Location location = new Location(world, x, y, z);
-						arena.spawns.put(i, location);
+						arena.getSpawns().put(i, location);
 					}
 				} else System.out.println("Warning: could not get world by "
-					+ arena.getWorldName() + " for arena " + arena.name);
-			} else System.out.println("Warning: world not set for arena " + arena.name);
+					+ arena.getWorldName() + " for arena " + arena.getName());
+			} else System.out.println("Warning: world not set for arena " + arena.getName());
 			// add arena to the arena list
 			arenas.add(arena);
 			System.out.println("Loaded arena " + arena.getName());

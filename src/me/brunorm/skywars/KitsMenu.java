@@ -14,6 +14,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import me.brunorm.skywars.structures.Kit;
+
 public class KitsMenu implements Listener {
 
 	static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();

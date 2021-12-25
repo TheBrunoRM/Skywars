@@ -16,6 +16,9 @@ import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
+import me.brunorm.skywars.structures.Arena;
+import me.brunorm.skywars.structures.SkywarsPlayer;
+
 public class SkywarsScoreboard {
 
 	static String url = getUrl();
@@ -57,12 +60,12 @@ public class SkywarsScoreboard {
 
 		if (arena.getStatus() == ArenaStatus.STARTING) {
 			status = config.getString("status.starting").replaceAll(getVariableCode("seconds"),
-					Integer.toString(arena.countdown));
+					Integer.toString(arena.getCountdown()));
 		} else if (arena.getStatus() == ArenaStatus.WAITING) {
 			status = config.getString("status.waiting");
 		} else {
 			status = config.getString("status.ending").replaceAll(getVariableCode("seconds"),
-					Integer.toString(arena.countdown));
+					Integer.toString(arena.getCountdown()));
 		}
 
 		return status;

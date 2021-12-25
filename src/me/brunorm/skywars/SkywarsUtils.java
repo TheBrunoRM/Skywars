@@ -17,6 +17,9 @@ import org.bukkit.potion.PotionEffect;
 
 import com.cryptomorin.xseries.XMaterial;
 
+import me.brunorm.skywars.structures.Arena;
+import me.brunorm.skywars.structures.SkywarsPlayer;
+
 public class SkywarsUtils {
 
 	static String url = getUrl();
@@ -32,7 +35,7 @@ public class SkywarsUtils {
 		return Messager.color(name);
 	}
 	
-	public static void format(String text, Player player, Arena arena, SkywarsPlayer swp) {
+	public static String format(String text, Player player, Arena arena, SkywarsPlayer swp) {
 		Date date = new Date();
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 		String strDate = formatter.format(date);
@@ -47,14 +50,16 @@ public class SkywarsUtils {
 					.replaceAll(getVariableCode("players"), Integer.toString(players.size()))
 					.replaceAll(getVariableCode("maxplayers"), Integer.toString(arena.getMaxPlayers()))
 					.replaceAll(getVariableCode("minplayers"), Integer.toString(arena.getMinPlayers()))
-					.replaceAll(getVariableCode("seconds"), Integer.toString(arena.countdown))
+					.replaceAll(getVariableCode("seconds"), Integer.toString(arena.getCountdown()))
 					.replaceAll(getVariableCode("status"), getStatus(arena));
 		}
 
 		if (swp != null) {
-			text = text.replaceAll(getVariableCode("kills"), Integer.toString(swp.getKills()));
+			text = text.replaceAll(getVariableCode("kills"), Integer.toString(swp.getKills()))
+					.replaceAll(getVariableCode("kit"), swp.getKit().getDisplayName());
 		}
-
+		
+		return text;
 	}
 
 	public static String getVariableCode(String thing) {

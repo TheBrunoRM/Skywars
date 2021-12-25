@@ -63,10 +63,12 @@ public class SchematicHandler {
 			}
 		}
 		
+		/*
 		System.out.println("Skipped " + skipped.size() + " blocks:");
 		for(int block : skipped) {
 			System.out.println(block);
 		}
+		*/
 		
 		for(Tag tag : tileEntities.getValue()) {
 			@SuppressWarnings("unchecked")

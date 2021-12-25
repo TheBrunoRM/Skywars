@@ -1,4 +1,4 @@
-package me.brunorm.skywars;
+package me.brunorm.skywars.structures;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +26,11 @@ import org.jnbt.Tag;
 
 import com.cryptomorin.xseries.XMaterial;
 
+import me.brunorm.skywars.ArenaStatus;
+import me.brunorm.skywars.ChestManager;
+import me.brunorm.skywars.Messager;
+import me.brunorm.skywars.Skywars;
+import me.brunorm.skywars.SkywarsUtils;
 import me.brunorm.skywars.schematics.Schematic;
 import me.brunorm.skywars.schematics.SchematicHandler;
 import mrblobman.sounds.Sounds;
@@ -44,15 +49,15 @@ public class Arena {
 	Location location;
 	boolean full;
 	int countdown;
-	boolean forcedStart;
-	Player forcedStartPlayer;
-	List<Item> droppedItems = new ArrayList<Item>();
+	public boolean forcedStart;
+	public Player forcedStartPlayer;
+	private List<Item> droppedItems = new ArrayList<Item>();
 	
 	HashMap<Integer, Location> spawns = new HashMap<Integer, Location>();
 	private ArrayList<SkywarsPlayer> players = new ArrayList<SkywarsPlayer>();
 	// ArrayList<SkywarsPlayer> spectators = new ArrayList<SkywarsPlayer>();
 
-	Arena(String name) {
+	public Arena(String name) {
 		this.name = name;
 		this.status = ArenaStatus.DISABLED;
 		// this.minPlayers = 2;
@@ -104,7 +109,7 @@ public class Arena {
 		}
 	}
 	
-	boolean JoinPlayer(Player player) {
+	public boolean JoinPlayer(Player player) {
 		if(!SkywarsUtils.JoinableCheck(this, player)) return false;
 		if (status == ArenaStatus.PLAYING)
 			return false;
@@ -173,7 +178,7 @@ public class Arena {
 			.add(new Vector(0.5,0,0.5));
 	}
 	
-	void MakeSpectator(SkywarsPlayer p) {
+	public void MakeSpectator(SkywarsPlayer p) {
 		if (p.isSpectator())
 			return;
 		
@@ -183,14 +188,14 @@ public class Arena {
 		// drop player inventory
 		for (ItemStack i : player.getInventory().getContents()) {
 			if (i != null) {
-				droppedItems.add(player.getWorld().dropItemNaturally(player.getLocation(), i));
+				getDroppedItems().add(player.getWorld().dropItemNaturally(player.getLocation(), i));
 				player.getInventory().remove(i);
 			}
 		}
 		// drop player armor
 		for (ItemStack i : player.getInventory().getArmorContents()) {
 			if (i != null && i.getType() != Material.AIR) {
-				droppedItems.add(player.getWorld().dropItemNaturally(player.getLocation(), i));
+				getDroppedItems().add(player.getWorld().dropItemNaturally(player.getLocation(), i));
 			}
 		}
 		player.getInventory().setArmorContents(null);
@@ -199,6 +204,7 @@ public class Arena {
 		player.setAllowFlight(true);
 		player.setFlying(true);
 		player.setGameMode(GameMode.ADVENTURE);
+		
 		for (Player players : Bukkit.getOnlinePlayers()) {
 			players.hidePlayer(player);
 		}
@@ -221,14 +227,14 @@ public class Arena {
 		}, 20);
 	}
 
-	void LeavePlayer(Player player) {
+	public void LeavePlayer(Player player) {
 		SkywarsPlayer p = getPlayer(player);
 		if (p == null)
 			return;
 		LeavePlayer(p);
 	}
 
-	void LeavePlayer(SkywarsPlayer player) {
+	public void LeavePlayer(SkywarsPlayer player) {
 		System.out.println("Debug: " + player.getPlayer().getName() + " leaved arena " + this.name);
 		full = false;
 		players.remove(player);
@@ -247,7 +253,7 @@ public class Arena {
 			if(status == ArenaStatus.ENDING) StopGame();
 			setStatus(ArenaStatus.WAITING);
 			for (SkywarsPlayer players : getPlayers()) {
-				players.getPlayer().sendMessage("countdown stopped, not enough players");
+				players.getPlayer().sendMessage("&eCountdown stopped, not enough players!");
 			}
 			cancelTimer();
 		}
@@ -277,12 +283,12 @@ public class Arena {
 	BukkitTask task;
 
 	void cancelTimer() {
-		if (task == null)
+		if (getTask() == null)
 			return;
-		task.cancel();
+		getTask().cancel();
 	}
 
-	void StartTimer(ArenaStatus status) {
+	public void StartTimer(ArenaStatus status) {
 		setStatus(status);
 		System.out.println(String.format("starting %s timer", status));
 		if (status == ArenaStatus.STARTING) {
@@ -348,11 +354,11 @@ public class Arena {
 		}
 	}
 
-	int getCountdown() {
+	public int getCountdown() {
 		return countdown;
 	}
 
-	void StartGame() {
+	public void StartGame() {
 		cancelTimer();
 		setStatus(ArenaStatus.PLAYING);
 		calculateAndFillChests();
@@ -385,7 +391,7 @@ public class Arena {
 		}
 	}
 	
-	boolean StopGame() {
+	public boolean StopGame() {
 		System.out.println("stop game debug 1");
 		if (getStatus() != ArenaStatus.PLAYING && getStatus() != ArenaStatus.ENDING)
 			return false;
@@ -401,22 +407,15 @@ public class Arena {
 		return true;
 	}
 
-	void Clear() {
+	public void Clear() {
 		System.out.println("Clearing arena " + this.name);
-		for(Item i : droppedItems) {
+		for(Item i : getDroppedItems()) {
 			i.remove();
 		}
-		droppedItems.clear();
+		getDroppedItems().clear();
 		if(getWorldName() != null) {			
-			if(loadedSchematic == null) loadSchematic();
 			for(Entity i : Bukkit.getWorld(getWorldName()).getEntities()) {
-				if(i instanceof Item
-						&& i.getLocation().getX()>getLocation().getX()-loadedSchematic.getWidth()/2
-						&& i.getLocation().getX()<getLocation().getX()+loadedSchematic.getWidth()/2
-						&& i.getLocation().getY()>getLocation().getY()-loadedSchematic.getHeight()/2
-						&& i.getLocation().getY()<getLocation().getY()+loadedSchematic.getHeight()/2
-						&& i.getLocation().getZ()>getLocation().getZ()-loadedSchematic.getLength()/2
-						&& i.getLocation().getZ()<getLocation().getZ()+loadedSchematic.getLength()/2) {
+				if(i instanceof Item && isInBoundaries(i.getLocation())) {
 					i.remove();
 				}
 			}
@@ -425,13 +424,33 @@ public class Arena {
 		ResetCases();
 	}
 	
-	void ResetCases() {
+	public void goBackToCenter(Player player) {
+		player.setAllowFlight(false);
+		player.setFlying(false);
+		player.setAllowFlight(true);
+		player.setFlying(true);
+		player.setVelocity(new Vector(0,0,0));
+		player.teleport(this.getLocation());
+		player.setVelocity(new Vector(0, 5f, 0));
+	}
+	
+	public boolean isInBoundaries(Location loc) {
+		if(loadedSchematic == null) loadSchematic();
+		return loc.getX()>getLocation().getX()-loadedSchematic.getWidth()/2
+		&& loc.getX()<getLocation().getX()+loadedSchematic.getWidth()/2
+		&& loc.getY()>getLocation().getY()-loadedSchematic.getHeight()/2
+		&& loc.getY()<getLocation().getY()+loadedSchematic.getHeight()/2
+		&& loc.getZ()>getLocation().getZ()-loadedSchematic.getLength()/2
+		&& loc.getZ()<getLocation().getZ()+loadedSchematic.getLength()/2;
+	}
+	
+	public void ResetCases() {
 		for (Location spawn : getSpawns().values()) {
 			Skywars.createCase(getLocationInArena(spawn), XMaterial.RED_STAINED_GLASS.parseMaterial());
 		}
 	}
 
-	String getName() {
+	public String getName() {
 		return name;
 	}
 
@@ -439,7 +458,7 @@ public class Arena {
 		return getProblems().size() <= 0;
 	}
 
-	ArrayList<String> getProblems() {
+	public ArrayList<String> getProblems() {
 		ArrayList<String> problems = new ArrayList<String>();
 		if(!Bukkit.getServer().getWorlds().stream().map(world -> world.getName())
 				.collect(Collectors.toList()).contains(getWorldName()))
@@ -468,7 +487,7 @@ public class Arena {
 		);
 	}
 	
-	Location getSpawn(int index) {
+	public Location getSpawn(int index) {
 		Location loc = spawns.get(index);
 		if (loc == null || worldName == null)
 			return null;
@@ -480,12 +499,12 @@ public class Arena {
 		return spawns;
 	}
 	
-	void setSpawn(int index, Location location) {
+	public void setSpawn(int index, Location location) {
 		this.spawns.put(index, location);
 		setLocationConfig(String.format("spawn.%s", index), null);
 	}
 
-	boolean removeSpawn(int index) {
+	public boolean removeSpawn(int index) {
 		if (this.spawns.get(index) == null)
 			return false;
 		this.spawns.remove(index);
@@ -497,7 +516,7 @@ public class Arena {
 		return this.players.size();
 	}
 
-	ArrayList<SkywarsPlayer> getPlayers() {
+	public ArrayList<SkywarsPlayer> getPlayers() {
 		return this.players;
 	}
 
@@ -526,7 +545,7 @@ public class Arena {
 		return players.get(index);
 	}
 
-	SkywarsPlayer getPlayer(String name) {
+	public SkywarsPlayer getPlayer(String name) {
 		for (SkywarsPlayer players : getPlayers()) {
 			if (players.getPlayer().getName().equals(name))
 				return players;
@@ -534,7 +553,7 @@ public class Arena {
 		return null;
 	}
 
-	SkywarsPlayer getPlayer(Player player) {
+	public SkywarsPlayer getPlayer(Player player) {
 		for (SkywarsPlayer players : getPlayers()) {
 			if (players.getPlayer().getName().equals(player.getName()))
 				return players;
@@ -753,6 +772,18 @@ public class Arena {
 
 	public boolean isFull() {
 		return full;
+	}
+
+	public List<Item> getDroppedItems() {
+		return droppedItems;
+	}
+
+	public void setDroppedItems(List<Item> droppedItems) {
+		this.droppedItems = droppedItems;
+	}
+
+	public BukkitTask getTask() {
+		return task;
 	}
 
 }

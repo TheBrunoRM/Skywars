@@ -145,7 +145,7 @@ public class ChestManager implements Listener {
 		ItemStack stone = new ItemStack(XMaterial.COBBLESTONE.parseItem());
 		stone.setAmount(16);
 		
-		for(int i = 0; i < Math.floor(Math.random() * 3) - 1; i++) {			
+		for(int i = 0; i < Math.floor(Math.random() * 3); i++) {			
 			inventory.setItem(RandomSlot(inventory), Math.random() > 0.5 ? stone : wood);
 		}
 	}

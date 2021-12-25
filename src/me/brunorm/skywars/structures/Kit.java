@@ -1,4 +1,4 @@
-package me.brunorm.skywars;
+package me.brunorm.skywars.structures;
 
 import java.io.File;
 
@@ -15,7 +15,7 @@ public class Kit {
 	YamlConfiguration config;
 	File file;
 	
-	Kit(String name) {
+	public Kit(String name) {
 		this.name = name;
 	}
 

@@ -21,6 +21,7 @@ import org.bukkit.util.Vector;
 
 import com.cryptomorin.xseries.XMaterial;
 
+import me.brunorm.skywars.structures.Arena;
 import mrblobman.sounds.Sounds;
 
 public class ArenaSetupMenu implements Listener {
@@ -136,12 +137,12 @@ public class ArenaSetupMenu implements Listener {
 		inventory.setItem(14, schematic);
 		
 		ItemStack status = new ItemStack(
-				currentArena.status != ArenaStatus.DISABLED ?
+				currentArena.getStatus() != ArenaStatus.DISABLED ?
 						XMaterial.GREEN_STAINED_GLASS.parseItem() :
 							XMaterial.RED_STAINED_GLASS.parseItem());
 		ItemMeta statusMeta = status.getItemMeta();
 		statusMeta.setDisplayName(Messager.colorFormat(statusName,
-				currentArena.status != ArenaStatus.DISABLED ? "&a&lENABLED" : "&c&lDISABLED"));
+				currentArena.getStatus() != ArenaStatus.DISABLED ? "&a&lENABLED" : "&c&lDISABLED"));
 		status.setItemMeta(statusMeta);
 		inventory.setItem(15, status);
 
@@ -303,9 +304,9 @@ public class ArenaSetupMenu implements Listener {
 					OpenSchematicsMenu(player);
 			}
 			if (name.equals(Messager.colorFormat(statusName,
-					currentArena.status != ArenaStatus.DISABLED ? "&a&lENABLED" : "&c&lDISABLED"))) {
+					currentArena.getStatus() != ArenaStatus.DISABLED ? "&a&lENABLED" : "&c&lDISABLED"))) {
 				currentArena.setStatus(
-						currentArena.status != ArenaStatus.DISABLED ? ArenaStatus.DISABLED : ArenaStatus.WAITING);
+						currentArena.getStatus() != ArenaStatus.DISABLED ? ArenaStatus.DISABLED : ArenaStatus.WAITING);
 				System.out.println("status changed to " + currentArena.getStatus());
 			}
 			
