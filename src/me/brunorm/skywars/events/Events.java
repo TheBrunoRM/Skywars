@@ -58,7 +58,7 @@ public class Events implements Listener {
 			Arena arena = Skywars.get().getPlayerArena(player);
 			if (arena != null) {
 				SkywarsPlayer swPlayer = arena.getPlayer(player.getName());
-				if(arena.getStatus() != ArenaStatus.PLAYING) {
+				if(arena.getStatus() != ArenaStatus.PLAYING || arena.isInvencibility()) {
 					event.setCancelled(true);
 				}
 				if(swPlayer.isSpectator() && event.getCause() == DamageCause.VOID) {

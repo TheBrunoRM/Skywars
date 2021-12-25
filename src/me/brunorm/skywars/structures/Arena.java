@@ -51,6 +51,8 @@ public class Arena {
 	int countdown;
 	public boolean forcedStart;
 	public Player forcedStartPlayer;
+	boolean invencibility = false;
+
 	private List<Item> droppedItems = new ArrayList<Item>();
 	
 	HashMap<Integer, Location> spawns = new HashMap<Integer, Location>();
@@ -380,14 +382,22 @@ public class Arena {
 			player.getPlayer().playSound(player.getPlayer().getLocation(), Sounds.PORTAL_TRIGGER.bukkitSound(), 0.5f,
 					5f);
 			
+			setInvencibility(true);
+			
 			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
 				@Override
 				public void run() {
-					for(String l : Skywars.startLines) {
+					for(String l : Skywars.get().getConfig().getStringList("startLines")) {
 						player.getPlayer().sendMessage(Messager.color(l));
 					}
 				}
 			}, 20);
+			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
+				@Override
+				public void run() {
+					setInvencibility(false);
+				}
+			}, 60);
 		}
 	}
 	
@@ -784,6 +794,14 @@ public class Arena {
 
 	public BukkitTask getTask() {
 		return task;
+	}
+	
+	public boolean isInvencibility() {
+		return invencibility;
+	}
+
+	public void setInvencibility(boolean invencibility) {
+		this.invencibility = invencibility;
 	}
 
 }
