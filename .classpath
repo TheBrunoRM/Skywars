@@ -12,5 +12,6 @@
 	<classpathentry kind="lib" path="E:/Cosas/Server/Cosas/Jars/craftbukkit-1.8.jar"/>
 	<classpathentry kind="lib" path="E:/Cosas/Server/Cosas/Jars/craftbukkit-1.9.jar"/>
 	<classpathentry kind="lib" path="E:/Cosas/Server/Cosas/Jars/craftbukkit-1.13.jar"/>
+	<classpathentry kind="lib" path="E:/skywars plugin test servers/skywars server 1.8/plugins/Vault.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -21,26 +20,84 @@ import me.brunorm.skywars.structures.SkywarsPlayer;
 
 public class SkywarsScoreboard {
 
-	static String url = getUrl();
-	static String[] colorSymbols = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "f" };
+	public static String url = getUrl();
+	public static String[] colorSymbols = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "f" };
 
-	public static String format(String text, Arena arena, SkywarsPlayer player) {
+	/*
+	
+	public static String format(String text) {
 		Date date = new Date();
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 		String strDate = formatter.format(date);
+		return Messager.color(text.replaceAll(getVariableCode("date"), strDate)
+				.replaceAll(getVariableCode("url"), url));
+	}
+	
+	public static String format(String text, Arena arena) {
 
+		if(arena == null) return text;
+		
 		List<SkywarsPlayer> players = new ArrayList<>(arena.getPlayers());
 		players.removeIf(p -> p.isSpectator());
 
-		text = text.replaceAll(getVariableCode("map"), arena.getName())
+		return Messager.color(format(text).replaceAll(getVariableCode("map"), arena.getName())
 				.replaceAll(getVariableCode("players"), Integer.toString(players.size()))
 				.replaceAll(getVariableCode("maxplayers"), Integer.toString(arena.getMaxPlayers()))
-				.replaceAll(getVariableCode("status"), getStatus(arena))
-				.replaceAll(getVariableCode("kills"), Integer.toString(player.getKills()))
-				.replaceAll(getVariableCode("date"), strDate).replaceAll(getVariableCode("url"), url);
-		return ChatColor.translateAlternateColorCodes('&', text);
+				.replaceAll(getVariableCode("status"), SkywarsUtils.getStatus(arena))
+				.replaceAll(getVariableCode("seconds"), Integer.toString(arena.getCountdown())));
 	}
-
+	
+	public static String format(String text, Player player) {
+		return Messager.color(format(text)
+				.replaceAll(getVariableCode("coins"), "4568234"));
+	}
+	
+	public static String format(String text, Arena arena, SkywarsPlayer swp) {
+		return Messager.color(format(format(format(text), arena), swp.getPlayer())
+				.replaceAll(getVariableCode("kills"), Integer.toString(swp.getKills())));
+	}
+	
+	*/
+	
+	public static String format(String text, Player player, Arena arena, SkywarsPlayer swp) {
+		Date date = new Date();
+		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+		String strDate = formatter.format(date);
+		text = text.replaceAll(getVariableCode("date"), strDate)
+				.replaceAll(getVariableCode("url"), url);
+		
+		if(player != null) {
+			
+			String balance = null;
+			
+			if(Skywars.get().getEconomy() != null) {
+				balance = Double.toString(Skywars.get().getEconomy().getBalance(player));
+			} else {
+				balance = "Vaultn't";
+			}
+			text = text.replaceAll(getVariableCode("coins"), balance)
+					.replaceAll(getVariableCode("totalkills"),
+				Integer.toString(Skywars.get().getPlayerTotalKills(player)));
+		}
+		
+		if(arena != null) {
+			List<SkywarsPlayer> players = new ArrayList<>(arena.getPlayers());
+			players.removeIf(p -> p.isSpectator());
+			
+			text = text.replaceAll(getVariableCode("map"), arena.getName())
+					.replaceAll(getVariableCode("players"), Integer.toString(players.size()))
+					.replaceAll(getVariableCode("maxplayers"), Integer.toString(arena.getMaxPlayers()))
+					.replaceAll(getVariableCode("status"), SkywarsUtils.getStatus(arena))
+					.replaceAll(getVariableCode("seconds"), Integer.toString(arena.getCountdown()));
+		}
+		
+		if(swp != null) {
+			text = text.replaceAll(getVariableCode("kills"), Integer.toString(swp.getKills()));
+		}
+		
+		return Messager.color(text);
+	}
+	
 	public static String getVariableCode(String thing) {
 		return String.format("%%%s%%", thing);
 	}
@@ -53,24 +110,7 @@ public class SkywarsScoreboard {
 		else
 			return "www.skywars.com";
 	}
-
-	public static String getStatus(Arena arena) {
-		YamlConfiguration config = Skywars.get().langConfig;
-		String status;
-
-		if (arena.getStatus() == ArenaStatus.STARTING) {
-			status = config.getString("status.starting").replaceAll(getVariableCode("seconds"),
-					Integer.toString(arena.getCountdown()));
-		} else if (arena.getStatus() == ArenaStatus.WAITING) {
-			status = config.getString("status.waiting");
-		} else {
-			status = config.getString("status.ending").replaceAll(getVariableCode("seconds"),
-					Integer.toString(arena.getCountdown()));
-		}
-
-		return status;
-	}
-
+	
 	public static void update(Player player) {
 
 		YamlConfiguration config = Skywars.get().scoreboardConfig;
@@ -91,24 +131,27 @@ public class SkywarsScoreboard {
 		ArrayList<String> texts = new ArrayList<String>();
 
 		Arena arena = Skywars.get().getPlayerArena(player);
+		SkywarsPlayer swp = null;
+		List<String> stringList = null;
 		if (arena != null) {
-			SkywarsPlayer swp = arena.getPlayer(player);
-			List<String> arenaBoard = null;
+			swp = arena.getPlayer(player);
 			if (swp.isSpectator()) {
-				arenaBoard = config.getStringList("arena.spectator");
+				stringList = config.getStringList("arena.spectator");
 			} else {
 				if (arena.getStatus() == ArenaStatus.PLAYING) {
-					arenaBoard = config.getStringList("arena.player");
+					stringList = config.getStringList("arena.player");
 				} else {
-					arenaBoard = config.getStringList("arena.intermission");
+					stringList = config.getStringList("arena.intermission");
 				}
 			}
 
-			if (arenaBoard != null) {
-				for (int i = 0; i < arenaBoard.size(); i++) {
-					String text = format(arenaBoard.get(i), arena, swp);
-					texts.add(i, text);
-				}
+		} else {
+			stringList = config.getStringList("lobby");
+		}
+		if (stringList != null) {
+			for (int i = 0; i < stringList.size(); i++) {
+				String text = format(stringList.get(i), player, arena, swp);
+				texts.add(i, text);
 			}
 		}
 

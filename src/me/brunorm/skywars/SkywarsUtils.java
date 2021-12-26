@@ -77,17 +77,19 @@ public class SkywarsUtils {
 
 	public static String getStatus(Arena arena) {
 		YamlConfiguration config = Skywars.get().langConfig;
-		String status;
-
-		if (arena.getStatus() == ArenaStatus.STARTING) {
-			status = config.getString("status.starting");
-		} else if (arena.getStatus() == ArenaStatus.WAITING) {
-			status = config.getString("status.waiting");
-		} else {
-			status = config.getString("status.ending");
+		
+		switch(arena.getStatus()) {
+			case WAITING:
+				return config.getString("status.waiting");
+			case STARTING:
+				return config.getString("status.starting");
+			case PLAYING:
+				return config.getString("status.playing");
+			case ENDING:
+				return config.getString("status.ending");
+			default:
+				return "";
 		}
-
-		return status;
 	}
 
 	public static void TeleportToLobby(Player player) {

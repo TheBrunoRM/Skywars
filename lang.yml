@@ -12,3 +12,6 @@ items:
 
 actionbar:
   waiting: '&eCurrent kit: &a%kit%'
+
+NO_PERMISSION: "&cNo permission."
+NOT_JOINED: "&cNot joined."

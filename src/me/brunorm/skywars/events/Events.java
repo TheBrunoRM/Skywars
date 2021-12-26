@@ -28,8 +28,10 @@ public class Events implements Listener {
 		Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena != null) {
 			SkywarsPlayer swp = arena.getPlayer(event.getPlayer());
-			if(!arena.isInBoundaries(event.getPlayer().getLocation())) {
-				if(!swp.isSpectator())
+			if(!arena.isInBoundaries(event.getPlayer())) {
+				if(arena.getStatus() != ArenaStatus.PLAYING && !swp.isSpectator())
+					arena.LeavePlayer(player);
+				else if(!swp.isSpectator())
 					arena.MakeSpectator(swp);
 				else
 					arena.goBackToCenter(player);
@@ -59,16 +61,17 @@ public class Events implements Listener {
 			if (arena != null) {
 				SkywarsPlayer swPlayer = arena.getPlayer(player.getName());
 				if(arena.getStatus() != ArenaStatus.PLAYING || arena.isInvencibility()) {
+					System.out.println("Cancelling damage!");
 					event.setCancelled(true);
-				}
-				if(swPlayer.isSpectator() && event.getCause() == DamageCause.VOID) {
-					arena.goBackToCenter(player);
-				}
-				else if (event.getCause() == DamageCause.VOID || health - damage <= 0) {
-					event.setCancelled(true);
-					System.out.println("player damaged, made spectator");
-					arena.MakeSpectator(swPlayer);
-					return;
+				} else if(arena.getStatus() == ArenaStatus.PLAYING) {					
+					if(swPlayer.isSpectator() && event.getCause() == DamageCause.VOID) {
+						arena.goBackToCenter(player);
+					} else if (event.getCause() == DamageCause.VOID || health - damage <= 0) {
+						event.setCancelled(true);
+						System.out.println("player damaged, made spectator");
+						arena.MakeSpectator(swPlayer);
+						return;
+					}
 				}
 			}
 		}

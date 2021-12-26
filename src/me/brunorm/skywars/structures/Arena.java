@@ -29,6 +29,7 @@ import com.cryptomorin.xseries.XMaterial;
 import me.brunorm.skywars.ArenaStatus;
 import me.brunorm.skywars.ChestManager;
 import me.brunorm.skywars.Messager;
+import me.brunorm.skywars.SavedPlayer;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.SkywarsUtils;
 import me.brunorm.skywars.schematics.Schematic;
@@ -154,6 +155,7 @@ public class Arena {
 		centered.add(0.5,0,0.5);
 		
 		player.teleport(getCenteredLocation(spawn));
+		swPlayer.setSavedPlayer(new SavedPlayer(player));
 		SkywarsUtils.ClearPlayer(player);
 		SkywarsUtils.GiveBedItem(player);
 		
@@ -238,7 +240,7 @@ public class Arena {
 	}
 
 	public void LeavePlayer(SkywarsPlayer player) {
-		System.out.println("Debug: " + player.getPlayer().getName() + " leaved arena " + this.name);
+		player.getPlayer().sendMessage(Messager.colorFormat("&eYou leaved arena %s", this.name));
 		full = false;
 		players.remove(player);
 		removePlayer(player);
@@ -249,7 +251,9 @@ public class Arena {
 			}
 		}
 		SkywarsUtils.ClearPlayer(player.getPlayer());
-		SkywarsUtils.TeleportToLobby(player.getPlayer());
+		player.getSavedPlayer().Restore();
+		if(this.isInBoundaries(player.getPlayer()))
+			SkywarsUtils.TeleportToLobby(player.getPlayer());
 		if ((this.getStatus() == ArenaStatus.STARTING &&
 				!forcedStart && getCurrentPlayers() < getMinPlayers())
 				|| getCurrentPlayers() <= 0) {
@@ -369,6 +373,7 @@ public class Arena {
 			Skywars.createCase(getLocationInArena(spawn), XMaterial.AIR.parseMaterial());
 		}
 		for (SkywarsPlayer player : getPlayers()) {
+			if(player.isSpectator()) continue;
 			SkywarsUtils.ClearPlayer(player.getPlayer());
 			player.getPlayer().setGameMode(GameMode.SURVIVAL);
 			Kit kit = player.getKit();
@@ -443,6 +448,10 @@ public class Arena {
 		player.setVelocity(new Vector(0,0,0));
 		player.teleport(this.getLocation());
 		player.setVelocity(new Vector(0, 5f, 0));
+	}
+	
+	public boolean isInBoundaries(Player player) {
+		return isInBoundaries(player.getLocation());
 	}
 	
 	public boolean isInBoundaries(Location loc) {

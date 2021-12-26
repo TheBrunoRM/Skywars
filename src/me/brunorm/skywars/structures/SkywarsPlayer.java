@@ -2,6 +2,8 @@ package me.brunorm.skywars.structures;
 
 import org.bukkit.entity.Player;
 
+import me.brunorm.skywars.SavedPlayer;
+
 public class SkywarsPlayer {
 	
 	Player player;
@@ -10,7 +12,16 @@ public class SkywarsPlayer {
 	int kills = 0;
 	boolean spectator = false;
 	int number;
+	SavedPlayer savedPlayer;
 	
+	public SavedPlayer getSavedPlayer() {
+		return savedPlayer;
+	}
+
+	public void setSavedPlayer(SavedPlayer savedPlayer) {
+		this.savedPlayer = savedPlayer;
+	}
+
 	public int getKills() {
 		return this.kills;
 	}

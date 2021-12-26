@@ -1,7 +1,16 @@
 title: '&e&lSkyWars'
+lobby:
+- '&7%date%'
+- ''
+- 'Coins: &6%coins%'
+- 'Kills: &c%totalkills%'
+- ''
+- '%url%'
 arena:
    player:
    - '&7%date%'
+   - ''
+   - '%status%'
    - ''
    - 'Players left: &a%players%'
    - ''
@@ -9,7 +18,7 @@ arena:
    - ''
    - 'Map: &a%map%'
    - ''
-   - '&e%url%'
+   - '%url%'
    spectator:
    - '&7%date%'
    - ''
@@ -18,13 +27,13 @@ arena:
    - 'Map: &a%map%'
    - 'Players left: &a%players%'
    - ''
-   - '&e%url%'
+   - '%url%'
    intermission:
    - '&7%date%'
    - ''
    - '%status%'
    - ''
    - 'Map: &a%map%'
-   - 'Players: &a%players%/&a%maxplayers%'
+   - 'Players: &a%players%/%maxplayers%'
    - ''
-   - '&e%url%'
+   - '%url%'

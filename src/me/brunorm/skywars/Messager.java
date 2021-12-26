@@ -11,7 +11,7 @@ public class Messager {
 	}
 	
 	public static String colorFormat(String thing, Object... format) {
-		return ChatColor.translateAlternateColorCodes(ALT_COLOR_CHAR, String.format(thing, format));
+		return Messager.color(String.format(thing, format));
 	}
 
 }

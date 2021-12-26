@@ -56,9 +56,11 @@ public class MainCommand implements CommandExecutor {
 	
 	String[] helpLines = {
 			"&a&lSkywars commands",
+			"&b/skywars setmainlobby &e- sets the main lobby",
+			"&b/skywars lobby &e- teleports you to the main lobby",
 			"&b/skywars create <arena> &e- creates an arena",
 			"&b/skywars delete <arena> &e- deletes an arena",
-			"&b/skywars config <arena> &e- opens a menu to change an arena's settings",
+			"&b/skywars config <arena> &e- opens the configuration menu",
 			"&b/skywars play &e- open the arenas menu",
 			"&b/skywars start &e- starts a game",
 			"&b/skywars forcestart &e- starts a game immediately"
@@ -66,7 +68,7 @@ public class MainCommand implements CommandExecutor {
 
 	boolean permissionCheckWithMessage(Player player, String permission) {
 		if(!player.hasPermission(permission)) {
-			player.sendMessage(Messager.color("&cNo permission."));
+			player.sendMessage(Messager.color(Skywars.get().langConfig.getString("NO_PERMISSION")));
 			return false;
 		}
 		return true;
@@ -74,7 +76,7 @@ public class MainCommand implements CommandExecutor {
 	
 	boolean arenaCheckWithMessage(Player player) {
 		if(plugin.getPlayerArena(player) == null) {
-			player.sendMessage(Messager.color("&cNot joined."));
+			player.sendMessage(Messager.color(Skywars.get().langConfig.getString("NOT_JOINED")));
 			return false;
 		}
 		return true;
@@ -102,7 +104,16 @@ public class MainCommand implements CommandExecutor {
 					if(permissionCheckWithMessage(player, "skywars.setmainlobby")) {						
 						plugin.setLobby(player.getLocation());
 						plugin.saveConfig();
-						player.sendMessage("main lobby set");
+						player.sendMessage(Messager.color("&eThe main lobby has been set to your current position."));
+					}
+				}
+				if (args[0].equalsIgnoreCase("lobby")) {
+					if(permissionCheckWithMessage(player, "skywars.setmainlobby")) {	
+						if (joined) {
+							Skywars.get().getPlayerArena(player).LeavePlayer(player);
+						}
+						SkywarsUtils.TeleportToLobby(player);
+						player.sendMessage(Messager.color("&eTeleported to the lobby!"));
 					}
 				}
 				if(args[0].equalsIgnoreCase("play")) {
@@ -206,8 +217,13 @@ public class MainCommand implements CommandExecutor {
 				if(args[0].equalsIgnoreCase("tp")) {
 					player.teleport(arena.getLocation());
 				}
-				if(args[0].equalsIgnoreCase("getconfig")) {
+				if(args[0].equalsIgnoreCase("getarenaconfig")) {
 					Object xd = arena.getConfig().get(args[2]);
+					if(xd == null) xd = "lmao it doesnt exist";
+					sender.sendMessage(xd.toString());
+				}
+				if(args[0].equalsIgnoreCase("getconfig")) {
+					Object xd = Skywars.get().getConfig().get(args[1]);
 					if(xd == null) xd = "lmao it doesnt exist";
 					sender.sendMessage(xd.toString());
 				}
@@ -284,13 +300,6 @@ public class MainCommand implements CommandExecutor {
 				}
 				if (args[0].equalsIgnoreCase("case")) {
 					Skywars.createCase(player.getLocation(), XMaterial.GLASS.parseMaterial(), Integer.parseInt(args[1]));
-				}
-				if (args[0].equalsIgnoreCase("lobby")) {
-					if (joined) {
-						Skywars.get().getPlayerArena(player).LeavePlayer(player);
-					}
-					SkywarsUtils.TeleportToLobby(player);
-					player.sendMessage("teleported to lobby");
 				}
 				if (args[0].equalsIgnoreCase("spawn")) {
 					String nameArena = args[2];

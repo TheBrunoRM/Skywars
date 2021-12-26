@@ -21,11 +21,12 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.cryptomorin.xseries.XMaterial;
@@ -40,6 +41,7 @@ import me.brunorm.skywars.events.SignEvents;
 import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.Kit;
 import me.brunorm.skywars.structures.SkywarsPlayer;
+import net.milkbowl.vault.economy.Economy;
 
 @SuppressWarnings("deprecation")
 public class Skywars extends JavaPlugin {
@@ -54,8 +56,23 @@ public class Skywars extends JavaPlugin {
 	public static String arenasPath;
 	public static String kitsPath;
 	public static String schematicsPath;
-	// config.yml
-	public static FileConfiguration config;
+	
+	Plugin vault;
+	
+	public Plugin getVault() {
+		return vault;
+	}
+
+	public void setVault(Plugin vault) {
+		this.vault = vault;
+	}
+
+	Economy economy;
+	
+	public Economy getEconomy() {
+		return economy;
+	}
+	
 	public YamlConfiguration scoreboardConfig;
 	public YamlConfiguration langConfig;
 	
@@ -71,10 +88,10 @@ public class Skywars extends JavaPlugin {
 	private Location lobby;
 
 	public void setLobby(Location lobby) {
-		config.set("lobby.x", lobby.getX());
-		config.set("lobby.y", lobby.getY());
-		config.set("lobby.z", lobby.getZ());
-		config.set("lobby.world", lobby.getWorld().getName());
+		getConfig().set("lobby.x", lobby.getX());
+		getConfig().set("lobby.y", lobby.getY());
+		getConfig().set("lobby.z", lobby.getZ());
+		getConfig().set("lobby.world", lobby.getWorld().getName());
 		this.lobby = lobby;
 		System.out.println("lobby set");
 	}
@@ -87,27 +104,23 @@ public class Skywars extends JavaPlugin {
 		
 		// set stuff
 		plugin = this;
-		config = getConfig();
 		arenasPath = getDataFolder() + "/arenas";
 		kitsPath = getDataFolder() + "/kits";
 		schematicsPath = getDataFolder() + "/schematics";
-
-		// load lobby
-		if (config.get("lobby") != null) {
-			String worldName = config.getString("lobby.world");
-			if(worldName != null) {				
-				World world = Bukkit.getWorld(worldName);
-				double x = config.getDouble("lobby.x");
-				double y = config.getDouble("lobby.y");
-				double z = config.getDouble("lobby.z");
-				this.lobby = new Location(world, x, y, z);
-			}
-		}
 		
 		packageName = this.getServer().getClass().getPackage().getName();
 		serverPackageVersion = packageName.substring(packageName.lastIndexOf('.') + 1);
 		nmsHandler = new NMSHandler();
 		
+		if(setupEconomy())
+			Bukkit.getConsoleSender().sendMessage(Messager.color(
+					String.format("%s &aloaded Vault! &bv%s",
+					prefix, vault.getDescription().getVersion())));
+		/*
+		else
+			Bukkit.getConsoleSender().sendMessage(Messager.color(
+					String.format("%s &cVault not found.", prefix)));
+		*/
 		// load stuff
 		// loadPlayers();
 		loadConfig();
@@ -115,6 +128,19 @@ public class Skywars extends JavaPlugin {
 		loadEvents();
 		loadArenas();
 		loadKits();
+		
+		// load lobby
+		if (getConfig().get("lobby") != null) {
+			String worldName = getConfig().getString("lobby.world");
+			if(worldName != null) {				
+				World world = Bukkit.getWorld(worldName);
+				double x = getConfig().getDouble("lobby.x");
+				double y = getConfig().getDouble("lobby.y");
+				double z = getConfig().getDouble("lobby.z");
+				this.lobby = new Location(world, x, y, z);
+			}
+		}
+		
 		// done
 		Bukkit.getConsoleSender().sendMessage(Messager.color(
 				String.format("%s &ahas been enabled: &bv%s", prefix, version)));
@@ -131,11 +157,13 @@ public class Skywars extends JavaPlugin {
 			}
 		}, 0L, 20L);
 	}
-
+	
 	public void onDisable() {
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (getPlayerArena(player) != null) {
+			Arena arena = getPlayerArena(player);
+			if (arena != null) {
 				SkywarsUtils.ClearPlayer(player);
+				arena.getPlayer(player).getSavedPlayer().Restore();
 				SkywarsUtils.TeleportToLobby(player);
 			}
 		}
@@ -168,6 +196,19 @@ public class Skywars extends JavaPlugin {
 		loadKits();
 	}
 
+    private boolean setupEconomy() {
+    	setVault(getServer().getPluginManager().getPlugin("Vault"));
+        if (getVault() == null) {
+            return false;
+        }
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            return false;
+        }
+        economy = rsp.getProvider();
+        return economy != null;
+    }
+	
 	// player data
 	public void loadPlayers() {
 		File playersFile = new File(this.getDataFolder(), "players.yml");
@@ -184,7 +225,7 @@ public class Skywars extends JavaPlugin {
 	public void loadEvents() {
 		getServer().getPluginManager().registerEvents(new Events(), this);
 		getServer().getPluginManager().registerEvents(new GamesMenu(), this);
-		if(config.getBoolean("signsEnabled") == true) {
+		if(getConfig().getBoolean("signsEnabled") == true) {
 			System.out.println("Registering sign events...");
 			getServer().getPluginManager().registerEvents(new SignEvents(), this);
 		}
@@ -217,11 +258,14 @@ public class Skywars extends JavaPlugin {
 	public void loadConfig() {
 		
 		// config.yml
+		/*
 		File config = new File(this.getDataFolder(), "config.yml");
 		if (!config.exists()) {
 			saveDefaultConfig();
 		}
-		//loadConfigFile("config.yml");
+		Skywars.config = getConfig();
+		*/
+		loadConfigFile("config.yml");
 
 		// scoreboard.yml
 		scoreboardConfig = YamlConfiguration.loadConfiguration(loadConfigFile("scoreboard.yml"));
@@ -342,7 +386,7 @@ public class Skywars extends JavaPlugin {
 		if (!folder.exists()) {
 			folder.mkdir();
 		}
-		File defaultArenaFile = new File(arenasPath, "MiniTrees.yml");
+		File defaultArenaFile = null;
 		if(folder.listFiles().length <= 0) {
 			System.out.println("Created default arena");
 			defaultArenaFile = new File(arenasPath, "MiniTrees.yml");
@@ -608,6 +652,18 @@ public class Skywars extends JavaPlugin {
 		String kitName = getPlayerConfig(player).getString("kit");
 		Kit kit = getKit(kitName);
 		return kit;
+	}
+
+	public Integer getPlayerTotalKills(Player player) {
+		return getPlayerConfig(player).getInt("kills");
+	}
+	
+	public void setPlayerTotalKills(Player player, int kills) {
+		getPlayerConfig(player).set("kills", kills);
+	}
+	
+	public void incrementPlayerTotalKills(Player player) {
+		setPlayerTotalKills(player, getPlayerTotalKills(player)+1);
 	}
 	
 	/*
