@@ -62,6 +62,7 @@ public class Arena {
 	public Arena(String name) {
 		this.name = name;
 		this.status = ArenaStatus.DISABLED;
+		setFile(new File(Skywars.arenasPath, name + ".yml"));
 		// this.minPlayers = 2;
 	}
 
