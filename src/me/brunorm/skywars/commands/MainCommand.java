@@ -255,7 +255,7 @@ public class MainCommand implements CommandExecutor {
 				}
 				if (args[0].equalsIgnoreCase("fillchest")) {
 					Block block = SkywarsUtils.getTargetBlock(player, 5);
-					ChestManager.fillChest(block.getLocation());
+					ChestManager.fillChest(block.getLocation(), false);
 				}
 				if (args[0].equalsIgnoreCase("testschem")) {
 					arena.pasteSchematic();
@@ -285,7 +285,7 @@ public class MainCommand implements CommandExecutor {
 				}
 				if (args[0].equalsIgnoreCase("forcestop")) {
 					if (arena != null) {
-						arena.stopGame();
+						arena.restart();
 					}
 				}
 				if(args[0].equalsIgnoreCase("calculatespawns")) {
@@ -299,7 +299,7 @@ public class MainCommand implements CommandExecutor {
 					sender.sendMessage(plugin.getPlayerArena(player) != null ? "joined" : "not joined");
 				}
 				if (args[0].equalsIgnoreCase("case")) {
-					Skywars.createCase(player.getLocation(), XMaterial.GLASS.parseMaterial(), Integer.parseInt(args[1]));
+					Skywars.createCase(player.getLocation(), XMaterial.GLASS);
 				}
 				if (args[0].equalsIgnoreCase("spawn")) {
 					String nameArena = args[2];

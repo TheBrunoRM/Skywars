@@ -201,6 +201,25 @@ public class SkywarsUtils {
 			.add(new Vector(0.5,0,0.5));
 	}
 	
+	Location calculateClosestLocation(Location loc, ArrayList<Location> locations) {
+		if(locations.size() <= 1) return loc;
+		Location closest = locations.get(0);
+		for(Location l : locations) {
+			if(distance(loc, l) < distance(loc, closest)) {
+				closest = l;
+			}
+		}
+		return closest;
+	}
+
+	public static double distance(Location vec1, Location vec2) {
+		//if(vec1 == null || vec2 == null) return -1;
+		double dx = vec2.getX() - vec1.getX();
+		double dy = vec2.getY() - vec1.getY();
+		double dz = vec2.getZ() - vec1.getZ();
+		return Math.sqrt(dx * dx + dy * dy + dz * dz);
+	}
+	
 	public static Block getTargetBlock(Player player, int range) {
 		BlockIterator iter = new BlockIterator(player, range);
 		Block lastBlock = iter.next();

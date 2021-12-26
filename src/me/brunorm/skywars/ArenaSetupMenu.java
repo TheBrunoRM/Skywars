@@ -36,6 +36,7 @@ public class ArenaSetupMenu implements Listener {
 	static String calculateSpawnsName = "&6&lCalculate spawns";
 	static String regenerateCasesName = "&6&lRegenerate cases";
 	static String pasteSchematicName = "&6&lPaste schematic";
+	static String restartName = "&c&lRestart";
 
 	static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();
 	static HashMap<Player, Location> playerLocations = new HashMap<Player, Location>();
@@ -179,10 +180,16 @@ public class ArenaSetupMenu implements Listener {
 		inventory.setItem(20, pasteSchematic);
 		
 		ItemStack regenerateCases = new ItemStack(XMaterial.GLASS.parseItem());
-		ItemMeta regenerateCasesMeta = pasteSchematic.getItemMeta();
+		ItemMeta regenerateCasesMeta = regenerateCases.getItemMeta();
 		regenerateCasesMeta.setDisplayName(Messager.color(regenerateCasesName));
 		regenerateCases.setItemMeta(regenerateCasesMeta);
 		inventory.setItem(18, regenerateCases);
+		
+		ItemStack restart = new ItemStack(XMaterial.BARRIER.parseItem());
+		ItemMeta restartMeta = restart.getItemMeta();
+		restartMeta.setDisplayName(Messager.color(restartName));
+		restart.setItemMeta(restartMeta);
+		inventory.setItem(21, restart);
 	}
 	
 	public static void OpenConfigurationMenu(Player player, Arena arena) {
@@ -292,6 +299,10 @@ public class ArenaSetupMenu implements Listener {
 			if(name.equals(Messager.color(regenerateCasesName))) {
 				currentArena.resetCases();
 				player.sendMessage("Regenerated cases.");
+			}
+			if(name.equals(Messager.color(restartName))) {
+				currentArena.restart();
+				player.sendMessage("Restarted.");
 			}
 			String currentSchematic = currentArena.getSchematic();
 			if(currentSchematic == null) currentSchematic = "none";

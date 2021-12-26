@@ -23,6 +23,18 @@ import org.jnbt.Tag;
 import com.cryptomorin.xseries.XMaterial;
 
 public class SchematicHandler {
+	
+	public static Location calculatePositionWithOffset(Map<String, Tag> values, World world, Vector offset) {
+		int x = (int) values.get("x").getValue();
+		int y = (int) values.get("y").getValue();
+		int z = (int) values.get("z").getValue();
+		System.out.println("schematic values: " + x + ", " + y + ", " + z);
+		return new Location(world,
+			x + offset.getBlockX(),
+			y + offset.getBlockY(),
+			z + offset.getBlockZ());
+	}
+	
 	@SuppressWarnings("deprecation")
 	public static void pasteSchematic(Location loc, Schematic schematic) {
 		World world = loc.getWorld();

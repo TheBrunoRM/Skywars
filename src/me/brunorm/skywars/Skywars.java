@@ -16,7 +16,6 @@ import java.util.Properties;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandExecutor;
@@ -214,7 +213,7 @@ public class Skywars extends JavaPlugin {
 			try {
 				playersFile.createNewFile();
 			} catch (IOException e) {
-				System.out.println("couldn't create players.yml");
+				e.printStackTrace();
 			}
 		}
 	}
@@ -224,7 +223,7 @@ public class Skywars extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(new Events(), this);
 		getServer().getPluginManager().registerEvents(new GamesMenu(), this);
 		if(getConfig().getBoolean("signsEnabled") == true) {
-			System.out.println("Registering sign events...");
+			Bukkit.getConsoleSender().sendMessage(Messager.colorFormat("%s &eRegistering sign events...", prefix));
 			getServer().getPluginManager().registerEvents(new SignEvents(), this);
 		}
 		getServer().getPluginManager().registerEvents(new ArenaMenu(), this);
@@ -285,46 +284,13 @@ public class Skywars extends JavaPlugin {
 		return file;
 	}
 	
-	public void createMissingKeys(String defaultFileName, File file) {
-		try {
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-			Reader defaultConfigStream =
-					new InputStreamReader(getResource(defaultFileName), "UTF-8");
-			YamlConfiguration defaultConfig =
-					YamlConfiguration.loadConfiguration(defaultConfigStream);
-			ConfigurationSection section = defaultConfig.getConfigurationSection("");
-			for (String key : section.getKeys(true)) {
-				if (config.get(key) == null) {
-					config.set(key, defaultConfig.get(key));
-				}
-			}
-			config.save(file);
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void copyDefaultContentsToFile(String defaultFileName, File file) {
-		try {
-			if(!file.exists()) file.createNewFile();
-			try {
-				copyInputStreamToFile(getResource(defaultFileName), file);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
 	public void loadKits() {
 		File folder = new File(kitsPath);
 		if (!folder.exists()) {
 			folder.mkdirs();
 		}
 		if(folder.listFiles().length <= 0) {
-			System.out.println("Created default kit");
+			Bukkit.getConsoleSender().sendMessage(Messager.color("&eSetting up default kit."));
 			copyDefaultContentsToFile("kits/default.yml", new File(kitsPath, "default.yml"));
 		}
 		for (File file : folder.listFiles()) {
@@ -358,25 +324,9 @@ public class Skywars extends JavaPlugin {
 			
 			// add kit to the arena list
 			kits.add(kit);
-			System.out.println("Loaded kit " + kit.getName());
+			Bukkit.getConsoleSender().sendMessage(Messager.colorFormat("&eLoaded kit: &a%s", kit.getName()));
 		}
 	}
-	
-    public static final int DEFAULT_BUFFER_SIZE = 8192;
-	
-    private static void copyInputStreamToFile(InputStream inputStream, File file)
-            throws IOException {
-
-        // append = false
-        try (FileOutputStream outputStream = new FileOutputStream(file, false)) {
-            int read;
-            byte[] bytes = new byte[DEFAULT_BUFFER_SIZE];
-            while ((read = inputStream.read(bytes)) != -1) {
-                outputStream.write(bytes, 0, read);
-            }
-        }
-
-    }
 	
 	public void loadArenas() {
 		arenas.clear();
@@ -386,14 +336,14 @@ public class Skywars extends JavaPlugin {
 		}
 		File defaultArenaFile = null;
 		if(folder.listFiles().length <= 0) {
-			System.out.println("Created default arena");
+			Bukkit.getConsoleSender().sendMessage(Messager.color("&eSetting up default arena."));
 			defaultArenaFile = new File(arenasPath, "MiniTrees.yml");
 			copyDefaultContentsToFile("arenas/MiniTrees.yml", defaultArenaFile);
 		}
 		File schematics = new File(schematicsPath);
 		if(!schematics.exists()) schematics.mkdir();
 		if(schematics.listFiles().length <= 0) {
-			System.out.println("copying default schematic");
+			Bukkit.getConsoleSender().sendMessage(Messager.color("&eSetting up default schematic."));
 			copyDefaultContentsToFile("schematics/mini_trees.schematic",
 					new File(schematicsPath, "mini_trees.schematic"));
 		}
@@ -419,11 +369,11 @@ public class Skywars extends JavaPlugin {
 				}
 				String levelName = props.getProperty("level-name");
 				if(levelName != null) {
-					System.out.println("Got world name from server.properties: " + levelName);
+					//System.out.println("Got world name from server.properties: " + levelName);
 					arena.setWorldName(levelName);
 				} else {
 					String firstWorld = Bukkit.getServer().getWorlds().get(0).getName();
-					System.out.println("Got world name from first world");
+					//System.out.println("Got world name from first world");
 					arena.setWorldName(firstWorld);
 				}
 			}
@@ -438,17 +388,13 @@ public class Skywars extends JavaPlugin {
 			arena.setSchematic(config.getString("schematic"));
 			arena.setMinPlayers(config.getInt("minPlayers"));
 			arena.setMaxPlayers(config.getInt("maxPlayers"));
+			arena.setCenterRadius(config.getInt("centerRadius"));
 			// spawns
 			if (arena.getWorldName() != null) {
 				World world = Bukkit.getServer().getWorld(arena.getWorldName());
 				if (world != null) {
-					/*
-					 * if(config.get("lobby") != null) { double x = config.getDouble("lobby.x");
-					 * double y = config.getDouble("lobby.y"); double z =
-					 * config.getDouble("lobby.z"); Location lobby = new Location(world,x,y,z);
-					 * arena.setLobby(lobby); }
-					 */
-					System.out.println("Loading spawns from config for arena " + arena.getName());
+					
+					// this will ignore spawns that are outside max players range
 					for (int i = 0; i < arena.getMaxPlayers(); i++) {
 						if (config.get(String.format("spawn.%s", i)) == null)
 							continue;
@@ -461,23 +407,21 @@ public class Skywars extends JavaPlugin {
 				} else System.out.println("Warning: could not get world by "
 					+ arena.getWorldName() + " for arena " + arena.getName());
 			} else System.out.println("Warning: world not set for arena " + arena.getName());
-			// add arena to the arena list
+			
 			arenas.add(arena);
-			System.out.println("Loaded arena " + arena.getName());
+			Bukkit.getConsoleSender().sendMessage(Messager.colorFormat("&eLoaded arena: &a%s", arena.getName()));
+			
+			// this is enabled when the server reloads or when setting up a default arena
 			if(config.getBoolean("restartNeeded")) {
-				Bukkit.getConsoleSender().sendMessage(Messager.color("&c&lNeeded to restart arena " + arena.getName()));
+				Bukkit.getConsoleSender().sendMessage(Messager.colorFormat("&c&lNeeded to restart arena %s", arena.getName()));
 				arena.clear();
 				config.set("restartNeeded", null);
 				arena.saveConfig();
 			}
 		}
 	}
-
-	public static void createCase(Location location, Material material) {
-		createCase(location, material, 0);
-	}
-
-	public static void createCase(Location location, Material material, int data) {
+	
+	public static void createCase(Location location, XMaterial material) {
 		int[][] blocks = {
 				// first layer
 				{ -1, 0, 0 }, { 1, 0, 0 }, { 0, 0, -1 }, { 0, 0, 1 },
@@ -495,9 +439,9 @@ public class Skywars extends JavaPlugin {
 		for (int i = 0; i < blocks.length; i++) {
 			int[] relative = blocks[i];
 			Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
-			block.setType(material);
+			block.setType(material.parseMaterial());
 			if(!XMaterial.isNewVersion()) {					
-				block.setData((byte) data);
+				block.setData(material.getData());
 			}
 		}
 	}
@@ -668,24 +612,52 @@ public class Skywars extends JavaPlugin {
 		setPlayerTotalKills(player, getPlayerTotalKills(player)+1);
 	}
 	
-	/*
-	 * void PasteSchematic(Location location) { File file = new
-	 * File(Skywars.get().getDataFolder(), "schematic.schematic"); ClipboardFormat
-	 * format = ClipboardFormats.findByFile(file); try { ClipboardReader reader =
-	 * format.getReader(new FileInputStream(file)); Clipboard clipboard =
-	 * reader.read(); try {
-	 * 
-	 * @SuppressWarnings("deprecation") EditSession editSession =
-	 * WorldEdit.getInstance().getEditSessionFactory()
-	 * .getEditSession((com.sk89q.worldedit.world.World)
-	 * Bukkit.getWorld(location.getWorld().getName()), -1); Operation operation =
-	 * new ClipboardHolder(clipboard).createPaste(editSession)
-	 * .to(BlockVector3.at(location.getX(), location.getY(),
-	 * location.getZ())).ignoreAirBlocks(false) .build();
-	 * Operations.complete(operation); } catch (Exception e) {
-	 * 
-	 * } } catch (Exception e) {
-	 * 
-	 * } }
-	 */
+    public static final int DEFAULT_BUFFER_SIZE = 8192;
+	
+    private static void copyInputStreamToFile(InputStream inputStream, File file)
+            throws IOException {
+
+        // append = false
+        try (FileOutputStream outputStream = new FileOutputStream(file, false)) {
+            int read;
+            byte[] bytes = new byte[DEFAULT_BUFFER_SIZE];
+            while ((read = inputStream.read(bytes)) != -1) {
+                outputStream.write(bytes, 0, read);
+            }
+        }
+
+    }
+    
+	public void createMissingKeys(String defaultFileName, File file) {
+		try {
+			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+			Reader defaultConfigStream =
+					new InputStreamReader(getResource(defaultFileName), "UTF-8");
+			YamlConfiguration defaultConfig =
+					YamlConfiguration.loadConfiguration(defaultConfigStream);
+			ConfigurationSection section = defaultConfig.getConfigurationSection("");
+			for (String key : section.getKeys(true)) {
+				if (config.get(key) == null) {
+					config.set(key, defaultConfig.get(key));
+				}
+			}
+			config.save(file);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void copyDefaultContentsToFile(String defaultFileName, File file) {
+		try {
+			if(!file.exists()) file.createNewFile();
+			try {
+				copyInputStreamToFile(getResource(defaultFileName), file);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
