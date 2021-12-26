@@ -282,15 +282,15 @@ public class ArenaSetupMenu implements Listener {
 				player.sendMessage(Messager.color("&e&lTo exit, &b&ldrop the blaze rod"));
 			}
 			if(name.equals(Messager.color(calculateSpawnsName))) {
-				currentArena.CalculateSpawns();
+				currentArena.calculateSpawns();
 				player.sendMessage("Spawns have been calculated and saved.");
 			}
 			if(name.equals(Messager.color(pasteSchematicName))) {
-				currentArena.PasteSchematic();
+				currentArena.pasteSchematic();
 				player.sendMessage("Pasted schematic.");
 			}
 			if(name.equals(Messager.color(regenerateCasesName))) {
-				currentArena.ResetCases();
+				currentArena.resetCases();
 				player.sendMessage("Regenerated cases.");
 			}
 			String currentSchematic = currentArena.getSchematic();
@@ -316,7 +316,7 @@ public class ArenaSetupMenu implements Listener {
 					currentArena.setSchematic(schematicName);
 					System.out.println("schematic changed to " + currentArena.getSchematic());
 					OpenConfigurationMenu(player, currentArena);
-					currentArena.PasteSchematic();
+					currentArena.pasteSchematic();
 				}
 			}
 			

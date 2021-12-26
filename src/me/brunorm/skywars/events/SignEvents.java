@@ -46,7 +46,7 @@ public class SignEvents implements Listener {
 					if (arenaName != null) {
 						Arena newArena = Skywars.get().getArena(ChatColor.stripColor(arenaName));
 						if (newArena != null) {
-							newArena.JoinPlayer(player);
+							newArena.joinPlayer(player);
 						} else
 							player.sendMessage(String.format("arena %s not found", arenaName));
 					}
@@ -54,7 +54,7 @@ public class SignEvents implements Listener {
 				if (sign.getLine(1).equals("random")) {
 					if (sign.getLine(2).equals("skywars")) {
 						Arena randomArena = Skywars.get().getRandomJoinableArena();
-						randomArena.JoinPlayer(player);
+						randomArena.joinPlayer(player);
 					}
 				}
 				if (sign.getLine(1).equals("play")) {

@@ -30,9 +30,9 @@ public class Events implements Listener {
 			SkywarsPlayer swp = arena.getPlayer(event.getPlayer());
 			if(!arena.isInBoundaries(event.getPlayer())) {
 				if(arena.getStatus() != ArenaStatus.PLAYING && !swp.isSpectator())
-					arena.LeavePlayer(player);
+					arena.leavePlayer(player);
 				else if(!swp.isSpectator())
-					arena.MakeSpectator(swp);
+					arena.makeSpectator(swp);
 				else
 					arena.goBackToCenter(player);
 			}
@@ -43,7 +43,7 @@ public class Events implements Listener {
 	void onLeave(PlayerQuitEvent event) {
 		Arena arena = Skywars.get().getPlayerArena(event.getPlayer());
 		if (arena != null) {
-			arena.LeavePlayer(event.getPlayer());
+			arena.leavePlayer(event.getPlayer());
 		}
 	}
 	
@@ -69,7 +69,7 @@ public class Events implements Listener {
 					} else if (event.getCause() == DamageCause.VOID || health - damage <= 0) {
 						event.setCancelled(true);
 						System.out.println("player damaged, made spectator");
-						arena.MakeSpectator(swPlayer);
+						arena.makeSpectator(swPlayer);
 						return;
 					}
 				}
@@ -117,8 +117,6 @@ public class Events implements Listener {
 			if (swp != null) {
 				if (arena.getStatus() != ArenaStatus.PLAYING || swp.isSpectator()) {
 					event.setCancelled(true);
-				} else {
-					arena.getDroppedItems().add(event.getItemDrop());
 				}
 			}
 		}

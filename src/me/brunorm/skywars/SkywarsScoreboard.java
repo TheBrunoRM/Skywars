@@ -60,6 +60,10 @@ public class SkywarsScoreboard {
 	*/
 	
 	public static String format(String text, Player player, Arena arena, SkywarsPlayer swp) {
+		return format(text, player, arena, swp, false);
+	}
+	
+	public static String format(String text, Player player, Arena arena, SkywarsPlayer swp, boolean status) {
 		Date date = new Date();
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 		String strDate = formatter.format(date);
@@ -84,10 +88,13 @@ public class SkywarsScoreboard {
 			List<SkywarsPlayer> players = new ArrayList<>(arena.getPlayers());
 			players.removeIf(p -> p.isSpectator());
 			
+			// this prevents a stack overflow error
+			if(!status) text = text.replaceAll(getVariableCode("status"),
+					format(SkywarsUtils.getStatus(arena), player, arena, swp, true));
+			
 			text = text.replaceAll(getVariableCode("map"), arena.getName())
 					.replaceAll(getVariableCode("players"), Integer.toString(players.size()))
 					.replaceAll(getVariableCode("maxplayers"), Integer.toString(arena.getMaxPlayers()))
-					.replaceAll(getVariableCode("status"), SkywarsUtils.getStatus(arena))
 					.replaceAll(getVariableCode("seconds"), Integer.toString(arena.getCountdown()));
 		}
 		

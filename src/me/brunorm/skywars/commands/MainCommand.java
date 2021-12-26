@@ -110,7 +110,7 @@ public class MainCommand implements CommandExecutor {
 				if (args[0].equalsIgnoreCase("lobby")) {
 					if(permissionCheckWithMessage(player, "skywars.setmainlobby")) {	
 						if (joined) {
-							Skywars.get().getPlayerArena(player).LeavePlayer(player);
+							Skywars.get().getPlayerArena(player).leavePlayer(player);
 						}
 						SkywarsUtils.TeleportToLobby(player);
 						player.sendMessage(Messager.color("&eTeleported to the lobby!"));
@@ -135,12 +135,12 @@ public class MainCommand implements CommandExecutor {
 				}
 				if (args[0].equalsIgnoreCase("leave")) {
 					if (arenaCheckWithMessage(player))
-						playerArena.LeavePlayer(player);
+						playerArena.leavePlayer(player);
 				}
 				if (args[0].equalsIgnoreCase("forcestart")) {
 					if(permissionCheckWithMessage(player, "skywars.forcestart"))
 						if (arenaCheckWithMessage(player))
-							playerArena.StartGame();
+							playerArena.startGame();
 				}
 				if (args[0].equalsIgnoreCase("start")) {
 					if(permissionCheckWithMessage(player, "skywars.start")) {
@@ -149,16 +149,16 @@ public class MainCommand implements CommandExecutor {
 									playerArena.getTask() == null) {
 								playerArena.forcedStart = true;
 								playerArena.forcedStartPlayer = player;
-								playerArena.StartTimer(ArenaStatus.STARTING);
+								playerArena.startTimer(ArenaStatus.STARTING);
 							} else {
-								playerArena.StartGame();
+								playerArena.startGame();
 							}
 						}
 					}
 				}
 				if (args[0].equalsIgnoreCase("join")) {
 					if(!SkywarsUtils.JoinableCheck(arena, player)) return false;
-					arena.JoinPlayer(player);
+					arena.joinPlayer(player);
 				}
 				if (args[0].equalsIgnoreCase("version")) {
 					sender.sendMessage(String.format("%s version %s made by %s", plugin.name, plugin.version,
@@ -250,19 +250,19 @@ public class MainCommand implements CommandExecutor {
 					sender.sendMessage("reloaded");
 				}
 				if (args[0].equalsIgnoreCase("getblock")) {
-					Block block = ChestManager.getTargetBlock(player, 5);
+					Block block = SkywarsUtils.getTargetBlock(player, 5);
 					Bukkit.broadcastMessage(String.format("block is at %s", block.getLocation()));
 				}
 				if (args[0].equalsIgnoreCase("fillchest")) {
-					Block block = ChestManager.getTargetBlock(player, 5);
-					ChestManager.FillChest(block.getLocation());
+					Block block = SkywarsUtils.getTargetBlock(player, 5);
+					ChestManager.fillChest(block.getLocation());
 				}
 				if (args[0].equalsIgnoreCase("testschem")) {
-					arena.PasteSchematic();
+					arena.pasteSchematic();
 					player.sendMessage("pasted");
 				}
 				if (args[0].equalsIgnoreCase("resetcases")) {
-					arena.ResetCases();
+					arena.resetCases();
 					player.sendMessage("regenerated");
 				}
 				if (args[0].equalsIgnoreCase("players")) {
@@ -276,20 +276,20 @@ public class MainCommand implements CommandExecutor {
 					}
 				}
 				if(args[0].equalsIgnoreCase("restart")) {
-					arena.Clear();
+					arena.clear();
 				}
 				if (args[0].equalsIgnoreCase("stop")) {
 					if (playerArena != null) {
-						playerArena.StartTimer(ArenaStatus.ENDING);
+						playerArena.startTimer(ArenaStatus.ENDING);
 					}
 				}
 				if (args[0].equalsIgnoreCase("forcestop")) {
 					if (arena != null) {
-						arena.StopGame();
+						arena.stopGame();
 					}
 				}
 				if(args[0].equalsIgnoreCase("calculatespawns")) {
-					arena.CalculateSpawns();
+					arena.calculateSpawns();
 				}
 				if (args[0].equalsIgnoreCase("save")) {
 					// plugin.saveArenas();

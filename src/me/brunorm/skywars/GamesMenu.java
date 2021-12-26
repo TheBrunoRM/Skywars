@@ -33,7 +33,7 @@ public class GamesMenu implements Listener {
 			if (player.getItemInHand().getType() == XMaterial.RED_BED.parseMaterial()) {
 				if (arena.getStatus() != ArenaStatus.PLAYING
 						|| arena.getPlayer(player).isSpectator()) {
-					arena.LeavePlayer(arena.getPlayer(player));
+					arena.leavePlayer(arena.getPlayer(player));
 				}
 			}
 		}
@@ -70,7 +70,7 @@ public class GamesMenu implements Listener {
 					player.sendMessage("couldn't find joinable arena");
 					return;
 				}
-				arena.JoinPlayer(player);
+				arena.joinPlayer(player);
 			}
 		}
 	}

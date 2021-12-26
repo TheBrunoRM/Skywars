@@ -8,12 +8,16 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.util.BlockIterator;
+import org.bukkit.util.Vector;
 
 import com.cryptomorin.xseries.XMaterial;
 
@@ -97,14 +101,6 @@ public class SkywarsUtils {
 		if (lobby == null) {
 			return;
 		}
-		/*
-		 * FileConfiguration config = Skywars.get().getConfig(); if(config.get("lobby")
-		 * == null) { System.out.println("lobby not set"); return; } double x =
-		 * config.getDouble("lobby.x"); double y = config.getDouble("lobby.y"); double z
-		 * = config.getDouble("lobby.z"); String worldName =
-		 * config.getString("lobby.world"); World world = Bukkit.getWorld(worldName);
-		 * Location lobby = new Location(world, x, y, z);
-		 */
 		player.teleport(lobby);
 	}
 
@@ -194,5 +190,31 @@ public class SkywarsUtils {
 			return false;
 		}
 		return true;
+	}
+	
+	public static Location getCenteredLocation(Location loc) {
+		return new Location(
+			loc.getWorld(),
+			loc.getBlockX(),
+			loc.getBlockY(),
+			loc.getBlockZ())
+			.add(new Vector(0.5,0,0.5));
+	}
+	
+	public static Block getTargetBlock(Player player, int range) {
+		BlockIterator iter = new BlockIterator(player, range);
+		Block lastBlock = iter.next();
+		while (iter.hasNext()) {
+			lastBlock = iter.next();
+			if (lastBlock.getType() == XMaterial.AIR.parseMaterial()) {
+				continue;
+			}
+			break;
+		}
+		return lastBlock;
+	}
+	
+	public static int getRandomSlot(Inventory inventory) {
+		return (int) Math.floor(Math.random() * inventory.getSize() + 1) - 1;
 	}
 }

@@ -84,7 +84,7 @@ public class ArenaMenu implements Listener {
 			Arena arena = Skywars.get().getArena(name);
 			if(arena != null) {
 				if(!SkywarsUtils.JoinableCheck(arena, player)) return;
-				arena.JoinPlayer(player);
+				arena.joinPlayer(player);
 			} else {
 				player.sendMessage(Messager.color("&cError: &7could not join arena"));
 			}

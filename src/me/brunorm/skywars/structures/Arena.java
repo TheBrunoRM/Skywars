@@ -39,8 +39,6 @@ import mrblobman.sounds.Sounds;
 public class Arena {
 
 	String name;
-	int minPlayers;
-	int maxPlayers;
 	File file;
 	YamlConfiguration config;
 	ArenaStatus status;
@@ -48,23 +46,21 @@ public class Arena {
 	String schematicFilename;
 	Schematic loadedSchematic;
 	Location location;
-	boolean full;
+	int minPlayers;
+	int maxPlayers;
 	int countdown;
+	boolean full;
+	boolean invencibility = false;
 	public boolean forcedStart;
 	public Player forcedStartPlayer;
-	boolean invencibility = false;
-
-	private List<Item> droppedItems = new ArrayList<Item>();
 	
 	HashMap<Integer, Location> spawns = new HashMap<Integer, Location>();
 	private ArrayList<SkywarsPlayer> players = new ArrayList<SkywarsPlayer>();
-	// ArrayList<SkywarsPlayer> spectators = new ArrayList<SkywarsPlayer>();
-
+	
 	public Arena(String name) {
 		this.name = name;
 		this.status = ArenaStatus.DISABLED;
 		setFile(new File(Skywars.arenasPath, name + ".yml"));
-		// this.minPlayers = 2;
 	}
 
 	public void setLocationConfig(String string, Location location) {
@@ -113,7 +109,7 @@ public class Arena {
 		}
 	}
 	
-	public boolean JoinPlayer(Player player) {
+	public boolean joinPlayer(Player player) {
 		if(!SkywarsUtils.JoinableCheck(this, player)) return false;
 		if (status == ArenaStatus.PLAYING)
 			return false;
@@ -154,7 +150,7 @@ public class Arena {
 		Location centered = new Location(spawn.getWorld(), spawn.getBlockX(), spawn.getBlockY(), spawn.getBlockZ());
 		centered.add(0.5,0,0.5);
 		
-		player.teleport(getCenteredLocation(spawn));
+		player.teleport(SkywarsUtils.getCenteredLocation(spawn));
 		swPlayer.setSavedPlayer(new SavedPlayer(player));
 		SkywarsUtils.ClearPlayer(player);
 		SkywarsUtils.GiveBedItem(player);
@@ -168,22 +164,13 @@ public class Arena {
 		Skywars.get().NMS().sendTitle(player, "&eSkyWars", "&cInsane Mode");
 
 		if (getStatus() != ArenaStatus.STARTING && this.getPlayers().size() >= this.getMinPlayers()) {
-			StartTimer(ArenaStatus.STARTING);
+			startTimer(ArenaStatus.STARTING);
 		}
 
 		return true;
 	}
-
-	Location getCenteredLocation(Location loc) {
-		return new Location(
-			loc.getWorld(),
-			loc.getBlockX(),
-			loc.getBlockY(),
-			loc.getBlockZ())
-			.add(new Vector(0.5,0,0.5));
-	}
 	
-	public void MakeSpectator(SkywarsPlayer p) {
+	public void makeSpectator(SkywarsPlayer p) {
 		if (p.isSpectator())
 			return;
 		
@@ -193,14 +180,14 @@ public class Arena {
 		// drop player inventory
 		for (ItemStack i : player.getInventory().getContents()) {
 			if (i != null) {
-				getDroppedItems().add(player.getWorld().dropItemNaturally(player.getLocation(), i));
+				player.getWorld().dropItemNaturally(player.getLocation(), i);
 				player.getInventory().remove(i);
 			}
 		}
 		// drop player armor
 		for (ItemStack i : player.getInventory().getArmorContents()) {
 			if (i != null && i.getType() != Material.AIR) {
-				getDroppedItems().add(player.getWorld().dropItemNaturally(player.getLocation(), i));
+				player.getWorld().dropItemNaturally(player.getLocation(), i);
 			}
 		}
 		player.getInventory().setArmorContents(null);
@@ -221,7 +208,7 @@ public class Arena {
 
 		removePlayer(p);
 
-		p.getPlayer().teleport(getCenteredLocation(getLocationInArena(getSpawn(p.number))));
+		p.getPlayer().teleport(SkywarsUtils.getCenteredLocation(getLocationInArena(getSpawn(p.number))));
 		p.getPlayer().setVelocity(new Vector(0, 1f, 0));
 
 		Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
@@ -232,14 +219,12 @@ public class Arena {
 		}, 20);
 	}
 
-	public void LeavePlayer(Player player) {
-		SkywarsPlayer p = getPlayer(player);
-		if (p == null)
-			return;
-		LeavePlayer(p);
+	public void leavePlayer(Player player) {
+		leavePlayer(getPlayer(player));
 	}
 
-	public void LeavePlayer(SkywarsPlayer player) {
+	public void leavePlayer(SkywarsPlayer player) {
+		if(player == null) return;
 		player.getPlayer().sendMessage(Messager.colorFormat("&eYou leaved arena %s", this.name));
 		full = false;
 		players.remove(player);
@@ -257,13 +242,24 @@ public class Arena {
 		if ((this.getStatus() == ArenaStatus.STARTING &&
 				!forcedStart && getCurrentPlayers() < getMinPlayers())
 				|| getCurrentPlayers() <= 0) {
-			if(status == ArenaStatus.ENDING) StopGame();
+			if(status == ArenaStatus.ENDING) stopGame();
 			setStatus(ArenaStatus.WAITING);
 			for (SkywarsPlayer players : getPlayers()) {
 				players.getPlayer().sendMessage("&eCountdown stopped, not enough players!");
 			}
 			cancelTimer();
 		}
+	}
+	
+	public void kick(Player player) {
+		kick(getPlayer(player));
+	}
+	
+	public void kick(SkywarsPlayer player) {
+		if(player == null) return;
+		SkywarsUtils.ClearPlayer(player.getPlayer());
+		player.getSavedPlayer().Restore();
+		SkywarsUtils.TeleportToLobby(player.getPlayer());
 	}
 
 	void removePlayer(SkywarsPlayer player) {
@@ -276,26 +272,30 @@ public class Arena {
 						winner = winners.get(0);
 					}
 					if (winners.size() <= 0 || winner == null) {
-						players.getPlayer().sendMessage(Messager.color("&cnobody &ewon!"));
+						players.getPlayer().sendMessage(Messager.color("&cnobody &ewon"));
 					} else {
 						players.getPlayer()
 								.sendMessage(Messager.colorFormat("&c%s &ewon!", winner.getPlayer().getName()));
 					}
 				}
-				StartTimer(ArenaStatus.ENDING);
+				startTimer(ArenaStatus.ENDING);
 			}
 		}
 	}
 
 	BukkitTask task;
-
+	
+	public BukkitTask getTask() {
+		return task;
+	}
+	
 	void cancelTimer() {
 		if (getTask() == null)
 			return;
 		getTask().cancel();
 	}
 
-	public void StartTimer(ArenaStatus status) {
+	public void startTimer(ArenaStatus status) {
 		setStatus(status);
 		System.out.println(String.format("starting %s timer", status));
 		if (status == ArenaStatus.STARTING) {
@@ -314,7 +314,7 @@ public class Arena {
 					countdown = time;
 					
 					if (this.time == 0) {
-						StartGame();
+						startGame();
 						cancelTimer();
 						return;
 					}
@@ -352,7 +352,7 @@ public class Arena {
 					// todo: throw fireworks
 
 					if (this.time == 0) {
-						StopGame();
+						stopGame();
 						cancelTimer();
 						return;
 					}
@@ -360,12 +360,8 @@ public class Arena {
 			}, 0L, 20L);
 		}
 	}
-
-	public int getCountdown() {
-		return countdown;
-	}
-
-	public void StartGame() {
+	
+	public void startGame() {
 		cancelTimer();
 		setStatus(ArenaStatus.PLAYING);
 		calculateAndFillChests();
@@ -407,28 +403,21 @@ public class Arena {
 		}
 	}
 	
-	public boolean StopGame() {
-		System.out.println("stop game debug 1");
+	public boolean stopGame() {
 		if (getStatus() != ArenaStatus.PLAYING && getStatus() != ArenaStatus.ENDING)
 			return false;
-		System.out.println("stop game debug 2");
 		cancelTimer();
-		for(int i = 0; i < getPlayers().size(); i++) {
-			LeavePlayer(getPlayer(0));
+		for(SkywarsPlayer player : getPlayers()) {
+			kick(player);
 		}
-		System.out.println("stop game debug 3");
-		Clear();
-		System.out.println("stop game debug 4");
+		clear();
 		setStatus(ArenaStatus.WAITING);
 		return true;
 	}
 
-	public void Clear() {
+	public void clear() {
 		System.out.println("Clearing arena " + this.name);
-		for(Item i : getDroppedItems()) {
-			i.remove();
-		}
-		getDroppedItems().clear();
+		players.clear();
 		if(getWorldName() != null) {			
 			for(Entity i : Bukkit.getWorld(getWorldName()).getEntities()) {
 				if(i instanceof Item && isInBoundaries(i.getLocation())) {
@@ -436,8 +425,47 @@ public class Arena {
 				}
 			}
 		}
-		PasteSchematic();
-		ResetCases();
+		pasteSchematic();
+		resetCases();
+	}
+	
+	public void resetCases() {
+		for (Location spawn : getSpawns().values()) {
+			Skywars.createCase(getLocationInArena(spawn), XMaterial.RED_STAINED_GLASS.parseMaterial());
+		}
+	}
+	
+	public ArrayList<String> getProblems() {
+		ArrayList<String> problems = new ArrayList<String>();
+		if(!Bukkit.getServer().getWorlds().stream().map(world -> world.getName())
+				.collect(Collectors.toList()).contains(getWorldName()))
+			problems.add("World " + getWorldName() +" does not exist");
+		if (getSpawn(getPlayers().size()) == null)
+			problems.add(String.format("Spawn %s not set", getPlayers().size()));
+		if (Skywars.get().getLobby() == null)
+			problems.add("Main lobby not set");
+		if (maxPlayers <= 0)
+			problems.add("Max players not set");
+		if (schematicFilename == null)
+			problems.add("Schematic not set");
+		if (location == null)
+			problems.add("No location set");
+		if (isFull())
+			problems.add("Arena is full");
+		return problems;
+	}
+	
+	boolean checkProblems() {
+		return getProblems().size() <= 0;
+	}
+	
+	Location getLocationInArena(Location loc) {
+		return new Location(
+			loc.getWorld(),
+			loc.getBlockX() + this.location.getBlockX(),
+			loc.getBlockY() + this.location.getBlockY(),
+			loc.getBlockZ() + this.location.getBlockZ()
+		);
 	}
 	
 	public void goBackToCenter(Player player) {
@@ -462,49 +490,6 @@ public class Arena {
 		&& loc.getY()<getLocation().getY()+loadedSchematic.getHeight()/2
 		&& loc.getZ()>getLocation().getZ()-loadedSchematic.getLength()/2
 		&& loc.getZ()<getLocation().getZ()+loadedSchematic.getLength()/2;
-	}
-	
-	public void ResetCases() {
-		for (Location spawn : getSpawns().values()) {
-			Skywars.createCase(getLocationInArena(spawn), XMaterial.RED_STAINED_GLASS.parseMaterial());
-		}
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	boolean checkProblems() {
-		return getProblems().size() <= 0;
-	}
-
-	public ArrayList<String> getProblems() {
-		ArrayList<String> problems = new ArrayList<String>();
-		if(!Bukkit.getServer().getWorlds().stream().map(world -> world.getName())
-				.collect(Collectors.toList()).contains(getWorldName()))
-			problems.add("World " + getWorldName() +" does not exist");
-		if (getSpawn(getPlayers().size()) == null)
-			problems.add(String.format("Spawn %s not set", getPlayers().size()));
-		if (Skywars.get().getLobby() == null)
-			problems.add("Main lobby not set");
-		if (maxPlayers <= 0)
-			problems.add("Max players not set");
-		if (schematicFilename == null)
-			problems.add("Schematic not set");
-		if (location == null)
-			problems.add("No location set");
-		if (isFull())
-			problems.add("Arena is full");
-		return problems;
-	}
-	
-	Location getLocationInArena(Location loc) {
-		return new Location(
-			loc.getWorld(),
-			loc.getBlockX() + this.location.getBlockX(),
-			loc.getBlockY() + this.location.getBlockY(),
-			loc.getBlockZ() + this.location.getBlockZ()
-		);
 	}
 	
 	public Location getSpawn(int index) {
@@ -581,7 +566,7 @@ public class Arena {
 		return null;
 	}
 
-	public void PasteSchematic() {
+	public void pasteSchematic() {
 		if (schematicFilename == null) {
 			System.out.println("tried to paste schematic, but schematic is not set!");
 			return;
@@ -596,7 +581,7 @@ public class Arena {
 		SchematicHandler.pasteSchematic(location, loadedSchematic);
 	}
 
-	public void CalculateSpawns() {
+	public void calculateSpawns() {
 		//if(loadedSchematic == null)
 			loadSchematic();
 		
@@ -716,12 +701,16 @@ public class Arena {
 			Map<String, Tag> values = (Map<String, Tag>) tag.getValue();
 			if (values.get("id").getValue().equals("Chest")) {
 				Location loc = calculatePositionWithOffset(values, world, offset);
-				ChestManager.FillChest(getLocationInArena(loc));
+				ChestManager.fillChest(getLocationInArena(loc));
 				filled++;
 			}
 		}
 		
 		System.out.println("Filled " + filled + " chests");
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	public int getMinPlayers() {
@@ -738,6 +727,10 @@ public class Arena {
 
 	public void setMaxPlayers(int maxPlayers) {
 		this.maxPlayers = maxPlayers;
+	}
+	
+	public int getCountdown() {
+		return countdown;
 	}
 
 	public File getFile() {
@@ -792,18 +785,6 @@ public class Arena {
 
 	public boolean isFull() {
 		return full;
-	}
-
-	public List<Item> getDroppedItems() {
-		return droppedItems;
-	}
-
-	public void setDroppedItems(List<Item> droppedItems) {
-		this.droppedItems = droppedItems;
-	}
-
-	public BukkitTask getTask() {
-		return task;
 	}
 	
 	public boolean isInvencibility() {

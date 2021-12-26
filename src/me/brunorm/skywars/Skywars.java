@@ -162,9 +162,7 @@ public class Skywars extends JavaPlugin {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			Arena arena = getPlayerArena(player);
 			if (arena != null) {
-				SkywarsUtils.ClearPlayer(player);
-				arena.getPlayer(player).getSavedPlayer().Restore();
-				SkywarsUtils.TeleportToLobby(player);
+				arena.kick(player);
 			}
 		}
 		ArenaSetupMenu.currentArenas.forEach((player, arena) -> {
@@ -468,7 +466,7 @@ public class Skywars extends JavaPlugin {
 			System.out.println("Loaded arena " + arena.getName());
 			if(config.getBoolean("restartNeeded")) {
 				Bukkit.getConsoleSender().sendMessage(Messager.color("&c&lNeeded to restart arena " + arena.getName()));
-				arena.Clear();
+				arena.clear();
 				config.set("restartNeeded", null);
 				arena.saveConfig();
 			}
@@ -615,20 +613,24 @@ public class Skywars extends JavaPlugin {
 		return null;
 	}
 
+	public File getPlayerConfigFile(Player player) {
+		return new File(getDataFolder() + "/players", player.getUniqueId() + ".yml");
+	}
+	
 	public YamlConfiguration getPlayerConfig(Player player) {
 		File folder = new File(getDataFolder() + "/players");
 		if(!folder.exists()) folder.mkdir();
-		File file = new File(getDataFolder() + "/players", player.getUniqueId() + ".yml");
+		File file = getPlayerConfigFile(player);
 		if(!file.exists())
 			copyDefaultContentsToFile("players/default.yml", file);
-		createMissingKeys("players/default.yml", file);
 		return YamlConfiguration.loadConfiguration(file);
 	}
 	
 	public void savePlayerConfig(Player player) {
 		try {
-			File file = new File(getDataFolder() + "/players", player.getUniqueId() + ".yml");
+			File file = getPlayerConfigFile(player);
 			getPlayerConfig(player).save(file);
+			createMissingKeys("players/default.yml", file);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

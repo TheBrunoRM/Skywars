@@ -10,8 +10,6 @@ arena:
    player:
    - '&7%date%'
    - ''
-   - '%status%'
-   - ''
    - 'Players left: &a%players%'
    - ''
    - 'Kills: &a%kills%'
