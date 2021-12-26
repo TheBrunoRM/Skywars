@@ -2,8 +2,7 @@ main: me.brunorm.skywars.Skywars
 version: 0.2.2
 name: Skywars
 author: BrunoRM
-softdepend: [WorldEdit]
-depend: [Vault]
+softdepend: [WorldEdit, Vault]
 api-version: "1.13"
 
 commands:
