@@ -11,9 +11,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 import com.cryptomorin.xseries.XMaterial;
 
-import me.bruno.skywars.menus.ArenaMenu;
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
+import me.brunorm.skywars.menus.ArenaMenu;
 import me.brunorm.skywars.structures.Arena;
 
 public class SignEvents implements Listener {

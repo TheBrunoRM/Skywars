@@ -28,10 +28,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.cryptomorin.xseries.XMaterial;
 
-import me.bruno.skywars.menus.ArenaMenu;
-import me.bruno.skywars.menus.ArenaSetupMenu;
-import me.bruno.skywars.menus.GamesMenu;
-import me.bruno.skywars.menus.KitsMenu;
 import me.brunorm.skywars.NMS.NMSHandler;
 import me.brunorm.skywars.commands.ForceStartCommand;
 import me.brunorm.skywars.commands.LeaveCommand;
@@ -43,6 +39,10 @@ import me.brunorm.skywars.events.DisableWeather;
 import me.brunorm.skywars.events.Events;
 import me.brunorm.skywars.events.MessageSound;
 import me.brunorm.skywars.events.SignEvents;
+import me.brunorm.skywars.menus.ArenaMenu;
+import me.brunorm.skywars.menus.ArenaSetupMenu;
+import me.brunorm.skywars.menus.GamesMenu;
+import me.brunorm.skywars.menus.KitsMenu;
 import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.Kit;
 import me.brunorm.skywars.structures.SkywarsPlayer;

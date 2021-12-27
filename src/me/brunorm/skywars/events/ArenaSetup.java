@@ -11,9 +11,9 @@ import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-import me.bruno.skywars.menus.ArenaSetupMenu;
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
+import me.brunorm.skywars.menus.ArenaSetupMenu;
 import me.brunorm.skywars.structures.Arena;
 import mrblobman.sounds.Sounds;
 

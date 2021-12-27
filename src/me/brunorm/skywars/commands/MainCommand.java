@@ -16,9 +16,6 @@ import org.bukkit.entity.Player;
 
 import com.cryptomorin.xseries.XMaterial;
 
-import me.bruno.skywars.menus.ArenaMenu;
-import me.bruno.skywars.menus.ArenaSetupMenu;
-import me.bruno.skywars.menus.GamesMenu;
 import me.brunorm.skywars.ArenaStatus;
 import me.brunorm.skywars.ChestManager;
 import me.brunorm.skywars.Messager;
@@ -26,6 +23,9 @@ import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.SkywarsScoreboard;
 import me.brunorm.skywars.SkywarsUtils;
 import me.brunorm.skywars.NMS.NMSHandler;
+import me.brunorm.skywars.menus.ArenaMenu;
+import me.brunorm.skywars.menus.ArenaSetupMenu;
+import me.brunorm.skywars.menus.GamesMenu;
 import me.brunorm.skywars.schematics.Schematic;
 import me.brunorm.skywars.schematics.SchematicHandler;
 import me.brunorm.skywars.structures.Arena;

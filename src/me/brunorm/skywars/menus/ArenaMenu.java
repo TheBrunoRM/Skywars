@@ -1,4 +1,4 @@
-package me.bruno.skywars.menus;
+package me.brunorm.skywars.menus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
