@@ -10,9 +10,9 @@ You can start the server after installing the plugin.
 
 ## How to use
 
-Firstly, you will need to set the main lobby by using **/sw setmainlobby**\
-The plugin comes with a default arena and kit.\
-After setting the main lobby, you should be able to play.
+Type **/sw help** to see the available commands.\
+The plugin comes with a default arena and kit,\
+so you should be able to play right after installing the plugin.
 
 ### How to play
 
