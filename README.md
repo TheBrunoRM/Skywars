@@ -2,6 +2,16 @@
 
 For Minecraft servers from version 1.8 to 1.12 (I plan to add support to more versions in the future)
 
+# Table of Contents
+1. [How to install](#how-to-install)
+2. [How to use](#how-to-use)
+   * [How to play](#how-to-play)
+   * [Creating an arena](#creating-an-arena)
+   * [Creating signs](#creating-signs)
+4. [Current features](#current-features)
+5. [To do](#to-do)
+6. [Compatibility issues](#compatibility-issues)
+
 ## How to install
 
 To install the plugin, drag the .jar file to your server's **plugins** folder.\
@@ -57,10 +67,10 @@ To create a sign, make it like this:
   - 1.13+ compatible
   - coins (?)
 
-## Something important about schematics and compatibility
-
-The plugin works in 1.13+, but the schematics do not work.\
-Schematic files from versions lower than 1.13 use block IDs\
-Instead, schematic files from 1.13+ use block palettes with block names.\
-I will have to remake the Schematic handler code (I will probably do at some point)\
-but for now, the schematics do not work in 1.13+.
+## Compatibility issues
+  * **1.13+**\
+    The plugin works in 1.13+, but the schematics do not work.\
+    Schematic files from versions lower than 1.13 use block IDs\
+    Instead, schematic files from 1.13+ use block palettes with block names.\
+    I will have to remake the Schematic handler code (I will probably do at some point)\
+    but for now, the schematics do not work in 1.13+.
