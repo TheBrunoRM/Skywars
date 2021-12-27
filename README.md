@@ -14,6 +14,13 @@ Type **/sw help** to see the available commands.\
 The plugin comes with a default arena and kit,\
 so you should be able to play right after installing the plugin.
 
+To disable the default lobby scoreboard,\
+set the value of **lobby** in the **scoreboard.yml** file to **false**.
+
+If the plugin doesn't have a **main lobby** set,\
+players will be teleported to the last location they were at.\
+If it is set, then they will be teleported to it.
+
 ### How to play
 
 Type **/sw play** to open the arenas menu and click an arena to join.\
