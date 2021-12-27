@@ -1,5 +1,7 @@
 # Skywars
 
+For Minecraft servers from version 1.8 to 1.12 (I plan to add support to more versions in the future)
+
 ## How to install
 
 To install the plugin, drag the .jar file to your server's **plugins** folder.\
