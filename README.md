@@ -68,7 +68,7 @@ To create a sign, make it like this:
   - Coins (?)
 
 ## Compatibility issues
-  * 1.13+
+  * **1.13+**\
     The plugin works in 1.13+, but the schematics do not work.\
     Schematic files from versions lower than 1.13 use block IDs\
     Instead, schematic files from 1.13+ use block palettes with block names.\
