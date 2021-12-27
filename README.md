@@ -53,19 +53,19 @@ To create a sign, make it like this:
 ![Sign image](https://cdn.discordapp.com/attachments/835594221456064544/876946375110189146/unknown.png)
 
 ## Current features
-  - maps
-  - kits
-  - easy map setup menu
+  - Maps
+  - Kits
+  - Easy map setup menu
 
 ## To do
-  - custom language file
-  - lots of configuration options
-  - game events (chest refills, etc)
-  - party options (?)
-  - team games
-  - code optimization
+  - Custom language file
+  - Lots of configuration options
+  - Game events (chest refills, etc)
+  - Party options (?)
+  - Team games
+  - Code optimization
   - 1.13+ compatible
-  - coins (?)
+  - Coins (?)
 
 ## Compatibility issues
   * **1.13+**\
