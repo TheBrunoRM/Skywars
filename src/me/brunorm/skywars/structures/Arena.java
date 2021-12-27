@@ -134,7 +134,7 @@ public class Arena {
 		}
 		if (hasPlayer(player))
 			return false;
-		int index = getPlayers().size();
+		int index = getNextAvailablePlayerSlot();
 		if (index > maxPlayers)
 			return false;
 		else
@@ -144,19 +144,16 @@ public class Arena {
 			player.sendMessage(String.format("spawn %s of arena %s not set", index, this.getName()));
 			return false;
 		}
-		SkywarsPlayer swPlayer = new SkywarsPlayer(player, this);
-		swPlayer.number = index;
+		SkywarsPlayer swPlayer = new SkywarsPlayer(player, this, index);
 		players.add(swPlayer);
 		for (SkywarsPlayer players : this.getPlayers()) {
 			players.getPlayer().sendMessage(Messager.colorFormat("&7%s &ehas joined (&b%s&e/&b%s&e)!", player.getName(),
-					index + 1, this.getMaxPlayers()));
+					getPlayerCount(), this.getMaxPlayers()));
 		}
 
 		Skywars.createCase(spawn, XMaterial.LIME_STAINED_GLASS);
 		
-		Location centered = new Location(spawn.getWorld(), spawn.getBlockX(), spawn.getBlockY(), spawn.getBlockZ());
-		centered.add(0.5,0,0.5);
-		
+		Skywars.get().playerLocations.put(player, player.getLocation());
 		player.teleport(SkywarsUtils.getCenteredLocation(spawn));
 		swPlayer.setSavedPlayer(new SavedPlayer(player));
 		SkywarsUtils.ClearPlayer(player);
@@ -177,7 +174,7 @@ public class Arena {
 		return true;
 	}
 	
-	public void makeSpectator(SkywarsPlayer p) {
+	public void makeSpectator(SkywarsPlayer p, Player killer) {
 		if (p.isSpectator())
 			return;
 		
@@ -215,8 +212,12 @@ public class Arena {
 
 		if(getStatus() == ArenaStatus.PLAYING)
 			for (SkywarsPlayer players : getPlayers()) {
-				// TODO: add death message
-				players.getPlayer().sendMessage(Messager.colorFormat("&c%s &edied", player.getName()));
+				if(killer != null)
+					players.getPlayer().sendMessage(
+							Messager.colorFormat("&c%s &ekilled &c%s",
+							killer.getName(), player.getName()));
+				else players.getPlayer().sendMessage(
+							Messager.colorFormat("&c%s &edied.", player.getName()));
 			}
 
 		removePlayer(p);
@@ -239,33 +240,36 @@ public class Arena {
 
 	public void leavePlayer(SkywarsPlayer player) {
 		if(player == null) return;
-		player.getPlayer().sendMessage(Messager.colorFormat("&eYou leaved arena &b%s", this.name));
+		player.getPlayer().sendMessage(
+				Messager.getFormattedMessage("LEAVE_SELF",
+						player.getPlayer(), this, player, getName()));
 		full = false;
 		players.remove(player);
 		removePlayer(player);
-		if (this.getStatus() != ArenaStatus.ENDING) {
+		if (this.getStatus() != ArenaStatus.ENDING && !player.isSpectator()) {
 			for (SkywarsPlayer players : getPlayers()) {
-				players.getPlayer().sendMessage(Messager.colorFormat("&7%s &eleaved (&b%s&e/&b%s&e)",
+				players.getPlayer().sendMessage(Messager.getFormattedMessage("LEAVE",
+						player.getPlayer(), this, player,
 						player.getPlayer().getName(), getPlayers().size(), getMaxPlayers()));
 			}
 		}
+		System.out.println("debug leave");
 		SkywarsUtils.ClearPlayer(player.getPlayer());
 		player.getSavedPlayer().Restore();
 		if(this.isInBoundaries(player.getPlayer()))
-			SkywarsUtils.TeleportToLobby(player.getPlayer());
+			SkywarsUtils.TeleportPlayerBack(player.getPlayer());
 		
 		if (this.getStatus() == ArenaStatus.STARTING
 				&& !forcedStart
 				&& (getMinPlayers() <= 0 || getPlayerCount() < getMinPlayers())) {
-			System.out.println("stopping start cooldown");
+			//System.out.println("stopping start cooldown");
 			setStatus(ArenaStatus.WAITING);
 			for (SkywarsPlayer players : getPlayers()) {
-				players.getPlayer().sendMessage("&eCountdown stopped, not enough players!");
+				players.getPlayer().sendMessage(Messager.getMessage("COUNTDOWN_STOPPED", getPlayerCount()));
 			}
 			cancelTimer();
 		}
-		if((status == ArenaStatus.PLAYING && getPlayerCount() <= 0)
-				|| status == ArenaStatus.ENDING) restart();
+		if(status != ArenaStatus.WAITING && getPlayerCount() <= 0) restart();
 	}
 	
 	public void kick(Player player) {
@@ -276,7 +280,7 @@ public class Arena {
 		if(player == null) return;
 		SkywarsUtils.ClearPlayer(player.getPlayer());
 		player.getSavedPlayer().Restore();
-		SkywarsUtils.TeleportToLobby(player.getPlayer());
+		SkywarsUtils.TeleportPlayerBack(player.getPlayer());
 	}
 
 	void removePlayer(SkywarsPlayer player) {
@@ -327,7 +331,7 @@ public class Arena {
 			if (forcedStart && forcedStartPlayer != null) {
 				for (SkywarsPlayer player : getPlayers()) {
 					player.getPlayer().sendMessage(
-							Messager.colorFormat("&b&l%s &e&lforced the game to start!", forcedStartPlayer.getName()));
+							Messager.getMessage("FORCED_START", forcedStartPlayer.getName()));
 				}
 			}
 			task = Bukkit.getScheduler().runTaskTimer(Skywars.get(), new Runnable() {
@@ -350,8 +354,8 @@ public class Arena {
 								5, 1f);
 						if (time == 10) {
 							if (this.time == 10) {
-								Skywars.get().NMS().sendTitle(player.getPlayer(), Messager.color("&e10 seconds"),
-										Messager.color("&eRight-click the bow to select a kit!"), 0, 50, 0);
+								Skywars.get().NMS().sendTitle(player.getPlayer(), Messager.getMessage("10_SECONDS_TITLE"),
+										Messager.getMessage("10_SECONDS_SUBTITLE"), 0, 50, 0);
 							}
 						} else if (time <= 5 || time % 5 == 0) {
 							player.getPlayer().sendMessage(
@@ -390,7 +394,7 @@ public class Arena {
 					this.time--;
 					countdown = time;
 					
-					// todo: throw fireworks
+					// TODO: throw fireworks
 
 					if (this.time == 0) {
 						restart();
@@ -486,8 +490,6 @@ public class Arena {
 			problems.add("World " + getWorldName() +" does not exist");
 		if (getSpawn(getPlayers().size()) == null)
 			problems.add(String.format("Spawn %s not set", getPlayers().size()));
-		if (Skywars.get().getLobby() == null)
-			problems.add("Main lobby not set");
 		if (maxPlayers <= 0)
 			problems.add("Max players not set");
 		if (schematicFilename == null)
@@ -561,6 +563,13 @@ public class Arena {
 		return true;
 	}
 
+	private int getNextAvailablePlayerSlot() {
+		for(int i = 0; i < getMaxPlayers(); i++) {
+			if(getPlayer(i) == null) return i;
+		}
+		return -1;
+	}
+	
 	int getPlayerCount() {
 		return this.players.size();
 	}
@@ -591,7 +600,10 @@ public class Arena {
 	}
 
 	SkywarsPlayer getPlayer(int index) {
-		return players.get(index);
+		for (SkywarsPlayer p : getPlayers()) {
+			if(p.getNumber() == index) return p;
+		}
+		return null;
 	}
 
 	public SkywarsPlayer getPlayer(String name) {

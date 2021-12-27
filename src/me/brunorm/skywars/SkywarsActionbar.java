@@ -13,11 +13,10 @@ public class SkywarsActionbar {
 			SkywarsPlayer swp = arena.getPlayer(player);
 			if (arena.getStatus() != ArenaStatus.PLAYING && !swp.isSpectator()) {
 				Skywars.get().NMS().sendActionbar(player, Messager.color(
-						SkywarsScoreboard.format(Skywars.get().langConfig
+						SkywarsUtils.format(Skywars.get().langConfig
 								.getString("actionbar.waiting"), player, arena, swp)));
 			}
 
 		}
 	}
-
 }

@@ -46,7 +46,7 @@ public class Events implements Listener {
 						&& !swp.isSpectator())
 					arena.leavePlayer(player);
 				else if(!swp.isSpectator())
-					arena.makeSpectator(swp);
+					arena.makeSpectator(swp, null);
 				else
 					arena.goBackToCenter(player);
 			}
@@ -81,10 +81,10 @@ public class Events implements Listener {
 				} else if(arena.getStatus() == ArenaStatus.PLAYING) {					
 					if(swPlayer.isSpectator() && event.getCause() == DamageCause.VOID) {
 						arena.goBackToCenter(player);
-					} else if (event.getCause() == DamageCause.VOID || health - damage <= 0) {
+					} else if (event.getCause() == DamageCause.VOID) {
 						event.setCancelled(true);
 						System.out.println("player damaged, made spectator");
-						arena.makeSpectator(swPlayer);
+						arena.makeSpectator(swPlayer, null);
 					}
 				}
 			}
@@ -93,13 +93,26 @@ public class Events implements Listener {
 	
 	@EventHandler
 	void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+		
+		Entity entity = event.getEntity();
+		LivingEntity livingEntity = (LivingEntity) entity;
 		Entity damager = event.getDamager();
-		if(damager != null && damager instanceof Player) {
-			Player attacker = (Player) damager;			
+		
+		if (entity instanceof Player && damager instanceof Player ) {
+			Player victim = (Player) entity;
+			Player attacker = (Player) damager;
 			Arena attackerArena = Skywars.get().getPlayerArena(attacker);
-			if (attackerArena != null) {
-				SkywarsPlayer swp = attackerArena.getPlayer(attacker);
-				if(swp != null && swp.isSpectator()) {
+			Arena victimArena = Skywars.get().getPlayerArena(victim);
+			if(victimArena != null) {				
+				SkywarsPlayer swVictim = victimArena.getPlayer(victim);
+				if(livingEntity.getHealth() - event.getDamage() <= 0) {
+					event.setCancelled(true);
+					victimArena.makeSpectator(swVictim, attacker);
+				}
+			}
+			if(attackerArena != null) {					
+				SkywarsPlayer swAttacker = attackerArena.getPlayer(attacker);
+				if(swAttacker != null && swAttacker.isSpectator()) {
 					event.setCancelled(true);
 				}
 			}

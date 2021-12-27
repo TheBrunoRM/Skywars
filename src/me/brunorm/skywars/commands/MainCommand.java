@@ -82,7 +82,7 @@ public class MainCommand implements CommandExecutor {
 					if(CommandsUtils.permissionCheckWithMessage(player, "skywars.setmainlobby")) {						
 						Skywars.get().setLobby(player.getLocation());
 						Skywars.get().saveConfig();
-						player.sendMessage(Messager.color("&eThe main lobby has been set to your current position."));
+						player.sendMessage(Messager.getMessage("MAIN_LOBBY_SET"));
 					}
 				}
 				else if (args[0].equalsIgnoreCase("lobby")) {
@@ -90,8 +90,12 @@ public class MainCommand implements CommandExecutor {
 						if (joined) {
 							Skywars.get().getPlayerArena(player).leavePlayer(player);
 						}
-						SkywarsUtils.TeleportToLobby(player);
-						player.sendMessage(Messager.color("&eTeleported to the lobby!"));
+						if(Skywars.get().getLobby() != null) {
+							player.teleport(Skywars.get().getLobby());
+							player.sendMessage(Messager.getMessage("TELEPORTED_TO_MAIN_LOBBY"));
+						} else {
+							player.sendMessage(Messager.getMessage("MAIN_LOBBY_NOT_SET"));
+						}
 					}
 				}
 				else if(args[0].equalsIgnoreCase("play")) {
@@ -100,7 +104,7 @@ public class MainCommand implements CommandExecutor {
 				else if (args[0].equalsIgnoreCase("config") || args[0].equalsIgnoreCase("setup")) {
 					if(CommandsUtils.permissionCheckWithMessage(player, "skywars.config")) {
 						if(arena == null) {
-							player.sendMessage(Messager.color("&cNo arena."));
+							player.sendMessage(Messager.getMessage("NO_ARENA"));
 							return false;
 						}
 						ArenaSetupMenu.OpenConfigurationMenu(player, arena);
@@ -139,7 +143,10 @@ public class MainCommand implements CommandExecutor {
 				else if (args[0].equalsIgnoreCase("menu")) {
 					GamesMenu.OpenMenu(player);
 				}
+				
 				else if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.test")) return false;
+				// TEST COMMANDS
+				
 				if(args[0].equalsIgnoreCase("pasteschematic")) {
 					if(schematic == null) {
 						sender.sendMessage("schematic not loaded");

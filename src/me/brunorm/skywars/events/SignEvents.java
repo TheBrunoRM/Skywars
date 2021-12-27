@@ -26,10 +26,10 @@ public class SignEvents implements Listener {
 				Arena arena = Skywars.get().getArena(arenaName);
 				if(arena != null) {
 					event.setLine(1, Messager.color("&e[&bSkyWars&e]"));
-					event.setLine(2, Messager.color(String.format("&a%s", arenaName)));
+					event.setLine(2, Messager.color(String.format("&a%s", arena.getName())));
 				} else System.out.println("null arena " + arenaName);
 			} else System.out.println("null arena name");
-		} else System.out.println("line is not skywars: " + event.getLine(1));
+		}
 	}
 	
 	@EventHandler
@@ -39,7 +39,8 @@ public class SignEvents implements Listener {
 		if (arena == null && event.getClickedBlock() != null) {
 			if (event.getClickedBlock().getType() == XMaterial.OAK_SIGN.parseMaterial()
 					|| event.getClickedBlock().getType() == XMaterial.OAK_WALL_SIGN.parseMaterial()) {
-				if(player.isSneaking() && player.getGameMode() == GameMode.CREATIVE) return;
+				if(player.getGameMode() == GameMode.CREATIVE && player.isSneaking())
+					return;
 				Sign sign = (Sign) event.getClickedBlock().getState();
 				if (sign.getLine(1).equals(Messager.color("&e[&bSkyWars&e]"))) {
 					String arenaName = sign.getLine(2);
@@ -53,12 +54,14 @@ public class SignEvents implements Listener {
 				}
 				if (sign.getLine(1).equals("random")) {
 					if (sign.getLine(2).equals("skywars")) {
+						event.setCancelled(true);
 						Arena randomArena = Skywars.get().getRandomJoinableArena();
 						randomArena.joinPlayer(player);
 					}
 				}
 				if (sign.getLine(1).equals("play")) {
 					if (sign.getLine(2).equals("skywars")) {
+						event.setCancelled(true);
 						ArenaMenu.open(player);
 					}
 				}

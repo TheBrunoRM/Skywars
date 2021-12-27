@@ -22,7 +22,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -60,16 +59,6 @@ public class Skywars extends JavaPlugin {
 	public static String kitsPath;
 	public static String schematicsPath;
 	
-	Plugin vault;
-	
-	public Plugin getVault() {
-		return vault;
-	}
-
-	public void setVault(Plugin vault) {
-		this.vault = vault;
-	}
-
 	Economy economy;
 	
 	public Economy getEconomy() {
@@ -80,6 +69,8 @@ public class Skywars extends JavaPlugin {
 	public YamlConfiguration langConfig;
 	public HashMap<Player, YamlConfiguration> playerConfigurations =
 			new HashMap<Player, YamlConfiguration>();
+	public HashMap<Player, Location> playerLocations =
+			new HashMap<Player, Location>();
 	
     private String packageName;
     private String serverPackageVersion;
@@ -119,8 +110,7 @@ public class Skywars extends JavaPlugin {
 		
 		if(setupEconomy())
 			Bukkit.getConsoleSender().sendMessage(Messager.color(
-					String.format("%s &aloaded Vault! &bv%s",
-					prefix, vault.getDescription().getVersion())));
+					String.format("%s &aloaded economy!", prefix)));
 		/*
 		else
 			Bukkit.getConsoleSender().sendMessage(Messager.color(
@@ -139,10 +129,13 @@ public class Skywars extends JavaPlugin {
 			String worldName = getConfig().getString("lobby.world");
 			if(worldName != null) {				
 				World world = Bukkit.getWorld(worldName);
-				double x = getConfig().getDouble("lobby.x");
-				double y = getConfig().getDouble("lobby.y");
-				double z = getConfig().getDouble("lobby.z");
-				this.lobby = new Location(world, x, y, z);
+				if(world != null) {					
+					double x = getConfig().getDouble("lobby.x");
+					double y = getConfig().getDouble("lobby.y");
+					double z = getConfig().getDouble("lobby.z");
+					this.lobby = new Location(world, x, y, z);
+				} else getLogger().info(Messager.color(
+				String.format("%s &ccould not set lobby in world &7%s", prefix, worldName)));
 			}
 		}
 		
@@ -172,7 +165,7 @@ public class Skywars extends JavaPlugin {
 		}
 		ArenaSetupMenu.currentArenas.forEach((player, arena) -> {
 			player.getInventory().removeItem(ArenaSetup.item);
-			SkywarsUtils.TeleportToLobby(player);
+			SkywarsUtils.TeleportPlayerBack(player);
 		});
 		System.out.println("Stopping arenas...");
 		for (Arena arena : arenas) {
@@ -200,15 +193,15 @@ public class Skywars extends JavaPlugin {
 	}
 
     private boolean setupEconomy() {
-    	setVault(getServer().getPluginManager().getPlugin("Vault"));
-        if (getVault() == null) {
-            return false;
-        }
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        RegisteredServiceProvider<Economy> rsp =
+        		getServer().getServicesManager()
+        		.getRegistration(net.milkbowl.vault.economy.Economy.class);
+    	System.out.println("economy provider: " + rsp);
         if (rsp == null) {
             return false;
         }
         economy = rsp.getProvider();
+    	System.out.println("economy: " + economy);
         return economy != null;
     }
 	

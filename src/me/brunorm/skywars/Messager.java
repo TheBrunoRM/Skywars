@@ -1,6 +1,10 @@
 package me.brunorm.skywars;
 
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+
+import me.brunorm.skywars.structures.Arena;
+import me.brunorm.skywars.structures.SkywarsPlayer;
 
 public class Messager {
 
@@ -18,9 +22,13 @@ public class Messager {
 		String msg = Skywars.get().langConfig.getString(name);
 		if(msg == null) return null;
 		for(int i = 0; i < format.length; i++) {
-			msg = msg.replaceAll(String.format("{%s}", i), (String) format[i]);
+			msg = msg.replaceAll(String.format("\\{%s\\}", i), (String) format[i]);
 		}
 		return Messager.color(msg);
+	}
+	
+	public static String getFormattedMessage(String name, Player player, Arena arena, SkywarsPlayer swp, Object... format) {
+		return Messager.color(SkywarsUtils.format(getMessage(name, format), player, arena, swp));
 	}
 
 }

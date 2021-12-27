@@ -22,57 +22,69 @@ import org.bukkit.util.Vector;
 import com.cryptomorin.xseries.XMaterial;
 
 import me.brunorm.skywars.structures.Arena;
+import me.brunorm.skywars.structures.SkywarsEvent;
 import me.brunorm.skywars.structures.SkywarsPlayer;
 
 public class SkywarsUtils {
-
-	static String url = getUrl();
-
-	public static String parseItemName(String text) {
-		String name = Skywars.get().langConfig.getString("items." + text);
-		if(Skywars.get().langConfig.getBoolean("items.show_context") == true) {
-			String context = Skywars.get().langConfig.getString("items.context");
-			if(context != null) {
-				name = name + " " + Messager.color(context);
-			}
-		}
-		return Messager.color(name);
-	}
+	
+	public static String url = getUrl();
+	public static String[] colorSymbols = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "f" };
 	
 	public static String format(String text, Player player, Arena arena, SkywarsPlayer swp) {
+		return format(text, player, arena, swp, false);
+	}
+	
+	public static String format(String text, Player player, Arena arena, SkywarsPlayer swp, boolean status) {
 		Date date = new Date();
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 		String strDate = formatter.format(date);
-
-		text = text.replaceAll(getVariableCode("date"), strDate) //
+		text = text.replaceAll(getVariableCode("date"), strDate)
 				.replaceAll(getVariableCode("url"), url);
-
-		if (player != null) {
-			text = text
-					.replaceAll(getVariableCode("kit"),
-							Skywars.get().getPlayerKit(player).getDisplayName())
+		
+		if(player != null) {
+			
+			String balance = null;
+			
+			if(Skywars.get().getEconomy() != null) {
+				balance = Double.toString(Skywars.get().getEconomy().getBalance(player));
+			} else {
+				balance = "Vaultn't";
+			}
+			text = text.replaceAll(getVariableCode("coins"), balance)
 					.replaceAll(getVariableCode("totalkills"),
-							Integer.toString(Skywars.get().getPlayerConfig(player).getInt("kills")));
+				Integer.toString(Skywars.get().getPlayerTotalKills(player)))
+					.replaceAll(getVariableCode("kit"),
+							Skywars.get().getPlayerKit(player).getDisplayName());
 		}
 		
-		if (arena != null) {
+		if(arena != null) {
 			List<SkywarsPlayer> players = new ArrayList<>(arena.getPlayers());
 			players.removeIf(p -> p.isSpectator());
+			
+			// this prevents a stack overflow error
+			if(!status) text = text.replaceAll(getVariableCode("status"),
+					format(SkywarsUtils.getStatus(arena), player, arena, swp, true));
+			
+			SkywarsEvent event = arena.getNextEvent();
+			String eventText;
+			if(event != null) eventText = String.format("%s (%s)", event.getType(), event.getTime());
+			else eventText = "No event";
+			
 			text = text.replaceAll(getVariableCode("map"), arena.getName())
+					.replaceAll(getVariableCode("arena"), arena.getName())
+					.replaceAll(getVariableCode("event"), eventText)
 					.replaceAll(getVariableCode("players"), Integer.toString(players.size()))
 					.replaceAll(getVariableCode("maxplayers"), Integer.toString(arena.getMaxPlayers()))
-					.replaceAll(getVariableCode("minplayers"), Integer.toString(arena.getMinPlayers()))
-					.replaceAll(getVariableCode("seconds"), Integer.toString(arena.getCountdown()))
-					.replaceAll(getVariableCode("status"), getStatus(arena));
+					.replaceAll(getVariableCode("seconds"), Integer.toString(arena.getCountdown()));
 		}
-
-		if (swp != null) {
+		
+		if(swp != null) {
 			text = text.replaceAll(getVariableCode("kills"), Integer.toString(swp.getKills()));
 		}
 		
 		return text;
 	}
-
+	
 	public static String getVariableCode(String thing) {
 		return String.format("%%%s%%", thing);
 	}
@@ -83,7 +95,18 @@ public class SkywarsUtils {
 		if (url != null)
 			return url;
 		else
-			return "www.example.com";
+			return "www.skywars.com";
+	}
+	
+	public static String parseItemName(String text) {
+		String name = Skywars.get().langConfig.getString("items." + text);
+		if(Skywars.get().langConfig.getBoolean("items.show_context") == true) {
+			String context = Skywars.get().langConfig.getString("items.context");
+			if(context != null) {
+				name = name + " " + Messager.color(context);
+			}
+		}
+		return Messager.color(name);
 	}
 
 	public static String getStatus(Arena arena) {
@@ -102,13 +125,16 @@ public class SkywarsUtils {
 				return "";
 		}
 	}
-
-	public static void TeleportToLobby(Player player) {
+	
+	public static void TeleportPlayerBack(Player player) {
 		Location lobby = Skywars.get().getLobby();
-		if (lobby == null) {
-			return;
+		Location lastLocation = Skywars.get().playerLocations.get(player);
+		if(lobby != null)
+			player.getPlayer().teleport(lobby);
+		else if (lastLocation != null) {	
+			player.getPlayer().teleport(lastLocation);
+			Skywars.get().playerLocations.remove(player);
 		}
-		player.teleport(lobby);
 	}
 
 	public static void GiveBedItem(Player player) {
@@ -200,12 +226,7 @@ public class SkywarsUtils {
 	}
 	
 	public static Location getCenteredLocation(Location loc) {
-		return new Location(
-			loc.getWorld(),
-			loc.getBlockX(),
-			loc.getBlockY(),
-			loc.getBlockZ())
-			.add(new Vector(0.5,0,0.5));
+		return loc.clone().add(new Vector(0.5,0,0.5));
 	}
 	
 	Location calculateClosestLocation(Location loc, ArrayList<Location> locations) {

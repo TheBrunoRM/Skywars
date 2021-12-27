@@ -11,6 +11,12 @@ public class SkywarsPlayer {
 	int number;
 	SavedPlayer savedPlayer;
 	
+	SkywarsPlayer(Player player, Arena arena, int number) {
+		this.player = player;
+		this.arena = arena;
+		this.number = number;
+	}
+	
 	public SavedPlayer getSavedPlayer() {
 		return savedPlayer;
 	}
@@ -34,10 +40,9 @@ public class SkywarsPlayer {
 	public void setSpectator(boolean spectator) {
 		this.spectator = spectator;
 	}
-
-	SkywarsPlayer(Player player, Arena arena) {
-		this.player = player;
-		this.arena = arena;
+	
+	public int getNumber() {
+		return number;
 	}
 	
 	public Player getPlayer() {

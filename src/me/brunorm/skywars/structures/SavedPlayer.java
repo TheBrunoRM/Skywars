@@ -69,5 +69,4 @@ public class SavedPlayer {
 			player.addPotionEffect(effect);
 		}
 	}
-	
 }

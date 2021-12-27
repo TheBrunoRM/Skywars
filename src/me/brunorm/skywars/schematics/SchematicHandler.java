@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
@@ -54,8 +53,6 @@ public class SchematicHandler {
 			for (int y = 0; y < height; ++y) {
 				for (int z = 0; z < length; ++z) {
 					int index = y * width * length + z * width + x;
-					// System.out.println("current block: " + blocks[index] +
-					// " - data: " + blockData[index]);
 					Block block = new Location(world, x + loc.getX() + offset.getX(), y + loc.getY() + offset.getY(),
 							z + loc.getZ() + offset.getZ()).getBlock();
 					if (blocks[index] < 0) {
@@ -63,7 +60,7 @@ public class SchematicHandler {
 						continue;
 					}
 					if(XMaterial.isNewVersion()) {
-						block.setType(Material.getMaterial(blocks[index]));
+						
 					} else {						
 						if (!(blocks[index] == 0 && (block.getType() == XMaterial.WATER.parseMaterial()
 								|| block.getType() == XMaterial.LAVA.parseMaterial()))) {
@@ -74,13 +71,6 @@ public class SchematicHandler {
 				}
 			}
 		}
-		
-		/*
-		System.out.println("Skipped " + skipped.size() + " blocks:");
-		for(int block : skipped) {
-			System.out.println(block);
-		}
-		*/
 		
 		for(Tag tag : tileEntities.getValue()) {
 			@SuppressWarnings("unchecked")
@@ -133,35 +123,32 @@ public class SchematicHandler {
 		}
 
 		Map<String, Tag> schematic = schematicTag.getValue();
-		if (!schematic.containsKey("Blocks")) {
-			throw new IllegalArgumentException("Schematic file is missing a \"Blocks\" tag");
-		}
-
-		short width = getChildTag(schematic, "Width", ShortTag.class).getValue();
-		short length = getChildTag(schematic, "Length", ShortTag.class).getValue();
-		short height = getChildTag(schematic, "Height", ShortTag.class).getValue();
-
-		int offsetX = getChildTag(schematic, "WEOffsetX", IntTag.class).getValue();
-		int offsetY = getChildTag(schematic, "WEOffsetY", IntTag.class).getValue();
-		int offsetZ = getChildTag(schematic, "WEOffsetZ", IntTag.class).getValue();
-
-		Vector offset = new Vector(offsetX, offsetY, offsetZ);
-
-		ListTag tileEntities = getChildTag(schematic, "TileEntities", ListTag.class);
-		
-		//List<Tag> tileEntities = getChildTag(schematic, "TileEntities", ListTag.class).getValue();
-		
-        // using nms NBTTagList tileentities = nbtdata.getList("TileEntities");
-
 		String materials = getChildTag(schematic, "Materials", StringTag.class).getValue();
-		if (!materials.equals("Alpha")) {
+		if (materials.equals("Alpha")) {
+			if (!schematic.containsKey("Blocks")) {
+				throw new IllegalArgumentException("Schematic file is missing a \"Blocks\" tag");
+			}
+			
+			short width = getChildTag(schematic, "Width", ShortTag.class).getValue();
+			short length = getChildTag(schematic, "Length", ShortTag.class).getValue();
+			short height = getChildTag(schematic, "Height", ShortTag.class).getValue();
+			
+			int offsetX = getChildTag(schematic, "WEOffsetX", IntTag.class).getValue();
+			int offsetY = getChildTag(schematic, "WEOffsetY", IntTag.class).getValue();
+			int offsetZ = getChildTag(schematic, "WEOffsetZ", IntTag.class).getValue();
+			
+			Vector offset = new Vector(offsetX, offsetY, offsetZ);
+			
+			ListTag tileEntities = getChildTag(schematic, "TileEntities", ListTag.class);
+			
+			byte[] blocks = getChildTag(schematic, "Blocks", ByteArrayTag.class).getValue();
+			byte[] blockData = getChildTag(schematic, "Data", ByteArrayTag.class).getValue();
+			
+			return new Schematic(blocks, blockData, width, length, height, offset, tileEntities);
+		} else {
 			throw new IllegalArgumentException("Schematic file is not an Alpha schematic");
 		}
 
-		byte[] blocks = getChildTag(schematic, "Blocks", ByteArrayTag.class).getValue();
-		byte[] blockData = getChildTag(schematic, "Data", ByteArrayTag.class).getValue();
-
-		return new Schematic(blocks, blockData, width, length, height, offset, tileEntities);
 	}
 
 	/**
