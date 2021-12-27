@@ -1,4 +1,4 @@
-package me.brunorm.skywars;
+package me.bruno.skywars.menus;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,6 +21,10 @@ import org.bukkit.util.Vector;
 
 import com.cryptomorin.xseries.XMaterial;
 
+import me.brunorm.skywars.ArenaStatus;
+import me.brunorm.skywars.Messager;
+import me.brunorm.skywars.Skywars;
+import me.brunorm.skywars.events.ArenaSetup;
 import me.brunorm.skywars.structures.Arena;
 import mrblobman.sounds.Sounds;
 
@@ -38,9 +42,9 @@ public class ArenaSetupMenu implements Listener {
 	static String pasteSchematicName = "&6&lPaste schematic";
 	static String restartName = "&c&lRestart";
 
-	static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();
-	static HashMap<Player, Location> playerLocations = new HashMap<Player, Location>();
-	static HashMap<Player, Arena> currentArenas = new HashMap<Player, Arena>();
+	public static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();
+	public static HashMap<Player, Location> playerLocations = new HashMap<Player, Location>();
+	public static HashMap<Player, Arena> currentArenas = new HashMap<Player, Arena>();
 	File schematicsFolder = new File(Skywars.schematicsPath);
 	
 	static void OpenSchematicsMenu(Player player) {

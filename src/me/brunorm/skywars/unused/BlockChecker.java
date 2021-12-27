@@ -1,4 +1,4 @@
-package me.brunorm.skywars;
+package me.brunorm.skywars.unused;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;

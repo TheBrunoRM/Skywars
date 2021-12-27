@@ -2,13 +2,10 @@ package me.brunorm.skywars.structures;
 
 import org.bukkit.entity.Player;
 
-import me.brunorm.skywars.SavedPlayer;
-
 public class SkywarsPlayer {
 	
 	Player player;
 	Arena arena;
-	Kit kit;
 	int kills = 0;
 	boolean spectator = false;
 	int number;
@@ -49,14 +46,6 @@ public class SkywarsPlayer {
 	
 	Arena getArena() {
 		return arena;
-	}
-	
-	public Kit getKit() {
-		return kit;
-	}
-
-	public void setKit(Kit kit) {
-		this.kit = kit;
 	}
 	
 }

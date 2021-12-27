@@ -1,4 +1,4 @@
-package me.brunorm.skywars;
+package me.brunorm.skywars.structures;
 
 import java.util.Collection;
 
@@ -6,6 +6,8 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+
+import me.brunorm.skywars.SkywarsUtils;
 
 public class SavedPlayer {
 	
@@ -21,6 +23,8 @@ public class SavedPlayer {
 	Collection<PotionEffect> potionEffects;
 	boolean flying;
 	boolean allowFlight;
+	int fireTicks;
+	int heldItemSlot;
 	
 	public SavedPlayer(Player player) {
 		this.player = player;
@@ -35,6 +39,8 @@ public class SavedPlayer {
 		this.potionEffects = player.getActivePotionEffects();
 		this.flying = player.isFlying();
 		this.allowFlight = player.getAllowFlight();
+		this.fireTicks = player.getFireTicks();
+		this.heldItemSlot = player.getInventory().getHeldItemSlot();
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -56,6 +62,8 @@ public class SavedPlayer {
 		player.setMaxHealth(maxHealth);
 		player.setFlying(flying);
 		player.setAllowFlight(allowFlight);
+		player.setFireTicks(fireTicks);
+		player.getInventory().setHeldItemSlot(heldItemSlot);
 		
 		for (PotionEffect effect : potionEffects) {
 			player.addPotionEffect(effect);

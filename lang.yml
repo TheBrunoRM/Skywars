@@ -15,3 +15,5 @@ actionbar:
 
 NO_PERMISSION: "&cNo permission."
 NOT_JOINED: "&cNot joined."
+CANT_EXECUTE_COMMAND_IN_CONSOLE: "&cYou can't execute this command in the console!"
+NO_ARENA: "&cNo arena found by {0}"

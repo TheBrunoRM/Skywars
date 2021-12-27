@@ -1,7 +1,9 @@
-package me.brunorm.skywars;
+package me.brunorm.skywars.unused;
 
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
+
+import me.brunorm.skywars.Skywars;
 
 public class Scheduler {
 

@@ -47,6 +47,14 @@ public class SkywarsUtils {
 		text = text.replaceAll(getVariableCode("date"), strDate) //
 				.replaceAll(getVariableCode("url"), url);
 
+		if (player != null) {
+			text = text
+					.replaceAll(getVariableCode("kit"),
+							Skywars.get().getPlayerKit(player).getDisplayName())
+					.replaceAll(getVariableCode("totalkills"),
+							Integer.toString(Skywars.get().getPlayerConfig(player).getInt("kills")));
+		}
+		
 		if (arena != null) {
 			List<SkywarsPlayer> players = new ArrayList<>(arena.getPlayers());
 			players.removeIf(p -> p.isSpectator());
@@ -59,8 +67,7 @@ public class SkywarsUtils {
 		}
 
 		if (swp != null) {
-			text = text.replaceAll(getVariableCode("kills"), Integer.toString(swp.getKills()))
-					.replaceAll(getVariableCode("kit"), swp.getKit().getDisplayName());
+			text = text.replaceAll(getVariableCode("kills"), Integer.toString(swp.getKills()));
 		}
 		
 		return text;
@@ -235,5 +242,9 @@ public class SkywarsUtils {
 	
 	public static int getRandomSlot(Inventory inventory) {
 		return (int) Math.floor(Math.random() * inventory.getSize() + 1) - 1;
+	}
+	
+	public static float lerp(float a, float b, float t) {
+		return a + (b - a) * t;
 	}
 }

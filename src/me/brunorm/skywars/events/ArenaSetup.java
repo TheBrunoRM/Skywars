@@ -1,4 +1,4 @@
-package me.brunorm.skywars;
+package me.brunorm.skywars.events;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -11,12 +11,15 @@ import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
+import me.bruno.skywars.menus.ArenaSetupMenu;
+import me.brunorm.skywars.Messager;
+import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.structures.Arena;
 import mrblobman.sounds.Sounds;
 
 public class ArenaSetup implements Listener {
 
-	static ItemStack item;
+	public static ItemStack item;
 
 	@EventHandler
 	void onDrop(PlayerDropItemEvent event) {
@@ -46,11 +49,7 @@ public class ArenaSetup implements Listener {
 			Skywars.get().NMS().sendTitle(event.getPlayer(), "&cWarning!", "&eDrop the blaze rod to exit edit mode!");
 		}
 	}
-
-	float lerp(float a, float b, float t) {
-		return a + (b - a) * t;
-	}
-
+	
 	@EventHandler
 	void onInteract(PlayerInteractEvent event) {
 		Player player = event.getPlayer();

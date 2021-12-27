@@ -1,4 +1,4 @@
-package me.brunorm.skywars.API;
+package me.brunorm.skywars.NMS;
 
 import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 import net.minecraft.server.v1_8_R3.PacketPlayOutChat;

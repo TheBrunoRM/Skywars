@@ -1,4 +1,4 @@
-package me.brunorm.skywars.API;
+package me.brunorm.skywars.NMS;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

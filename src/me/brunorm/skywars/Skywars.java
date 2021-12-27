@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Properties;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -24,15 +23,22 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.cryptomorin.xseries.XMaterial;
 
-import me.brunorm.skywars.API.NMSHandler;
+import me.bruno.skywars.menus.ArenaMenu;
+import me.bruno.skywars.menus.ArenaSetupMenu;
+import me.bruno.skywars.menus.GamesMenu;
+import me.bruno.skywars.menus.KitsMenu;
+import me.brunorm.skywars.NMS.NMSHandler;
+import me.brunorm.skywars.commands.ForceStartCommand;
+import me.brunorm.skywars.commands.LeaveCommand;
 import me.brunorm.skywars.commands.MainCommand;
+import me.brunorm.skywars.commands.StartCommand;
 import me.brunorm.skywars.commands.WhereCommand;
+import me.brunorm.skywars.events.ArenaSetup;
 import me.brunorm.skywars.events.DisableWeather;
 import me.brunorm.skywars.events.Events;
 import me.brunorm.skywars.events.MessageSound;
@@ -44,14 +50,12 @@ import net.milkbowl.vault.economy.Economy;
 
 @SuppressWarnings("deprecation")
 public class Skywars extends JavaPlugin {
-
-	// get plugin.yml
-	PluginDescriptionFile descriptionFile = getDescription();
+	
 	// get plugin data
-	public String version = descriptionFile.getVersion();
-	public String name = descriptionFile.getName();
-	public List<String> authors = descriptionFile.getAuthors();
-	public String prefix = ChatColor.translateAlternateColorCodes('&', String.format("&6[&e%s&6]", name));
+	public String version = getDescription().getVersion();
+	public String name = getDescription().getName();
+	public List<String> authors = getDescription().getAuthors();
+	public String prefix = Messager.colorFormat("&6[&e%s&6]", name);
 	public static String arenasPath;
 	public static String kitsPath;
 	public static String schematicsPath;
@@ -74,6 +78,8 @@ public class Skywars extends JavaPlugin {
 	
 	public YamlConfiguration scoreboardConfig;
 	public YamlConfiguration langConfig;
+	public HashMap<Player, YamlConfiguration> playerConfigurations =
+			new HashMap<Player, YamlConfiguration>();
 	
     private String packageName;
     private String serverPackageVersion;
@@ -239,8 +245,11 @@ public class Skywars extends JavaPlugin {
 	// commands
 	public void loadCommands() {
 		HashMap<String, CommandExecutor> cmds = new HashMap<String, CommandExecutor>();
-		cmds.put("skywars", new MainCommand(this));
-		cmds.put("where", new WhereCommand(this));
+		cmds.put("skywars", new MainCommand());
+		cmds.put("where", new WhereCommand());
+		cmds.put("start", new StartCommand());
+		cmds.put("forcestart", new ForceStartCommand());
+		cmds.put("leave", new LeaveCommand());
 		for(String cmd : cmds.keySet()) {
 			if(!getConfig().getStringList("disabledCommands").contains(cmd)) {
 				Bukkit.getConsoleSender().sendMessage(
@@ -562,12 +571,16 @@ public class Skywars extends JavaPlugin {
 	}
 	
 	public YamlConfiguration getPlayerConfig(Player player) {
+		if(playerConfigurations.get(player) != null)
+			return playerConfigurations.get(player);
 		File folder = new File(getDataFolder() + "/players");
 		if(!folder.exists()) folder.mkdir();
 		File file = getPlayerConfigFile(player);
 		if(!file.exists())
 			copyDefaultContentsToFile("players/default.yml", file);
-		return YamlConfiguration.loadConfiguration(file);
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		playerConfigurations.put(player, config);
+		return config;
 	}
 	
 	public void savePlayerConfig(Player player) {
@@ -590,6 +603,7 @@ public class Skywars extends JavaPlugin {
 	}
 
 	public void setPlayerKit(Player player, Kit kit) {
+		System.out.println(getPlayerConfig(player).get("kit"));
 		getPlayerConfig(player).set("kit", kit.getName());
 		savePlayerConfig(player);
 	}

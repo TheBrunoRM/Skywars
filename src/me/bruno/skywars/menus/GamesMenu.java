@@ -1,4 +1,4 @@
-package me.brunorm.skywars;
+package me.bruno.skywars.menus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.cryptomorin.xseries.XMaterial;
 
+import me.brunorm.skywars.ArenaStatus;
+import me.brunorm.skywars.Messager;
+import me.brunorm.skywars.PlayerInventoryManager;
+import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.structures.Arena;
 
 public class GamesMenu implements Listener {

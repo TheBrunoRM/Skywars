@@ -1,4 +1,4 @@
-package me.brunorm.skywars.API;
+package me.brunorm.skywars.NMS;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

@@ -29,7 +29,6 @@ import com.cryptomorin.xseries.XMaterial;
 import me.brunorm.skywars.ArenaStatus;
 import me.brunorm.skywars.ChestManager;
 import me.brunorm.skywars.Messager;
-import me.brunorm.skywars.SavedPlayer;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.SkywarsUtils;
 import me.brunorm.skywars.schematics.Schematic;
@@ -54,16 +53,30 @@ public class Arena {
 	public boolean forcedStart;
 	public Player forcedStartPlayer;
 	int centerRadius = 15;
+	SkywarsPlayer winner;
 	
 	HashMap<Integer, Location> spawns = new HashMap<Integer, Location>();
 	private ArrayList<SkywarsPlayer> players = new ArrayList<SkywarsPlayer>();
+	ArrayList<SkywarsEvent> events = new ArrayList<SkywarsEvent>();
+	
+	public SkywarsEvent getNextEvent() {
+		if(events.size() > 0)
+			return events.get(0);
+		return null;
+	}
 	
 	public Arena(String name) {
 		this.name = name;
 		this.status = ArenaStatus.DISABLED;
 		setFile(new File(Skywars.arenasPath, name + ".yml"));
+		restartEvents();
 	}
 
+	void restartEvents() {
+		events.clear();
+		events.add(new SkywarsEvent(this, SkywarsEventType.REFILL, 60));
+	}
+	
 	public void setLocationConfig(String string, Location location) {
 		if (location == null) {
 			config.set(string, null);
@@ -132,10 +145,6 @@ public class Arena {
 			return false;
 		}
 		SkywarsPlayer swPlayer = new SkywarsPlayer(player, this);
-		YamlConfiguration playerConfig = Skywars.get().getPlayerConfig(player);
-		String kitName = playerConfig.getString("kit");
-		Kit kit = Skywars.get().getKit(kitName);
-		swPlayer.setKit(kit);
 		swPlayer.number = index;
 		players.add(swPlayer);
 		for (SkywarsPlayer players : this.getPlayers()) {
@@ -204,21 +213,24 @@ public class Arena {
 		}
 		SkywarsUtils.GiveBedItem(player);
 
-		for (SkywarsPlayer players : getPlayers()) {
-			players.getPlayer().sendMessage(Messager.colorFormat("&c%s &edied", player.getName()));
-		}
+		if(getStatus() == ArenaStatus.PLAYING)
+			for (SkywarsPlayer players : getPlayers()) {
+				// TODO: add death message
+				players.getPlayer().sendMessage(Messager.colorFormat("&c%s &edied", player.getName()));
+			}
 
 		removePlayer(p);
 
 		p.getPlayer().teleport(SkywarsUtils.getCenteredLocation(getLocationInArena(getSpawn(p.number))));
 		p.getPlayer().setVelocity(new Vector(0, 1f, 0));
 
-		Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
-			@Override
-			public void run() {
-				Skywars.get().NMS().sendTitle(player, "&c&lYOU DIED!", "&7You are now a spectator!", 0, 80, 0);
-			}
-		}, 20);
+		if(getWinner() != p)
+			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
+				@Override
+				public void run() {
+					Skywars.get().NMS().sendTitle(player, "&c&lYOU DIED!", "&7You are now a spectator!", 0, 80, 0);
+				}
+			}, 20);
 	}
 
 	public void leavePlayer(Player player) {
@@ -241,16 +253,19 @@ public class Arena {
 		player.getSavedPlayer().Restore();
 		if(this.isInBoundaries(player.getPlayer()))
 			SkywarsUtils.TeleportToLobby(player.getPlayer());
-		if ((this.getStatus() == ArenaStatus.STARTING &&
-				!forcedStart && getCurrentPlayers() < getMinPlayers())
-				|| getCurrentPlayers() <= 0) {
-			if(status == ArenaStatus.ENDING) restart();
+		
+		if (this.getStatus() == ArenaStatus.STARTING
+				&& !forcedStart
+				&& (getMinPlayers() <= 0 || getPlayerCount() < getMinPlayers())) {
+			System.out.println("stopping start cooldown");
 			setStatus(ArenaStatus.WAITING);
 			for (SkywarsPlayer players : getPlayers()) {
 				players.getPlayer().sendMessage("&eCountdown stopped, not enough players!");
 			}
 			cancelTimer();
 		}
+		if((status == ArenaStatus.PLAYING && getPlayerCount() <= 0)
+				|| status == ArenaStatus.ENDING) restart();
 	}
 	
 	public void kick(Player player) {
@@ -268,15 +283,22 @@ public class Arena {
 		if (this.getStatus() == ArenaStatus.PLAYING) {
 			if (getAlivePlayers().size() < 2) {
 				List<SkywarsPlayer> winners = new ArrayList<>(this.getAlivePlayers());
-				for (SkywarsPlayer players : getPlayers()) {
-					SkywarsPlayer winner = null;
-					if (winners.size() > 0) {
-						winner = winners.get(0);
+				if (winners.size() > 0) {
+					setWinner(winners.get(0));
+				}
+				
+				for (SkywarsPlayer p : getPlayers()) {
+					if (p == getWinner()) {
+						Skywars.get().NMS().sendTitle(p.getPlayer(),
+								"&6&lYOU WON", "&7Congratulations!", 0, 80, 0);
+					} else {
+						Skywars.get().NMS().sendTitle(p.getPlayer(),
+								"&c&lGAME ENDED", "&7You didn't win this time.", 0, 80, 0);
 					}
 					if (winners.size() <= 0 || winner == null) {
-						players.getPlayer().sendMessage(Messager.color("&cnobody &ewon"));
+						p.getPlayer().sendMessage(Messager.color("&cnobody &ewon"));
 					} else {
-						players.getPlayer()
+						p.getPlayer()
 								.sendMessage(Messager.colorFormat("&c%s &ewon!", winner.getPlayer().getName()));
 					}
 				}
@@ -298,6 +320,7 @@ public class Arena {
 	}
 
 	public void startTimer(ArenaStatus status) {
+		cancelTimer();
 		setStatus(status);
 		//System.out.println(String.format("starting %s timer", status));
 		if (status == ArenaStatus.STARTING) {
@@ -342,6 +365,22 @@ public class Arena {
 					}
 				}
 			}, 0L, 20L);
+		} else if (status == ArenaStatus.PLAYING) {
+			task = Bukkit.getScheduler().runTaskTimer(Skywars.get(), new Runnable() {
+				@Override
+				public void run() {
+					
+					SkywarsEvent event = getNextEvent();
+					
+					if(event != null) {
+						event.decreaseTime();
+						if(event.getTime() <= 0) {
+							events.remove(event);
+							event.run();							
+						}
+					}
+				}
+			}, 0L, 20L);
 		} else if (status == ArenaStatus.ENDING) {
 			task = Bukkit.getScheduler().runTaskTimer(Skywars.get(), new Runnable() {
 				int time = 60 + 1;
@@ -367,6 +406,7 @@ public class Arena {
 		if(getStatus() == ArenaStatus.PLAYING) return;
 		cancelTimer();
 		setStatus(ArenaStatus.PLAYING);
+		startTimer(getStatus());
 		calculateAndFillChests();
 		for (Location spawn : getSpawns().values()) {
 			Skywars.createCase(getLocationInArena(spawn), XMaterial.AIR);
@@ -375,7 +415,7 @@ public class Arena {
 			if(player.isSpectator()) continue;
 			SkywarsUtils.ClearPlayer(player.getPlayer());
 			player.getPlayer().setGameMode(GameMode.SURVIVAL);
-			Kit kit = player.getKit();
+			Kit kit = Skywars.get().getPlayerKit(player.getPlayer());
 			if(kit != null) {
 				for(ItemStack item : kit.getItems()) {
 					player.getPlayer().getInventory().addItem(item);
@@ -407,6 +447,7 @@ public class Arena {
 	}
 	
 	public boolean restart() {
+		System.out.println("Restarting arena " + this.name);
 		cancelTimer();
 		for(SkywarsPlayer player : getPlayers()) {
 			kick(player);
@@ -417,8 +458,10 @@ public class Arena {
 	}
 
 	public void clear() {
-		//System.out.println("Clearing arena " + this.name);
+		System.out.println("Clearing arena " + this.name);
+		restartEvents();
 		players.clear();
+		setWinner(null);
 		if(getWorldName() != null) {			
 			for(Entity i : Bukkit.getWorld(getWorldName()).getEntities()) {
 				if(i instanceof Item && isInBoundaries(i.getLocation())) {
@@ -518,7 +561,7 @@ public class Arena {
 		return true;
 	}
 
-	int getCurrentPlayers() {
+	int getPlayerCount() {
 		return this.players.size();
 	}
 
@@ -775,5 +818,24 @@ public class Arena {
 	public void setCenterRadius(int centerRadius) {
 		this.centerRadius = centerRadius;
 	}
+	
+	public SkywarsPlayer getWinner() {
+		return winner;
+	}
 
+	public void setWinner(SkywarsPlayer winner) {
+		this.winner = winner;
+	}
+
+	public void softStart(Player player) {
+		if(this.getStatus() == ArenaStatus.WAITING &&
+				this.getTask() == null) {
+			forcedStart = true;
+			forcedStartPlayer = player;
+			startTimer(ArenaStatus.STARTING);
+		} else {
+			startGame();
+		}
+	}
+	
 }
