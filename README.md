@@ -74,4 +74,3 @@ To create a sign, make it like this:
     Instead, schematic files from 1.13+ use block palettes with block names.\
     I will have to remake the Schematic handler code (I will probably do at some point)\
     but for now, the schematics do not work in 1.13+.
-  
