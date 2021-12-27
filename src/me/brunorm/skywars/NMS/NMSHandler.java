@@ -12,6 +12,8 @@ import me.brunorm.skywars.Skywars;
 
 public class NMSHandler {
 
+	String prefix = "&7[&cSkywars-NMS-Debug&7] ";
+	
 	String version = Skywars.get().getServerPackageVersion();
 	String nms = "net.minecraft.server." + version;
 
@@ -21,21 +23,21 @@ public class NMSHandler {
 	Class<?> packetPlayOutChat = getPacketPlayOutChat();
 	Class<?> enumTitleAction = getEnumTitleAction();
 	Class<?> craftPlayerClass = getCraftPlayerClass();
+	Class<?> chatMessageTypeClass = getChatMessageTypeClass();
 
 	public Class<?> getChatSerializer() {
 		try {
 			Bukkit.getConsoleSender().sendMessage(
-					Messager.color("&7[&cSkywars-Debug&7] &6Loading &cold &bChatSerializer"));
-			System.out.println();
+					Messager.color(prefix + "&6Loading &cold &bChatSerializer"));
 			return getNMS("ChatSerializer");
 		} catch (Exception e) {
 			try {
 				Bukkit.getConsoleSender().sendMessage(
-						Messager.color("&7[&cSkywars-Debug&7] &6Loading &anew &bChatSerializer"));
+						Messager.color(prefix + "&6Loading &anew &bChatSerializer"));
 				return getNMS("IChatBaseComponent$ChatSerializer");
 			} catch (Exception e2) {
 				Bukkit.getConsoleSender().sendMessage(
-						Messager.color("&7[&cSkywars-Debug&7] &cCould not load &bChatSerializer"));
+						Messager.color(prefix + "&cCould not load &bChatSerializer"));
 				return null;
 			}
 		}
@@ -44,11 +46,11 @@ public class NMSHandler {
 	public Class<?> getIChatBaseComponent() {
 		try {
 			Bukkit.getConsoleSender().sendMessage(
-					Messager.color("&7[&cSkywars-Debug&7] &6Loading &bChatBaseComponent Interface"));
+					Messager.color(prefix + "&6Loading &bChatBaseComponent Interface"));
 			return getNMS("IChatBaseComponent");
 		} catch (Exception e) {
 			Bukkit.getConsoleSender().sendMessage(
-					Messager.color("&7[&cSkywars-Debug&7] &cCould not load &bChatBaseComponent Interface"));
+					Messager.color(prefix + "&cCould not load &bChatBaseComponent Interface"));
 			return null;
 		}
 	}
@@ -56,11 +58,11 @@ public class NMSHandler {
 	public Class<?> getPacketPlayOutTitle() {
 		try {
 			Bukkit.getConsoleSender().sendMessage(
-					Messager.color("&7[&cSkywars-Debug&7] &6Loading &bPacketPlayOutTitle"));
+					Messager.color(prefix + "&6Loading &bPacketPlayOutTitle"));
 			return getNMS("PacketPlayOutTitle");
 		} catch (Exception e) {
 			Bukkit.getConsoleSender().sendMessage(
-					Messager.color("&7[&cSkywars-Debug&7] &cCould not load &bPacketPlayOutTitle"));
+					Messager.color(prefix + "&cCould not load &bPacketPlayOutTitle"));
 			return null;
 		}
 	}
@@ -68,11 +70,11 @@ public class NMSHandler {
 	public Class<?> getPacketPlayOutChat() {
 		try {
 			Bukkit.getConsoleSender().sendMessage(
-					Messager.color("&7[&cSkywars-Debug&7] &6Loading &bPacketPlayOutChat"));
+					Messager.color(prefix + "&6Loading &bPacketPlayOutChat"));
 			return getNMS("PacketPlayOutChat");
 		} catch (Exception e) {
 			Bukkit.getConsoleSender().sendMessage(
-					Messager.color("&7[&cSkywars-Debug&7] &cCould not load &bPacketPlayOutChat"));
+					Messager.color(prefix + "&cCould not load &bPacketPlayOutChat"));
 			return null;
 		}
 	}
@@ -80,16 +82,16 @@ public class NMSHandler {
 	public Class<?> getEnumTitleAction() {
 		try {
 			Bukkit.getConsoleSender().sendMessage(
-					Messager.color("&7[&cSkywars-Debug&7] &6Loading &cold &bEnumTitleAction"));
+					Messager.color(prefix + "&6Loading &cold &bEnumTitleAction"));
 			return getNMS("EnumTitleAction");
 		} catch (Exception e) {
 			try {
 				Bukkit.getConsoleSender().sendMessage(
-						Messager.color("&7[&cSkywars-Debug&7] &6Loading &aold &bEnumTitleAction"));
+						Messager.color(prefix + "&6Loading &anew &bEnumTitleAction"));
 				return getNMS("PacketPlayOutTitle$EnumTitleAction");
 			} catch (Exception e2) {
 				Bukkit.getConsoleSender().sendMessage(
-						Messager.color("&7[&cSkywars-Debug&7] &cCould not load &bEnumTitleAction"));
+						Messager.color(prefix + "&cCould not load &bEnumTitleAction"));
 				return null;
 			}
 		}
@@ -99,6 +101,18 @@ public class NMSHandler {
 		try {
 			return Class.forName("org.bukkit.craftbukkit." + version + ".entity.CraftPlayer");
 		} catch (ClassNotFoundException e) {
+			return null;
+		}
+	}
+	
+	public Class<?> getChatMessageTypeClass() {
+		try {
+			Bukkit.getConsoleSender().sendMessage(
+					Messager.color(prefix + "&6Loading &bChatMessageType"));
+			return getNMS("ChatMessageType");
+		} catch (Exception e) {
+			Bukkit.getConsoleSender().sendMessage(
+					Messager.color(prefix + "&cCould not find &bChatMessageType"));
 			return null;
 		}
 	}
@@ -114,23 +128,22 @@ public class NMSHandler {
 			Object chat = a.invoke(chatSerializer, "{\"text\":\"" + title + "\"}");
 
 			Constructor<?> packetPlayOutChatConstructor;
+			Method chatMessageTypeMethod;
+			Object chatMessageTypeValue;
+			Object packet;
+			
 			try {
 				// 1.8
 				packetPlayOutChatConstructor = packetPlayOutChat.getConstructor(iChatBaseComponent, byte.class);
-			} catch (Exception e) {
-				// 1.13
-				packetPlayOutChatConstructor = packetPlayOutChat.getConstructor(iChatBaseComponent);
-			}
-
-			Object packet;
-			try {
-				// 1.8
 				packet = packetPlayOutChatConstructor.newInstance(chat, (byte) 2);
 			} catch (Exception e) {
 				// 1.13
-				packet = packetPlayOutChatConstructor.newInstance(chat);
+				packetPlayOutChatConstructor = packetPlayOutChat.getConstructor(iChatBaseComponent, chatMessageTypeClass);
+                chatMessageTypeMethod = chatMessageTypeClass.getMethod("valueOf", String.class);
+                chatMessageTypeValue = chatMessageTypeMethod.invoke(null, "GAME_INFO");
+				packet = packetPlayOutChatConstructor.newInstance(chat, chatMessageTypeValue);
 			}
-
+			
 			Method getHandle = craftPlayerClass.getMethod("getHandle");
 			// CraftPlayer.getHandle();
 
