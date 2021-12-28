@@ -8,40 +8,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.cryptomorin.xseries.XMaterial;
 
-import me.brunorm.skywars.ArenaStatus;
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.PlayerInventoryManager;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.structures.Arena;
 
 public class GamesMenu implements Listener {
-	
-	@SuppressWarnings("deprecation")
-	@EventHandler
-	void onInteract(PlayerInteractEvent event) {
-		Player player = event.getPlayer();
-		Arena arena = Skywars.get().getPlayerArena(player);
-		if (arena != null) {
-			if (player.getItemInHand().getType() == XMaterial.BOW.parseMaterial()) {
-				if (arena.getStatus() != ArenaStatus.PLAYING) {		
-					KitsMenu.open(player);
-				}
-			}
-			if (player.getItemInHand().getType() == XMaterial.RED_BED.parseMaterial()) {
-				if (arena.getStatus() != ArenaStatus.PLAYING
-						|| arena.getPlayer(player).isSpectator()) {
-					arena.leavePlayer(arena.getPlayer(player));
-				}
-			}
-		}
-	}
 	
 	public static void OpenMenu(Player player) {
 		Inventory inventory = Bukkit.createInventory(null, 9 * 3, "Skywars");

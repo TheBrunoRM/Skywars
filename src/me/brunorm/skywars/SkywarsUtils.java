@@ -175,6 +175,8 @@ public class SkywarsUtils {
 		for (PotionEffect e : player.getActivePotionEffects()) {
 			player.removePotionEffect(e.getType());
 		}
+		
+		player.resetPlayerTime();
 	}
 
 	public static boolean JoinableCheck(Arena arena) {

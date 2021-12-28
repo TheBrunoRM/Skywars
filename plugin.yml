@@ -1,5 +1,5 @@
 main: me.brunorm.skywars.Skywars
-version: 0.2.4.1
+version: 0.2.5
 name: Skywars
 author: BrunoRM
 softdepend: [WorldEdit, Vault]

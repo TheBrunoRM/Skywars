@@ -1,6 +1,8 @@
 package me.brunorm.skywars.events;
 
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -8,9 +10,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
@@ -30,7 +35,8 @@ public class Events implements Listener {
 		Arena arena = Skywars.get().getPlayerArena(player);
 		if(arena != null) {
 			SkywarsPlayer swp = arena.getPlayer(player);
-			if(swp.isSpectator()) event.setCancelled(true);
+			if(swp.isSpectator())
+				event.setCancelled(true);
 		}
     }
 	
@@ -64,19 +70,13 @@ public class Events implements Listener {
 	@EventHandler
 	void onDamage(EntityDamageEvent event) {
 		Entity entity = event.getEntity();
-		if (entity instanceof LivingEntity && entity instanceof Player) {
-			LivingEntity livingEntity = (LivingEntity) entity;
-			double health = livingEntity.getHealth();
-			double damage = event.getDamage();
-			System.out.println(String.format("player with %s health got damaged %s",
-					health, damage));
+		if (entity instanceof Player) {
 			Player player = (Player) entity;
 			Arena arena = Skywars.get().getPlayerArena(player);
 			if (arena != null) {
 				SkywarsPlayer swPlayer = arena.getPlayer(player);
 				if(swPlayer.isSpectator()) event.setCancelled(true);
 				if(arena.getStatus() != ArenaStatus.PLAYING || arena.isInvencibility()) {
-					System.out.println("Cancelling damage!");
 					event.setCancelled(true);
 				} else if(arena.getStatus() == ArenaStatus.PLAYING) {					
 					if(swPlayer.isSpectator() && event.getCause() == DamageCause.VOID) {
@@ -98,26 +98,28 @@ public class Events implements Listener {
 		LivingEntity livingEntity = (LivingEntity) entity;
 		Entity damager = event.getDamager();
 		
-		if (entity instanceof Player && damager instanceof Player ) {
-			Player victim = (Player) entity;
+		if (damager instanceof Player) {
 			Player attacker = (Player) damager;
 			Arena attackerArena = Skywars.get().getPlayerArena(attacker);
-			Arena victimArena = Skywars.get().getPlayerArena(victim);
-			if(victimArena != null) {				
-				SkywarsPlayer swVictim = victimArena.getPlayer(victim);
-				if(livingEntity.getHealth() - event.getDamage() <= 0) {
-					// instead of cancelling the event,
-					// we set the damage to 0 so the damage sound sounds
-					// and it doesnt feel like the player just disappears when we hit
-					//event.setCancelled(true);
-					event.setDamage(0);
-					victimArena.makeSpectator(swVictim, attacker);
-				}
-			}
 			if(attackerArena != null) {					
 				SkywarsPlayer swAttacker = attackerArena.getPlayer(attacker);
 				if(swAttacker != null && swAttacker.isSpectator()) {
 					event.setCancelled(true);
+				}
+			}
+			if (entity instanceof Player) {
+				Player victim = (Player) entity;
+				Arena victimArena = Skywars.get().getPlayerArena(victim);
+				if(victimArena != null) {				
+					SkywarsPlayer swVictim = victimArena.getPlayer(victim);
+					if(livingEntity.getHealth() - event.getDamage() <= 0) {
+						//event.setCancelled(true);
+						// instead of cancelling the event,
+						// we set the damage to 0 so the damage sound sounds
+						// and it doesnt feel like the player just disappears when we hit
+						event.setDamage(0);
+						victimArena.makeSpectator(swVictim, attacker);
+					}
 				}
 			}
 		}
@@ -126,16 +128,15 @@ public class Events implements Listener {
 	@EventHandler
 	void onFoodLevelChange(FoodLevelChangeEvent event) {
 		Entity entity = event.getEntity();
-		if (entity instanceof LivingEntity) {
-			if (entity instanceof Player) {
-				Player player = (Player) entity;
-				Arena arena = Skywars.get().getPlayerArena(player);
-				if (arena != null) {
-					SkywarsPlayer swp = arena.getPlayer(player);
-					if (swp != null) {
-						if (arena.getStatus() != ArenaStatus.PLAYING) {
-							event.setCancelled(true);
-						}
+		if (entity instanceof Player) {
+			Player player = (Player) entity;
+			Arena arena = Skywars.get().getPlayerArena(player);
+			if (arena != null) {
+				SkywarsPlayer swp = arena.getPlayer(player);
+				if (swp != null) {
+					if (arena.getStatus() != ArenaStatus.PLAYING
+							|| swp.isSpectator()) {
+						event.setCancelled(true);
 					}
 				}
 			}
@@ -149,7 +150,8 @@ public class Events implements Listener {
 		if (arena != null) {
 			SkywarsPlayer swp = arena.getPlayer(player);
 			if (swp != null) {
-				if (arena.getStatus() != ArenaStatus.PLAYING || swp.isSpectator()) {
+				if (arena.getStatus() != ArenaStatus.PLAYING
+						|| swp.isSpectator()) {
 					event.setCancelled(true);
 				}
 			}
@@ -163,8 +165,8 @@ public class Events implements Listener {
 		if (arena != null) {
 			SkywarsPlayer swp = arena.getPlayer(player);
 			if (swp != null) {
-				if (swp.isSpectator()) {
-					System.out.println("cancelling interaction");
+				if (arena.getStatus() == ArenaStatus.WAITING
+						|| swp.isSpectator()) {
 					event.setCancelled(true);
 				}
 			}
@@ -180,10 +182,68 @@ public class Events implements Listener {
 			SkywarsPlayer swp = arena.getPlayer(player);
 			if (swp != null) {
 				if (arena.getStatus() != ArenaStatus.PLAYING
-						|| swp.isSpectator()
-						//|| !arena.droppedItems.contains(event.getItem())
-					)
+						|| swp.isSpectator()) {					
 					event.setCancelled(true);
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	void onEntityTarget(EntityTargetEvent event) {
+		Entity entity = event.getEntity();
+		Entity target = event.getTarget();
+		if(target instanceof Player) {			
+			Player player = (Player) target;
+			Arena arena = Skywars.get().getPlayerArena(player);
+			
+			if(arena != null) {
+				SkywarsPlayer swp = arena.getPlayer(player);
+				if (swp != null) {
+					if (arena.getStatus() != ArenaStatus.PLAYING
+							|| swp.isSpectator()) {
+						if (entity instanceof ExperienceOrb){
+							event.setCancelled(true);
+							event.setTarget(null);
+							// TODO: do something else
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	void onXPChange(PlayerExpChangeEvent event) {
+		Player player = event.getPlayer();
+		Arena arena = Skywars.get().getPlayerArena(player);
+		
+		if(arena != null) {
+			SkywarsPlayer swp = arena.getPlayer(player);
+			if (swp != null) {
+				if (arena.getStatus() != ArenaStatus.PLAYING
+						|| swp.isSpectator()) {
+					// TODO: do something since this cant be cancelled
+					//event.setCancelled(true);
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	void onInventoryCLick(InventoryClickEvent event) {
+		HumanEntity whoClicked = event.getWhoClicked();
+		if(whoClicked instanceof Player) {
+			Player player = (Player) whoClicked;
+			Arena arena = Skywars.get().getPlayerArena(player);
+			if(arena != null) {
+				SkywarsPlayer swp = arena.getPlayer(player);
+				if (swp != null) {
+					if(arena.getStatus() != ArenaStatus.PLAYING
+							|| swp.isSpectator()) {
+						event.setCancelled(true);
+					}
+				}
 			}
 		}
 	}

@@ -10,6 +10,9 @@ arena:
    player:
    - '&7%date%'
    - ''
+   - 'Next event:'
+   - '%event%'
+   - ''
    - 'Players left: &a%players%'
    - ''
    - 'Kills: &a%kills%'
@@ -19,6 +22,9 @@ arena:
    - '%url%'
    spectator:
    - '&7%date%'
+   - ''
+   - 'Next event:'
+   - '%event%'
    - ''
    - '%status%'
    - ''

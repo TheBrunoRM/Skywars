@@ -36,6 +36,7 @@ import me.brunorm.skywars.commands.WhereCommand;
 import me.brunorm.skywars.events.ArenaSetup;
 import me.brunorm.skywars.events.DisableWeather;
 import me.brunorm.skywars.events.Events;
+import me.brunorm.skywars.events.InteractEvent;
 import me.brunorm.skywars.events.MessageSound;
 import me.brunorm.skywars.events.SignEvents;
 import me.brunorm.skywars.menus.ArenaMenu;
@@ -227,6 +228,7 @@ public class Skywars extends JavaPlugin {
 		if(getConfig().getBoolean("disableWeather")) {			
 			getServer().getPluginManager().registerEvents(new DisableWeather(), this);
 		}
+		getServer().getPluginManager().registerEvents(new InteractEvent(), this);
 		getServer().getPluginManager().registerEvents(new Events(), this);
 		getServer().getPluginManager().registerEvents(new GamesMenu(), this);
 		getServer().getPluginManager().registerEvents(new ArenaMenu(), this);
@@ -266,13 +268,13 @@ public class Skywars extends JavaPlugin {
 		}
 		Skywars.config = getConfig();
 		*/
-		loadConfigFile("config.yml");
+		loadConfigFile("config.yml", "resources/config.yml");
 
 		// scoreboard.yml
-		scoreboardConfig = YamlConfiguration.loadConfiguration(loadConfigFile("scoreboard.yml"));
+		scoreboardConfig = YamlConfiguration.loadConfiguration(loadConfigFile("scoreboard.yml", "resources/scoreboard.yml"));
 		
 		// lang.yml
-		langConfig = YamlConfiguration.loadConfiguration(loadConfigFile("lang.yml"));
+		langConfig = YamlConfiguration.loadConfiguration(loadConfigFile("lang.yml", "resources/lang.yml"));
 	}
 	
 	public File loadConfigFile(String name) {
@@ -641,6 +643,9 @@ public class Skywars extends JavaPlugin {
     }
     
 	public void createMissingKeys(String defaultFileName, File file) {
+		
+		// TODO: make it not delete default spaces, comments, etc.
+		
 		try {
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			Reader defaultConfigStream =
@@ -648,12 +653,23 @@ public class Skywars extends JavaPlugin {
 			YamlConfiguration defaultConfig =
 					YamlConfiguration.loadConfiguration(defaultConfigStream);
 			ConfigurationSection section = defaultConfig.getConfigurationSection("");
+			
+			// temporarily fix
+			boolean modified = false;
+			
 			for (String key : section.getKeys(true)) {
 				if (config.get(key) == null) {
+					System.out.println("debug: setting key " + key + " in file " + file.getName());
 					config.set(key, defaultConfig.get(key));
+					modified = true;
 				}
 			}
-			config.save(file);
+			
+			// this is breaking the file
+			// because its saving using YamlConfiguration
+			// which does not have spaces and comments.
+			if(modified)
+				config.save(file);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

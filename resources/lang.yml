@@ -5,10 +5,43 @@ status:
    ending: Ending in &a%seconds%s
 
 items:
-   show_context: true
-   context: '&7(Right Click)'
-   select_kit: '&aSelect kit'
-   leave: '&cLeave'
+  show_context: true
+  context: '&7(Right Click)'
+  
+  KIT_SELECTOR:
+    name: '&a&lKit selector'
+    description:
+    - "&7Right-click to select your kit"
+    
+  GAME_OPTIONS: 
+    name: '&b&lGame options'
+    description:
+    - "&7Right-click to change the game options"
+    
+  SPECTATOR_OPTIONS:
+    name: '&b&lSpectator options'
+    description:
+    - "&7Right-click to change your spectator options"
+    
+  LEAVE:
+    name: '&c&lLeave'
+    description:
+    - "&7Right-click to go back to the"
+    - "&7main lobby."
+    
+  PLAY_AGAIN:
+    name: '&b&lPlay again'
+    description:
+    - "&7Right-click to play again"
+    
+  TELEPORTER:
+    name: '&b&lTeleporter'
+    description:
+    - "&7Right-click to teleport to players"
+
+arena_join:
+  title: "&eSkyWars"
+  subtitle: "&cInsane Mode"
 
 actionbar:
   waiting: '&eCurrent kit: &a%kit%'

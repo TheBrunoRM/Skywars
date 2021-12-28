@@ -13,6 +13,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -157,15 +158,41 @@ public class Arena {
 		player.teleport(SkywarsUtils.getCenteredLocation(spawn));
 		swPlayer.setSavedPlayer(new SavedPlayer(player));
 		SkywarsUtils.ClearPlayer(player);
-		SkywarsUtils.GiveBedItem(player);
 		
-		ItemStack bow = XMaterial.BOW.parseItem();
-		ItemMeta meta = bow.getItemMeta();
-		meta.setDisplayName(SkywarsUtils.parseItemName("select_kit"));
-		bow.setItemMeta(meta);
-		player.getInventory().setItem(0, bow);
+		ConfigurationSection itemsSection =
+				Skywars.get().getConfig().getConfigurationSection("items.waiting");
 		
-		Skywars.get().NMS().sendTitle(player, "&eSkyWars", "&cInsane Mode");
+		ConfigurationSection itemTypes =
+				Skywars.get().getConfig().getConfigurationSection("item_types");
+		
+		for(String slotName : itemsSection.getKeys(false)) {
+			Object itemName = itemsSection.get(slotName);
+			int slot = Integer.parseInt(slotName);
+			String itemType = itemTypes.getString((String) itemName);
+			Material material = Material.getMaterial(itemType);
+			ItemStack item = new ItemStack(material);
+			ItemMeta itemMeta = item.getItemMeta();
+			String configName = Skywars.get().langConfig.getString("items." + itemName + ".name");
+			if(Skywars.get().langConfig.getBoolean("items.show_context") == true) {
+				String context = Skywars.get().langConfig.getString("items.context");
+				if(context != null) {
+					configName = configName + " " + Messager.color(context);
+				}
+			}
+			itemMeta.setDisplayName(Messager.color(configName));
+			List<String> itemLore = new ArrayList<String>();
+			for(String loreLine : Skywars.get().langConfig.
+				getStringList("items." + itemName + ".description")) {
+				itemLore.add(Messager.color(loreLine));
+			}
+			itemMeta.setLore(itemLore);
+			item.setItemMeta(itemMeta);
+			player.getInventory().setItem(slot, item);
+		}
+		
+		Skywars.get().NMS().sendTitle(player,
+				Skywars.get().langConfig.getString("arena_join.title"),
+				Skywars.get().langConfig.getString("arena_join.subtitle"));
 
 		if (getStatus() != ArenaStatus.STARTING && this.getPlayers().size() >= this.getMinPlayers()) {
 			startTimer(ArenaStatus.STARTING);
@@ -200,6 +227,8 @@ public class Arena {
 		}
 		player.getInventory().setArmorContents(null);
 		
+		// TODO: make customizable spectator mode
+		
 		SkywarsUtils.ClearPlayer(player);
 		player.setAllowFlight(true);
 		player.setFlying(true);
@@ -208,10 +237,43 @@ public class Arena {
 		for (Player players : Bukkit.getOnlinePlayers()) {
 			players.hidePlayer(player);
 		}
-		SkywarsUtils.GiveBedItem(player);
+		
+		ConfigurationSection itemsSection =
+				Skywars.get().getConfig().getConfigurationSection("items.spectator");
+		
+		ConfigurationSection itemTypes =
+				Skywars.get().getConfig().getConfigurationSection("item_types");
+		
+		// TODO: remove duplicated code (joinPlayer method)
+		
+		for(String slotName : itemsSection.getKeys(false)) {
+			Object itemName = itemsSection.get(slotName);
+			int slot = Integer.parseInt(slotName);
+			String itemType = itemTypes.getString((String) itemName);
+			Material material = Material.getMaterial(itemType);
+			ItemStack item = new ItemStack(material);
+			ItemMeta itemMeta = item.getItemMeta();
+			String configName = Skywars.get().langConfig.getString("items." + itemName + ".name");
+			if(Skywars.get().langConfig.getBoolean("items.show_context") == true) {
+				String context = Skywars.get().langConfig.getString("items.context");
+				if(context != null) {
+					configName = configName + " " + Messager.color(context);
+				}
+			}
+			itemMeta.setDisplayName(Messager.color(configName));
+			List<String> itemLore = new ArrayList<String>();
+			for(String loreLine : Skywars.get().langConfig.
+				getStringList("items." + itemName + ".description")) {
+				itemLore.add(Messager.color(loreLine));
+			}
+			itemMeta.setLore(itemLore);
+			item.setItemMeta(itemMeta);
+			player.getInventory().setItem(slot, item);
+		}
 
 		if(getStatus() == ArenaStatus.PLAYING)
 			for (SkywarsPlayer players : getPlayers()) {
+				// TODO: add more death messages
 				if(killer != null)
 					players.getPlayer().sendMessage(
 							Messager.colorFormat("&c%s &ekilled &c%s",
@@ -253,7 +315,6 @@ public class Arena {
 						player.getPlayer().getName(), getPlayers().size(), getMaxPlayers()));
 			}
 		}
-		System.out.println("debug leave");
 		SkywarsUtils.ClearPlayer(player.getPlayer());
 		player.getSavedPlayer().Restore();
 		if(this.isInBoundaries(player.getPlayer()))

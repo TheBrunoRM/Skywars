@@ -1,0 +1,60 @@
+# set the main lobby using /sw setmainlobby
+lobby:
+  x:
+  y:
+  z:
+  world:
+
+# the url that appears on the scoreboard
+url: "&ewww.example.com"
+
+# you may want to disable these
+
+signsEnabled: true
+messageSounds: true
+disableWeather: true
+
+# this is displayed when the game starts
+
+startLines:
+  - "&a&l---------------------------------------------"
+  - ""
+  - "                              &f&lSkyWars"
+  - ""
+  - "    &e&lGather resources and equipmenton your island"
+  - "      &e&lin order to eliminate every other player."
+  - "     &e&lGo to the center island for special chests"
+  - "                       &e&lwith special items!"
+  - ""
+  - "&a&l---------------------------------------------"
+
+# you can disable the plugin commands here
+# possible options: start, forcestart, leave, where, skywars
+# you probably wont want to disable the last one lol
+
+disabledCommands: []
+
+# this is represented as
+# slot: item type
+# for when the player enters and arena
+# and for when it enters spectator mode
+
+items:
+  waiting:
+    0: KIT_SELECTOR
+    1: GAME_OPTIONS
+    8: LEAVE
+  spectator:
+    0: TELEPORTER
+    1: SPECTATOR_OPTIONS
+    8: LEAVE
+
+# this is self explanatory
+# its the item types
+
+item_types:
+  KIT_SELECTOR: BOW
+  GAME_OPTIONS: PAPER
+  LEAVE: BED
+  SPECTATOR_OPTIONS: REDSTONE_COMPARATOR
+  TELEPORTER: COMPASS
