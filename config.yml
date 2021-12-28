@@ -10,6 +10,7 @@ url: "&ewww.example.com"
 
 signsEnabled: true
 messageSounds: true
+disableWeather: true
 
 startLines:
   - "&a&l---------------------------------------------"
