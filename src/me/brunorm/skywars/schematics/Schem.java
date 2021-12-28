@@ -1,8 +1,10 @@
 package me.brunorm.skywars.schematics;
 
+import java.util.Map;
+
 import org.bukkit.util.Vector;
-import org.jnbt.CompoundTag;
 import org.jnbt.ListTag;
+import org.jnbt.Tag;
 
 /*
 *
@@ -29,14 +31,14 @@ public class Schem
 {
  
     private byte[] blockData;
-    private CompoundTag palette;
+    private Map<String, Tag> palette;
     private short width;
     private short length;
     private short height;
     private Vector offset;
     private ListTag tileEntities;
  
-    public Schem(byte[] blockData, CompoundTag palette, short width,
+    public Schem(byte[] blockData, Map<String, Tag> palette, short width,
     		short length, short height, Vector offset, ListTag tileEntities)
     {
         this.blockData = blockData;
@@ -55,11 +57,11 @@ public class Schem
     {
         return blockData;
     }
- 
+    
     /**
     * @return the block palette
     */
-    public CompoundTag getPalette()
+    public Map<String, Tag> getPalette()
     {
         return palette;
     }

@@ -1,5 +1,5 @@
 main: me.brunorm.skywars.Skywars
-version: 0.2.5.1
+version: 0.2.5.2
 name: Skywars
 author: BrunoRM
 softdepend: [WorldEdit, Vault]
@@ -14,6 +14,7 @@ commands:
   forcestart:
     description: Forces a Skywars arena game to start.
   where:
+    aliases: whereami
     description: Tells you where you are.
   leave:
     description: Leave a Skywars arena game.

@@ -120,6 +120,7 @@ public class Events implements Listener {
 						event.setDamage(0);
 						victimArena.makeSpectator(swVictim, attacker);
 					}
+					swVictim.setLastHit(attacker);
 				}
 			}
 		}

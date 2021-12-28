@@ -76,6 +76,7 @@ public class SchematicHandler {
 			@SuppressWarnings("unchecked")
 			Map<String, Tag> values = (Map<String, Tag>) tag.getValue();
 			if(values.get("id").getValue().equals("Sign")) {
+				// TODO: parse sign
 				/*
 				System.out.println("its a sign");
 				int x = (int) values.get("x").getValue();
@@ -103,6 +104,43 @@ public class SchematicHandler {
 			}
 		}
 	}
+	
+	@SuppressWarnings("unused")
+	public static void pasteSchematic(Location loc, Schem schematic) {
+		World world = loc.getWorld();
+		byte[] blockData = schematic.getBlockData();
+		Map<String, Tag> palette = schematic.getPalette();
+
+		short length = schematic.getLength();
+		short width = schematic.getWidth();
+		short height = schematic.getHeight();
+
+		Vector offset = schematic.getOffset();
+		ListTag tileEntities = schematic.getTileEntities();
+
+		ArrayList<Integer> skipped = new ArrayList<>();
+		
+		System.out.println("SCHEM DEBUG");
+		System.out.println("blockData: " + blockData);
+		System.out.println("palette: " + palette);
+		
+		for(Tag tag : tileEntities.getValue()) {
+			@SuppressWarnings("unchecked")
+			Map<String, Tag> values = (Map<String, Tag>) tag.getValue();
+			if(values.get("id").getValue().equals("Sign")) {
+				// TODO: parse sign
+			}
+			if(values.get("id").getValue().equals("Beacon")) {
+				int x = (int) values.get("x").getValue();
+				int y = (int) values.get("y").getValue();
+				int z = (int) values.get("z").getValue();
+				
+				Block block = new Location(world, x + loc.getX() + offset.getX(), y + loc.getY() + offset.getY(),
+						z + loc.getZ() + offset.getZ()).getBlock();
+				block.setType(XMaterial.BEACON.parseMaterial());
+			}
+		}
+	}
 
 	public static String getSignText(String text) {
 		try {
@@ -112,10 +150,10 @@ public class SchematicHandler {
 		}
 	}
 	
-	public static Schematic loadSchematic(File file) throws IOException {
+	public static Object loadSchematic(File file) throws IOException {
 		FileInputStream stream = new FileInputStream(file);
 		NBTInputStream nbtStream = new NBTInputStream(stream);
-
+		
 		CompoundTag schematicTag = (CompoundTag) nbtStream.readTag();
 		nbtStream.close();
 		if (!schematicTag.getName().equals("Schematic")) {
@@ -125,6 +163,7 @@ public class SchematicHandler {
 		Map<String, Tag> schematic = schematicTag.getValue();
 		String materials = getChildTag(schematic, "Materials", StringTag.class).getValue();
 		if (materials.equals("Alpha")) {
+			// handle schematic file from below 1.13
 			if (!schematic.containsKey("Blocks")) {
 				throw new IllegalArgumentException("Schematic file is missing a \"Blocks\" tag");
 			}
@@ -146,7 +185,31 @@ public class SchematicHandler {
 			
 			return new Schematic(blocks, blockData, width, length, height, offset, tileEntities);
 		} else {
-			throw new IllegalArgumentException("Schematic file is not an Alpha schematic");
+			// handle schem file from above 1.13
+			if (!schematic.containsKey("BlockData")) {
+				throw new IllegalArgumentException("Schematic file is missing a \"BlockData\" tag");
+			}
+			
+			short width = getChildTag(schematic, "Width", ShortTag.class).getValue();
+			short length = getChildTag(schematic, "Length", ShortTag.class).getValue();
+			short height = getChildTag(schematic, "Height", ShortTag.class).getValue();
+			
+			Map<String, Tag> metadata = getChildTag(schematic, "Metadata", CompoundTag.class).getValue();
+			
+			System.out.println("metadata: " + metadata);
+			
+			int offsetX = (int) metadata.get("WEOffsetX").getValue();
+			int offsetY = (int) metadata.get("WEOffsetY").getValue();
+			int offsetZ = (int) metadata.get("WEOffsetZ").getValue();
+			
+			Vector offset = new Vector(offsetX, offsetY, offsetZ);
+			
+			ListTag tileEntities = getChildTag(schematic, "TileEntities", ListTag.class);
+			
+			byte[] blockData = getChildTag(schematic, "BlockData", ByteArrayTag.class).getValue();
+			Map<String, Tag> palette = getChildTag(schematic, "Palette", CompoundTag.class).getValue();
+			
+			return new Schem(blockData, palette, width, length, height, offset, tileEntities);
 		}
 
 	}

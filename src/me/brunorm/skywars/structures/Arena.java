@@ -32,6 +32,7 @@ import me.brunorm.skywars.ChestManager;
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.SkywarsUtils;
+import me.brunorm.skywars.schematics.Schem;
 import me.brunorm.skywars.schematics.Schematic;
 import me.brunorm.skywars.schematics.SchematicHandler;
 import mrblobman.sounds.Sounds;
@@ -45,6 +46,7 @@ public class Arena {
 	String worldName;
 	String schematicFilename;
 	Schematic loadedSchematic;
+	Schem loadedSchem;
 	Location location;
 	int minPlayers;
 	int maxPlayers;
@@ -208,6 +210,16 @@ public class Arena {
 		p.setSpectator(true);
 		Player player = p.getPlayer();
 		
+		if(killer != null) {
+			SkywarsPlayer killerPlayer = getPlayer(killer);
+			if(killerPlayer != null) {
+				int kills = Skywars.get().getPlayerConfig(killer).getInt("kills");
+				Skywars.get().getPlayerConfig(killer)
+				.set("kills", kills+1);
+				Skywars.get().savePlayerConfig(killer);
+			}
+		}
+		
 		// only drop items if the player is inside the arena
 		// if the player dies for void, it will not drop items
 		if(isInBoundaries(player)) {
@@ -278,8 +290,13 @@ public class Arena {
 					players.getPlayer().sendMessage(
 							Messager.colorFormat("&c%s &ekilled &c%s",
 							killer.getName(), player.getName()));
+				else if (p.getLastHit() != null)
+					players.getPlayer().sendMessage(
+							Messager.colorFormat("&c%s &edied while trying to escape &c%s",
+									player.getName(), p.getLastHit().getName()));
 				else players.getPlayer().sendMessage(
-							Messager.colorFormat("&c%s &edied.", player.getName()));
+						Messager.colorFormat("&c%s &edied.",
+								player.getName()));
 			}
 
 		removePlayer(p);
@@ -682,22 +699,7 @@ public class Arena {
 		}
 		return null;
 	}
-
-	public void pasteSchematic() {
-		if (schematicFilename == null) {
-			System.out.println("tried to paste schematic, but schematic is not set!");
-			return;
-		}
-		if (location == null) {
-			System.out.println("tried to paste schematic, but location is not set!");
-			return;
-		}
-		System.out.println("Loading schematic for " + this.name);
-		loadSchematic();
-		System.out.println("Pasting schematic for " + this.name);
-		SchematicHandler.pasteSchematic(location, loadedSchematic);
-	}
-
+	
 	public void calculateSpawns() {
 		//if(loadedSchematic == null)
 			loadSchematic();
@@ -760,18 +762,53 @@ public class Arena {
 		saveConfig();
 	}
 	
-	void loadSchematic() {
+	Object loadSchematic() {
 		File schematicFile = Skywars.get().getSchematicFile(schematicFilename);
 		if(schematicFile == null) {
-			System.out.println("Could not get schematic file! (Maybe it doesnt exist?)");
-			return;
+			System.out.println("Could not get schematic file for arena "
+					+ getName() + "! (Maybe it doesnt exist?)");
+			return null;
 		}
 		try {
-			loadedSchematic = SchematicHandler.loadSchematic(schematicFile);
+			Object loaded = SchematicHandler.loadSchematic(schematicFile);
+			if(loaded instanceof Schematic) {
+				System.out.println("Loading schematic from below 1.13");
+				loadedSchematic = (Schematic) loaded;
+			} else if (loaded instanceof Schem) {
+				System.out.println("Loading schem from above 1.13");
+				loadedSchem = (Schem) loaded;
+				return loaded;
+			} else
+				System.out.println("Unknown schematic type: " + loaded);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("Could not load schematic!");
 		}
+		return null;
+	}
+	
+	public void pasteSchematic() {
+		if (schematicFilename == null) {
+			System.out.println("tried to paste schematic, but schematic is not set!");
+			return;
+		}
+		if (location == null) {
+			System.out.println("tried to paste schematic, but location is not set!");
+			return;
+		}
+		System.out.println("Loading schematic for " + this.name);
+		Object loaded = loadSchematic();
+		if(loaded == null) {
+			System.out.println("Schematic is null");
+			return;
+		}
+		System.out.println("Pasting schematic for " + this.name);
+		if(loaded instanceof Schematic)
+			SchematicHandler.pasteSchematic(location, loadedSchematic);
+		else if (loaded instanceof Schem)
+			SchematicHandler.pasteSchematic(location, loadedSchem);
+		else
+			System.out.println("Unknown schematic type: " + loaded);
 	}
 	
 	void calculateAndFillChests() {

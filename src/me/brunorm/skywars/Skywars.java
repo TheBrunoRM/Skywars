@@ -603,7 +603,6 @@ public class Skywars extends JavaPlugin {
 	}
 
 	public void setPlayerKit(Player player, Kit kit) {
-		System.out.println(getPlayerConfig(player).get("kit"));
 		getPlayerConfig(player).set("kit", kit.getName());
 		savePlayerConfig(player);
 	}

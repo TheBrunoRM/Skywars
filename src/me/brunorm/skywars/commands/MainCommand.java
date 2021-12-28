@@ -26,6 +26,7 @@ import me.brunorm.skywars.NMS.NMSHandler;
 import me.brunorm.skywars.menus.ArenaMenu;
 import me.brunorm.skywars.menus.ArenaSetupMenu;
 import me.brunorm.skywars.menus.GamesMenu;
+import me.brunorm.skywars.schematics.Schem;
 import me.brunorm.skywars.schematics.Schematic;
 import me.brunorm.skywars.schematics.SchematicHandler;
 import me.brunorm.skywars.structures.Arena;
@@ -61,6 +62,7 @@ public class MainCommand implements CommandExecutor {
 	};
 	
 	Schematic schematic;
+	Schem schem;
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String cmd, String[] args) {
@@ -160,7 +162,15 @@ public class MainCommand implements CommandExecutor {
 						sender.sendMessage("file not found: " + args[1]);
 						return false;
 					}
-					schematic = SchematicHandler.loadSchematic(file);
+					Object loaded = SchematicHandler.loadSchematic(file);
+					if(loaded instanceof Schematic) {
+						System.out.println("Loading schematic!");
+						schematic = (Schematic) loaded;
+					} else if (loaded instanceof Schem) {
+						System.out.println("Loading schem!");
+						schem = (Schem) loaded;
+					} else
+						System.out.println("Unknown schematic type: " + loaded);
 				}
 				if(args[0].equalsIgnoreCase("testnms")) {
 					NMSHandler handler = new NMSHandler();

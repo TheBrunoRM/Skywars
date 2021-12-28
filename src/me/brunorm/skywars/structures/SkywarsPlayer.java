@@ -1,6 +1,11 @@
 package me.brunorm.skywars.structures;
 
+import java.util.Date;
+
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+
+import me.brunorm.skywars.Skywars;
 
 public class SkywarsPlayer {
 	
@@ -10,11 +15,32 @@ public class SkywarsPlayer {
 	boolean spectator = false;
 	int number;
 	SavedPlayer savedPlayer;
+	Player lastHit;
+	long lastHitTimestamp;
 	
 	SkywarsPlayer(Player player, Arena arena, int number) {
 		this.player = player;
 		this.arena = arena;
 		this.number = number;
+	}
+	
+	public Player getLastHit() {
+		return lastHit;
+	}
+	
+	public void setLastHit(Player lastHit) {
+		this.lastHit = lastHit;
+		if(lastHit == null) return;
+		long timestamp = new Date().getTime();
+		this.lastHitTimestamp = timestamp;
+		Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
+			@Override
+			public void run() {
+				if(timestamp == lastHitTimestamp) {
+					setLastHit(null);
+				}
+			}
+		}, Skywars.get().getConfig().getLong("lastHitResetCooldown")*20);
 	}
 	
 	public SavedPlayer getSavedPlayer() {
