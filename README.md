@@ -58,11 +58,13 @@ To create a sign, make it like this:
   - Maps
   - Kits
   - Easy map setup menu
+  - Custom language file (not 100% of the messages, still working on it)
+  - Configuration options
+  - Chest refills
 
 ## To do
-  - Custom language file
-  - Lots of configuration options
-  - Game events (chest refills, etc)
+  - More game events
+  - More configuration options
   - Party options (?)
   - Team games
   - Code optimization
