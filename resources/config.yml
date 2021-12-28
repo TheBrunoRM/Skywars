@@ -9,7 +9,6 @@ lobby:
 url: "&ewww.example.com"
 
 # you may want to disable these
-
 signsEnabled: true
 messageSounds: true
 disableWeather: true
@@ -18,7 +17,6 @@ disableWeather: true
 lastHitResetCooldown: 15
 
 # this is displayed when the game starts
-
 startLines:
   - "&a&l---------------------------------------------"
   - ""
@@ -34,14 +32,12 @@ startLines:
 # you can disable the plugin commands here
 # possible options: start, forcestart, leave, where, skywars
 # you probably wont want to disable the last one lol
-
 disabledCommands: []
 
 # this is represented as
 # slot: item type
 # for when the player enters and arena
 # and for when it enters spectator mode
-
 items:
   waiting:
     0: KIT_SELECTOR
@@ -54,7 +50,8 @@ items:
 
 # this is self explanatory
 # its the item types
-
+# you can make custom items by adding them here
+# remember to add the details in the lang file
 item_types:
   KIT_SELECTOR: BOW
   GAME_OPTIONS: PAPER
