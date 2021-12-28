@@ -65,7 +65,6 @@ To create a sign, make it like this:
 ## To do
   - More game events
   - More configuration options
-  - team support
   - Party options (?)
   - Team games
   - Code optimization
