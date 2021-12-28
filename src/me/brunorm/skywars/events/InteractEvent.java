@@ -2,6 +2,7 @@ package me.brunorm.skywars.events;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -30,13 +31,18 @@ public class InteractEvent implements Listener {
 			SkywarsPlayer swp = arena.getPlayer(player);
 			ItemStack item;
 			item = player.getItemInHand();
-			if (item.getType() == XMaterial.BOW.parseMaterial()) {
-				if (arena.getStatus() == ArenaStatus.STARTING) {
+			String kitSelectorTypeName = Skywars.get().getConfig().getString("item_types.KIT_SELECTOR");
+			Material kitSelectorType = XMaterial.matchXMaterial(kitSelectorTypeName).get().parseMaterial();
+			if (item.getType() == kitSelectorType) {
+				if (arena.getStatus() == ArenaStatus.WAITING ||
+						arena.getStatus() == ArenaStatus.STARTING) {
 					KitsMenu.open(player);
 					event.setCancelled(true);
 				}
 			}
-			if (item.getType() == XMaterial.RED_BED.parseMaterial()) {
+			String leaveTypeName = Skywars.get().getConfig().getString("item_types.LEAVE");
+			Material leaveType = XMaterial.matchXMaterial(leaveTypeName).get().parseMaterial();
+			if (item.getType() == leaveType) {
 				if (arena.getStatus() != ArenaStatus.PLAYING
 						|| swp.isSpectator()) {
 					arena.leavePlayer(swp);
