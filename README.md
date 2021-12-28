@@ -2,6 +2,8 @@
 
 For Minecraft servers from version 1.8 to 1.12 (I plan to add support to more versions in the future)
 
+**Resource page:** https://www.spigotmc.org/resources/skywars.98709/
+
 # Table of Contents
 1. [How to install](#how-to-install)
 2. [How to use](#how-to-use)
