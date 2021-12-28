@@ -12,8 +12,9 @@ public class MessageSound implements Listener {
 
 	@EventHandler
 	void onMessage(AsyncPlayerChatEvent event) {
+		float random = (float) (Math.random() + 0.5f);
 		for(Player player : Bukkit.getOnlinePlayers()) {
-			player.playSound(player.getLocation(), Sounds.ITEM_PICKUP.bukkitSound(), 1, (float) (Math.random() + 0.5f));
+			player.playSound(player.getLocation(), Sounds.ITEM_PICKUP.bukkitSound(), 1, random);
 		}
 	}
 	

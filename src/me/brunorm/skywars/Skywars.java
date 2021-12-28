@@ -67,8 +67,7 @@ public class Skywars extends JavaPlugin {
 	
 	public YamlConfiguration scoreboardConfig;
 	public YamlConfiguration langConfig;
-	public HashMap<Player, YamlConfiguration> playerConfigurations =
-			new HashMap<Player, YamlConfiguration>();
+
 	public HashMap<Player, Location> playerLocations =
 			new HashMap<Player, Location>();
 	
@@ -219,18 +218,21 @@ public class Skywars extends JavaPlugin {
 
 	// events
 	public void loadEvents() {
-		getServer().getPluginManager().registerEvents(new Events(), this);
-		getServer().getPluginManager().registerEvents(new GamesMenu(), this);
-		if(getConfig().getBoolean("signsEnabled") == true) {
-			Bukkit.getConsoleSender().sendMessage(Messager.colorFormat("%s &eRegistering sign events...", prefix));
+		if(getConfig().getBoolean("signsEnabled")) {
 			getServer().getPluginManager().registerEvents(new SignEvents(), this);
 		}
+		if(getConfig().getBoolean("messageSounds")) {
+			getServer().getPluginManager().registerEvents(new MessageSound(), this);
+		}
+		if(getConfig().getBoolean("disableWeather")) {			
+			getServer().getPluginManager().registerEvents(new DisableWeather(), this);
+		}
+		getServer().getPluginManager().registerEvents(new Events(), this);
+		getServer().getPluginManager().registerEvents(new GamesMenu(), this);
 		getServer().getPluginManager().registerEvents(new ArenaMenu(), this);
 		getServer().getPluginManager().registerEvents(new KitsMenu(), this);
 		getServer().getPluginManager().registerEvents(new ArenaSetup(), this);
 		getServer().getPluginManager().registerEvents(new ChestManager(), this);
-		getServer().getPluginManager().registerEvents(new MessageSound(), this);
-		getServer().getPluginManager().registerEvents(new DisableWeather(), this);
 		getServer().getPluginManager().registerEvents(new ArenaSetupMenu(), this);
 		getServer().getPluginManager().registerEvents(new PlayerInventoryManager(), this);
 	}
@@ -559,6 +561,9 @@ public class Skywars extends JavaPlugin {
 		return null;
 	}
 
+	public HashMap<Player, YamlConfiguration> playerConfigurations =
+			new HashMap<Player, YamlConfiguration>();
+	
 	public File getPlayerConfigFile(Player player) {
 		return new File(getDataFolder() + "/players", player.getUniqueId() + ".yml");
 	}

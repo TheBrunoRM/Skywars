@@ -22,7 +22,7 @@ public class Messager {
 		String msg = Skywars.get().langConfig.getString(name);
 		if(msg == null) return null;
 		for(int i = 0; i < format.length; i++) {
-			msg = msg.replaceAll(String.format("\\{%s\\}", i), (String) format[i]);
+			msg = msg.replaceAll(String.format("\\{%s\\}", i), String.valueOf(format[i]));
 		}
 		return Messager.color(msg);
 	}

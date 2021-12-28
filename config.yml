@@ -9,6 +9,7 @@ lobby:
 url: "&ewww.example.com"
 
 signsEnabled: true
+messageSounds: true
 
 startLines:
   - "&a&l---------------------------------------------"

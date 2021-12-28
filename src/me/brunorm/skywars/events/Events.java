@@ -106,7 +106,11 @@ public class Events implements Listener {
 			if(victimArena != null) {				
 				SkywarsPlayer swVictim = victimArena.getPlayer(victim);
 				if(livingEntity.getHealth() - event.getDamage() <= 0) {
-					event.setCancelled(true);
+					// instead of cancelling the event,
+					// we set the damage to 0 so the damage sound sounds
+					// and it doesnt feel like the player just disappears when we hit
+					//event.setCancelled(true);
+					event.setDamage(0);
 					victimArena.makeSpectator(swVictim, attacker);
 				}
 			}
