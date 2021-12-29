@@ -92,11 +92,25 @@ public class Skywars extends JavaPlugin {
 		lobbyConfig.set("lobby.world", lobby.getWorld().getName());
 		ConfigurationUtils.saveConfiguration(lobbyConfig, "lobby.yml");
 		this.lobby = lobby;
-		System.out.println("lobby set");
 	}
 
 	public Location getLobby() {
 		return this.lobby;
+	}
+	
+	public void setLobbyFromConfig() {
+		if (lobbyConfig.get("lobby") != null) {
+			String worldName = lobbyConfig.getString("lobby.world");
+			if(worldName != null) {				
+				World world = Bukkit.getWorld(worldName);
+				if(world != null) {					
+					double x = lobbyConfig.getDouble("lobby.x");
+					double y = lobbyConfig.getDouble("lobby.y");
+					double z = lobbyConfig.getDouble("lobby.z");
+					this.lobby = new Location(world, x, y, z);
+				} else sendMessage("&cCould not set main lobby in world &b%s", worldName);
+			}
+		} else this.lobby = null;
 	}
 	
 	public void onEnable() {
@@ -123,21 +137,6 @@ public class Skywars extends JavaPlugin {
 			sendMessage("&eHooked with Vault!");
 			sendMessage("&eEconomy service provider: &a%s",
 					economyProvider.getPlugin().getName());
-		}
-		
-		// load lobby
-		if (getConfig().get("lobby") != null) {
-			String worldName = getConfig().getString("lobby.world");
-			if(worldName != null) {				
-				World world = Bukkit.getWorld(worldName);
-				if(world != null) {					
-					double x = getConfig().getDouble("lobby.x");
-					double y = getConfig().getDouble("lobby.y");
-					double z = getConfig().getDouble("lobby.z");
-					this.lobby = new Location(world, x, y, z);
-				} else getLogger().info(Messager.color(
-						String.format("%s &ccould not set lobby in world &7%s", prefix, worldName)));
-			}
 		}
 		
 		// done
@@ -644,6 +643,9 @@ public class Skywars extends JavaPlugin {
 		
 		// lobby.yml
 		lobbyConfig = ConfigurationUtils.loadConfiguration("lobby.yml", "resources/lobby.yml");
+		
+		// load lobby
+		setLobbyFromConfig();
 	}
     
     public void sendMessage(String text, Object... format) {
