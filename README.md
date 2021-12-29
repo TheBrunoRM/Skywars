@@ -2,6 +2,8 @@
 
 For Minecraft servers from version 1.8 to 1.12 (I plan to add support to more versions in the future)
 
+**Resource page:** https://www.spigotmc.org/resources/skywars.98709/
+
 # Table of Contents
 1. [How to install](#how-to-install)
 2. [How to use](#how-to-use)
@@ -56,11 +58,13 @@ To create a sign, make it like this:
   - Maps
   - Kits
   - Easy map setup menu
+  - Custom language file (not 100% of the messages, still working on it)
+  - Configuration options
+  - Chest refills
 
 ## To do
-  - Custom language file
-  - Lots of configuration options
-  - Game events (chest refills, etc)
+  - More game events
+  - More configuration options
   - Party options (?)
   - Team games
   - Code optimization
