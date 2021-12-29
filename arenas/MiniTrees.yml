@@ -1,3 +1,7 @@
+# ARENA CONFIGURATION FILE
+# This file is modificated through the game
+# That's why it doesn't have any comments in it.
+
 minPlayers: 2
 maxPlayers: 12
 disabled: false

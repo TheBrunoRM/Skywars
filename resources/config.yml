@@ -1,12 +1,10 @@
-# set the main lobby using /sw setmainlobby
-lobby:
-  x:
-  y:
-  z:
-  world:
+# Skywars configuration file
 
-# the url that appears on the scoreboard
+# the url for displaying the %url% placeholder (scoreboard)
 url: "&ewww.example.com"
+
+# the format for displaying the %date% placeholder (scoreboard)
+dateFormat: "dd/MM/yyyy"
 
 # you may want to disable these
 signsEnabled: true
@@ -15,6 +13,24 @@ disableWeather: true
 
 # this is the reset cooldown for last hits (in seconds)
 lastHitResetCooldown: 15
+
+# update task for actionbar and scoreboard
+taskUpdate:
+  disable: false
+  interval: 1 # seconds
+
+time: # seconds
+  starting: 10
+  ending: 10
+
+economy:
+  enabled: true
+  play: 10
+  kill: 25
+  win: 100
+
+# this is used to format money
+decimalFormat: "0.#"
 
 # this is displayed when the game starts
 startLines:
@@ -31,13 +47,19 @@ startLines:
 
 # you can disable the plugin commands here
 # possible options: start, forcestart, leave, where, skywars
-# you probably wont want to disable the last one lol
+# you probably dont want to disable the last one lol
 disabledCommands: []
 
 # this is represented as
 # slot: item type
-# for when the player enters and arena
-# and for when it enters spectator mode
+# possible item types:
+# KIT_SELECTOR - clickable kit menu to select kit
+# GAME_OPTIONS - not yet implemented
+# LEAVE - same as /sw leave or /leave
+# TELEPORTER - not yet implemented - menu for selecting someone to spectate
+# SPECTATOR_OPTIONS - not yet implemented - spectator options as speed, night vision, etc
+# ARENAS_MENU - clickable arena menu to join a game
+# JOIN_RANDOM_ARENA - instantly join an arena
 items:
   waiting:
     0: KIT_SELECTOR
@@ -47,14 +69,21 @@ items:
     0: TELEPORTER
     1: SPECTATOR_OPTIONS
     8: LEAVE
+  # if for some reason you want to give items when the game starts
+  # you can do so here
+  # (not yet implemented)
+  playing: {}
 
 # this is self explanatory
 # its the item types
 # you can make custom items by adding them here
-# remember to add the details in the lang file
+# you can add the details (name, description) in the lang file
 item_types:
   KIT_SELECTOR: BOW
   GAME_OPTIONS: PAPER
   LEAVE: BED
   SPECTATOR_OPTIONS: REDSTONE_COMPARATOR
   TELEPORTER: COMPASS
+
+debug:
+  bigCases: false

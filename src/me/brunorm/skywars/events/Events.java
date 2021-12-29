@@ -47,9 +47,9 @@ public class Events implements Listener {
 		if (arena != null) {
 			SkywarsPlayer swp = arena.getPlayer(event.getPlayer());
 			if(!arena.isInBoundaries(event.getPlayer())) {
-				if(arena.getWinner() != swp
-						&& arena.getStatus() != ArenaStatus.PLAYING
-						&& !swp.isSpectator())
+				if ((arena.getStatus() != ArenaStatus.PLAYING
+						&& arena.getWinner() != swp)
+						|| swp.isSpectator())
 					arena.leavePlayer(player);
 				else if(!swp.isSpectator())
 					arena.makeSpectator(swp, null);
@@ -83,7 +83,6 @@ public class Events implements Listener {
 						arena.goBackToCenter(player);
 					} else if (event.getCause() == DamageCause.VOID) {
 						event.setCancelled(true);
-						System.out.println("player damaged, made spectator");
 						arena.makeSpectator(swPlayer, null);
 					}
 				}
@@ -135,7 +134,8 @@ public class Events implements Listener {
 			if (arena != null) {
 				SkywarsPlayer swp = arena.getPlayer(player);
 				if (swp != null) {
-					if (arena.getStatus() != ArenaStatus.PLAYING
+					if ((arena.getStatus() != ArenaStatus.PLAYING
+							&& arena.getWinner() != swp)
 							|| swp.isSpectator()) {
 						event.setCancelled(true);
 					}
@@ -151,7 +151,8 @@ public class Events implements Listener {
 		if (arena != null) {
 			SkywarsPlayer swp = arena.getPlayer(player);
 			if (swp != null) {
-				if (arena.getStatus() != ArenaStatus.PLAYING
+				if ((arena.getStatus() != ArenaStatus.PLAYING
+						&& arena.getWinner() != swp)
 						|| swp.isSpectator()) {
 					event.setCancelled(true);
 				}
@@ -166,7 +167,8 @@ public class Events implements Listener {
 		if (arena != null) {
 			SkywarsPlayer swp = arena.getPlayer(player);
 			if (swp != null) {
-				if (arena.getStatus() == ArenaStatus.WAITING
+				if ((arena.getStatus() == ArenaStatus.WAITING
+						&& arena.getWinner() != swp)
 						|| swp.isSpectator()) {
 					event.setCancelled(true);
 				}
@@ -182,7 +184,8 @@ public class Events implements Listener {
 		if(arena != null) {
 			SkywarsPlayer swp = arena.getPlayer(player);
 			if (swp != null) {
-				if (arena.getStatus() != ArenaStatus.PLAYING
+				if ((arena.getStatus() != ArenaStatus.PLAYING
+						&& arena.getWinner() != swp)
 						|| swp.isSpectator()) {					
 					event.setCancelled(true);
 				}
@@ -201,7 +204,8 @@ public class Events implements Listener {
 			if(arena != null) {
 				SkywarsPlayer swp = arena.getPlayer(player);
 				if (swp != null) {
-					if (arena.getStatus() != ArenaStatus.PLAYING
+					if ((arena.getStatus() != ArenaStatus.PLAYING
+							&& arena.getWinner() != swp)
 							|| swp.isSpectator()) {
 						if (entity instanceof ExperienceOrb){
 							event.setCancelled(true);
@@ -222,7 +226,8 @@ public class Events implements Listener {
 		if(arena != null) {
 			SkywarsPlayer swp = arena.getPlayer(player);
 			if (swp != null) {
-				if (arena.getStatus() != ArenaStatus.PLAYING
+				if ((arena.getStatus() != ArenaStatus.PLAYING
+						&& arena.getWinner() != swp)
 						|| swp.isSpectator()) {
 					// TODO: do something since this cant be cancelled
 					//event.setCancelled(true);
@@ -240,7 +245,8 @@ public class Events implements Listener {
 			if(arena != null) {
 				SkywarsPlayer swp = arena.getPlayer(player);
 				if (swp != null) {
-					if(arena.getStatus() != ArenaStatus.PLAYING
+					if((arena.getStatus() != ArenaStatus.PLAYING
+							&& arena.getWinner() != swp)
 							|| swp.isSpectator()) {
 						event.setCancelled(true);
 					}

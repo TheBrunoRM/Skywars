@@ -1,2 +1,12 @@
+# PLAYER CONFIGURATION FILE
+
 kit: default
-kills: 0
+stats:
+  solo:
+    kills: 0
+    deaths: 0
+    wins: 0
+  team:
+    kills: 0
+    deaths: 0
+    wins: 0

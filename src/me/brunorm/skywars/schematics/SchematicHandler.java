@@ -27,7 +27,7 @@ public class SchematicHandler {
 		int x = (int) values.get("x").getValue();
 		int y = (int) values.get("y").getValue();
 		int z = (int) values.get("z").getValue();
-		System.out.println("schematic values: " + x + ", " + y + ", " + z);
+		//System.out.println("schematic values: " + x + ", " + y + ", " + z);
 		return new Location(world,
 			x + offset.getBlockX(),
 			y + offset.getBlockY(),

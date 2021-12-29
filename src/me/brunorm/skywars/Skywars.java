@@ -2,12 +2,8 @@ package me.brunorm.skywars;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,10 +14,11 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandExecutor;
-import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -52,22 +49,27 @@ import net.milkbowl.vault.economy.Economy;
 public class Skywars extends JavaPlugin {
 	
 	// get plugin data
-	public String version = getDescription().getVersion();
 	public String name = getDescription().getName();
+	public String version = getDescription().getVersion();
 	public List<String> authors = getDescription().getAuthors();
-	public String prefix = Messager.colorFormat("&6[&e%s&6]", name);
-	public static String arenasPath;
+	private String prefix = Messager.colorFormat("&6[&e%s&6]&e", name);
 	public static String kitsPath;
+	public static String arenasPath;
 	public static String schematicsPath;
 	
+	public static boolean economyEnabled;
 	Economy economy;
+	RegisteredServiceProvider<Economy> economyProvider;
 	
 	public Economy getEconomy() {
 		return economy;
 	}
 	
+	public static YamlConfiguration config;
+	
 	public YamlConfiguration scoreboardConfig;
 	public YamlConfiguration langConfig;
+	public YamlConfiguration lobbyConfig;
 
 	public HashMap<Player, Location> playerLocations =
 			new HashMap<Player, Location>();
@@ -84,10 +86,11 @@ public class Skywars extends JavaPlugin {
 	private Location lobby;
 
 	public void setLobby(Location lobby) {
-		getConfig().set("lobby.x", lobby.getX());
-		getConfig().set("lobby.y", lobby.getY());
-		getConfig().set("lobby.z", lobby.getZ());
-		getConfig().set("lobby.world", lobby.getWorld().getName());
+		lobbyConfig.set("lobby.x", lobby.getX());
+		lobbyConfig.set("lobby.y", lobby.getY());
+		lobbyConfig.set("lobby.z", lobby.getZ());
+		lobbyConfig.set("lobby.world", lobby.getWorld().getName());
+		ConfigurationUtils.saveConfiguration(lobbyConfig, "lobby.yml");
 		this.lobby = lobby;
 		System.out.println("lobby set");
 	}
@@ -95,7 +98,7 @@ public class Skywars extends JavaPlugin {
 	public Location getLobby() {
 		return this.lobby;
 	}
-
+	
 	public void onEnable() {
 		
 		// set stuff
@@ -108,21 +111,19 @@ public class Skywars extends JavaPlugin {
 		serverPackageVersion = packageName.substring(packageName.lastIndexOf('.') + 1);
 		nmsHandler = new NMSHandler();
 		
-		if(setupEconomy())
-			Bukkit.getConsoleSender().sendMessage(Messager.color(
-					String.format("%s &aloaded economy!", prefix)));
-		/*
-		else
-			Bukkit.getConsoleSender().sendMessage(Messager.color(
-					String.format("%s &cVault not found.", prefix)));
-		*/
 		// load stuff
-		// loadPlayers();
 		loadConfig();
 		loadCommands();
 		loadEvents();
 		loadArenas();
 		loadKits();
+		
+		economyEnabled = Skywars.get().getConfig().getBoolean("economy.enabled");
+		if(economyEnabled && setupEconomy()) {
+			sendMessage("&eHooked with Vault!");
+			sendMessage("&eEconomy service provider: &a%s",
+					economyProvider.getPlugin().getName());
+		}
 		
 		// load lobby
 		if (getConfig().get("lobby") != null) {
@@ -135,28 +136,27 @@ public class Skywars extends JavaPlugin {
 					double z = getConfig().getDouble("lobby.z");
 					this.lobby = new Location(world, x, y, z);
 				} else getLogger().info(Messager.color(
-				String.format("%s &ccould not set lobby in world &7%s", prefix, worldName)));
+						String.format("%s &ccould not set lobby in world &7%s", prefix, worldName)));
 			}
 		}
 		
 		// done
-		Bukkit.getConsoleSender().sendMessage(Messager.color(
-				String.format("%s &ahas been enabled: &bv%s", prefix, version)));
-		//Bukkit.getConsoleSender().sendMessage(Messager.color(
-		//		String.format("%s &eis running on &b%s", prefix, serverPackageVersion)));
-
-		Bukkit.getScheduler().runTaskTimer(Skywars.get(), new Runnable() {
-			@Override
-			public void run() {
-				for (Player player : Bukkit.getOnlinePlayers()) {
-					SkywarsScoreboard.update(player);
-					SkywarsActionbar.update(player);
+		sendMessage("&ahas been enabled: &bv%s", version);
+		
+		if(!Skywars.get().getConfig().getBoolean("debug.disableUpdateTask"))
+			Bukkit.getScheduler().runTaskTimer(Skywars.get(), new Runnable() {
+				@Override
+				public void run() {
+					for (Player player : Bukkit.getOnlinePlayers()) {
+						SkywarsScoreboard.update(player);
+						SkywarsActionbar.update(player);
+					}
 				}
-			}
-		}, 0L, 20L);
+			}, 0L, Skywars.get().getConfig().getLong("taskUpdateInterval")*20);
 	}
 	
 	public void onDisable() {
+		
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			Arena arena = getPlayerArena(player);
 			if (arena != null) {
@@ -167,7 +167,7 @@ public class Skywars extends JavaPlugin {
 			player.getInventory().removeItem(ArenaSetup.item);
 			SkywarsUtils.TeleportPlayerBack(player);
 		});
-		System.out.println("Stopping arenas...");
+		getLogger().info(Messager.colorFormat("%s &eStopping arenas...", prefix));
 		for (Arena arena : arenas) {
 			if(arena.getStatus() == ArenaStatus.PLAYING
 					|| arena.getStatus() == ArenaStatus.ENDING) {
@@ -188,55 +188,38 @@ public class Skywars extends JavaPlugin {
 	public void Reload() {
 		loadConfig();
 		loadArenas();
-		kits.clear();
 		loadKits();
 	}
 
     private boolean setupEconomy() {
-        RegisteredServiceProvider<Economy> rsp =
-        		getServer().getServicesManager()
-        		.getRegistration(net.milkbowl.vault.economy.Economy.class);
-    	System.out.println("economy provider: " + rsp);
-        if (rsp == null) {
-            return false;
-        }
-        economy = rsp.getProvider();
-    	System.out.println("economy: " + economy);
+    	if(!economyEnabled) return false;
+        economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+        if (economyProvider != null)   	
+        	economy = economyProvider.getProvider();
         return economy != null;
     }
-	
-	// player data
-	public void loadPlayers() {
-		File playersFile = new File(this.getDataFolder(), "players.yml");
-		if (!playersFile.exists()) {
-			try {
-				playersFile.createNewFile();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	// events
+    
 	public void loadEvents() {
-		if(getConfig().getBoolean("signsEnabled")) {
-			getServer().getPluginManager().registerEvents(new SignEvents(), this);
+		FileConfiguration config = getConfig();
+		PluginManager pluginManager = getServer().getPluginManager();
+		if(config.getBoolean("signsEnabled")) {
+			pluginManager.registerEvents(new SignEvents(), this);
 		}
-		if(getConfig().getBoolean("messageSounds")) {
-			getServer().getPluginManager().registerEvents(new MessageSound(), this);
+		if(config.getBoolean("messageSounds")) {
+			pluginManager.registerEvents(new MessageSound(), this);
 		}
-		if(getConfig().getBoolean("disableWeather")) {			
-			getServer().getPluginManager().registerEvents(new DisableWeather(), this);
+		if(config.getBoolean("disableWeather")) {			
+			pluginManager.registerEvents(new DisableWeather(), this);
 		}
-		getServer().getPluginManager().registerEvents(new InteractEvent(), this);
-		getServer().getPluginManager().registerEvents(new Events(), this);
-		getServer().getPluginManager().registerEvents(new GamesMenu(), this);
-		getServer().getPluginManager().registerEvents(new ArenaMenu(), this);
-		getServer().getPluginManager().registerEvents(new KitsMenu(), this);
-		getServer().getPluginManager().registerEvents(new ArenaSetup(), this);
-		getServer().getPluginManager().registerEvents(new ChestManager(), this);
-		getServer().getPluginManager().registerEvents(new ArenaSetupMenu(), this);
-		getServer().getPluginManager().registerEvents(new PlayerInventoryManager(), this);
+		pluginManager.registerEvents(new InteractEvent(), this);
+		pluginManager.registerEvents(new Events(), this);
+		pluginManager.registerEvents(new GamesMenu(), this);
+		pluginManager.registerEvents(new ArenaMenu(), this);
+		pluginManager.registerEvents(new KitsMenu(), this);
+		pluginManager.registerEvents(new ArenaSetup(), this);
+		pluginManager.registerEvents(new ChestManager(), this);
+		pluginManager.registerEvents(new ArenaSetupMenu(), this);
+		pluginManager.registerEvents(new PlayerInventoryManager(), this);
 	}
 
 	// commands
@@ -256,53 +239,22 @@ public class Skywars extends JavaPlugin {
 				Messager.colorFormat("%s &7Skipping command &c%s&e...", prefix, cmd));
 		}
 	}
-
-	// config file
-	public void loadConfig() {
-		
-		// config.yml
-		/*
-		File config = new File(this.getDataFolder(), "config.yml");
-		if (!config.exists()) {
-			saveDefaultConfig();
-		}
-		Skywars.config = getConfig();
-		*/
-		loadConfigFile("config.yml", "resources/config.yml");
-
-		// scoreboard.yml
-		scoreboardConfig = YamlConfiguration.loadConfiguration(loadConfigFile("scoreboard.yml", "resources/scoreboard.yml"));
-		
-		// lang.yml
-		langConfig = YamlConfiguration.loadConfiguration(loadConfigFile("lang.yml", "resources/lang.yml"));
-	}
-	
-	public File loadConfigFile(String name) {
-		return loadConfigFile(name, name);
-	}
-	
-	public File loadConfigFile(String name, String defaultFileName) {
-		File file = new File(getDataFolder(), name);
-		if (!file.exists()) {
-			copyDefaultContentsToFile(defaultFileName, file);
-		}
-		createMissingKeys(defaultFileName, file);
-		return file;
-	}
 	
 	public void loadKits() {
+		kits.clear();
 		File folder = new File(kitsPath);
 		if (!folder.exists()) {
 			folder.mkdirs();
 		}
 		if(folder.listFiles().length <= 0) {
 			Bukkit.getConsoleSender().sendMessage(Messager.color("&eSetting up default kit."));
-			copyDefaultContentsToFile("kits/default.yml", new File(kitsPath, "default.yml"));
+			ConfigurationUtils.copyDefaultContentsToFile("kits/default.yml", new File(kitsPath, "default.yml"));
 		}
 		for (File file : folder.listFiles()) {
 			String name = file.getName().replaceFirst("[.][^.]+$", "");
-			createMissingKeys("kits/default.yml", file);
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+			ConfigurationUtils.createMissingKeys(config,
+					ConfigurationUtils.getDefaultConfig("kits/default.yml"));
 			
 			// create kit and set values from config
 			Kit kit = new Kit(name);
@@ -330,7 +282,7 @@ public class Skywars extends JavaPlugin {
 			
 			// add kit to the arena list
 			kits.add(kit);
-			Bukkit.getConsoleSender().sendMessage(Messager.colorFormat("&eLoaded kit: &a%s", kit.getName()));
+			sendMessage("&eLoaded kit: &a%s", kit.getName());
 		}
 	}
 	
@@ -338,19 +290,19 @@ public class Skywars extends JavaPlugin {
 		arenas.clear();
 		File folder = new File(arenasPath);
 		if (!folder.exists()) {
-			folder.mkdir();
+			folder.mkdirs();
 		}
 		File defaultArenaFile = null;
 		if(folder.listFiles().length <= 0) {
 			Bukkit.getConsoleSender().sendMessage(Messager.color("&eSetting up default arena."));
 			defaultArenaFile = new File(arenasPath, "MiniTrees.yml");
-			copyDefaultContentsToFile("arenas/MiniTrees.yml", defaultArenaFile);
+			ConfigurationUtils.copyDefaultContentsToFile("arenas/MiniTrees.yml", defaultArenaFile);
 		}
 		File schematics = new File(schematicsPath);
 		if(!schematics.exists()) schematics.mkdir();
 		if(schematics.listFiles().length <= 0) {
 			Bukkit.getConsoleSender().sendMessage(Messager.color("&eSetting up default schematic."));
-			copyDefaultContentsToFile("schematics/mini_trees.schematic",
+			ConfigurationUtils.copyDefaultContentsToFile("schematics/mini_trees.schematic",
 					new File(schematicsPath, "mini_trees.schematic"));
 		}
 		for (File arenaFile : folder.listFiles()) {
@@ -415,11 +367,11 @@ public class Skywars extends JavaPlugin {
 			} else System.out.println("Warning: world not set for arena " + arena.getName());
 			
 			arenas.add(arena);
-			Bukkit.getConsoleSender().sendMessage(Messager.colorFormat("&eLoaded arena: &a%s", arena.getName()));
+			sendMessage("&eLoaded arena: &a%s", arena.getName());
 			
 			// this is enabled when the server reloads or when setting up a default arena
 			if(config.getBoolean("restartNeeded")) {
-				Bukkit.getConsoleSender().sendMessage(Messager.colorFormat("&c&lNeeded to restart arena %s", arena.getName()));
+				sendMessage("&c&lNeeded to restart arena %s", arena.getName());
 				arena.clear();
 				config.set("restartNeeded", null);
 				arena.saveConfig();
@@ -427,7 +379,69 @@ public class Skywars extends JavaPlugin {
 		}
 	}
 	
+	public static void createBigCase(Location location, XMaterial material) {
+		int[][] blocks = {
+				// base
+				{-1,-1,-1},{0,-1,-1},{1,-1,-1},
+				{-1,-1,0},{0,-1,0},{1,-1,0},
+				{-1,-1,1},{0,-1,1},{1,-1,1},
+				
+				// top
+				{-1,3,1},{0,3,-1},{1,3,-1},
+				{-1,3,0},{0,3,0},{1,3,0},
+				{-1,3,1},{0,3,1},{1,3,1},
+				
+				// left wall
+				{2,0,-1},{2,0,0},{2,0,1},
+				{2,1,-1},{2,1,0},{2,1,1},
+				{2,2,-1},{2,2,0},{2,2,1},
+				
+				// front wall
+				{-1,0,2},{0,0,2},{1,0,2},
+				{-1,1,2},{0,1,2},{1,1,2},
+				{-1,2,2},{0,2,2},{1,2,2},
+				
+				// right wall
+				{-2,0,-1},{-2,0,0},{-2,0,1},
+				{-2,1,-1},{-2,1,0},{-2,1,1},
+				{-2,2,-1},{-2,2,0},{-2,2,1},
+				
+				// back wall
+				{-1,0,-2},{0,0,-2},{1,0,-2},
+				{-1,1,-2},{0,1,-2},{1,1,-2},
+				{-1,2,-2},{0,2,-2},{1,2,-2},
+		};
+		int[][] airBlocks = {
+				{-1,0,-1},{0,0,-1},{1,0,-1},
+				{-1,0,0},{0,0,0},{1,0,0},
+				{-1,0,1},{0,0,1},{1,0,1},
+				
+				{-1,1,-1},{0,1,-1},{1,1,-1},
+				{-1,1,0},{0,1,0},{1,1,0},
+				{-1,1,1},{0,1,1},{1,1,1},
+				
+				{-1,2,-1},{0,2,-1},{1,2,-1},
+				{-1,2,0},{0,2,0},{1,2,0},
+				{-1,2,1},{0,2,1},{1,2,1},
+		};
+		for (int[] relative : airBlocks) {
+			Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
+			block.setType(XMaterial.AIR.parseMaterial());
+		}
+		for (int[] relative : blocks) {
+			Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
+			block.setType(material.parseMaterial());
+			if(!XMaterial.isNewVersion()) {					
+				block.setData(material.getData());
+			}
+		}
+	}
+	
 	public static void createCase(Location location, XMaterial material) {
+		if(config.getBoolean("debug.bigCases")) {
+			createBigCase(location, material);
+			return;
+		}
 		int[][] blocks = {
 				// first layer
 				{ -1, 0, 0 }, { 1, 0, 0 }, { 0, 0, -1 }, { 0, 0, 1 },
@@ -442,8 +456,14 @@ public class Skywars extends JavaPlugin {
 				// top joints
 				{ -1, 3, 0 }, { 1, 3, 0 }, { 0, 3, -1 }, { 0, 3, 1 },
 		};
-		for (int i = 0; i < blocks.length; i++) {
-			int[] relative = blocks[i];
+		int[][] airBlocks = {
+				{ 0, 0, 0 }, { 0, 1, 0 }, { 0, 2, 0 }
+		};
+		for (int[] relative : airBlocks) {
+			Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
+			block.setType(XMaterial.AIR.parseMaterial());
+		}
+		for (int[] relative : blocks) {
 			Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
 			block.setType(material.parseMaterial());
 			if(!XMaterial.isNewVersion()) {					
@@ -535,39 +555,23 @@ public class Skywars extends JavaPlugin {
 		return null;
 	}
 	
-	/*
-	public void PasteSchematicWorldEdit(String schematicName, Location pasteLoc) {
-		try {
-			File dir = new File(Skywars.get().getDataFolder(), "/schematics/" + schematicName);
-
-			EditSession editSession = new EditSession(new BukkitWorld(pasteLoc.getWorld()), 999999999);
-			editSession.enableQueue();
-
-			SchematicFormat schematic = SchematicFormat.getFormat(dir);
-			CuboidClipboard clipboard = schematic.load(dir);
-
-			clipboard.paste(editSession, BukkitUtil.toVector(pasteLoc), false);
-			editSession.flushQueue();
-			System.out.println(String.format("pasted schematic %s", schematicName));
-		} catch (DataException | IOException ex) {
-			ex.printStackTrace();
-		} catch (MaxChangedBlocksException ex) {
-			ex.printStackTrace();
-		}
-	}
-	*/
-
-	public File getSchematicFile(String schematicName) {
-		File schematic = new File(Skywars.get().getDataFolder(), "/schematics/" + schematicName);
-		if(schematic.exists()) return schematic;
-		return null;
-	}
-
 	public HashMap<Player, YamlConfiguration> playerConfigurations =
 			new HashMap<Player, YamlConfiguration>();
 	
 	public File getPlayerConfigFile(Player player) {
 		return new File(getDataFolder() + "/players", player.getUniqueId() + ".yml");
+	}
+	
+	public File getSchematicFile(String schematicName) {
+		File schematic = new File(Skywars.get().getDataFolder(), "/schematics/" + schematicName);
+		if(!schematic.exists())
+			try {
+				schematic.createNewFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		return schematic;
 	}
 	
 	public YamlConfiguration getPlayerConfig(Player player) {
@@ -577,7 +581,7 @@ public class Skywars extends JavaPlugin {
 		if(!folder.exists()) folder.mkdir();
 		File file = getPlayerConfigFile(player);
 		if(!file.exists())
-			copyDefaultContentsToFile("players/default.yml", file);
+			ConfigurationUtils.copyDefaultContentsToFile("players/default.yml", file);
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		playerConfigurations.put(player, config);
 		return config;
@@ -586,8 +590,10 @@ public class Skywars extends JavaPlugin {
 	public void savePlayerConfig(Player player) {
 		try {
 			File file = getPlayerConfigFile(player);
-			getPlayerConfig(player).save(file);
-			createMissingKeys("players/default.yml", file);
+			YamlConfiguration config = getPlayerConfig(player);
+			config.save(file);
+			ConfigurationUtils.createMissingKeys(config,
+					ConfigurationUtils.getDefaultConfig("players/default.yml"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -625,66 +631,22 @@ public class Skywars extends JavaPlugin {
 		setPlayerTotalKills(player, getPlayerTotalKills(player)+1);
 	}
 	
-    public static final int DEFAULT_BUFFER_SIZE = 8192;
-	
-    private static void copyInputStreamToFile(InputStream inputStream, File file)
-            throws IOException {
-
-        // append = false
-        try (FileOutputStream outputStream = new FileOutputStream(file, false)) {
-            int read;
-            byte[] bytes = new byte[DEFAULT_BUFFER_SIZE];
-            while ((read = inputStream.read(bytes)) != -1) {
-                outputStream.write(bytes, 0, read);
-            }
-        }
-
-    }
+	public void loadConfig() {
+		
+		// config.yml
+		config = ConfigurationUtils.loadConfiguration("config.yml", "resources/config.yml");
+		
+		// scoreboard.yml
+		scoreboardConfig = ConfigurationUtils.loadConfiguration("scoreboard.yml", "resources/scoreboard.yml");
+		
+		// lang.yml
+		langConfig = ConfigurationUtils.loadConfiguration("lang.yml", "resources/lang.yml");
+		
+		// lobby.yml
+		lobbyConfig = ConfigurationUtils.loadConfiguration("lobby.yml", "resources/lobby.yml");
+	}
     
-	public void createMissingKeys(String defaultFileName, File file) {
-		
-		// TODO: make it not delete default spaces, comments, etc.
-		
-		try {
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-			Reader defaultConfigStream =
-					new InputStreamReader(getResource(defaultFileName), "UTF-8");
-			YamlConfiguration defaultConfig =
-					YamlConfiguration.loadConfiguration(defaultConfigStream);
-			ConfigurationSection section = defaultConfig.getConfigurationSection("");
-			
-			// temporarily fix
-			boolean modified = false;
-			
-			for (String key : section.getKeys(true)) {
-				if (config.get(key) == null) {
-					System.out.println("debug: setting key " + key + " in file " + file.getName());
-					config.set(key, defaultConfig.get(key));
-					modified = true;
-				}
-			}
-			
-			// this is breaking the file
-			// because its saving using YamlConfiguration
-			// which does not have spaces and comments.
-			if(modified)
-				config.save(file);
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void copyDefaultContentsToFile(String defaultFileName, File file) {
-		try {
-			if(!file.exists()) file.createNewFile();
-			try {
-				copyInputStreamToFile(getResource(defaultFileName), file);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    public void sendMessage(String text, Object... format) {
+    	Bukkit.getConsoleSender().sendMessage(prefix + " " + Messager.colorFormat(text, format));
+    }
 }

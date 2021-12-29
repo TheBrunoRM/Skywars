@@ -1,6 +1,5 @@
-# Note:
-# Use 1.13+ item IDs
-# -------------------
+# KIT CONFIGURATION FILE
+# Note: use 1.13+ item IDs
 
 # This is the display name of the kit, used in the kits menu
 name: Default kit

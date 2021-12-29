@@ -83,7 +83,6 @@ public class MainCommand implements CommandExecutor {
 				if (args[0].equalsIgnoreCase("setmainlobby")) {
 					if(CommandsUtils.permissionCheckWithMessage(player, "skywars.setmainlobby")) {						
 						Skywars.get().setLobby(player.getLocation());
-						Skywars.get().saveConfig();
 						player.sendMessage(Messager.getMessage("MAIN_LOBBY_SET"));
 					}
 				}
@@ -144,11 +143,17 @@ public class MainCommand implements CommandExecutor {
 				}
 				else if (args[0].equalsIgnoreCase("menu")) {
 					GamesMenu.OpenMenu(player);
+				} else if (args[0].equalsIgnoreCase("reload")) {
+					Skywars.get().Reload();
+					sender.sendMessage(Messager.getMessage("RELOADED"));
 				}
 				
 				else if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.test")) return false;
 				// TEST COMMANDS
 				
+				if(args[0].equalsIgnoreCase("bigcase")) {
+					Skywars.createBigCase(player.getLocation(), XMaterial.LIME_STAINED_GLASS);
+				}
 				if(args[0].equalsIgnoreCase("pasteschematic")) {
 					if(schematic == null) {
 						sender.sendMessage("schematic not loaded");
@@ -216,11 +221,6 @@ public class MainCommand implements CommandExecutor {
 					if(xd == null) xd = "lmao it doesnt exist";
 					sender.sendMessage(xd.toString());
 				}
-				if(args[0].equalsIgnoreCase("setconfig")) {
-					Skywars.get().getConfig().set(args[1], args[2]);
-					Skywars.get().saveConfig();
-					sender.sendMessage("set");
-				}
 				if(args[0].equalsIgnoreCase("savearenaconfig")) {
 					arena.saveParametersInConfig();
 					sender.sendMessage("saved");
@@ -229,14 +229,8 @@ public class MainCommand implements CommandExecutor {
 					Skywars.get().loadArenas();
 					sender.sendMessage("reloaded arenas");
 				}
-				if(args[0].equalsIgnoreCase("reload")) {
-					Skywars.get().Reload();
-				}
 				if (args[0].equalsIgnoreCase("scoreboard")) {
 					SkywarsScoreboard.update(player);
-				}
-				if (args[0].equalsIgnoreCase("reload")) {
-					sender.sendMessage("reloaded");
 				}
 				if (args[0].equalsIgnoreCase("getblock")) {
 					Block block = SkywarsUtils.getTargetBlock(player, 5);

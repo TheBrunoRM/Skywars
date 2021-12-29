@@ -33,7 +33,7 @@ public class ArenaMenu implements Listener {
 
 		int index = 10;
 		for (Arena arena : Skywars.get().getSortedArenas()) {
-			System.out.println("current index: " + index);
+			//System.out.println("current index: " + index);
 			if((index+1)%9==0)index+=2;
 			List<String> lore = new ArrayList<String>();
 			lore.clear();

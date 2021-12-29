@@ -1,4 +1,7 @@
 title: '&e&lSkyWars'
+
+# if you want to disable this just put it like this:
+# lobby: {}
 lobby:
 - '&7%date%'
 - ''
@@ -6,6 +9,7 @@ lobby:
 - 'Kills: &c%totalkills%'
 - ''
 - '%url%'
+
 arena:
    player:
    - '&7%date%'
@@ -20,6 +24,7 @@ arena:
    - 'Map: &a%map%'
    - ''
    - '%url%'
+   
    spectator:
    - '&7%date%'
    - ''
@@ -32,6 +37,7 @@ arena:
    - 'Players left: &a%players%'
    - ''
    - '%url%'
+   
    intermission:
    - '&7%date%'
    - ''

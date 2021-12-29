@@ -19,8 +19,8 @@ public class SignEvents implements Listener {
 				if(arena != null) {
 					event.setLine(1, Messager.color("&e[&bSkyWars&e]"));
 					event.setLine(2, Messager.color(String.format("&a%s", arena.getName())));
-				} else System.out.println("null arena " + arenaName);
-			} else System.out.println("null arena name");
+				} //else System.out.println("null arena " + arenaName);
+			} //else System.out.println("null arena name");
 		}
 	}
 	

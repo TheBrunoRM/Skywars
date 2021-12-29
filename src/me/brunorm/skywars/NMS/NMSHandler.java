@@ -180,9 +180,7 @@ public class NMSHandler {
 			Method a = chatSerializer.getMethod("a", String.class);
 			Object chatTitle = a.invoke(chatSerializer, "{\"text\":\"" + title + "\"}");
 			Object chatSubtitle = a.invoke(chatSerializer, "{\"text\":\"" + subtitle + "\"}");
-			// IChatBaseComponent chatTitle = ChatSerializer.a("{\"text\":\"" + "hola" +
-			// "\"}");
-
+			
 			Object enumTitleActionTitle = enumTitleAction.getEnumConstants()[0];
 			Object enumTitleActionSubtitle = enumTitleAction.getEnumConstants()[1];
 

@@ -1,19 +1,25 @@
 package me.brunorm.skywars;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.BlockIterator;
@@ -36,7 +42,7 @@ public class SkywarsUtils {
 	
 	public static String format(String text, Player player, Arena arena, SkywarsPlayer swp, boolean status) {
 		Date date = new Date();
-		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+		SimpleDateFormat formatter = new SimpleDateFormat(Skywars.get().getConfig().getString("dateFormat"));
 		String strDate = formatter.format(date);
 		text = text.replaceAll(getVariableCode("date"), strDate)
 				.replaceAll(getVariableCode("url"), url);
@@ -46,7 +52,7 @@ public class SkywarsUtils {
 			String balance = null;
 			
 			if(Skywars.get().getEconomy() != null) {
-				balance = Double.toString(Skywars.get().getEconomy().getBalance(player));
+				balance = SkywarsUtils.formatDouble(Skywars.get().getEconomy().getBalance(player));
 			} else {
 				balance = "Vaultn't";
 			}
@@ -269,5 +275,33 @@ public class SkywarsUtils {
 	
 	public static float lerp(float a, float b, float t) {
 		return a + (b - a) * t;
+	}
+	
+	public static Color getRandomColor() {
+		return Color.fromRGB(
+        		(int) Math.floor(Math.random() * 255),
+        		(int) Math.floor(Math.random() * 255),
+        		(int) Math.floor(Math.random() * 255));
+	}
+	
+	public static void spawnRandomFirework(Location location) {
+		if(location == null) return;
+        Firework firework = (Firework) location.getWorld().spawnEntity(location, EntityType.FIREWORK);
+        FireworkMeta meta = firework.getFireworkMeta();
+        FireworkEffect.Builder builder = FireworkEffect.builder();
+        builder.withTrail().withFlicker().with(FireworkEffect.Type.BALL_LARGE)
+        .withFade(SkywarsUtils.getRandomColor(),
+        		SkywarsUtils.getRandomColor(),
+        		SkywarsUtils.getRandomColor())
+        .withColor(SkywarsUtils.getRandomColor(),
+        		SkywarsUtils.getRandomColor(),
+        		SkywarsUtils.getRandomColor());
+        meta.addEffect(builder.build());
+        meta.setPower(1);
+        firework.setFireworkMeta(meta);
+	}
+
+	public static String formatDouble(double d) {
+		return new DecimalFormat(Skywars.get().getConfig().getString("decimalFormat")).format(d);
 	}
 }

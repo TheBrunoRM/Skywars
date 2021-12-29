@@ -59,17 +59,6 @@ public class ChestManager implements Listener {
 			
 			ItemStack water = new ItemStack(XMaterial.WATER_BUCKET.parseItem());
 			inventory.setItem(SkywarsUtils.getRandomSlot(inventory), water);
-			
-			// blocks
-			
-			ItemStack wood = new ItemStack(XMaterial.OAK_WOOD.parseMaterial(), 16);
-			
-			ItemStack stone = new ItemStack(XMaterial.COBBLESTONE.parseMaterial(), 16);
-			
-			for(int i = 0; i < Math.ceil(Math.random() * 3); i++) {			
-				inventory.setItem(SkywarsUtils.getRandomSlot(inventory),
-						Math.random() > 0.5 ? stone : wood);
-			}
 		} else {
 			
 			// swords
@@ -112,18 +101,17 @@ public class ChestManager implements Listener {
 			
 			ItemStack water = new ItemStack(XMaterial.WATER_BUCKET.parseItem());
 			inventory.setItem(SkywarsUtils.getRandomSlot(inventory), water);
-			
-			// blocks
-			
-			ItemStack wood = new ItemStack(XMaterial.OAK_WOOD.parseItem());
-			wood.setAmount(16);
-			
-			ItemStack stone = new ItemStack(XMaterial.COBBLESTONE.parseItem());
-			stone.setAmount(16);
-			
-			for(int i = 0; i < Math.floor(Math.random() * 3); i++) {			
-				inventory.setItem(SkywarsUtils.getRandomSlot(inventory), Math.random() > 0.5 ? stone : wood);
-			}
+		}
+		
+		// blocks
+		
+		ItemStack wood = new ItemStack(XMaterial.OAK_WOOD.parseMaterial(), 16);
+		
+		ItemStack stone = new ItemStack(XMaterial.COBBLESTONE.parseMaterial(), 16);
+		
+		for(int i = 0; i < Math.ceil(Math.random() * 3); i++) {			
+			inventory.setItem(SkywarsUtils.getRandomSlot(inventory),
+					Math.random() > 0.5 ? stone : wood);
 		}
 	}
 

@@ -46,6 +46,7 @@ arena_join:
 actionbar:
   waiting: '&eCurrent kit: &a%kit%'
 
+RELOADED: "&aSkywars configuration reloaded."
 NO_PERMISSION: "&cNo permission."
 NOT_JOINED: "&cNot joined."
 CANT_EXECUTE_COMMAND_IN_CONSOLE: "&cYou can't execute this command in the console!"
