@@ -5,7 +5,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.structures.Arena;
 
@@ -22,12 +21,6 @@ public class ForceStartCommand implements CommandExecutor {
 					return true;
 				}
 			}
-		} else {
-			Arena arena = Skywars.get().getArena(args[0]);
-			if(arena == null) {
-				sender.sendMessage(Messager.getMessage("NO_ARENA", args[0]));
-			}
-			arena.startGame();
 		}
 		return false;
 	}

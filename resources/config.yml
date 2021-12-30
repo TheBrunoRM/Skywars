@@ -14,6 +14,11 @@ disableWeather: true
 # this is the reset cooldown for last hits (in seconds)
 lastHitResetCooldown: 15
 
+arenas:
+  world: world
+  Y: 100 # altitude of the schematics
+  separation: 100 # blocks per arena
+
 # update task for actionbar and scoreboard
 taskUpdate:
   disable: false
@@ -59,7 +64,7 @@ disabledCommands: []
 # TELEPORTER - not yet implemented - menu for selecting someone to spectate
 # SPECTATOR_OPTIONS - not yet implemented - spectator options as speed, night vision, etc
 # ARENAS_MENU - clickable arena menu to join a game
-# JOIN_RANDOM_ARENA - instantly join an arena
+# JOIN_RANDOM_ARENA - not yet implemented - instantly join an arena
 items:
   waiting:
     0: KIT_SELECTOR
@@ -86,4 +91,6 @@ item_types:
   TELEPORTER: COMPASS
 
 debug:
+  enabled: false
   bigCases: false
+  projectileTests: false

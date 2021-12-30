@@ -1,13 +1,10 @@
 package me.brunorm.skywars;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -17,6 +14,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -30,18 +28,20 @@ import me.brunorm.skywars.commands.LeaveCommand;
 import me.brunorm.skywars.commands.MainCommand;
 import me.brunorm.skywars.commands.StartCommand;
 import me.brunorm.skywars.commands.WhereCommand;
-import me.brunorm.skywars.events.ArenaSetup;
 import me.brunorm.skywars.events.DisableWeather;
 import me.brunorm.skywars.events.Events;
 import me.brunorm.skywars.events.InteractEvent;
+import me.brunorm.skywars.events.MapSetup;
 import me.brunorm.skywars.events.MessageSound;
+import me.brunorm.skywars.events.ProjectileTrails;
 import me.brunorm.skywars.events.SignEvents;
-import me.brunorm.skywars.menus.ArenaMenu;
-import me.brunorm.skywars.menus.ArenaSetupMenu;
 import me.brunorm.skywars.menus.GamesMenu;
 import me.brunorm.skywars.menus.KitsMenu;
+import me.brunorm.skywars.menus.MapMenu;
+import me.brunorm.skywars.menus.MapSetupMenu;
 import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.Kit;
+import me.brunorm.skywars.structures.SkywarsMap;
 import me.brunorm.skywars.structures.SkywarsPlayer;
 import net.milkbowl.vault.economy.Economy;
 
@@ -54,8 +54,9 @@ public class Skywars extends JavaPlugin {
 	public List<String> authors = getDescription().getAuthors();
 	private String prefix = Messager.colorFormat("&6[&e%s&6]&e", name);
 	public static String kitsPath;
-	public static String arenasPath;
+	public static String mapsPath;
 	public static String schematicsPath;
+	public static String playersPath;
 	
 	public static boolean economyEnabled;
 	Economy economy;
@@ -117,9 +118,10 @@ public class Skywars extends JavaPlugin {
 		
 		// set stuff
 		plugin = this;
-		arenasPath = getDataFolder() + "/arenas";
+		mapsPath = getDataFolder() + "/maps";
 		kitsPath = getDataFolder() + "/kits";
 		schematicsPath = getDataFolder() + "/schematics";
+		playersPath = getDataFolder() + "/players";
 		
 		packageName = this.getServer().getClass().getPackage().getName();
 		serverPackageVersion = packageName.substring(packageName.lastIndexOf('.') + 1);
@@ -129,7 +131,7 @@ public class Skywars extends JavaPlugin {
 		loadConfig();
 		loadCommands();
 		loadEvents();
-		loadArenas();
+		loadMaps();
 		loadKits();
 		
 		economyEnabled = Skywars.get().getConfig().getBoolean("economy.enabled");
@@ -162,18 +164,15 @@ public class Skywars extends JavaPlugin {
 				arena.kick(player);
 			}
 		}
-		ArenaSetupMenu.currentArenas.forEach((player, arena) -> {
-			player.getInventory().removeItem(ArenaSetup.item);
+		MapSetupMenu.currentMaps.forEach((player, arena) -> {
+			player.getInventory().removeItem(MapSetup.item);
 			SkywarsUtils.TeleportPlayerBack(player);
 		});
 		getLogger().info(Messager.colorFormat("%s &eStopping arenas...", prefix));
 		for (Arena arena : arenas) {
-			if(arena.getStatus() == ArenaStatus.PLAYING
-					|| arena.getStatus() == ArenaStatus.ENDING) {
-				arena.getConfig().set("restartNeeded", true);
-				arena.saveConfig();
-			}
+			arena.clear();
 		}
+		arenas.clear();
 	}
 
 	public NMSHandler NMS() {
@@ -186,7 +185,7 @@ public class Skywars extends JavaPlugin {
 	
 	public void Reload() {
 		loadConfig();
-		loadArenas();
+		loadMaps();
 		loadKits();
 	}
 
@@ -210,18 +209,25 @@ public class Skywars extends JavaPlugin {
 		if(config.getBoolean("disableWeather")) {			
 			pluginManager.registerEvents(new DisableWeather(), this);
 		}
-		pluginManager.registerEvents(new InteractEvent(), this);
-		pluginManager.registerEvents(new Events(), this);
-		pluginManager.registerEvents(new GamesMenu(), this);
-		pluginManager.registerEvents(new ArenaMenu(), this);
-		pluginManager.registerEvents(new KitsMenu(), this);
-		pluginManager.registerEvents(new ArenaSetup(), this);
-		pluginManager.registerEvents(new ChestManager(), this);
-		pluginManager.registerEvents(new ArenaSetupMenu(), this);
-		pluginManager.registerEvents(new PlayerInventoryManager(), this);
+		if(config.getBoolean("debug.projectileTests")) {
+			pluginManager.registerEvents(new ProjectileTrails(), this);
+		}
+		Listener[] listeners = {
+				new InteractEvent(),
+				new Events(),
+				new GamesMenu(),
+				new MapMenu(),
+				new KitsMenu(),
+				new MapSetup(),
+				new ChestManager(),
+				new MapSetupMenu(),
+				new PlayerInventoryManager(),
+		};
+		for(Listener listener : listeners) {			
+			pluginManager.registerEvents(listener, this);
+		}
 	}
-
-	// commands
+	
 	public void loadCommands() {
 		HashMap<String, CommandExecutor> cmds = new HashMap<String, CommandExecutor>();
 		cmds.put("skywars", new MainCommand());
@@ -237,6 +243,113 @@ public class Skywars extends JavaPlugin {
 			} else Bukkit.getConsoleSender().sendMessage(
 				Messager.colorFormat("%s &7Skipping command &c%s&e...", prefix, cmd));
 		}
+	}
+	
+	// maps
+	
+	private ArrayList<SkywarsMap> maps = new ArrayList<SkywarsMap>();
+	
+	public SkywarsMap getMap(String name) {
+		for(SkywarsMap map : maps) {
+			if(map.getName().equalsIgnoreCase(name)) return map;
+		}
+		return null;
+	}
+	
+	public ArrayList<SkywarsMap> getMaps() {
+		return maps;
+	}
+	
+	public Arena getArenaByMap(SkywarsMap map) {
+		for(Arena arena : arenas) {
+			if(arena.getMap() == map) return arena;
+		}
+		return null;
+	}
+	
+	public void joinMap(SkywarsMap map, Player player) {
+		Arena arena = getArenaByMap(map);
+		if(arena == null) {
+			arena = createNewArena(map);
+		}
+		arena.joinPlayer(player);
+	}
+	
+	public void joinRandomMap(Player player) {
+		for(SkywarsMap map : maps) {
+			joinMap(map, player);
+			return;
+		}
+	}
+	
+	Arena createNewArena(SkywarsMap map) {
+		Arena arena = new Arena(map);
+		arena.pasteSchematic();
+		arenas.add(arena);
+		System.out.println("creating new arena for map " + map.getName());
+		return arena;
+	}
+
+	public Location getNextFreeLocation() {
+		return new Location(Bukkit.getWorld("world"), 0, config.getInt("arenas.Y"), 0);
+	}
+	
+	public void loadMaps() {
+		maps.clear();
+		File folder = new File(mapsPath);
+		if (!folder.exists()) {
+			folder.mkdirs();
+		}
+		if(folder.listFiles().length <= 0) {
+			Bukkit.getConsoleSender().sendMessage(Messager.color("&eSetting up default map."));
+			ConfigurationUtils.copyDefaultContentsToFile("maps/MiniTrees.yml", new File(mapsPath, "MiniTrees.yml"));
+		}
+		File schematics = new File(schematicsPath);
+		if(!schematics.exists()) schematics.mkdir();
+		if(schematics.listFiles().length <= 0) {
+			Bukkit.getConsoleSender().sendMessage(Messager.color("&eSetting up default schematic."));
+			ConfigurationUtils.copyDefaultContentsToFile("schematics/mini_trees.schematic",
+					new File(schematicsPath, "mini_trees.schematic"));
+		}
+		for (File file : folder.listFiles()) {
+			String name = file.getName().replaceFirst("[.][^.]+$", "");
+			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+			ConfigurationUtils.createMissingKeys(config,
+					ConfigurationUtils.getDefaultConfig("maps/MiniTrees.yml"));
+			
+			// create map and set values from config
+			SkywarsMap map = new SkywarsMap(name,
+					config.getString("schematic"),
+					config.getInt("minPlayers"),
+					config.getInt("maxPlayers"),
+					config.getInt("teamSize"));
+			
+			map.setSchematic(config.getString("schematic"));
+			
+			World world = Bukkit.getWorld("world");
+			
+			// this will ignore spawns that are outside max players range
+			for (int i = 0; i < map.getMaxPlayers(); i++) {
+				if (config.get(String.format("spawn.%s", i)) == null)
+					continue;
+				double x = config.getDouble(String.format("spawn.%s.x", i));
+				double y = config.getDouble(String.format("spawn.%s.y", i));
+				double z = config.getDouble(String.format("spawn.%s.z", i));
+				Location location = new Location(world, x, y, z);
+				map.getSpawns().put(i, location);
+			}
+			
+			maps.add(map);
+			sendMessage("&eLoaded map: &a%s", map.getName());
+		}
+	}
+	
+	// kits
+	
+	private ArrayList<Kit> kits = new ArrayList<Kit>();
+	
+	public ArrayList<Kit> getKits() {
+		return this.kits;
 	}
 	
 	public void loadKits() {
@@ -282,99 +395,6 @@ public class Skywars extends JavaPlugin {
 			// add kit to the arena list
 			kits.add(kit);
 			sendMessage("&eLoaded kit: &a%s", kit.getName());
-		}
-	}
-	
-	public void loadArenas() {
-		arenas.clear();
-		File folder = new File(arenasPath);
-		if (!folder.exists()) {
-			folder.mkdirs();
-		}
-		File defaultArenaFile = null;
-		if(folder.listFiles().length <= 0) {
-			Bukkit.getConsoleSender().sendMessage(Messager.color("&eSetting up default arena."));
-			defaultArenaFile = new File(arenasPath, "MiniTrees.yml");
-			ConfigurationUtils.copyDefaultContentsToFile("arenas/MiniTrees.yml", defaultArenaFile);
-		}
-		File schematics = new File(schematicsPath);
-		if(!schematics.exists()) schematics.mkdir();
-		if(schematics.listFiles().length <= 0) {
-			Bukkit.getConsoleSender().sendMessage(Messager.color("&eSetting up default schematic."));
-			ConfigurationUtils.copyDefaultContentsToFile("schematics/mini_trees.schematic",
-					new File(schematicsPath, "mini_trees.schematic"));
-		}
-		for (File arenaFile : folder.listFiles()) {
-			String name = arenaFile.getName().replaceFirst("[.][^.]+$", "");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(arenaFile);
-			// create arena and set values from config
-			Arena arena = new Arena(name);
-			arena.setFile(arenaFile);
-			arena.setConfig(config);
-			if(defaultArenaFile == null) {				
-				arena.setWorldName(config.getString("worldName"));
-			} else {
-				Properties props = new Properties();
-				try {
-					props.load(new FileReader("server.properties"));
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				String levelName = props.getProperty("level-name");
-				if(levelName != null) {
-					//System.out.println("Got world name from server.properties: " + levelName);
-					arena.setWorldName(levelName);
-				} else {
-					String firstWorld = Bukkit.getServer().getWorlds().get(0).getName();
-					//System.out.println("Got world name from first world");
-					arena.setWorldName(firstWorld);
-				}
-			}
-			arena.setStatus(config.getBoolean("disabled") ? ArenaStatus.DISABLED : ArenaStatus.WAITING);
-			if (arena.getWorldName() != null && config.get("location") != null) {
-				double x = config.getDouble("location.x");
-				double y = config.getDouble("location.y");
-				double z = config.getDouble("location.z");
-				Location location = new Location(Bukkit.getWorld(arena.getWorldName()), x, y, z);
-				arena.setLocation(location);
-			}
-			arena.setSchematic(config.getString("schematic"));
-			arena.setMinPlayers(config.getInt("minPlayers"));
-			arena.setMaxPlayers(config.getInt("maxPlayers"));
-			arena.setCenterRadius(config.getInt("centerRadius"));
-			// spawns
-			if (arena.getWorldName() != null) {
-				World world = Bukkit.getServer().getWorld(arena.getWorldName());
-				if (world != null) {
-					
-					// this will ignore spawns that are outside max players range
-					for (int i = 0; i < arena.getMaxPlayers(); i++) {
-						if (config.get(String.format("spawn.%s", i)) == null)
-							continue;
-						double x = config.getDouble(String.format("spawn.%s.x", i));
-						double y = config.getDouble(String.format("spawn.%s.y", i));
-						double z = config.getDouble(String.format("spawn.%s.z", i));
-						Location location = new Location(world, x, y, z);
-						arena.getSpawns().put(i, location);
-					}
-				} else System.out.println("Warning: could not get world by "
-					+ arena.getWorldName() + " for arena " + arena.getName());
-			} else System.out.println("Warning: world not set for arena " + arena.getName());
-			
-			arenas.add(arena);
-			sendMessage("&eLoaded arena: &a%s", arena.getName());
-			
-			// this is enabled when the server reloads or when setting up a default arena
-			if(config.getBoolean("restartNeeded")) {
-				sendMessage("&c&lNeeded to restart arena %s", arena.getName());
-				arena.clear();
-				config.set("restartNeeded", null);
-				arena.saveConfig();
-			}
 		}
 	}
 	
@@ -471,32 +491,16 @@ public class Skywars extends JavaPlugin {
 		}
 	}
 	
-	// kits
-	
-	private ArrayList<Kit> kits = new ArrayList<Kit>();
-	
-	public ArrayList<Kit> getKits() {
-		return this.kits;
-	}
-	
 	// arenas
-
+	
 	private ArrayList<Arena> arenas = new ArrayList<Arena>();
 
 	public ArrayList<Arena> getArenas() {
 		return this.arenas;
 	}
-
-	public ArrayList<Arena> getSortedArenas() {
-		ArrayList<Arena> sortedArenas = arenas;
-		sortedArenas.sort((a, b) -> a.getProblems().size() - b.getProblems().size());
-		sortedArenas.sort((a, b) -> b.getPlayers().size() - a.getPlayers().size());
-		return sortedArenas;
-	}
-
+	
 	public Arena getRandomJoinableArena() {
-		ArrayList<Arena> sortedArenas = getSortedArenas();
-		for (Arena arena : sortedArenas) {
+		for (Arena arena : arenas) {
 			if (!arena.isFull()) {
 				if (arena.getStatus() == ArenaStatus.WAITING
 						|| arena.getStatus() == ArenaStatus.STARTING) {
@@ -506,45 +510,10 @@ public class Skywars extends JavaPlugin {
 		}
 		return null;
 	}
-
-	public void createArena(String name) {
-		if (getArena(name) != null)
-			return;
-		Arena arena = new Arena(name);
-		arena.saveParametersInConfig();
-		//loadArenas();
-		arenas.add(arena);
-	}
-
-	public void deleteArena(String name) {
-		Arena arena = getArena(name);
-		if (arena == null)
-			return;
-		arena.getFile().delete();
-		arenas.remove(arena);
-	}
-
-	public Arena getArena(String name) {
-		for (int i = 0; i < arenas.size(); i++) {
-			if (arenas.get(i).getName().equalsIgnoreCase(name)) {
-				return arenas.get(i);
-			}
-		}
-		return null;
-	}
 	
-	public String[] getArenaNames() {
-		String[] arenaNames = new String[arenas.size()];
-		for(int i = 0; i < arenas.size(); i++) {
-			Arena _arena = arenas.get(i);
-			arenaNames[i] = _arena.getName();
-		}
-		return arenaNames;
-	}
-
 	public Arena getPlayerArena(Player player) {
 		for (int i = 0; i < arenas.size(); i++) {
-			List<SkywarsPlayer> players = arenas.get(i).getPlayers();
+			List<SkywarsPlayer> players = arenas.get(i).getAllPlayersIncludingAliveAndSpectators();
 			for (int j = 0; j < players.size(); j++) {
 				if (players.get(j).getPlayer().equals(player)) {
 					return arenas.get(i);
@@ -558,11 +527,11 @@ public class Skywars extends JavaPlugin {
 			new HashMap<Player, YamlConfiguration>();
 	
 	public File getPlayerConfigFile(Player player) {
-		return new File(getDataFolder() + "/players", player.getUniqueId() + ".yml");
+		return new File(playersPath, player.getUniqueId() + ".yml");
 	}
 	
 	public File getSchematicFile(String schematicName) {
-		File schematic = new File(Skywars.get().getDataFolder(), "/schematics/" + schematicName);
+		File schematic = new File(schematicsPath, schematicName);
 		if(!schematic.exists())
 			try {
 				schematic.createNewFile();
@@ -576,7 +545,7 @@ public class Skywars extends JavaPlugin {
 	public YamlConfiguration getPlayerConfig(Player player) {
 		if(playerConfigurations.get(player) != null)
 			return playerConfigurations.get(player);
-		File folder = new File(getDataFolder() + "/players");
+		File folder = new File(playersPath);
 		if(!folder.exists()) folder.mkdir();
 		File file = getPlayerConfigFile(player);
 		if(!file.exists())
@@ -619,14 +588,26 @@ public class Skywars extends JavaPlugin {
 	}
 
 	public Integer getPlayerTotalKills(Player player) {
-		return getPlayerConfig(player).getInt("kills");
+		return getPlayerConfig(player).getInt("stats.solo.kills");
 	}
 	
 	public void setPlayerTotalKills(Player player, int kills) {
-		getPlayerConfig(player).set("kills", kills);
+		getPlayerConfig(player).set("stats.solo.kills", kills);
 	}
 	
 	public void incrementPlayerTotalKills(Player player) {
+		setPlayerTotalKills(player, getPlayerTotalKills(player)+1);
+	}
+	
+	public Integer getPlayerTotalDeaths(Player player) {
+		return getPlayerConfig(player).getInt("stats.solo.deaths");
+	}
+	
+	public void setPlayerTotalDeaths(Player player, int kills) {
+		getPlayerConfig(player).set("stats.solo.deaths", kills);
+	}
+	
+	public void incrementPlayerTotalDeaths(Player player) {
 		setPlayerTotalKills(player, getPlayerTotalKills(player)+1);
 	}
 	

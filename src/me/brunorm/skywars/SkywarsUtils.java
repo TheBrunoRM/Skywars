@@ -11,7 +11,9 @@ import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
@@ -64,9 +66,6 @@ public class SkywarsUtils {
 		}
 		
 		if(arena != null) {
-			List<SkywarsPlayer> players = new ArrayList<>(arena.getPlayers());
-			players.removeIf(p -> p.isSpectator());
-			
 			// this prevents a stack overflow error
 			if(!status) text = text.replaceAll(getVariableCode("status"),
 					format(SkywarsUtils.getStatus(arena), player, arena, swp, true));
@@ -76,11 +75,11 @@ public class SkywarsUtils {
 			if(event != null) eventText = String.format("%s (%s)", event.getType(), event.getTime());
 			else eventText = "No event";
 			
-			text = text.replaceAll(getVariableCode("map"), arena.getName())
-					.replaceAll(getVariableCode("arena"), arena.getName())
+			text = text.replaceAll(getVariableCode("map"), arena.getMap().getName())
+					.replaceAll(getVariableCode("arena"), arena.getMap().getName())
 					.replaceAll(getVariableCode("event"), eventText)
-					.replaceAll(getVariableCode("players"), Integer.toString(players.size()))
-					.replaceAll(getVariableCode("maxplayers"), Integer.toString(arena.getMaxPlayers()))
+					.replaceAll(getVariableCode("players"), Integer.toString(arena.getPlayerCount()))
+					.replaceAll(getVariableCode("maxplayers"), Integer.toString(arena.getMap().getMaxPlayers()))
 					.replaceAll(getVariableCode("seconds"), Integer.toString(arena.getCountdown()));
 		}
 		
@@ -105,9 +104,10 @@ public class SkywarsUtils {
 	}
 	
 	public static String parseItemName(String text) {
-		String name = Skywars.get().langConfig.getString("items." + text);
-		if(Skywars.get().langConfig.getBoolean("items.show_context") == true) {
-			String context = Skywars.get().langConfig.getString("items.context");
+		YamlConfiguration config = Skywars.get().langConfig;
+		String name = config.getString("items." + text);
+		if(config.getBoolean("items.show_context") == true) {
+			String context = config.getString("items.context");
 			if(context != null) {
 				name = name + " " + Messager.color(context);
 			}
@@ -215,7 +215,7 @@ public class SkywarsUtils {
 				player.sendMessage("arena is playing");
 			return false;
 		}
-		if (arena.getMaxPlayers() <= 0) {
+		if (arena.getMap().getMaxPlayers() <= 0) {
 			if (player != null)
 				player.sendMessage("max players not set");
 			return false;
@@ -225,7 +225,7 @@ public class SkywarsUtils {
 				player.sendMessage("world not set");
 			return false;
 		}
-		if (arena.getPlayers().size() >= arena.getMaxPlayers()) {
+		if (arena.getAllPlayersIncludingAliveAndSpectators().size() >= arena.getMap().getMaxPlayers()) {
 			if (player != null)
 				player.sendMessage("too much players");
 			return false;
@@ -303,5 +303,38 @@ public class SkywarsUtils {
 
 	public static String formatDouble(double d) {
 		return new DecimalFormat(Skywars.get().getConfig().getString("decimalFormat")).format(d);
+	}
+	
+	public static void setPlayerInventory(Player player, String category) {
+		ConfigurationSection itemsSection =
+				Skywars.get().getConfig().getConfigurationSection("items." + category);
+		
+		ConfigurationSection itemTypes =
+				Skywars.get().getConfig().getConfigurationSection("item_types");
+		
+		for(String slotName : itemsSection.getKeys(false)) {
+			Object itemName = itemsSection.get(slotName);
+			int slot = Integer.parseInt(slotName);
+			String itemType = itemTypes.getString((String) itemName);
+			Material material = Material.getMaterial(itemType);
+			ItemStack item = new ItemStack(material);
+			ItemMeta itemMeta = item.getItemMeta();
+			String configName = Skywars.get().langConfig.getString("items." + itemName + ".name");
+			if(Skywars.get().langConfig.getBoolean("items.show_context") == true) {
+				String context = Skywars.get().langConfig.getString("items.context");
+				if(context != null) {
+					configName = configName + " " + Messager.color(context);
+				}
+			}
+			itemMeta.setDisplayName(Messager.color(configName));
+			List<String> itemLore = new ArrayList<String>();
+			for(String loreLine : Skywars.get().langConfig.
+				getStringList("items." + itemName + ".description")) {
+				itemLore.add(Messager.color(loreLine));
+			}
+			itemMeta.setLore(itemLore);
+			item.setItemMeta(itemMeta);
+			player.getInventory().setItem(slot, item);
+		}
 	}
 }

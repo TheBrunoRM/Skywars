@@ -15,9 +15,10 @@ import com.cryptomorin.xseries.XMaterial;
 import me.brunorm.skywars.ArenaStatus;
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
-import me.brunorm.skywars.menus.ArenaMenu;
 import me.brunorm.skywars.menus.KitsMenu;
+import me.brunorm.skywars.menus.MapMenu;
 import me.brunorm.skywars.structures.Arena;
+import me.brunorm.skywars.structures.SkywarsMap;
 import me.brunorm.skywars.structures.SkywarsPlayer;
 
 public class InteractEvent implements Listener {
@@ -57,26 +58,25 @@ public class InteractEvent implements Listener {
 					return;
 				Sign sign = (Sign) event.getClickedBlock().getState();
 				if (sign.getLine(1).equals(Messager.color("&e[&bSkyWars&e]"))) {
-					String arenaName = sign.getLine(2);
-					if (arenaName != null) {
-						Arena newArena = Skywars.get().getArena(ChatColor.stripColor(arenaName));
-						if (newArena != null) {
-							newArena.joinPlayer(player);
+					String mapName = sign.getLine(2);
+					if (mapName != null) {
+						SkywarsMap map = Skywars.get().getMap(ChatColor.stripColor(mapName));
+						if (map != null) {
+							Skywars.get().joinMap(map, player);
 						} else
-							player.sendMessage(String.format("arena %s not found", arenaName));
+							player.sendMessage(String.format("map %s not found", mapName));
 					}
 				}
 				if (sign.getLine(1).equals("random")) {
 					if (sign.getLine(2).equals("skywars")) {
 						event.setCancelled(true);
-						Arena randomArena = Skywars.get().getRandomJoinableArena();
-						randomArena.joinPlayer(player);
+						Skywars.get().joinRandomMap(player);
 					}
 				}
 				if (sign.getLine(1).equals("play")) {
 					if (sign.getLine(2).equals("skywars")) {
 						event.setCancelled(true);
-						ArenaMenu.open(player);
+						MapMenu.open(player);
 					}
 				}
 			}

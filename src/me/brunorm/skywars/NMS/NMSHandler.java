@@ -24,7 +24,7 @@ public class NMSHandler {
 	Class<?> enumTitleAction = getEnumTitleAction();
 	Class<?> craftPlayerClass = getCraftPlayerClass();
 	Class<?> chatMessageTypeClass = getChatMessageTypeClass();
-
+	
 	public Class<?> getChatSerializer() {
 		try {
 			Bukkit.getConsoleSender().sendMessage(
@@ -42,7 +42,7 @@ public class NMSHandler {
 			}
 		}
 	}
-
+	
 	public Class<?> getIChatBaseComponent() {
 		try {
 			Bukkit.getConsoleSender().sendMessage(
@@ -216,5 +216,4 @@ public class NMSHandler {
 			e.printStackTrace();
 		}
 	}
-
 }
