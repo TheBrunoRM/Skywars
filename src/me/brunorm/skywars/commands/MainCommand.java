@@ -190,8 +190,8 @@ public class MainCommand implements CommandExecutor {
 					Skywars.get().NMS().sendTitle(player, "Hello!", "This is a NMS test");
 				}
 				if(args[0].equalsIgnoreCase("worldname")) {
-					if(arena.getWorldName() != null)
-						player.sendMessage(arena.getWorldName());
+					if(map.getWorldName() != null)
+						player.sendMessage(map.getWorldName());
 					else
 						player.sendMessage("not set");
 				}
@@ -252,7 +252,7 @@ public class MainCommand implements CommandExecutor {
 					}
 				}
 				if(args[0].equalsIgnoreCase("restart")) {
-					arena.clear();
+					arena.restart();
 				}
 				if (args[0].equalsIgnoreCase("stop")) {
 					if (playerArena != null) {

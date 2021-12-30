@@ -42,6 +42,8 @@ public class MapMenu implements Listener {
 			//lore.add(Messager.color("&7Servidores Disponibles: &a1"));
 			//lore.add(Messager.color("&7Veces Unidas: &a0"));
 			//lore.add(Messager.color("&7Selecciones de Mapa: &a1"));
+			lore.add(Messager.colorFormat("&eCurrent arenas: &a%s",
+					Skywars.get().getArenasByMap(map).size()));
 			lore.add(Messager.color("&eClick to play!"));
 			//lore.add(Messager.color("&eClick derecho para alternarlo como favorito!"));
 			

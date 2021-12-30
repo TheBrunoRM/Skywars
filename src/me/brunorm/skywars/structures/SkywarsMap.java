@@ -24,6 +24,26 @@ public class SkywarsMap {
 	YamlConfiguration config;
 	File file;
 	
+	// this is in case the arenas method is set to SINGLE_ARENA
+	Location location;
+	String worldName;
+	
+	public void setLocation(Location location) {
+		this.location = location;
+	}
+	
+	public Location getLocation() {
+		return location;
+	}
+	
+	public void setWorldName(String worldName) {
+		this.worldName = worldName;
+	}
+	
+	public String getWorldName() {
+		return worldName;
+	}
+	
 	HashMap<Integer, Location> spawns = new HashMap<Integer, Location>();
 	
 	public SkywarsMap(String name, String schematicFile, int minPlayers, int maxPlayers, int teamSize) {

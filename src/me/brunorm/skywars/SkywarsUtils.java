@@ -220,7 +220,7 @@ public class SkywarsUtils {
 				player.sendMessage("max players not set");
 			return false;
 		}
-		if (arena.getWorldName() == null) {
+		if (arena.getWorld() == null) {
 			if (player != null)
 				player.sendMessage("world not set");
 			return false;

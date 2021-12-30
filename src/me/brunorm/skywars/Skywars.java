@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -170,7 +171,7 @@ public class Skywars extends JavaPlugin {
 		});
 		getLogger().info(Messager.colorFormat("%s &eStopping arenas...", prefix));
 		for (Arena arena : arenas) {
-			arena.clear();
+			arena.restart();
 		}
 		arenas.clear();
 	}
@@ -191,7 +192,8 @@ public class Skywars extends JavaPlugin {
 
     private boolean setupEconomy() {
     	if(!economyEnabled) return false;
-        economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+        economyProvider = getServer().getServicesManager()
+        		.getRegistration(net.milkbowl.vault.economy.Economy.class);
         if (economyProvider != null)   	
         	economy = economyProvider.getProvider();
         return economy != null;
@@ -256,15 +258,28 @@ public class Skywars extends JavaPlugin {
 		return null;
 	}
 	
+	public SkywarsMap getRandomMap() {
+		return maps.get((int) (Math.floor(Math.random() * maps.size()+1)-1));
+	}
+	
 	public ArrayList<SkywarsMap> getMaps() {
 		return maps;
 	}
 	
 	public Arena getArenaByMap(SkywarsMap map) {
 		for(Arena arena : arenas) {
+			if(arena.getStatus() != ArenaStatus.WAITING &&
+					arena.getStatus() != ArenaStatus.STARTING) continue;
+			if(!arena.isJoinable()) continue;
 			if(arena.getMap() == map) return arena;
 		}
 		return null;
+	}
+	
+	public ArrayList<Arena> getArenasByMap(SkywarsMap map) {
+		return getArenas().stream()
+				.filter(arena -> arena.getMap() == map)
+				.collect(Collectors.toCollection(ArrayList::new));
 	}
 	
 	public void joinMap(SkywarsMap map, Player player) {
@@ -272,29 +287,50 @@ public class Skywars extends JavaPlugin {
 		if(arena == null) {
 			arena = createNewArena(map);
 		}
+		System.out.println("joining player to map");
 		arena.joinPlayer(player);
 	}
 	
 	public void joinRandomMap(Player player) {
-		for(SkywarsMap map : maps) {
-			joinMap(map, player);
-			return;
-		}
+		SkywarsMap map = getRandomMap();
+		joinMap(map, player);
 	}
 	
 	Arena createNewArena(SkywarsMap map) {
 		Arena arena = new Arena(map);
+		arena.setWorld(getWorld(map));
+		arena.setLocation(getNextFreeLocation());
 		arena.pasteSchematic();
 		arenas.add(arena);
 		System.out.println("creating new arena for map " + map.getName());
 		return arena;
 	}
+	
+	public void clearArena(Arena arena) {
+		System.out.println("removing arena " + arena.getMap().getName());
+		arenas.remove(arena);
+		arena = null;
+	}
 
 	public Location getNextFreeLocation() {
-		return new Location(Bukkit.getWorld("world"), 0, config.getInt("arenas.Y"), 0);
+		int x = 0;
+		int z = 0;
+
+		for (int i = 0; i < arenas.size(); i++) {	
+			if (i % 2 == 0) {
+				z += 1;
+			} else {
+				x += 1;
+			}
+		}
+		return new Location(Bukkit.getWorld(config.getString("arenas.world")),
+				x*config.getInt("arenas.separation"),
+				config.getInt("arenas.Y"),
+				z*config.getInt("arenas.separation"));
 	}
 	
 	public void loadMaps() {
+		String arenasMethod = config.getString("arenasMethod");
 		maps.clear();
 		File folder = new File(mapsPath);
 		if (!folder.exists()) {
@@ -324,9 +360,18 @@ public class Skywars extends JavaPlugin {
 					config.getInt("maxPlayers"),
 					config.getInt("teamSize"));
 			
-			map.setSchematic(config.getString("schematic"));
+			map.setConfig(config);
 			
-			World world = Bukkit.getWorld("world");
+			if(arenasMethod.equalsIgnoreCase("SINGLE_ARENA")) {
+				
+				map.setWorldName(config.getString("world"));
+				map.setSchematic(config.getString("schematic"));
+				map.setLocation(
+						ConfigurationUtils.getLocationConfig(map.getWorldName(),
+								config.getConfigurationSection("location")));
+			}
+			
+			World world = getWorld(map);
 			
 			// this will ignore spawns that are outside max players range
 			for (int i = 0; i < map.getMaxPlayers(); i++) {
@@ -344,6 +389,13 @@ public class Skywars extends JavaPlugin {
 		}
 	}
 	
+	private World getWorld(SkywarsMap map) {
+		String worldName = map.getWorldName();
+		if(worldName == null)
+			worldName = Skywars.config.getString("arenas.world");
+		return Bukkit.getWorld(worldName);
+	}
+
 	// kits
 	
 	private ArrayList<Kit> kits = new ArrayList<Kit>();
@@ -501,11 +553,8 @@ public class Skywars extends JavaPlugin {
 	
 	public Arena getRandomJoinableArena() {
 		for (Arena arena : arenas) {
-			if (!arena.isFull()) {
-				if (arena.getStatus() == ArenaStatus.WAITING
-						|| arena.getStatus() == ArenaStatus.STARTING) {
-					return arena;
-				}
+			if (arena.isJoinable()) {
+				return arena;
 			}
 		}
 		return null;

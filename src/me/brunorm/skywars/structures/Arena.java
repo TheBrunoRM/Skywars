@@ -32,11 +32,11 @@ import mrblobman.sounds.Sounds;
 
 public class Arena {
 	
-	ArenaStatus status;
-	String worldName;
+	World world;	
 	Location location;
+	ArenaStatus status;
 	int countdown;
-	boolean full;
+	boolean joinable;
 	boolean invencibility = false;
 	public boolean forcedStart;
 	public Player forcedStartPlayer;
@@ -54,23 +54,14 @@ public class Arena {
 	public Arena(SkywarsMap map) {
 		this.map = map;
 		this.status = ArenaStatus.WAITING;
-		worldName = Skywars.get().getConfig().getString("arenas.world");
-		location = Skywars.get().getNextFreeLocation();
-	}
-	
-	public void load() {
-		System.out.println("Loading a new arena for the map " + getMap().getName());
+		events.add(new SkywarsEvent(this, SkywarsEventType.REFILL, 60));
+		joinable = true;
 	}
 	
 	public SkywarsEvent getNextEvent() {
 		if(events.size() > 0)
 			return events.get(0);
 		return null;
-	}
-
-	void restartEvents() {
-		events.clear();
-		events.add(new SkywarsEvent(this, SkywarsEventType.REFILL, 60));
 	}
 	
 	public boolean joinPlayer(Player player) {
@@ -83,8 +74,7 @@ public class Arena {
 		}
 		if (hasPlayer(player))
 			return false;
-		full = getPlayerCount() > map.maxPlayers;
-		if(full) return false;
+		joinable = getPlayerCount() > map.maxPlayers;
 		int index = getNextAvailablePlayerSlot();
 		Location spawn = getLocationInArena(getSpawn(index));
 		if (spawn == null) {
@@ -218,7 +208,9 @@ public class Arena {
 		player.getPlayer().sendMessage(
 				Messager.getFormattedMessage("LEAVE_SELF",
 						player.getPlayer(), this, player, map.getName()));
-		full = false;
+		if(getStatus() == ArenaStatus.WAITING
+				|| getStatus() == ArenaStatus.STARTING)
+			joinable = true;
 		players.remove(player);
 		removePlayer(player);
 		if (this.getStatus() != ArenaStatus.ENDING && !player.isSpectator()) {
@@ -459,35 +451,20 @@ public class Arena {
 	}
 	
 	public boolean restart() {
-		Skywars.get().sendMessage("Restarting arena for map " + map.getName());
 		cancelTimer();
+		Skywars.get().sendMessage("Restarting arena for map " + map.getName());
 		for(SkywarsPlayer player : getAllPlayersIncludingAliveAndSpectators()) {
 			kick(player);
 		}
-		clear();
-		setStatus(ArenaStatus.WAITING);
-		return true;
-	}
-
-	public void clear() {
-		Skywars.get().sendMessage("Clearing arena for map " + map.getName());
-		restartEvents();
-		forcedStart = false;
-		forcedStartPlayer = null;
-		full = false;
-		invencibility = false;
-		players.clear();
-		cancelTimer();
-		setWinner(null);
-		if(getWorldName() != null) {			
-			for(Entity i : Bukkit.getWorld(getWorldName()).getEntities()) {
+		if(world != null) {			
+			for(Entity i : world.getEntities()) {
 				if(i instanceof Item && isInBoundaries(i.getLocation())) {
 					i.remove();
 				}
 			}
 		}
-		pasteSchematic();
-		resetCases();
+		Skywars.get().clearArena(this);
+		return true;
 	}
 	
 	public void resetCases() {
@@ -498,9 +475,8 @@ public class Arena {
 	
 	public ArrayList<String> getProblems() {
 		ArrayList<String> problems = new ArrayList<String>();
-		if(!Bukkit.getServer().getWorlds().stream().map(world -> world.getName())
-				.collect(Collectors.toList()).contains(getWorldName()))
-			problems.add("World " + getWorldName() +" does not exist");
+		if(world == null)
+			problems.add("World not set");
 		if (getSpawn(getPlayerCount()) == null)
 			problems.add(String.format("Spawn %s not set", getPlayerCount()));
 		if (map.maxPlayers <= 0)
@@ -509,8 +485,8 @@ public class Arena {
 			problems.add("Schematic not set");
 		if (location == null)
 			problems.add("No location set");
-		if (isFull())
-			problems.add("Arena is full");
+		if (!isJoinable())
+			problems.add("Arena is not joinable");
 		return problems;
 	}
 	
@@ -613,6 +589,7 @@ public class Arena {
 	}
 	
 	public void pasteSchematic() {
+		System.out.println("pasting schematic at " + location.toString());
 		SchematicHandler.pasteSchematic(location, map.getSchematic());
 	}
 	
@@ -638,20 +615,24 @@ public class Arena {
 		return countdown;
 	}
 	
-	public String getWorldName() {
-		return worldName;
-	}
-
-	public void setWorldName(String worldName) {
-		this.worldName = worldName;
-	}
-
 	public ArenaStatus getStatus() {
 		return status;
 	}
 
 	public void setStatus(ArenaStatus status) {
 		this.status = status;
+	}
+	
+	public void setWorld(String worldName) {
+		this.world = Bukkit.getWorld(worldName);
+	}
+	
+	public void setWorld(World world) {
+		this.world = world;
+	}
+	
+	public World getWorld() {
+		return world;
 	}
 	
 	public Location getLocation() {
@@ -661,9 +642,9 @@ public class Arena {
 	public void setLocation(Location location) {
 		this.location = location;
 	}
-
-	public boolean isFull() {
-		return full;
+	
+	public boolean isJoinable() {
+		return joinable;
 	}
 	
 	public boolean isInvencibility() {

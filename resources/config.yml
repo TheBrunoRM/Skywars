@@ -14,10 +14,25 @@ disableWeather: true
 # this is the reset cooldown for last hits (in seconds)
 lastHitResetCooldown: 15
 
+# this is the arena location method
+# possible options are SINGLE_ARENA or MULTI_ARENA
+# --
+# if the option is SINGLE_ARENA then every arena
+# has its own position in an specified world
+# and cannot be played mor than once at the same time
+# --
+# if the option is MULTI_ARENA then every arena
+# does NOT have any position nor world assigned, and instead
+# you can set a default world for all the arenas
+# and then have the plugin place the arenas in the world.
+# this allows for a single map being playable in multiple arenas.
+arenasMethod: SINGLE_ARENA
+
+# this is in case you set the arenas method to MULTI_ARENA
 arenas:
-  world: world
-  Y: 100 # altitude of the schematics
-  separation: 100 # blocks per arena
+  world: SkywarsMaps
+  Y: 150 # altitude of the schematics
+  separation: 200 # blocks per arena
 
 # update task for actionbar and scoreboard
 taskUpdate:
