@@ -63,7 +63,7 @@ public class ConfigurationUtils {
 			}
 			if(modified) {				
 				Skywars.get().sendMessage("&cYou should not delete keys in the configuration files.");
-				Skywars.get().sendMessage("&cThe plugin will use the default values for the deleted keys.");
+				Skywars.get().sendMessage("&6The plugin will use the default values for the deleted keys.");
 			}
 			return conf;
 		} catch(Exception e) {

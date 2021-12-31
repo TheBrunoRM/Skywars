@@ -111,7 +111,7 @@ public class Skywars extends JavaPlugin {
 					double y = lobbyConfig.getDouble("lobby.y");
 					double z = lobbyConfig.getDouble("lobby.z");
 					this.lobby = new Location(world, x, y, z);
-				} else sendMessage("&cCould not set main lobby in world &b%s", worldName);
+				} else sendMessage("&cLobby world (&b%s&c) does not exist!", worldName);
 			}
 		} else this.lobby = null;
 	}
@@ -170,7 +170,7 @@ public class Skywars extends JavaPlugin {
 			player.getInventory().removeItem(MapSpawnSetup.item);
 			SkywarsUtils.TeleportPlayerBack(player);
 		});
-		getLogger().info(Messager.colorFormat("%s &eStopping arenas...", prefix));
+		sendMessage("Stopping arenas...");
 		for (Arena arena : arenas) {
 			arena.restart();
 		}
@@ -201,6 +201,7 @@ public class Skywars extends JavaPlugin {
     }
     
 	public void loadEvents() {
+		//sendMessage("Loading events...");
 		FileConfiguration config = getConfig();
 		PluginManager pluginManager = getServer().getPluginManager();
 		if(config.getBoolean("signsEnabled")) {
@@ -232,6 +233,7 @@ public class Skywars extends JavaPlugin {
 	}
 	
 	public void loadCommands() {
+		sendMessage("Loading commands...");
 		HashMap<String, CommandExecutor> cmds = new HashMap<String, CommandExecutor>();
 		cmds.put("skywars", new MainCommand());
 		cmds.put("where", new WhereCommand());
@@ -240,12 +242,11 @@ public class Skywars extends JavaPlugin {
 		cmds.put("leave", new LeaveCommand());
 		for(String cmd : cmds.keySet()) {
 			if(!getConfig().getStringList("disabledCommands").contains(cmd)) {
-				Bukkit.getConsoleSender().sendMessage(
-					Messager.colorFormat("%s &eLoading command &a%s&e...", prefix, cmd));
+				sendMessage("&eLoading command &a%s&e...", cmd);
 				this.getCommand(cmd).setExecutor(cmds.get(cmd));
-			} else Bukkit.getConsoleSender().sendMessage(
-				Messager.colorFormat("%s &7Skipping command &c%s&e...", prefix, cmd));
+			} else sendMessage("&7Skipping command &c%s&e...", cmd);
 		}
+		sendMessage("&eFinished loading commands.");
 	}
 	
 	// maps
@@ -377,7 +378,23 @@ public class Skywars extends JavaPlugin {
 	
 	public void loadMaps() {
 		String arenasMethod = config.getString("arenasMethod");
-		sendMessage("Loading arenas as &b" + arenasMethod.toUpperCase());
+		sendMessage("&eLoading arenas (&b%s&e)", arenasMethod.toUpperCase());
+		if(arenasMethod.equalsIgnoreCase("MULTI_ARENA")) {
+			String worldName = config.getString("arenas.world");
+			boolean aborted = false;
+			if(worldName == null) {					
+				sendMessage("World for arenas in config (&barenas.world&e) is not set!");
+				aborted = true;
+			} else if (Bukkit.getWorld(worldName) == null) {					
+				sendMessage("World for arenas in config (&barenas.world&e) does not exist!");
+				aborted = true;
+			}
+			if(aborted) {
+				sendMessage("&cCancelled map loading. &eUse &b/skywars reload &eto reload the plugin!");
+				return;
+			}
+		}
+		
 		maps.clear();
 		File folder = new File(mapsPath);
 		if (!folder.exists()) {
@@ -431,6 +448,7 @@ public class Skywars extends JavaPlugin {
 			maps.add(map);
 			sendMessage("&eLoaded map: &a%s", map.getName());
 		}
+		sendMessage("&eFinished loading maps.");
 	}
 	
 	private World getWorld(SkywarsMap map) {
@@ -449,6 +467,7 @@ public class Skywars extends JavaPlugin {
 	}
 	
 	public void loadKits() {
+		sendMessage("Loading kits...");
 		kits.clear();
 		File folder = new File(kitsPath);
 		if (!folder.exists()) {
@@ -492,6 +511,7 @@ public class Skywars extends JavaPlugin {
 			kits.add(kit);
 			sendMessage("&eLoaded kit: &a%s", kit.getName());
 		}
+		sendMessage("Finished loading kits.");
 	}
 	
 	public static void createBigCase(Location location, XMaterial material) {
@@ -706,6 +726,8 @@ public class Skywars extends JavaPlugin {
 	
 	public void loadConfig() {
 		
+		sendMessage("Loading configuration...");
+		
 		// config.yml
 		config = ConfigurationUtils.loadConfiguration("config.yml", "resources/config.yml");
 		
@@ -720,6 +742,8 @@ public class Skywars extends JavaPlugin {
 		
 		// load lobby
 		setLobbyFromConfig();
+		
+		sendMessage("Finished loading configuration.");
 	}
     
     public void sendMessage(String text, Object... format) {

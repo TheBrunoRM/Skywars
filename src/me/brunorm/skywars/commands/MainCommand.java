@@ -146,7 +146,7 @@ public class MainCommand implements CommandExecutor {
 					GamesMenu.OpenMenu(player);
 				} else if (args[0].equalsIgnoreCase("reload")
 						|| args[0].equalsIgnoreCase("rl")) {
-					if(CommandsUtils.permissionCheckWithMessage(player, "skywars.admin")) {						
+					if(CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin")) {						
 						Skywars.get().Reload();
 						sender.sendMessage(Messager.getMessage("RELOADED"));
 					}
@@ -348,7 +348,7 @@ public class MainCommand implements CommandExecutor {
 
 		} catch (Exception e) {
 			sender.sendMessage("there was an error executing the command:");
-			sender.sendMessage(e.getLocalizedMessage());
+			//sender.sendMessage(e.getLocalizedMessage());
 			e.printStackTrace();
 		}
 		return false;
