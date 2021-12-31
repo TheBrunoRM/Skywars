@@ -76,7 +76,7 @@ public class Arena {
 			return false;
 		joinable = getPlayerCount() > map.maxPlayers;
 		int index = getNextAvailablePlayerSlot();
-		Location spawn = getLocationInArena(getSpawn(index));
+		Location spawn = getVectorInArena(getSpawn(index));
 		if (spawn == null) {
 			player.sendMessage(String.format("spawn %s of arena %s not set", index, map.getName()));
 			return false;
@@ -112,7 +112,7 @@ public class Arena {
 		return true;
 	}
 	
-	private Location getSpawn(Object key) {
+	private Vector getSpawn(Object key) {
 		return map.spawns.get(key);
 	}
 
@@ -187,7 +187,7 @@ public class Arena {
 
 		removePlayer(p);
 
-		p.getPlayer().teleport(SkywarsUtils.getCenteredLocation(getLocationInArena(getSpawn(p.teamNumber))));
+		p.getPlayer().teleport(SkywarsUtils.getCenteredLocation(getVectorInArena(getSpawn(p.teamNumber))));
 		p.getPlayer().setVelocity(new Vector(0, 1f, 0));
 
 		if(getWinner() != p)
@@ -303,7 +303,7 @@ public class Arena {
 	public void startTimer(ArenaStatus status) {
 		cancelTimer();
 		setStatus(status);
-		//System.out.println(String.format("starting %s timer", status));
+		System.out.println(String.format("starting %s timer", status));
 		if (status == ArenaStatus.STARTING) {
 			if (forcedStart && forcedStartPlayer != null) {
 				for (SkywarsPlayer player : getAllPlayersIncludingAliveAndSpectators()) {
@@ -321,7 +321,6 @@ public class Arena {
 					
 					if (this.time == 0) {
 						startGame();
-						cancelTimer();
 						return;
 					}
 
@@ -331,7 +330,8 @@ public class Arena {
 								5, 1f);
 						if (time == 10) {
 							if (this.time == 10) {
-								Skywars.get().NMS().sendTitle(player.getPlayer(), Messager.getMessage("10_SECONDS_TITLE"),
+								Skywars.get().NMS().sendTitle(player.getPlayer(),
+										Messager.getMessage("10_SECONDS_TITLE"),
 										Messager.getMessage("10_SECONDS_SUBTITLE"), 0, 50, 0);
 							}
 						} else if (time <= 5 || time % 5 == 0) {
@@ -351,6 +351,8 @@ public class Arena {
 			task = Bukkit.getScheduler().runTaskTimer(Skywars.get(), new Runnable() {
 				@Override
 				public void run() {
+					
+					System.out.println("[debug] running game timer");
 					
 					SkywarsEvent event = getNextEvent();
 					
@@ -402,8 +404,8 @@ public class Arena {
 		setStatus(ArenaStatus.PLAYING);
 		startTimer(getStatus());
 		calculateAndFillChests();
-		for (Location spawn : map.getSpawns().values()) {
-			Skywars.createCase(getLocationInArena(spawn), XMaterial.AIR);
+		for (Vector spawn : map.getSpawns().values()) {
+			Skywars.createCase(getVectorInArena(spawn), XMaterial.AIR);
 		}
 		for (SkywarsPlayer player : getAllPlayersIncludingAliveAndSpectators()) {
 			if(player.isSpectator()) continue;
@@ -468,8 +470,8 @@ public class Arena {
 	}
 	
 	public void resetCases() {
-		for (Location spawn : map.getSpawns().values()) {
-			Skywars.createCase(getLocationInArena(spawn), XMaterial.RED_STAINED_GLASS);
+		for (Vector spawn : map.getSpawns().values()) {
+			Skywars.createCase(getVectorInArena(spawn), XMaterial.RED_STAINED_GLASS);
 		}
 	}
 	
@@ -494,7 +496,16 @@ public class Arena {
 		return getProblems().size() <= 0;
 	}
 	
-	Location getLocationInArena(Location loc) {
+	public Location getVectorInArena(Vector vector) {
+		return new Location(
+			getWorld(),
+			vector.getBlockX() + this.location.getBlockX(),
+			vector.getBlockY() + this.location.getBlockY(),
+			vector.getBlockZ() + this.location.getBlockZ()
+		);
+	}
+	
+	public Location getLocationInArena(Location loc) {
 		return new Location(
 			loc.getWorld(),
 			loc.getBlockX() + this.location.getBlockX(),
@@ -605,8 +616,8 @@ public class Arena {
 			if (values.get("id").getValue().equals("Chest")) {
 				Location loc = SchematicHandler.calculatePositionWithOffset(values, world, offset);
 				ChestManager.fillChest(getLocationInArena(loc),
-						SkywarsUtils.distance(this.getLocation(),
-								getLocationInArena(loc)) < map.getCenterRadius());
+						SkywarsUtils.distance(this.getLocation().toVector(),
+								getLocationInArena(loc).toVector()) < map.getCenterRadius());
 			}
 		}
 	}
@@ -671,6 +682,16 @@ public class Arena {
 			startTimer(ArenaStatus.STARTING);
 		} else {
 			startGame();
+		}
+	}
+
+	public void broadcastRefillMessage() {
+		broadcastMessage(Skywars.get().langConfig.getString("refill"));
+	}
+
+	private void broadcastMessage(String string, Object... format) {
+		for(SkywarsPlayer player : getAllPlayersIncludingAliveAndSpectators()) {
+			player.getPlayer().sendMessage(Messager.colorFormat(string, format));
 		}
 	}
 	

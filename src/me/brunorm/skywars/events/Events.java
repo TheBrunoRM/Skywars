@@ -48,8 +48,8 @@ public class Events implements Listener {
 			SkywarsPlayer swp = arena.getPlayer(event.getPlayer());
 			if(!arena.isInBoundaries(event.getPlayer())) {
 				if (arena.getStatus() == ArenaStatus.WAITING ||
-						arena.getStatus() == ArenaStatus.STARTING)
-					arena.leavePlayer(player);
+						arena.getStatus() == ArenaStatus.STARTING) {}
+					//arena.leavePlayer(player);
 				else if(!swp.isSpectator())
 					arena.makeSpectator(swp, null);
 				else

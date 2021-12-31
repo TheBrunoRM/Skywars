@@ -22,6 +22,16 @@ import org.jnbt.Tag;
 import com.cryptomorin.xseries.XMaterial;
 
 public class SchematicHandler {
+
+	public static Vector calculatePositionWithOffset(Map<String, Tag> values, Vector offset) {
+		int x = (int) values.get("x").getValue();
+		int y = (int) values.get("y").getValue();
+		int z = (int) values.get("z").getValue();
+		return new Vector(
+			x + offset.getBlockX(),
+			y + offset.getBlockY(),
+			z + offset.getBlockZ());
+	}
 	
 	public static Location calculatePositionWithOffset(Map<String, Tag> values, World world, Vector offset) {
 		int x = (int) values.get("x").getValue();

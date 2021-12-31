@@ -20,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
 
 import com.cryptomorin.xseries.XMaterial;
 
@@ -32,7 +33,7 @@ import me.brunorm.skywars.commands.WhereCommand;
 import me.brunorm.skywars.events.DisableWeather;
 import me.brunorm.skywars.events.Events;
 import me.brunorm.skywars.events.InteractEvent;
-import me.brunorm.skywars.events.MapSetup;
+import me.brunorm.skywars.events.MapSpawnSetup;
 import me.brunorm.skywars.events.MessageSound;
 import me.brunorm.skywars.events.ProjectileTrails;
 import me.brunorm.skywars.events.SignEvents;
@@ -165,8 +166,8 @@ public class Skywars extends JavaPlugin {
 				arena.kick(player);
 			}
 		}
-		MapSetupMenu.currentMaps.forEach((player, arena) -> {
-			player.getInventory().removeItem(MapSetup.item);
+		MapSetupMenu.currentArenas.forEach((player, arena) -> {
+			player.getInventory().removeItem(MapSpawnSetup.item);
 			SkywarsUtils.TeleportPlayerBack(player);
 		});
 		getLogger().info(Messager.colorFormat("%s &eStopping arenas...", prefix));
@@ -220,7 +221,7 @@ public class Skywars extends JavaPlugin {
 				new GamesMenu(),
 				new MapMenu(),
 				new KitsMenu(),
-				new MapSetup(),
+				new MapSpawnSetup(),
 				new ChestManager(),
 				new MapSetupMenu(),
 				new PlayerInventoryManager(),
@@ -266,11 +267,18 @@ public class Skywars extends JavaPlugin {
 		return maps;
 	}
 	
-	public Arena getArenaByMap(SkywarsMap map) {
+	public Arena getJoinableArenaByMap(SkywarsMap map) {
 		for(Arena arena : arenas) {
 			if(arena.getStatus() != ArenaStatus.WAITING &&
 					arena.getStatus() != ArenaStatus.STARTING) continue;
 			if(!arena.isJoinable()) continue;
+			if(arena.getMap() == map) return arena;
+		}
+		return null;
+	}
+	
+	public Arena getArenaByMap(SkywarsMap map) {
+		for(Arena arena : arenas) {
 			if(arena.getMap() == map) return arena;
 		}
 		return null;
@@ -282,13 +290,26 @@ public class Skywars extends JavaPlugin {
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
 	
-	public void joinMap(SkywarsMap map, Player player) {
-		Arena arena = getArenaByMap(map);
+	public boolean joinMap(SkywarsMap map, Player player) {
+		Arena arena = getJoinableArenaByMap(map);
 		if(arena == null) {
-			arena = createNewArena(map);
+			switch(config.getString("arenasMethod")) {
+			case "MULTI_ARENA":
+				arena = createNewArena(map);
+				break;
+			case "SINGLE_ARENA":
+				if(getArenaByMap(map) == null)
+					arena = createNewArena(map);
+				break;
+			}
 		}
-		System.out.println("joining player to map");
-		arena.joinPlayer(player);
+		if(arena != null) {			
+			System.out.println("joining player to map");
+			arena.joinPlayer(player);
+			return true;
+		}
+		System.out.println("no arena found");
+		return false;
 	}
 	
 	public void joinRandomMap(Player player) {
@@ -296,14 +317,33 @@ public class Skywars extends JavaPlugin {
 		joinMap(map, player);
 	}
 	
-	Arena createNewArena(SkywarsMap map) {
-		Arena arena = new Arena(map);
-		arena.setWorld(getWorld(map));
-		arena.setLocation(getNextFreeLocation());
-		arena.pasteSchematic();
-		arenas.add(arena);
-		System.out.println("creating new arena for map " + map.getName());
-		return arena;
+	public Arena createNewArena(SkywarsMap map) {
+		if(config.getString("arenasMethod")
+				.equalsIgnoreCase("MULTI_ARENA")) {			
+			Arena arena = new Arena(map);
+			arena.setWorld(getWorld(map));
+			arena.setLocation(getNextFreeLocation());
+			arena.pasteSchematic();
+			arenas.add(arena);
+			System.out.println("creating new arena for map " + map.getName());
+			return arena;
+		} else if (config.getString("arenasMethod")
+				.equalsIgnoreCase("SINGLE_ARENA")) {
+			Arena arena = getJoinableArenaByMap(map);
+			if(arena == null) {
+				if(getArenaByMap(map) != null)
+					return null;
+				arena = new Arena(map);
+				arena.setWorld(getWorld(map));
+				arena.setLocation(map.getLocation());
+				System.out.println("location: " + map.getLocation());
+				arena.pasteSchematic();
+				arenas.add(arena);
+				System.out.println("creating single arena for map " + map.getName());
+			}
+			return arena;
+		}
+		return null;
 	}
 	
 	public void clearArena(Arena arena) {
@@ -313,6 +353,12 @@ public class Skywars extends JavaPlugin {
 	}
 
 	public Location getNextFreeLocation() {
+		if(!config.getString("arenasMethod")
+				.equalsIgnoreCase("MULTI_ARENA")) {
+			System.out.println("warning: getNextFreeLocation called though MULTI_ARENA is disabled!");
+			return null;
+		}
+		
 		int x = 0;
 		int z = 0;
 
@@ -331,6 +377,7 @@ public class Skywars extends JavaPlugin {
 	
 	public void loadMaps() {
 		String arenasMethod = config.getString("arenasMethod");
+		sendMessage("Loading arenas as &b" + arenasMethod.toUpperCase());
 		maps.clear();
 		File folder = new File(mapsPath);
 		if (!folder.exists()) {
@@ -363,25 +410,22 @@ public class Skywars extends JavaPlugin {
 			map.setConfig(config);
 			
 			if(arenasMethod.equalsIgnoreCase("SINGLE_ARENA")) {
-				
-				map.setWorldName(config.getString("world"));
-				map.setSchematic(config.getString("schematic"));
+				//System.out.println("setting worldname and location for map " + map.getName());
+				map.setWorldName(config.getString("worldName"));
 				map.setLocation(
 						ConfigurationUtils.getLocationConfig(map.getWorldName(),
 								config.getConfigurationSection("location")));
 			}
 			
-			World world = getWorld(map);
-			
-			// this will ignore spawns that are outside max players range
-			for (int i = 0; i < map.getMaxPlayers(); i++) {
+			for (String spawn : config.getConfigurationSection("spawn").getKeys(false)) {
+				int i = Integer.parseInt(spawn);
 				if (config.get(String.format("spawn.%s", i)) == null)
 					continue;
 				double x = config.getDouble(String.format("spawn.%s.x", i));
 				double y = config.getDouble(String.format("spawn.%s.y", i));
 				double z = config.getDouble(String.format("spawn.%s.z", i));
-				Location location = new Location(world, x, y, z);
-				map.getSpawns().put(i, location);
+				Vector vector = new Vector(x, y, z);
+				map.getSpawns().put(i, vector);
 			}
 			
 			maps.add(map);

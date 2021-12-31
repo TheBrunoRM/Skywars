@@ -108,11 +108,14 @@ public class ConfigurationUtils {
 	}
 	
 	public static Location getLocationConfig(String worldName, ConfigurationSection config) {
-		if(worldName == null)
+		if(worldName == null) {
+			System.out.println("warning, getlocationconfig: worldname is null");
 			return null;
+		}
 		World world = Bukkit.getWorld(worldName);
 		if(world != null)
 			return getLocationConfig(world, config);
+		System.out.println("warning, getlocationconfig: world is null");
 		return null;
 	}
 	

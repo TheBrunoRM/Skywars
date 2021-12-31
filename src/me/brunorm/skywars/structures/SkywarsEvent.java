@@ -39,6 +39,7 @@ public class SkywarsEvent {
 	public void run() {
 		switch(type) {
 		case REFILL:
+			arena.broadcastRefillMessage();
 			arena.calculateAndFillChests();
 			break;
 		}

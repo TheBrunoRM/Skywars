@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 import com.cryptomorin.xseries.XMaterial;
 
@@ -80,7 +80,7 @@ public class MainCommand implements CommandExecutor {
 				}
 				Arena playerArena = Skywars.get().getPlayerArena(player);
 				SkywarsMap map = Skywars.get().getMap(name);
-				Arena arena = Skywars.get().getArenaByMap(map);
+				Arena arena = Skywars.get().getJoinableArenaByMap(map);
 				if (args[0].equalsIgnoreCase("setmainlobby")) {
 					if(CommandsUtils.permissionCheckWithMessage(player, "skywars.setmainlobby")) {						
 						Skywars.get().setLobby(player.getLocation());
@@ -134,8 +134,8 @@ public class MainCommand implements CommandExecutor {
 					}
 				}
 				else if (args[0].equalsIgnoreCase("join")) {
-					if(!SkywarsUtils.JoinableCheck(arena, player)) return false;
-					arena.joinPlayer(player);
+					//if(!SkywarsUtils.JoinableCheck(arena, player)) return false;
+					Skywars.get().joinMap(map, player);
 				}
 				else if (args[0].equalsIgnoreCase("version")) {
 					sender.sendMessage(String.format("%s version %s made by %s",
@@ -144,9 +144,12 @@ public class MainCommand implements CommandExecutor {
 				}
 				else if (args[0].equalsIgnoreCase("menu")) {
 					GamesMenu.OpenMenu(player);
-				} else if (args[0].equalsIgnoreCase("reload")) {
-					Skywars.get().Reload();
-					sender.sendMessage(Messager.getMessage("RELOADED"));
+				} else if (args[0].equalsIgnoreCase("reload")
+						|| args[0].equalsIgnoreCase("rl")) {
+					if(CommandsUtils.permissionCheckWithMessage(player, "skywars.admin")) {						
+						Skywars.get().Reload();
+						sender.sendMessage(Messager.getMessage("RELOADED"));
+					}
 				}
 				
 				else if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.test")) return false;
@@ -301,25 +304,37 @@ public class MainCommand implements CommandExecutor {
 					}
 					int spawn = Integer.parseInt(args[3]);
 					if (args[1].equalsIgnoreCase("nullcheck")) {
-						Location arenaSpawnLocation = mapSpawn.getSpawn(spawn);
+						Vector arenaSpawnLocation = mapSpawn.getSpawn(spawn);
 						sender.sendMessage(arenaSpawnLocation == null ? "spawn is null" : "spawn exists");
 					}
 					if (args[1].equalsIgnoreCase("set")) {
-						mapSpawn.setSpawn(spawn, player.getLocation());
+						// TODO: calculate location relative to arena location
+						//mapSpawn.setSpawn(spawn, player.getLocation().toVector());
 						player.sendMessage(String.format("Set spawn %s of arena '%s' to your current location", spawn,
 								mapSpawn.getName()));
 					}
 					if (args[1].equalsIgnoreCase("tp")) {
-						player.teleport(mapSpawn.getSpawn(spawn));
+						player.teleport(arena.getVectorInArena(mapSpawn.getSpawn(spawn)));
 						player.sendMessage(
 								String.format("Teleported to spawn %s of arena '%s'", spawn, mapSpawn.getName()));
 					}
 				}
+				if (args[0].equalsIgnoreCase("arenas")) {
+					if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.admin")) return false;
+					ArrayList<Arena> arenas = Skywars.get().getArenas();
+					if (arenas != null && arenas.size() > 0) {
+						List<String> arenaNames = arenas.stream()
+								.map(m -> m.getMap().getName())
+								.collect(Collectors.toList());
+						sender.sendMessage(String.format("Arenas: %s", String.join(", ", arenaNames)));
+					} else
+						sender.sendMessage("No arenas");
+				}
 				if (args[0].equalsIgnoreCase("maps")) {
 					if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.admin")) return false;
-					ArrayList<Arena> maps = Skywars.get().getArenas();
+					ArrayList<SkywarsMap> maps = Skywars.get().getMaps();
 					if (maps != null && maps.size() > 0) {
-						List<String> mapNames = Skywars.get().getMaps().stream()
+						List<String> mapNames = maps.stream()
 								.map(m -> m.getName())
 								.collect(Collectors.toList());
 						sender.sendMessage(String.format("Maps: %s", String.join(", ", mapNames)));

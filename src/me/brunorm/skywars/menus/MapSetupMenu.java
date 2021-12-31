@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -23,7 +22,8 @@ import com.cryptomorin.xseries.XMaterial;
 
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
-import me.brunorm.skywars.events.MapSetup;
+import me.brunorm.skywars.events.MapSpawnSetup;
+import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.SkywarsMap;
 import mrblobman.sounds.Sounds;
 
@@ -43,7 +43,7 @@ public class MapSetupMenu implements Listener {
 
 	public static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();
 	public static HashMap<Player, Location> playerLocations = new HashMap<Player, Location>();
-	public static HashMap<Player, SkywarsMap> currentMaps = new HashMap<Player, SkywarsMap>();
+	public static HashMap<Player, Arena> currentArenas = new HashMap<Player, Arena>();
 	File schematicsFolder = new File(Skywars.schematicsPath);
 	
 	static void OpenSchematicsMenu(Player player) {
@@ -60,7 +60,7 @@ public class MapSetupMenu implements Listener {
 			for(SkywarsMap map : Skywars.get().getMaps()) {
 				String mapSchematic = map.getSchematicFilename();
 				if(mapSchematic != null && mapSchematic.equals(schematicFile.getName())) {
-					if(map == currentMaps.get(player)) {
+					if(map == currentArenas.get(player).getMap()) {
 						lore.add(Messager.colorFormat("&6Current schematic file", map.getName()));
 					} else {
 						lore.add(Messager.colorFormat("&cWarning! %s already uses this file", map.getName()));
@@ -87,7 +87,7 @@ public class MapSetupMenu implements Listener {
 	}
 	
 	static void UpdateInventory(Inventory inventory, Player player) {
-		SkywarsMap currentMap = currentMaps.get(player);
+		SkywarsMap currentMap = currentArenas.get(player).getMap();
 		
 		List<String> intLore = new ArrayList<String>();
 		intLore.add(Messager.color("&eLeft-click to add"));
@@ -146,7 +146,7 @@ public class MapSetupMenu implements Listener {
 	}
 	
 	public static void OpenConfigurationMenu(Player player, SkywarsMap map) {
-		currentMaps.put(player, map);
+		currentArenas.put(player, Skywars.get().createNewArena(map));
 		Inventory inventory = Bukkit.createInventory(null, 9 * 3, Messager.color("&a&l" + map.getName()));
 		inventories.put(player, inventory);
 		
@@ -177,7 +177,7 @@ public class MapSetupMenu implements Listener {
 				return;
 			String name = clicked.getItemMeta().getDisplayName();
 			
-			SkywarsMap currentMap = currentMaps.get(player);
+			SkywarsMap currentMap = currentArenas.get(player).getMap();
 			
 			if (name.equals(Messager.colorFormat(minPlayersName, currentMap.getMinPlayers()))) {
 				int n = currentMap.getMinPlayers() + (event.getClick() == ClickType.LEFT ? 1 : -1);
@@ -188,13 +188,7 @@ public class MapSetupMenu implements Listener {
 				currentMap.setMaxPlayers(n);
 			}
 			if (name.equals(Messager.color(spawnName))) {
-				if(true) throw new NotImplementedException();
-				@SuppressWarnings("unused")
-				Location location = player.getLocation();
-				if(location == null) {
-					player.sendMessage("You need to set a location first!");
-					return;
-				}
+				Arena arena = currentArenas.get(player);
 				ItemStack item = new ItemStack(XMaterial.BLAZE_ROD.parseItem());
 				ItemMeta meta = item.getItemMeta();
 				List<String> lore = new ArrayList<String>();
@@ -205,12 +199,12 @@ public class MapSetupMenu implements Listener {
 				meta.setLore(lore);
 				item.setItemMeta(meta);
 
-				MapSetup.item = item;
-				player.getInventory().setItem(player.getInventory().getHeldItemSlot(), MapSetup.item);
+				MapSpawnSetup.item = item;
+				player.getInventory().setItem(player.getInventory().getHeldItemSlot(), MapSpawnSetup.item);
 				player.closeInventory();
 
 				playerLocations.put(player, player.getLocation());
-				player.teleport(location.add(new Vector(0, 5, 0)));
+				player.teleport(arena.getLocation().add(new Vector(0, 5, 0)));
 				player.setVelocity(new Vector(0, 1f, 0));
 
 				player.setAllowFlight(true);

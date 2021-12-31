@@ -241,15 +241,15 @@ public class SkywarsUtils {
 		if(locations.size() <= 1) return loc;
 		Location closest = locations.get(0);
 		for(Location l : locations) {
-			if(distance(loc, l) < distance(loc, closest)) {
+			if(distance(loc.toVector(), l.toVector())
+					< distance(loc.toVector(), closest.toVector())) {
 				closest = l;
 			}
 		}
 		return closest;
 	}
 
-	public static double distance(Location vec1, Location vec2) {
-		//if(vec1 == null || vec2 == null) return -1;
+	public static double distance(Vector vec1, Vector vec2) {
 		double dx = vec2.getX() - vec1.getX();
 		double dy = vec2.getY() - vec1.getY();
 		double dz = vec2.getZ() - vec1.getZ();
