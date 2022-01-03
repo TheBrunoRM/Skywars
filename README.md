@@ -2,6 +2,8 @@
 
 For Minecraft servers from version 1.8 to 1.12 (I plan to add support to more versions in the future)
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/786de08d9dfa4332bc1e15e8f4373bd6)](https://www.codacy.com/gh/TheBrunoRM/Skywars/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=TheBrunoRM/Skywars&amp;utm_campaign=Badge_Grade)
+
 **Resource page:** https://www.spigotmc.org/resources/skywars.98709/
 
 # Table of Contents
