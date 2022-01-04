@@ -356,12 +356,19 @@ public class SetupMenu implements Listener {
 			String schematicName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
 			for(File schematicFile : schematicsFolder.listFiles()) {
 				if(schematicFile.getName().equals(schematicName)) {
+					currentArena.clearBlocks();
 					currentMap.setSchematic(schematicName);
+					currentMap.loadSchematic();
+					currentArena.pasteSchematic();
 					player.sendMessage(
-							Messager.colorFormat("&eSchematic set to &b",
+							Messager.colorFormat("&eSchematic set to &b%s",
 									currentMap.getSchematicFilename()));
+					player.sendMessage(Messager.color("&eSchematic pasted."));
 				}
 			}
+			
+			currentMap.saveParametersInConfig();
+			currentMap.saveConfig();
 			
 			inventories.forEach((p, inv) -> {
 				if(inv == inventory) {					

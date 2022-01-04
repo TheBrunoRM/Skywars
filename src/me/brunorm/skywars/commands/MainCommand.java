@@ -341,6 +341,36 @@ public class MainCommand implements CommandExecutor {
 					} else
 						sender.sendMessage("No maps");
 				}
+				if (args[0].equalsIgnoreCase("create")) {
+					if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.admin")) return false;
+					if (name != null) {
+						if (Skywars.get().getMap(name) == null) {
+							if(Skywars.get().createMap(name))
+								sender.sendMessage("Map successfully created");
+							else
+								sender.sendMessage("Could not create map");
+						} else {
+							sender.sendMessage("Map already exists");
+						}
+					} else {
+						sender.sendMessage("No name");
+					}
+				}
+				if (args[0].equalsIgnoreCase("delete")) {
+					if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.admin")) return false;
+					if (name != null) {
+						if (Skywars.get().getMap(name) != null) {
+							if(Skywars.get().deleteMap(name))
+								sender.sendMessage("Map successfully deleted");
+							else
+								sender.sendMessage("Could not delete map");
+						} else {
+							sender.sendMessage("Map doesn't exist");
+						}
+					} else {
+						sender.sendMessage("No name");
+					}
+				}
 				return true;
 			} else {
 				sender.sendMessage(Messager.color("&a&lSkyWars &e- /sw help"));

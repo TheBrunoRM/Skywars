@@ -10,6 +10,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -592,8 +593,13 @@ public class Arena {
 	}
 	
 	public void pasteSchematic() {
+		if(map.getSchematic() == null) return;
 		System.out.println("pasting schematic at " + location.toString());
 		SchematicHandler.pasteSchematic(location, map.getSchematic());
+	}
+	
+	public void clearBlocks() {
+		SchematicHandler.clear(location, map.getSchematic());
 	}
 	
 	public void calculateAndFillChests() {
@@ -601,6 +607,32 @@ public class Arena {
 		World world = location.getWorld();
 		Vector offset = schematic.getOffset();
 		ListTag tileEntities = schematic.getTileEntities();
+		System.out.println("tile entities: " + tileEntities.getValue().size());
+		
+		byte[] blocks = schematic.getBlocks();
+		short length = schematic.getLength();
+		short width = schematic.getWidth();
+		short height = schematic.getHeight();
+		
+		int filled = 0;
+		
+		for (int x = 0; x < width; ++x) {
+			for (int y = 0; y < height; ++y) {
+				for (int z = 0; z < length; ++z) {
+					int index = y * width * length + z * width + x;
+					Location loc = getLocationInArena(new Location(world,x,y,z)).add(offset);
+					Block block = loc.getBlock();
+					if(block.getType() == XMaterial.CHEST.parseMaterial()
+							|| blocks[index] == 54 /*chest id*/) {						
+						ChestManager.fillChest(getLocationInArena(loc),
+								SkywarsUtils.distance(this.getLocation().toVector(),
+										getLocationInArena(loc).toVector()) < map.getCenterRadius());
+						System.out.println("filling chest at loc " + loc);
+						filled++;
+					}
+				}
+			}
+		}
 		
 		for (Tag tag : tileEntities.getValue()) {
 			@SuppressWarnings("unchecked")
@@ -610,8 +642,11 @@ public class Arena {
 				ChestManager.fillChest(getLocationInArena(loc),
 						SkywarsUtils.distance(this.getLocation().toVector(),
 								getLocationInArena(loc).toVector()) < map.getCenterRadius());
+				System.out.println("filling chest entity at loc " + loc);
+				filled++;
 			}
 		}
+		System.out.println(String.format("filled %s chests", filled));
 	}
 	
 	public int getCountdown() {
