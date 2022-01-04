@@ -17,13 +17,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.cryptomorin.xseries.XMaterial;
 
-import me.brunorm.skywars.ArenaStatus;
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
-import me.brunorm.skywars.SkywarsUtils;
 import me.brunorm.skywars.structures.Arena;
+import me.brunorm.skywars.structures.SkywarsMap;
 
-public class ArenaMenu implements Listener {
+public class MapMenu implements Listener {
 	
 	static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();
 	
@@ -32,41 +31,35 @@ public class ArenaMenu implements Listener {
 		inventories.put(player, inventory);
 
 		int index = 10;
-		for (Arena arena : Skywars.get().getSortedArenas()) {
+		for (SkywarsMap map : Skywars.get().getMaps()) {
 			//System.out.println("current index: " + index);
 			if((index+1)%9==0)index+=2;
 			List<String> lore = new ArrayList<String>();
 			lore.clear();
 			//lore.add(Messager.color("&7"));
-			ArrayList<String> problems = arena.getProblems();
-			if(problems.size() > 0) {
-				lore.add(Messager.color("&cWarning! &7This arena has some problems:"));
-				for(String problem : problems) {
-					lore.add(Messager.color("&c* &7" + problem));
-				}
-				//lore.add(Messager.color("&7"));
-			}
 			
-			boolean disabled = arena.getStatus() == ArenaStatus.DISABLED;
-			if(problems.size() <= 0) {				
-				if (disabled) {
-					lore.add(Messager.color("&cThis map is disabled!"));
-				} else {
-					//lore.add(Messager.color("&8Solo Insane"));
-					//lore.add(Messager.color("&7"));
-					//lore.add(Messager.color("&7Servidores Disponibles: &a1"));
-					//lore.add(Messager.color("&7Veces Unidas: &a0"));
-					//lore.add(Messager.color("&7Selecciones de Mapa: &a1"));
-					lore.add(Messager.color("&eClick to play!"));
-					//lore.add(Messager.color("&eClick derecho para alternarlo como favorito!"));
-				}
-			}
+			//lore.add(Messager.color("&8Solo Insane"));
+			//lore.add(Messager.color("&7"));
+			//lore.add(Messager.color("&7Servidores Disponibles: &a1"));
+			//lore.add(Messager.color("&7Veces Unidas: &a0"));
+			//lore.add(Messager.color("&7Selecciones de Mapa: &a1"));
+			
+			ArrayList<Arena> arenas = Skywars.get().getArenasByMap(map);
+			int players = arenas.stream()
+					.map(arena -> arena.getPlayerCount())
+					.reduce(0, (a,b)->a+b);
+			
+			lore.add(Messager.colorFormat("&eCurrent arenas: &a%s",
+					Skywars.get().getArenasByMap(map).size()));
+			lore.add(Messager.colorFormat("&eCurrent players: &a%s", players));
+			lore.add(Messager.color("&eClick to play!"));
+			//lore.add(Messager.color("&eClick derecho para alternarlo como favorito!"));
 			
 			ItemStack item = new ItemStack(XMaterial.FIREWORK_STAR.parseItem());
 			ItemMeta meta = item.getItemMeta();
 			meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 			
-			meta.setDisplayName(Messager.colorFormat((disabled ? "&c" : "&a") + "%s", arena.getName()));
+			meta.setDisplayName(Messager.colorFormat("&a%s", map.getName()));
 			meta.setLore(lore);
 			item.setItemMeta(meta);
 			inventory.setItem(index, item);
@@ -85,13 +78,8 @@ public class ArenaMenu implements Listener {
 			ItemStack clicked = event.getCurrentItem();
 			if (clicked == null || clicked.getItemMeta() == null) return;
 			String name = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
-			Arena arena = Skywars.get().getArena(name);
-			if(arena != null) {
-				if(!SkywarsUtils.JoinableCheck(arena, player)) return;
-				arena.joinPlayer(player);
-			} else {
-				player.sendMessage(Messager.color("&cError: &7could not join arena"));
-			}
+			SkywarsMap map = Skywars.get().getMap(name);
+			Skywars.get().joinMap(map, player);
 		}
 	}
 

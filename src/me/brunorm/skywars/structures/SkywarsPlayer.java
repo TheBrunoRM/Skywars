@@ -13,7 +13,7 @@ public class SkywarsPlayer {
 	Arena arena;
 	int kills = 0;
 	boolean spectator = false;
-	int number;
+	int teamNumber;
 	SavedPlayer savedPlayer;
 	Player lastHit;
 	long lastHitTimestamp;
@@ -21,7 +21,7 @@ public class SkywarsPlayer {
 	SkywarsPlayer(Player player, Arena arena, int number) {
 		this.player = player;
 		this.arena = arena;
-		this.number = number;
+		this.teamNumber = number;
 	}
 	
 	public Player getLastHit() {
@@ -68,7 +68,7 @@ public class SkywarsPlayer {
 	}
 	
 	public int getNumber() {
-		return number;
+		return teamNumber;
 	}
 	
 	public Player getPlayer() {

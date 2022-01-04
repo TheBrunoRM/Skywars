@@ -14,9 +14,29 @@ disableWeather: true
 # this is the reset cooldown for last hits (in seconds)
 lastHitResetCooldown: 15
 
+# this is the arena location method
+# possible options are SINGLE_ARENA or MULTI_ARENA
+# --
+# if the option is SINGLE_ARENA then every arena
+# has its own position in an specified world
+# and cannot be played mor than once at the same time
+# --
+# if the option is MULTI_ARENA then every arena
+# does NOT have any position nor world assigned, and instead
+# you can set a default world for all the arenas
+# and then have the plugin place the arenas in the world.
+# this allows for a single map being playable in multiple arenas.
+arenasMethod: SINGLE_ARENA
+
+# this is in case you set the arenas method to MULTI_ARENA
+arenas:
+  world: SkywarsMaps
+  Y: 150 # altitude of the schematics
+  separation: 200 # blocks per arena
+
 # update task for actionbar and scoreboard
 taskUpdate:
-  disable: false
+  disabled: false
   interval: 1 # seconds
 
 time: # seconds
@@ -36,9 +56,9 @@ decimalFormat: "0.#"
 startLines:
   - "&a&l---------------------------------------------"
   - ""
-  - "                              &f&lSkyWars"
+  - "                                  &f&lSkyWars"
   - ""
-  - "    &e&lGather resources and equipmenton your island"
+  - "    &e&lGather resources and equipment on your island"
   - "      &e&lin order to eliminate every other player."
   - "     &e&lGo to the center island for special chests"
   - "                       &e&lwith special items!"
@@ -59,7 +79,7 @@ disabledCommands: []
 # TELEPORTER - not yet implemented - menu for selecting someone to spectate
 # SPECTATOR_OPTIONS - not yet implemented - spectator options as speed, night vision, etc
 # ARENAS_MENU - clickable arena menu to join a game
-# JOIN_RANDOM_ARENA - instantly join an arena
+# JOIN_RANDOM_ARENA - not yet implemented - instantly join an arena
 items:
   waiting:
     0: KIT_SELECTOR
@@ -86,4 +106,6 @@ item_types:
   TELEPORTER: COMPASS
 
 debug:
+  enabled: false
   bigCases: false
+  projectileTests: false

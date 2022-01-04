@@ -22,6 +22,16 @@ import org.jnbt.Tag;
 import com.cryptomorin.xseries.XMaterial;
 
 public class SchematicHandler {
+
+	public static Vector calculatePositionWithOffset(Map<String, Tag> values, Vector offset) {
+		int x = (int) values.get("x").getValue();
+		int y = (int) values.get("y").getValue();
+		int z = (int) values.get("z").getValue();
+		return new Vector(
+			x + offset.getBlockX(),
+			y + offset.getBlockY(),
+			z + offset.getBlockZ());
+	}
 	
 	public static Location calculatePositionWithOffset(Map<String, Tag> values, World world, Vector offset) {
 		int x = (int) values.get("x").getValue();
@@ -150,7 +160,7 @@ public class SchematicHandler {
 		}
 	}
 	
-	public static Object loadSchematic(File file) throws IOException {
+	public static Schematic loadSchematic(File file) throws IOException {
 		FileInputStream stream = new FileInputStream(file);
 		NBTInputStream nbtStream = new NBTInputStream(stream);
 		
@@ -184,34 +194,8 @@ public class SchematicHandler {
 			byte[] blockData = getChildTag(schematic, "Data", ByteArrayTag.class).getValue();
 			
 			return new Schematic(blocks, blockData, width, length, height, offset, tileEntities);
-		} else {
-			// handle schem file from above 1.13
-			if (!schematic.containsKey("BlockData")) {
-				throw new IllegalArgumentException("Schematic file is missing a \"BlockData\" tag");
-			}
-			
-			short width = getChildTag(schematic, "Width", ShortTag.class).getValue();
-			short length = getChildTag(schematic, "Length", ShortTag.class).getValue();
-			short height = getChildTag(schematic, "Height", ShortTag.class).getValue();
-			
-			Map<String, Tag> metadata = getChildTag(schematic, "Metadata", CompoundTag.class).getValue();
-			
-			System.out.println("metadata: " + metadata);
-			
-			int offsetX = (int) metadata.get("WEOffsetX").getValue();
-			int offsetY = (int) metadata.get("WEOffsetY").getValue();
-			int offsetZ = (int) metadata.get("WEOffsetZ").getValue();
-			
-			Vector offset = new Vector(offsetX, offsetY, offsetZ);
-			
-			ListTag tileEntities = getChildTag(schematic, "TileEntities", ListTag.class);
-			
-			byte[] blockData = getChildTag(schematic, "BlockData", ByteArrayTag.class).getValue();
-			Map<String, Tag> palette = getChildTag(schematic, "Palette", CompoundTag.class).getValue();
-			
-			return new Schem(blockData, palette, width, length, height, offset, tileEntities);
 		}
-
+		return null;
 	}
 
 	/**

@@ -1,11 +1,20 @@
 package me.brunorm.skywars.commands;
 
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
 
 public class CommandsUtils {
+	
+	public static boolean permissionCheckWithMessage(CommandSender sender, String permission) {
+		if(!sender.hasPermission(permission)) {
+			sender.sendMessage(Messager.color(Skywars.get().langConfig.getString("NO_PERMISSION")));
+			return false;
+		}
+		return true;
+	}
 	
 	public static boolean permissionCheckWithMessage(Player player, String permission) {
 		if(!player.hasPermission(permission)) {

@@ -1,5 +1,6 @@
 package me.brunorm.skywars.events;
 
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,11 +14,12 @@ import org.bukkit.util.Vector;
 
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
-import me.brunorm.skywars.menus.ArenaSetupMenu;
+import me.brunorm.skywars.menus.SetupMenu;
 import me.brunorm.skywars.structures.Arena;
+import me.brunorm.skywars.structures.SkywarsMap;
 import mrblobman.sounds.Sounds;
 
-public class ArenaSetup implements Listener {
+public class SetupEvents implements Listener {
 
 	public static ItemStack item;
 
@@ -26,15 +28,19 @@ public class ArenaSetup implements Listener {
 		Player player = event.getPlayer();
 		if (player == null)
 			return;
-		Arena arena = ArenaSetupMenu.currentArenas.get(player);
-		if (arena == null)
+		Arena arena = SetupMenu.currentArenas.get(player);
+		SkywarsMap map = arena.getMap();
+		if (map == null)
 			return;
 		if (event.getItemDrop().getItemStack().equals(item)) {
-			player.teleport(ArenaSetupMenu.playerLocations.get(player));
-			ArenaSetupMenu.playerLocations.put(player, null);
-			ArenaSetupMenu.currentArenas.remove(player);
+			player.teleport(SetupMenu.playerLocations.get(player));
+			//Skywars.get().clearArena(arena);
+			map.saveParametersInConfig();
+			map.saveConfig();
+			SetupMenu.playerLocations.put(player, null);
+			SetupMenu.currentArenas.remove(player);
 			event.getItemDrop().remove();
-			Skywars.get().NMS().sendTitle(player, "&c&lDISABLED", "&eSpawn edit mode");
+			Skywars.get().NMS().sendTitle(player, "&a&LDONE", "&eSaved spawns");
 			player.playSound(player.getLocation(), Sounds.LEVEL_UP.bukkitSound(), 3, 1);
 			player.sendMessage(Messager.color("&e&lYou exited &b&lspawn edit mode"));
 		}
@@ -42,11 +48,13 @@ public class ArenaSetup implements Listener {
 
 	@EventHandler
 	public void onPlayerItemHoldEvent(PlayerItemHeldEvent event) {
-		if (ArenaSetup.item == null)
+		if (SetupEvents.item == null)
 			return;
-		ItemStack item = event.getPlayer().getInventory().getItem(event.getPreviousSlot());
-		if (item != null && item.equals(ArenaSetup.item)) {
+		ItemStack oldItem = event.getPlayer().getInventory().getItem(event.getPreviousSlot());
+		if (oldItem != null && oldItem.equals(SetupEvents.item)) {
 			Skywars.get().NMS().sendTitle(event.getPlayer(), "&cWarning!", "&eDrop the blaze rod to exit edit mode!");
+		} else {
+			Skywars.get().NMS().sendTitle(event.getPlayer(), "", "");
 		}
 	}
 	
@@ -60,28 +68,36 @@ public class ArenaSetup implements Listener {
 		Block block = event.getClickedBlock();
 		if (block == null)
 			return;
-		Arena arena = ArenaSetupMenu.currentArenas.get(player);
+		Arena arena = SetupMenu.currentArenas.get(player);
 		if (arena == null)
 			return;
+		SkywarsMap map = arena.getMap();
 		if (event.getItem() == null)
 			return;
 		if (event.getItem().equals(item)) {
-			int n = arena.getSpawns().size();
-			float t = (float) n / (arena.getMaxPlayers() - 1);
+			int n = map.getSpawns().size();
+			float t = (float) n / (map.getMaxPlayers() - 1);
 			player.playSound(player.getLocation(), Sounds.NOTE_PLING.bukkitSound(), 3, 1 + t);
 			if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
-				arena.setSpawn(n, block.getLocation().add(new Vector(0.5, 1, 0.5)));
-				Skywars.get().NMS().sendTitle(player, "", String.format("&eSpawn %s set!", n));
-				if (n > arena.getMaxPlayers()) {
-					player.sendMessage(Messager.colorFormat("&cWarning: spawn overload! &6Max players is set to &b%s&6!"));
+				Location loc = block.getLocation();
+				loc.add(new Vector(0.5, 1, 0.5));
+				Vector vector = loc.subtract(arena.getLocation()).toVector();
+				System.out.println("spawn set to vector " + vector);
+				map.setSpawn(n, vector);
+				Skywars.get().NMS().sendTitle(player, "", String.format("&eSpawn %s set!", n+1));
+				if (n+1 > map.getMaxPlayers()) {
+					player.sendMessage(Messager.colorFormat(
+							"&cWarning: spawn overload! &6Max players is set to &b%s&6!",
+							map.getMaxPlayers()));
 				}
 			} else if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 				n--;
-				if (!arena.removeSpawn(n)) {
+				if (map.getSpawns().get(n) == null) {
 					Skywars.get().NMS().sendTitle(player, "", String.format("&cNo spawn &c!", n));
 					return;
 				}
-				Skywars.get().NMS().sendTitle(player, "", String.format("&cSpawn %s removed!", n));
+				map.getSpawns().remove(n);
+				Skywars.get().NMS().sendTitle(player, "", String.format("&cSpawn %s removed!", n+1));
 			}
 			event.setCancelled(true);
 		}

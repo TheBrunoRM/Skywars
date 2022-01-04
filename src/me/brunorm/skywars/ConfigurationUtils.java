@@ -8,6 +8,9 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -60,7 +63,7 @@ public class ConfigurationUtils {
 			}
 			if(modified) {				
 				Skywars.get().sendMessage("&cYou should not delete keys in the configuration files.");
-				Skywars.get().sendMessage("&cThe plugin will use the default values for the deleted keys.");
+				Skywars.get().sendMessage("&6The plugin will use the default values for the deleted keys.");
 			}
 			return conf;
 		} catch(Exception e) {
@@ -102,5 +105,22 @@ public class ConfigurationUtils {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public static Location getLocationConfig(String worldName, ConfigurationSection config) {
+		if(worldName == null) {
+			System.out.println("warning, getlocationconfig: worldname is null");
+			return null;
+		}
+		World world = Bukkit.getWorld(worldName);
+		if(world != null)
+			return getLocationConfig(world, config);
+		System.out.println("warning, getlocationconfig: world is null");
+		return null;
+	}
+	
+	public static Location getLocationConfig(World world, ConfigurationSection config) {
+		Location loc = new Location(world, config.getInt("x"), config.getInt("y"), config.getInt("z"));
+		return loc;
 	}
 }
