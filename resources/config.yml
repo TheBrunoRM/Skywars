@@ -36,7 +36,7 @@ arenas:
 
 # update task for actionbar and scoreboard
 taskUpdate:
-  disable: false
+  disabled: false
   interval: 1 # seconds
 
 time: # seconds

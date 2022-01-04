@@ -19,6 +19,7 @@ import com.cryptomorin.xseries.XMaterial;
 
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
+import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.SkywarsMap;
 
 public class MapMenu implements Listener {
@@ -42,8 +43,15 @@ public class MapMenu implements Listener {
 			//lore.add(Messager.color("&7Servidores Disponibles: &a1"));
 			//lore.add(Messager.color("&7Veces Unidas: &a0"));
 			//lore.add(Messager.color("&7Selecciones de Mapa: &a1"));
+			
+			ArrayList<Arena> arenas = Skywars.get().getArenasByMap(map);
+			int players = arenas.stream()
+					.map(arena -> arena.getPlayerCount())
+					.reduce(0, (a,b)->a+b);
+			
 			lore.add(Messager.colorFormat("&eCurrent arenas: &a%s",
 					Skywars.get().getArenasByMap(map).size()));
+			lore.add(Messager.colorFormat("&eCurrent players: &a%s", players));
 			lore.add(Messager.color("&eClick to play!"));
 			//lore.add(Messager.color("&eClick derecho para alternarlo como favorito!"));
 			

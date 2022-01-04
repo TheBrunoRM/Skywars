@@ -36,7 +36,7 @@ public class Arena {
 	Location location;
 	ArenaStatus status;
 	int countdown;
-	boolean joinable;
+	boolean joinable = true;
 	boolean invencibility = false;
 	public boolean forcedStart;
 	public Player forcedStartPlayer;
@@ -74,7 +74,7 @@ public class Arena {
 		}
 		if (hasPlayer(player))
 			return false;
-		joinable = getPlayerCount() > map.maxPlayers;
+		joinable = getPlayerCount() < map.maxPlayers;
 		int index = getNextAvailablePlayerSlot();
 		Location spawn = getVectorInArena(getSpawn(index));
 		if (spawn == null) {
@@ -221,10 +221,7 @@ public class Arena {
 						getAllPlayersIncludingAliveAndSpectators().size(), map.getMaxPlayers()));
 			}
 		}
-		SkywarsUtils.ClearPlayer(player.getPlayer());
-		player.getSavedPlayer().Restore();
-		if(this.isInBoundaries(player.getPlayer()))
-			SkywarsUtils.TeleportPlayerBack(player.getPlayer());
+		exitPlayer(player);
 		
 		if (this.getStatus() == ArenaStatus.STARTING
 				&& !forcedStart
@@ -239,15 +236,16 @@ public class Arena {
 		if(status != ArenaStatus.WAITING && getPlayerCount() <= 0) clear();
 	}
 	
-	public void kick(Player player) {
-		kick(getPlayer(player));
+	public void exitPlayer(Player player) {
+		exitPlayer(getPlayer(player));
 	}
 	
-	public void kick(SkywarsPlayer player) {
+	public void exitPlayer(SkywarsPlayer player) {
 		if(player == null) return;
 		SkywarsUtils.ClearPlayer(player.getPlayer());
 		player.getSavedPlayer().Restore();
-		SkywarsUtils.TeleportPlayerBack(player.getPlayer());
+		if(this.isInBoundaries(player.getPlayer()))
+			SkywarsUtils.TeleportPlayerBack(player.getPlayer());
 	}
 
 	void removePlayer(SkywarsPlayer player) {
@@ -352,19 +350,14 @@ public class Arena {
 				@Override
 				public void run() {
 					
-					System.out.println("[debug] running game timer");
-					
 					SkywarsEvent event = getNextEvent();
 					
 					if(event != null) {
-						System.out.println("decreasing event time");
 						event.decreaseTime();
 						if(event.getTime() <= 0) {
 							events.remove(event);
 							event.run();							
 						}
-					} else {
-						System.out.println("event is null");
 					}
 				}
 			}, 0L, 20L);
@@ -456,8 +449,9 @@ public class Arena {
 		cancelTimer();
 		Skywars.get().sendMessage("Clearing arena for map " + map.getName());
 		for(SkywarsPlayer player : getAllPlayersIncludingAliveAndSpectators()) {
-			kick(player);
+			exitPlayer(player);
 		}
+		players.clear();
 		if(world != null) {			
 			for(Entity i : world.getEntities()) {
 				if(i instanceof Item && isInBoundaries(i.getLocation())) {

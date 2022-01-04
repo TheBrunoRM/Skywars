@@ -146,7 +146,7 @@ public class Skywars extends JavaPlugin {
 		// done
 		sendMessage("&ahas been enabled: &bv%s", version);
 		
-		if(!Skywars.get().getConfig().getBoolean("debug.disableUpdateTask"))
+		if(!Skywars.get().getConfig().getBoolean("taskUpdate.disabled"))
 			Bukkit.getScheduler().runTaskTimer(Skywars.get(), new Runnable() {
 				@Override
 				public void run() {
@@ -155,7 +155,7 @@ public class Skywars extends JavaPlugin {
 						SkywarsActionbar.update(player);
 					}
 				}
-			}, 0L, Skywars.get().getConfig().getLong("taskUpdateInterval")*20);
+			}, 0L, Skywars.get().getConfig().getLong("taskUpdate.interval")*20);
 	}
 	
 	public void onDisable() {
@@ -163,7 +163,7 @@ public class Skywars extends JavaPlugin {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			Arena arena = getPlayerArena(player);
 			if (arena != null) {
-				arena.kick(player);
+				arena.exitPlayer(player);
 			}
 		}
 		SetupMenu.currentArenas.forEach((player, arena) -> {
@@ -271,8 +271,12 @@ public class Skywars extends JavaPlugin {
 	public Arena getJoinableArenaByMap(SkywarsMap map) {
 		for(Arena arena : arenas) {
 			if(arena.getStatus() != ArenaStatus.WAITING &&
-					arena.getStatus() != ArenaStatus.STARTING) continue;
-			if(!arena.isJoinable()) continue;
+					arena.getStatus() != ArenaStatus.STARTING) {
+				System.out.println("arena is not waitin or satritng");continue;}
+			if(!arena.isJoinable()) {
+				System.out.println("arena is not joinable");
+				continue;}
+			System.out.println("returnin a found arena");
 			if(arena.getMap() == map) return arena;
 		}
 		return null;
