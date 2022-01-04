@@ -33,14 +33,14 @@ import me.brunorm.skywars.commands.WhereCommand;
 import me.brunorm.skywars.events.DisableWeather;
 import me.brunorm.skywars.events.Events;
 import me.brunorm.skywars.events.InteractEvent;
-import me.brunorm.skywars.events.MapSpawnSetup;
+import me.brunorm.skywars.events.SetupEvents;
 import me.brunorm.skywars.events.MessageSound;
 import me.brunorm.skywars.events.ProjectileTrails;
 import me.brunorm.skywars.events.SignEvents;
 import me.brunorm.skywars.menus.GamesMenu;
 import me.brunorm.skywars.menus.KitsMenu;
 import me.brunorm.skywars.menus.MapMenu;
-import me.brunorm.skywars.menus.MapSetupMenu;
+import me.brunorm.skywars.menus.SetupMenu;
 import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.Kit;
 import me.brunorm.skywars.structures.SkywarsMap;
@@ -166,13 +166,13 @@ public class Skywars extends JavaPlugin {
 				arena.kick(player);
 			}
 		}
-		MapSetupMenu.currentArenas.forEach((player, arena) -> {
-			player.getInventory().removeItem(MapSpawnSetup.item);
+		SetupMenu.currentArenas.forEach((player, arena) -> {
+			player.getInventory().removeItem(SetupEvents.item);
 			SkywarsUtils.TeleportPlayerBack(player);
 		});
 		sendMessage("Stopping arenas...");
 		for (Arena arena : arenas) {
-			arena.restart();
+			arena.clear();
 		}
 		arenas.clear();
 	}
@@ -222,9 +222,9 @@ public class Skywars extends JavaPlugin {
 				new GamesMenu(),
 				new MapMenu(),
 				new KitsMenu(),
-				new MapSpawnSetup(),
+				new SetupEvents(),
 				new ChestManager(),
-				new MapSetupMenu(),
+				new SetupMenu(),
 				new PlayerInventoryManager(),
 		};
 		for(Listener listener : listeners) {			
@@ -291,7 +291,7 @@ public class Skywars extends JavaPlugin {
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
 	
-	public boolean joinMap(SkywarsMap map, Player player) {
+	public Arena getArenaAndCreateIfNotFound(SkywarsMap map) {
 		Arena arena = getJoinableArenaByMap(map);
 		if(arena == null) {
 			switch(config.getString("arenasMethod")) {
@@ -304,6 +304,11 @@ public class Skywars extends JavaPlugin {
 				break;
 			}
 		}
+		return arena;
+	}
+	
+	public boolean joinMap(SkywarsMap map, Player player) {
+		Arena arena = getArenaAndCreateIfNotFound(map);
 		if(arena != null) {			
 			System.out.println("joining player to map");
 			arena.joinPlayer(player);
@@ -321,12 +326,13 @@ public class Skywars extends JavaPlugin {
 	public Arena createNewArena(SkywarsMap map) {
 		if(config.getString("arenasMethod")
 				.equalsIgnoreCase("MULTI_ARENA")) {			
+			System.out.println("creating new arena for map " + map.getName());
 			Arena arena = new Arena(map);
 			arena.setWorld(getWorld(map));
 			arena.setLocation(getNextFreeLocation());
 			arena.pasteSchematic();
+			arena.resetCases();
 			arenas.add(arena);
-			System.out.println("creating new arena for map " + map.getName());
 			return arena;
 		} else if (config.getString("arenasMethod")
 				.equalsIgnoreCase("SINGLE_ARENA")) {
@@ -349,6 +355,7 @@ public class Skywars extends JavaPlugin {
 	
 	public void clearArena(Arena arena) {
 		System.out.println("removing arena " + arena.getMap().getName());
+		arena.clear();
 		arenas.remove(arena);
 		arena = null;
 	}

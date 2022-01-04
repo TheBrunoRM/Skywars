@@ -25,7 +25,7 @@ import me.brunorm.skywars.SkywarsUtils;
 import me.brunorm.skywars.NMS.NMSHandler;
 import me.brunorm.skywars.menus.GamesMenu;
 import me.brunorm.skywars.menus.MapMenu;
-import me.brunorm.skywars.menus.MapSetupMenu;
+import me.brunorm.skywars.menus.SetupMenu;
 import me.brunorm.skywars.schematics.Schem;
 import me.brunorm.skywars.schematics.Schematic;
 import me.brunorm.skywars.schematics.SchematicHandler;
@@ -109,7 +109,7 @@ public class MainCommand implements CommandExecutor {
 							player.sendMessage(Messager.getMessage("NO_MAP"));
 							return false;
 						}
-						MapSetupMenu.OpenConfigurationMenu(player, map);
+						SetupMenu.OpenConfigurationMenu(player, map);
 					}
 				}
 				else if (args[0].equalsIgnoreCase("help")) {
@@ -255,7 +255,7 @@ public class MainCommand implements CommandExecutor {
 					}
 				}
 				if(args[0].equalsIgnoreCase("restart")) {
-					arena.restart();
+					arena.clear();
 				}
 				if (args[0].equalsIgnoreCase("stop")) {
 					if (playerArena != null) {
@@ -264,7 +264,7 @@ public class MainCommand implements CommandExecutor {
 				}
 				if (args[0].equalsIgnoreCase("forcestop")) {
 					if (arena != null) {
-						arena.restart();
+						arena.clear();
 					}
 				}
 				if(args[0].equalsIgnoreCase("calculatespawns")) {

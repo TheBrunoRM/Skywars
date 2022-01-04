@@ -87,7 +87,10 @@ public class SkywarsMap {
 		config.set("schematic", this.getSchematicFilename());
 		config.set("centerRadius", this.getCenterRadius());
 		if (getSpawns() != null) {
+			System.out.println("setting spawns");
+			config.set("spawn", null); // clear all the previous set spawns
 			for (int i = 0; i < this.getSpawns().size(); i++) {
+				System.out.println("setting spawn " + i);
 				Vector spawn = spawns.get(i);
 				setVectorConfig("spawn." + i, spawn);
 			}
@@ -145,7 +148,7 @@ public class SkywarsMap {
 		spawns.put(0, beaconLocations.get(0));
 		beaconLocations.remove(0);
 		
-		for(int i = 1; i < totalBeacons+1; i++) {
+		for(int i = 1; i < totalBeacons; i++) {
 			Vector previousSpawn = spawns.get(i-1);
 			Vector closest = beaconLocations.get(0);
 			if(beaconLocations.size() > 1) {

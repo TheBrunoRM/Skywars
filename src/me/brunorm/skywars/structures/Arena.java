@@ -236,7 +236,7 @@ public class Arena {
 			}
 			cancelTimer();
 		}
-		if(status != ArenaStatus.WAITING && getPlayerCount() <= 0) restart();
+		if(status != ArenaStatus.WAITING && getPlayerCount() <= 0) clear();
 	}
 	
 	public void kick(Player player) {
@@ -389,7 +389,7 @@ public class Arena {
 					}
 					
 					if (this.time == 0) {
-						restart();
+						clear();
 						cancelTimer();
 						return;
 					}
@@ -452,9 +452,9 @@ public class Arena {
 		}, 40);
 	}
 	
-	public boolean restart() {
+	public void clear() {
 		cancelTimer();
-		Skywars.get().sendMessage("Restarting arena for map " + map.getName());
+		Skywars.get().sendMessage("Clearing arena for map " + map.getName());
 		for(SkywarsPlayer player : getAllPlayersIncludingAliveAndSpectators()) {
 			kick(player);
 		}
@@ -465,8 +465,6 @@ public class Arena {
 				}
 			}
 		}
-		Skywars.get().clearArena(this);
-		return true;
 	}
 	
 	public void resetCases() {
@@ -604,7 +602,7 @@ public class Arena {
 		SchematicHandler.pasteSchematic(location, map.getSchematic());
 	}
 	
-	void calculateAndFillChests() {
+	public void calculateAndFillChests() {
 		Schematic schematic = map.getSchematic();
 		World world = location.getWorld();
 		Vector offset = schematic.getOffset();

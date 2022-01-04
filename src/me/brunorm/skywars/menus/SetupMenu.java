@@ -23,12 +23,12 @@ import com.cryptomorin.xseries.XMaterial;
 
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
-import me.brunorm.skywars.events.MapSpawnSetup;
+import me.brunorm.skywars.events.SetupEvents;
 import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.SkywarsMap;
 import mrblobman.sounds.Sounds;
 
-public class MapSetupMenu implements Listener {
+public class SetupMenu implements Listener {
 
 	static String minPlayersName = "&e&lMin Players: &a&l%s";
 	static String maxPlayersName = "&e&lMax Players: &a&l%s";
@@ -40,8 +40,9 @@ public class MapSetupMenu implements Listener {
 	static String calculateSpawnsName = "&6&lCalculate spawns";
 	static String regenerateCasesName = "&6&lRegenerate cases";
 	static String pasteSchematicName = "&6&lPaste schematic";
-	static String restartName = "&c&lRestart";
+	static String clearName = "&c&lClear";
 	static String teleportName = "&6&lTeleport";
+	static String chestsName = "&6&lFill chests";
 	
 	public static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();
 	public static HashMap<Player, Location> playerLocations = new HashMap<Player, Location>();
@@ -90,6 +91,7 @@ public class MapSetupMenu implements Listener {
 	
 	static void UpdateInventory(Inventory inventory, Player player) {
 		Arena currentArena = currentArenas.get(player);
+		if(currentArena == null) return;
 		SkywarsMap currentMap = currentArena.getMap();
 		
 		List<String> intLore = new ArrayList<String>();
@@ -152,7 +154,11 @@ public class MapSetupMenu implements Listener {
 		List<String> spawnLore = new ArrayList<String>();
 		spawnLore.add(Messager.color("&eWhen you enter &bSpawn Setup Mode&e,"));
 		spawnLore.add(Messager.color("&eyou can click blocks on the arena"));
-		spawnLore.add(Messager.color("&eto set the arena's spawns."));
+		spawnLore.add(Messager.color("&eto set spawns easily."));
+		if(currentMap.getSpawns().size()>0) {
+			spawnLore.add(Messager.color(""));
+			spawnLore.add(Messager.color("&cThis will delete all current spawns."));
+		}
 
 		ItemStack spawn = new ItemStack(XMaterial.BLAZE_ROD.parseItem());
 		ItemMeta spawnMeta = spawn.getItemMeta();
@@ -189,19 +195,25 @@ public class MapSetupMenu implements Listener {
 		
 		ItemStack restart = new ItemStack(XMaterial.BARRIER.parseItem());
 		ItemMeta restartMeta = restart.getItemMeta();
-		restartMeta.setDisplayName(Messager.color(restartName));
+		restartMeta.setDisplayName(Messager.color(clearName));
 		restart.setItemMeta(restartMeta);
 		inventory.setItem(21, restart);
 		
 		ItemStack teleport = new ItemStack(XMaterial.COMPASS.parseItem());
-		ItemMeta teleportMeta = restart.getItemMeta();
+		ItemMeta teleportMeta = teleport.getItemMeta();
 		teleportMeta.setDisplayName(Messager.color(teleportName));
 		teleport.setItemMeta(teleportMeta);
 		inventory.setItem(22, teleport);
+		
+		ItemStack chests = new ItemStack(XMaterial.CHEST.parseItem());
+		ItemMeta chestsMeta = chests.getItemMeta();
+		chestsMeta.setDisplayName(Messager.color(chestsName));
+		chests.setItemMeta(chestsMeta);
+		inventory.setItem(23, chests);
 	}
 	
 	public static void OpenConfigurationMenu(Player player, SkywarsMap map) {
-		currentArenas.put(player, Skywars.get().createNewArena(map));
+		currentArenas.put(player, Skywars.get().getArenaAndCreateIfNotFound(map));
 		Inventory inventory = Bukkit.createInventory(null, 9 * 3, Messager.color("&a&l" + map.getName()));
 		inventories.put(player, inventory);
 		
@@ -265,19 +277,20 @@ public class MapSetupMenu implements Listener {
 				ItemStack item = new ItemStack(XMaterial.BLAZE_ROD.parseItem());
 				ItemMeta meta = item.getItemMeta();
 				List<String> lore = new ArrayList<String>();
-				lore.add(Messager.color("&eclick the blocks that"));
-				lore.add(Messager.color("&eyou want to add spawns for"));
-				lore.add(Messager.color("&eyou can also rightclick to remove the last spawn you set"));
-				meta.setDisplayName("yes xd");
+				lore.add(Messager.color("&eClick the blocks that"));
+				lore.add(Messager.color("&eyou want to add spawns for."));
+				lore.add(Messager.color("&eYou can also rightclick"));
+				lore.add(Messager.color("to remove the last set spawn."));
+				meta.setDisplayName(Messager.color("&eSpawn Configurator"));
 				meta.setLore(lore);
 				item.setItemMeta(meta);
 
-				MapSpawnSetup.item = item;
-				player.getInventory().setItem(player.getInventory().getHeldItemSlot(), MapSpawnSetup.item);
+				SetupEvents.item = item;
+				player.getInventory().setItem(player.getInventory().getHeldItemSlot(), SetupEvents.item);
 				player.closeInventory();
 
 				playerLocations.put(player, player.getLocation());
-				player.teleport(arena.getLocation().add(new Vector(0, 5, 0)));
+				player.teleport(arena.getLocation().clone().add(new Vector(0, 5, 0)));
 				player.setVelocity(new Vector(0, 1f, 0));
 
 				player.setAllowFlight(true);
@@ -286,11 +299,15 @@ public class MapSetupMenu implements Listener {
 				Skywars.get().NMS().sendTitle(player, "&a&lENABLED", "&eSpawn edit mode");
 				player.playSound(player.getLocation(), Sounds.NOTE_PLING.bukkitSound(), 3, 2);
 
-				player.sendMessage(Messager.color("&e&lYou are now in &a&lspawn edit mode"));
-				player.sendMessage(Messager.color("&e&lUse the &6&lblaze rod &e&lto &b&lset and remove spawns"));
-				player.sendMessage(Messager.color("&e&lYou can &a&lright-click &e&la block to &a&ladd an spawn"));
+				if(currentMap.getSpawns().size()>0)
+					player.sendMessage(Messager.color("&6Old arena spawns deleted."));
+				currentMap.getSpawns().clear();
+				
+				player.sendMessage(Messager.color("&eYou are now in &a&lspawn edit mode"));
+				player.sendMessage(Messager.color("&eUse the &6&lblaze rod &eto &b&lset and remove spawns"));
+				player.sendMessage(Messager.color("&eYou can &a&lright-click &ea block to &a&ladd an spawn"));
 				player.sendMessage(Messager
-						.color("&e&lYou can &c&lright-click &e&la block to &c&lremove &4&lthe last spawn you set"));
+						.color("&eYou can &c&lright-click &ea block to &c&lremove &4&lthe last set spawn"));
 				player.sendMessage(Messager.color("&e&lTo exit, &b&ldrop the blaze rod"));
 				return;
 			}
@@ -304,15 +321,26 @@ public class MapSetupMenu implements Listener {
 			}
 			if(name.equals(Messager.color(regenerateCasesName))) {
 				currentArena.resetCases();
-				player.sendMessage("Regenerated cases.");
+				if(currentMap.getSpawns().size()<=0)
+					player.sendMessage(Messager.color("&cWarning: &7no spawns to create cases for."));
+				player.sendMessage(
+					Messager.colorFormat("Regenerated cases for %s spawns",
+							currentMap.getSpawns().size()));
 			}
-			if(name.equals(Messager.color(restartName))) {
-				currentArena.restart();
-				player.sendMessage("Restarted.");
+			if(name.equals(Messager.color(clearName))) {
+				Skywars.get().clearArena(currentArena);
+				currentArenas.remove(player);
+				currentArena = null;
+				player.sendMessage("Cleared");
+				player.closeInventory();
 			}
 			if(name.equals(Messager.color(teleportName))) {
 				player.teleport(currentArena.getLocation());
-				player.sendMessage("Teleported.");
+				player.sendMessage("Teleported");
+			}
+			if(name.equals(Messager.color(chestsName))) {
+				currentArena.calculateAndFillChests();
+				player.sendMessage("Chests filled");
 			}
 			String currentSchematic = currentMap.getSchematicFilename();
 			if(currentSchematic == null) currentSchematic = "none";
@@ -322,14 +350,16 @@ public class MapSetupMenu implements Listener {
 					player.sendMessage("&c&lThere are no schematic files!");
 					player.sendMessage("&e&lYou need to put schematics files in the schematics folder");
 					return;
-				}
+				} else OpenSchematicsMenu(player);
 			}
 			
 			String schematicName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
 			for(File schematicFile : schematicsFolder.listFiles()) {
 				if(schematicFile.getName().equals(schematicName)) {
 					currentMap.setSchematic(schematicName);
-					System.out.println("schematic changed to " + currentMap.getSchematicFilename());
+					player.sendMessage(
+							Messager.colorFormat("&eSchematic set to &b",
+									currentMap.getSchematicFilename()));
 				}
 			}
 			
