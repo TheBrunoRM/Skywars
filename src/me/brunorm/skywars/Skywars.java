@@ -207,7 +207,7 @@ public class Skywars extends JavaPlugin {
 		if(config.getBoolean("signsEnabled")) {
 			pluginManager.registerEvents(new SignEvents(), this);
 		}
-		if(config.getBoolean("messageSounds")) {
+		if(config.getBoolean("messageSounds.enabled")) {
 			pluginManager.registerEvents(new MessageSound(), this);
 		}
 		if(config.getBoolean("disableWeather")) {			
@@ -271,12 +271,10 @@ public class Skywars extends JavaPlugin {
 	public Arena getJoinableArenaByMap(SkywarsMap map) {
 		for(Arena arena : arenas) {
 			if(arena.getStatus() != ArenaStatus.WAITING &&
-					arena.getStatus() != ArenaStatus.STARTING) {
-				System.out.println("arena is not waitin or satritng");continue;}
-			if(!arena.isJoinable()) {
-				System.out.println("arena is not joinable");
-				continue;}
-			System.out.println("returnin a found arena");
+					arena.getStatus() != ArenaStatus.STARTING)
+				continue;
+			if(!arena.isJoinable())
+				continue;
 			if(arena.getMap() == map) return arena;
 		}
 		return null;
@@ -387,6 +385,30 @@ public class Skywars extends JavaPlugin {
 				z*config.getInt("arenas.separation"));
 	}
 	
+	public boolean createMap(String name) {
+		if(getMap(name) != null) return false;
+		SkywarsMap map = new SkywarsMap(name);
+		File file = new File(mapsPath, name + ".yml");
+		try {
+			file.createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		map.setFile(file);
+		map.saveParametersInConfig();
+		map.saveConfig();
+		maps.add(map);
+		return true;
+	}
+	
+	public boolean deleteMap(String name) {
+		SkywarsMap map = getMap(name);
+		if(map == null) return false;
+		map.getFile().delete();
+		maps.remove(map);
+		return true;
+	}
+	
 	public void loadMaps() {
 		String arenasMethod = config.getString("arenasMethod");
 		sendMessage("&eLoading arenas (&b%s&e)", arenasMethod.toUpperCase());
@@ -436,6 +458,7 @@ public class Skywars extends JavaPlugin {
 					config.getInt("teamSize"));
 			
 			map.setConfig(config);
+			map.setFile(file);
 			
 			if(arenasMethod.equalsIgnoreCase("SINGLE_ARENA")) {
 				//System.out.println("setting worldname and location for map " + map.getName());

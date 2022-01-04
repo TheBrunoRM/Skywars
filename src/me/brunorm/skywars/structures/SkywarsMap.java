@@ -59,6 +59,10 @@ public class SkywarsMap {
 		this.teamSize = teamSize;
 	}
 	
+	public SkywarsMap(String name) {
+		this.name = name;
+	}
+
 	public void setLocationConfig(String string, Location location) {
 		if (location == null) {
 			config.set(string, null);
@@ -80,7 +84,8 @@ public class SkywarsMap {
 	}
 	
 	public void saveParametersInConfig() {
-		if(config == null) return;
+		if(config == null)
+			config = YamlConfiguration.loadConfiguration(getFile());
 		System.out.println("saving parameters in config");
 		config.set("minPlayers", this.getMinPlayers());
 		config.set("maxPlayers", this.getMaxPlayers());
@@ -119,11 +124,9 @@ public class SkywarsMap {
 	
 	public void calculateSpawns() {
 		
-		getSchematic();
+		// get schematic data and beacon locations
 		
-		// clear spawns
-		spawns.clear();
-		config.set("spawn", null);
+		getSchematic();
 		
 		Vector offset = schematic.getOffset();
 		ListTag tileEntities = schematic.getTileEntities();
@@ -143,6 +146,16 @@ public class SkywarsMap {
 		
 		// saving the number of beacons
 		int totalBeacons = beaconLocations.size();
+		
+		// check if there are beacons before resetting spawns
+		if(totalBeacons <= 0) {
+			System.out.println("no beacons");
+			return;
+		}
+		
+		// clear spawns
+		spawns.clear();
+		config.set("spawn", null);
 		
 		// set the first spawn
 		spawns.put(0, beaconLocations.get(0));
@@ -232,7 +245,7 @@ public class SkywarsMap {
 		this.schematicFilename = schematic;
 	}
 	
-	void loadSchematic() {
+	public void loadSchematic() {
 		File schematicFile = Skywars.get().getSchematicFile(schematicFilename);
 		if(schematicFile == null) {
 			System.out.println("Could not get schematic file for map "

@@ -44,6 +44,24 @@ public class SchematicHandler {
 			z + offset.getBlockZ());
 	}
 	
+	public static void clear(Location loc, Schematic schematic) {
+		World world = loc.getWorld();
+		short length = schematic.getLength();
+		short width = schematic.getWidth();
+		short height = schematic.getHeight();
+		Vector offset = schematic.getOffset();
+		
+		for (int x = 0; x < width; ++x) {
+			for (int y = 0; y < height; ++y) {
+				for (int z = 0; z < length; ++z) {
+					Block block = new Location(world, x + loc.getX() + offset.getX(), y + loc.getY() + offset.getY(),
+							z + loc.getZ() + offset.getZ()).getBlock();
+					block.setType(XMaterial.AIR.parseMaterial(), true);
+				}
+			}
+		}
+	}
+	
 	@SuppressWarnings("deprecation")
 	public static void pasteSchematic(Location loc, Schematic schematic) {
 		World world = loc.getWorld();
@@ -151,7 +169,7 @@ public class SchematicHandler {
 			}
 		}
 	}
-
+	
 	public static String getSignText(String text) {
 		try {
 			return text.split("\\{\"extra\":\\[\"")[1].split("\"\\]")[0];
