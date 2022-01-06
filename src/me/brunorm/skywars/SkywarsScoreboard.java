@@ -17,7 +17,7 @@ import me.brunorm.skywars.structures.SkywarsPlayer;
 
 public class SkywarsScoreboard {
 	
-	public static YamlConfiguration config = Skywars.get().scoreboardConfig;
+	public static YamlConfiguration config = Skywars.scoreboardConfig;
 	
 	public static void update(Player player) {
 		

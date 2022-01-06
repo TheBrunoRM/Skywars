@@ -30,7 +30,6 @@ import org.bukkit.util.Vector;
 import com.cryptomorin.xseries.XMaterial;
 
 import me.brunorm.skywars.structures.Arena;
-import me.brunorm.skywars.structures.SkywarsEvent;
 import me.brunorm.skywars.structures.SkywarsPlayer;
 
 public class SkywarsUtils {
@@ -70,17 +69,13 @@ public class SkywarsUtils {
 			if(!status) text = text.replaceAll(getVariableCode("status"),
 					format(SkywarsUtils.getStatus(arena), player, arena, swp, true));
 			
-			SkywarsEvent event = arena.getNextEvent();
-			String eventText;
-			if(event != null) eventText = String.format("%s (%s)", event.getType(), event.getTime());
-			else eventText = "No event";
-			
 			text = text.replaceAll(getVariableCode("map"), arena.getMap().getName())
 					.replaceAll(getVariableCode("arena"), arena.getMap().getName())
-					.replaceAll(getVariableCode("event"), eventText)
+					.replaceAll(getVariableCode("event"), arena.getNextEventText())
 					.replaceAll(getVariableCode("players"), Integer.toString(arena.getPlayerCount()))
 					.replaceAll(getVariableCode("maxplayers"), Integer.toString(arena.getMap().getMaxPlayers()))
-					.replaceAll(getVariableCode("seconds"), Integer.toString(arena.getCountdown()));
+					.replaceAll(getVariableCode("seconds"), Integer.toString(arena.getCountdown()))
+					.replaceAll(getVariableCode("count"), Integer.toString(arena.getCountdown()));
 		}
 		
 		if(swp != null) {
@@ -104,7 +99,7 @@ public class SkywarsUtils {
 	}
 	
 	public static String parseItemName(String text) {
-		YamlConfiguration config = Skywars.get().langConfig;
+		YamlConfiguration config = Skywars.langConfig;
 		String name = config.getString("items." + text);
 		if(config.getBoolean("items.show_context") == true) {
 			String context = config.getString("items.context");
@@ -116,7 +111,7 @@ public class SkywarsUtils {
 	}
 
 	public static String getStatus(Arena arena) {
-		YamlConfiguration config = Skywars.get().langConfig;
+		YamlConfiguration config = Skywars.langConfig;
 		
 		switch(arena.getStatus()) {
 			case WAITING:
@@ -319,16 +314,16 @@ public class SkywarsUtils {
 			Material material = Material.getMaterial(itemType);
 			ItemStack item = new ItemStack(material);
 			ItemMeta itemMeta = item.getItemMeta();
-			String configName = Skywars.get().langConfig.getString("items." + itemName + ".name");
-			if(Skywars.get().langConfig.getBoolean("items.show_context") == true) {
-				String context = Skywars.get().langConfig.getString("items.context");
+			String configName = Skywars.langConfig.getString("items." + itemName + ".name");
+			if(Skywars.langConfig.getBoolean("items.show_context") == true) {
+				String context = Skywars.langConfig.getString("items.context");
 				if(context != null) {
 					configName = configName + " " + Messager.color(context);
 				}
 			}
 			itemMeta.setDisplayName(Messager.color(configName));
 			List<String> itemLore = new ArrayList<String>();
-			for(String loreLine : Skywars.get().langConfig.
+			for(String loreLine : Skywars.langConfig.
 				getStringList("items." + itemName + ".description")) {
 				itemLore.add(Messager.color(loreLine));
 			}

@@ -3,6 +3,12 @@ status:
    starting: Starting in &a%seconds%s
    playing: '&a%players% &rplayers remaining'
    ending: Ending in &a%seconds%s
+   ended: '&aGame ended!'
+   restarting: Restarting...
+
+events:
+  format: "&a%name% %time%"
+  refill: "Refill"
 
 items:
   show_context: true
@@ -60,6 +66,17 @@ LEAVE: "&7{0} &eleaved (&b{1}&e/&b{2}&e)"
 LEAVE_SELF: "&eYou leaved arena &b%arena%"
 
 FORCED_START: "&b&l{0} &e&lforced the game to start!"
-10_SECONDS_TITLE: "&e10 seconds"
-10_SECONDS_SUBTITLE: "&eRight-click the bow to select a kit!"
 REFILL: "&eChests have been refilled!"
+
+GAME_STARTING_SECOND: "&eThe game starts in %count% &esecond!"
+GAME_STARTING_SECONDS: "&eThe game starts in %count% &eseconds!"
+
+countdown:
+- title: "&e%count% seconds"
+  subtitle: "&eRight-click the bow to select a kit!"
+  color: 6
+  range: 10
+- title: "&c%count%"
+  subtitle: "&ePrepare to fight!"
+  color: c
+  range: 5-1

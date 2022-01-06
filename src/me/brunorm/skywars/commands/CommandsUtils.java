@@ -10,7 +10,7 @@ public class CommandsUtils {
 	
 	public static boolean permissionCheckWithMessage(CommandSender sender, String permission) {
 		if(!sender.hasPermission(permission)) {
-			sender.sendMessage(Messager.color(Skywars.get().langConfig.getString("NO_PERMISSION")));
+			sender.sendMessage(Messager.color(Skywars.langConfig.getString("NO_PERMISSION")));
 			return false;
 		}
 		return true;
@@ -18,7 +18,7 @@ public class CommandsUtils {
 	
 	public static boolean permissionCheckWithMessage(Player player, String permission) {
 		if(!player.hasPermission(permission)) {
-			player.sendMessage(Messager.color(Skywars.get().langConfig.getString("NO_PERMISSION")));
+			player.sendMessage(Messager.color(Skywars.langConfig.getString("NO_PERMISSION")));
 			return false;
 		}
 		return true;
@@ -26,7 +26,7 @@ public class CommandsUtils {
 	
 	public static boolean arenaCheckWithMessage(Player player) {
 		if(Skywars.get().getPlayerArena(player) == null) {
-			player.sendMessage(Messager.color(Skywars.get().langConfig.getString("NOT_JOINED")));
+			player.sendMessage(Messager.color(Skywars.langConfig.getString("NOT_JOINED")));
 			return false;
 		}
 		return true;

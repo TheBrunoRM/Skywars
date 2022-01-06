@@ -1,6 +1,7 @@
 package me.brunorm.skywars.structures;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -45,6 +46,10 @@ public class Arena {
 	
 	SkywarsMap map;
 	
+	public Arena get() {
+		return this;
+	}
+	
 	public SkywarsMap getMap() {
 		return map;
 	}
@@ -63,6 +68,20 @@ public class Arena {
 		if(events.size() > 0)
 			return events.get(0);
 		return null;
+	}
+	
+	public String getNextEventText() {
+		SkywarsEvent event = getNextEvent();
+		if(status == ArenaStatus.ENDING) return Skywars.langConfig.getString("status.ended");
+		if(event != null) {
+			int time = event.getTime();
+			int minutes = time / 60;
+			int seconds = time % 60;
+			String timeString = String.format("%d:%02d", minutes, seconds);
+			return Messager.color(Skywars.langConfig.getString("events.format")
+				.replaceAll("%name%", Skywars.langConfig.getString("events." + event.getType().name().toLowerCase()))
+				.replaceAll("%time%", timeString));
+		} else return "No event";
 	}
 	
 	public boolean joinPlayer(Player player) {
@@ -102,8 +121,8 @@ public class Arena {
 		SkywarsUtils.setPlayerInventory(player, "waiting");
 		
 		Skywars.get().NMS().sendTitle(player,
-				Skywars.get().langConfig.getString("arena_join.title"),
-				Skywars.get().langConfig.getString("arena_join.subtitle"));
+				Skywars.langConfig.getString("arena_join.title"),
+				Skywars.langConfig.getString("arena_join.subtitle"));
 
 		if (getStatus() != ArenaStatus.STARTING
 				&& this.getAllPlayersIncludingAliveAndSpectators().size() >= map.getMinPlayers()) {
@@ -327,14 +346,52 @@ public class Arena {
 
 						player.getPlayer().playSound(player.getPlayer().getLocation(), Sounds.NOTE_STICKS.bukkitSound(),
 								5, 1f);
-						if (time == 10) {
-							if (this.time == 10) {
-								Skywars.get().NMS().sendTitle(player.getPlayer(),
-										Messager.getMessage("10_SECONDS_TITLE"),
-										Messager.getMessage("10_SECONDS_SUBTITLE"), 0, 50, 0);
+						
+						for(Object object : Skywars.langConfig.getList("countdown")) {
+							@SuppressWarnings("unchecked")
+							HashMap<Object, Object> hash = (HashMap<Object, Object>) object;
+							Object range = hash.get("range");
+							boolean yes = false;
+							if(range.getClass().equals(Integer.class) && time == (Integer) range) {
+								yes = true;
+							} else if (range.getClass().equals(String.class)) {
+								String[] nums = ((String) range).split("-");
+								int first = Integer.parseInt(nums[0]);
+								int last = Integer.parseInt(nums[1]);
+								// put them from lower to higher
+								if(first > last) {
+									int temp = first;
+									first = last;
+									last = temp;
+								}
+								// check time in range
+								if(time >= first && time <= last) {
+									yes = true;
+								}
 							}
+							if(yes) {
+								String title = (String) hash.get("title");
+								String subtitle = (String) hash.get("subtitle");
+								String color = String.valueOf(hash.get("color"));
+								Skywars.get().NMS().sendTitle(player.getPlayer(),
+										SkywarsUtils.format(title, player.getPlayer(), get(), player),
+										SkywarsUtils.format(subtitle, player.getPlayer(), get(), player), 0, 50, 0);
+								String msg = Skywars.langConfig.getString
+										(time == 1 ? "GAME_STARTING_SECOND" : "GAME_STARTING_SECONDS");
+								player.getPlayer().sendMessage(Messager.color(
+										SkywarsUtils.format(msg
+												.replaceAll("%count%", "&"+color+"%count%")
+												.replaceAll("%seconds%", "&"+color+"%seconds%"),
+												player.getPlayer(), get(), player)));
+							}
+						}
+						
+						/*
+						if (time == 10) {
+							Skywars.get().NMS().sendTitle(player.getPlayer(),
+									Messager.getMessage("10_SECONDS_TITLE"),
+									Messager.getMessage("10_SECONDS_SUBTITLE"), 0, 50, 0);
 						} else if (time <= 5 || time % 5 == 0) {
-							// TODO: add this into the config
 							player.getPlayer().sendMessage(
 									Messager.colorFormat("&eThe game starts in &c%s &esecond(s)!", this.time));
 							Skywars.get().NMS().sendTitle(
@@ -343,6 +400,7 @@ public class Arena {
 									Messager.color("&ePrepare to fight!"),
 									0, 50, 0);
 						}
+						*/
 					}
 				}
 			}, 0L, 20L);
@@ -452,6 +510,10 @@ public class Arena {
 		for(SkywarsPlayer player : getAllPlayersIncludingAliveAndSpectators()) {
 			exitPlayer(player);
 		}
+		forcedStart = false;
+		forcedStartPlayer = null;
+		setStatus(ArenaStatus.WAITING);
+		countdown = -1;
 		players.clear();
 		if(world != null) {			
 			for(Entity i : world.getEntities()) {
@@ -713,7 +775,7 @@ public class Arena {
 	}
 
 	public void broadcastRefillMessage() {
-		broadcastMessage(Skywars.get().langConfig.getString("refill"));
+		broadcastMessage(Skywars.langConfig.getString("refill"));
 	}
 
 	private void broadcastMessage(String string, Object... format) {

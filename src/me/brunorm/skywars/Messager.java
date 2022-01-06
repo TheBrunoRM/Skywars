@@ -19,7 +19,7 @@ public class Messager {
 	}
 	
 	public static String getMessage(String name, Object... format) {
-		String msg = Skywars.get().langConfig.getString(name);
+		String msg = Skywars.langConfig.getString(name);
 		if(msg == null) return null;
 		for(int i = 0; i < format.length; i++) {
 			msg = msg.replaceAll(String.format("\\{%s\\}", i), String.valueOf(format[i]));

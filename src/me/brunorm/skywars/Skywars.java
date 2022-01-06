@@ -69,10 +69,9 @@ public class Skywars extends JavaPlugin {
 	}
 	
 	public static YamlConfiguration config;
-	
-	public YamlConfiguration scoreboardConfig;
-	public YamlConfiguration langConfig;
-	public YamlConfiguration lobbyConfig;
+	public static YamlConfiguration scoreboardConfig;
+	public static YamlConfiguration langConfig;
+	public static YamlConfiguration lobbyConfig;
 
 	public HashMap<Player, Location> playerLocations =
 			new HashMap<Player, Location>();
