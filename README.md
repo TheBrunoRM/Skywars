@@ -77,8 +77,11 @@ To create a sign, make it like this:
 
 ## Compatibility issues
   * **1.13+**\
-    The plugin works in 1.13+, but the schematics do not work.\
-    Schematic files from versions lower than 1.13 use block IDs\
-    Instead, schematic files from 1.13+ use block palettes with block names.\
+    The plugin works in 1.13+, and .schematic files work but\
+    there are some issues when pasting schematics.\
+    I will probably fix those at some point.\
+    .schem files are not supported yet.\
+    Schematic files from versions lower than 1.13 (.schematic) use block IDs\
+    Instead, schematic files from 1.13+ (.schem) use block palettes with block names.\
     I will have to remake the Schematic handler code (I will probably do at some point)\
     but for now, the schematics do not work in 1.13+.
