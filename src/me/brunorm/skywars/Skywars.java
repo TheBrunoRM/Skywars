@@ -117,6 +117,8 @@ public class Skywars extends JavaPlugin {
 	
 	public void onEnable() {
 		
+		System.out.println(XMaterial.matchXMaterial(35, (byte) 11));
+		
 		// set stuff
 		plugin = this;
 		mapsPath = getDataFolder() + "/maps";
@@ -356,7 +358,6 @@ public class Skywars extends JavaPlugin {
 	
 	public void clearArena(Arena arena) {
 		System.out.println("removing arena " + arena.getMap().getName());
-		arena.clear();
 		arenas.remove(arena);
 		arena = null;
 	}

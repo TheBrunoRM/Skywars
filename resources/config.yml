@@ -13,6 +13,11 @@ messageSounds:
   sound: ITEM_PICKUP
 disableWeather: true
 
+sounds: # sound name; volume; pitch
+  join: HORSE_ARMOR; 5; 0.1
+  leave: ITEM_PICKUP; 5; 0.1
+  countdown: NOTE_STICKS; 5; 1
+
 # this is the reset cooldown for last hits (in seconds)
 lastHitResetCooldown: 15
 
@@ -108,7 +113,7 @@ items:
 item_types:
   KIT_SELECTOR: BOW
   GAME_OPTIONS: PAPER
-  LEAVE: BED
+  LEAVE: BED # RED_BED if 1.13+
   SPECTATOR_OPTIONS: REDSTONE_COMPARATOR
   TELEPORTER: COMPASS
 

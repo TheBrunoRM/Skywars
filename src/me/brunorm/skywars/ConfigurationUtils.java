@@ -86,7 +86,7 @@ public class ConfigurationUtils {
 	public static void copyDefaultContentsToFile(String defaultFileName, File file) {
 		try {
 			if(!file.exists()) file.createNewFile();
-			//System.out.println("copying default contents to file " + file.getName());
+			System.out.println("copying default contents to file " + file.getPath());
 			try {
 				copyInputStreamToFile(Skywars.get().getResource(defaultFileName), file);
 			} catch (IOException e) {

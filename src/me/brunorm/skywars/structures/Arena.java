@@ -61,6 +61,7 @@ public class Arena {
 		this.map = map;
 		this.status = ArenaStatus.WAITING;
 		events.add(new SkywarsEvent(this, SkywarsEventType.REFILL, 60));
+		events.add(new SkywarsEvent(this, SkywarsEventType.REFILL, 60));
 		joinable = true;
 	}
 	
@@ -106,6 +107,12 @@ public class Arena {
 		for (SkywarsPlayer players : this.getAllPlayersIncludingAliveAndSpectators()) {
 			players.getPlayer().sendMessage(Messager.colorFormat("&7%s &ehas joined (&b%s&e/&b%s&e)!", player.getName(),
 					getPlayerCount(), map.getMaxPlayers()));
+			String sound = Skywars.config.getString("sounds.join");
+			String[] splitted = sound.split(";");
+			player.getPlayer().playSound(player.getPlayer().getLocation(),
+					Sounds.valueOf(splitted[0]).bukkitSound(),
+					splitted.length > 1 ? Float.parseFloat(splitted[1]) : 1f,
+					splitted.length > 2 ? Float.parseFloat(splitted[2]) : 1f);
 		}
 
 		if(getTask() != null && getStatus() == ArenaStatus.STARTING)
@@ -239,6 +246,12 @@ public class Arena {
 						player.getPlayer(), this, player,
 						player.getPlayer().getName(),
 						getAllPlayersIncludingAliveAndSpectators().size(), map.getMaxPlayers()));
+				String sound = Skywars.config.getString("sounds.leave");
+				String[] splitted = sound.split(";");
+				player.getPlayer().playSound(player.getPlayer().getLocation(),
+						Sounds.valueOf(splitted[0]).bukkitSound(),
+						splitted.length > 1 ? Float.parseFloat(splitted[1]) : 1,
+						splitted.length > 2 ? Float.parseFloat(splitted[2]) : 1);
 			}
 		}
 		exitPlayer(player);
@@ -344,8 +357,12 @@ public class Arena {
 
 					for (SkywarsPlayer player : getAllPlayersIncludingAliveAndSpectators()) {
 
-						player.getPlayer().playSound(player.getPlayer().getLocation(), Sounds.NOTE_STICKS.bukkitSound(),
-								5, 1f);
+						String sound = Skywars.config.getString("sounds.countdown");
+						String[] splitted = sound.split(";");
+						player.getPlayer().playSound(player.getPlayer().getLocation(),
+								Sounds.valueOf(splitted[0]).bukkitSound(),
+								splitted.length > 1 ? Float.parseFloat(splitted[1]) : 1,
+								splitted.length > 2 ? Float.parseFloat(splitted[2]) : 1);
 						
 						for(Object object : Skywars.langConfig.getList("countdown")) {
 							@SuppressWarnings("unchecked")
@@ -506,6 +523,7 @@ public class Arena {
 				}
 			}
 		}
+		Skywars.get().clearArena(this);
 	}
 	
 	public void resetCases() {
@@ -653,7 +671,7 @@ public class Arena {
 		World world = location.getWorld();
 		Vector offset = schematic.getOffset();
 		ListTag tileEntities = schematic.getTileEntities();
-		System.out.println("tile entities: " + tileEntities.getValue().size());
+		//System.out.println("tile entities: " + tileEntities.getValue().size());
 		
 		byte[] blocks = schematic.getBlocks();
 		short length = schematic.getLength();
@@ -666,14 +684,14 @@ public class Arena {
 			for (int y = 0; y < height; ++y) {
 				for (int z = 0; z < length; ++z) {
 					int index = y * width * length + z * width + x;
-					Location loc = getLocationInArena(new Location(world,x,y,z)).add(offset);
+					Location loc = new Location(world,x,y,z).add(offset).add(location);
 					Block block = loc.getBlock();
 					if(block.getType() == XMaterial.CHEST.parseMaterial()
 							|| blocks[index] == 54 /*chest id*/) {						
-						ChestManager.fillChest(getLocationInArena(loc),
+						ChestManager.fillChest(loc,
 								SkywarsUtils.distance(this.getLocation().toVector(),
-										getLocationInArena(loc).toVector()) < map.getCenterRadius());
-						System.out.println("filling chest at loc " + loc);
+										loc.toVector()) < map.getCenterRadius());
+						//System.out.println("filling chest at loc " + loc);
 						filled++;
 					}
 				}
@@ -684,15 +702,18 @@ public class Arena {
 			@SuppressWarnings("unchecked")
 			Map<String, Tag> values = (Map<String, Tag>) tag.getValue();
 			if (values.get("id").getValue().equals("Chest")) {
-				Location loc = SchematicHandler.calculatePositionWithOffset(values, world, offset);
-				ChestManager.fillChest(getLocationInArena(loc),
+				Vector v = SchematicHandler.getVector(values);
+				Location loc = new Location(world, v.getX(), v.getY(), v.getZ())
+						.add(offset).add(location);
+				ChestManager.fillChest(loc,
 						SkywarsUtils.distance(this.getLocation().toVector(),
-								getLocationInArena(loc).toVector()) < map.getCenterRadius());
-				System.out.println("filling chest entity at loc " + loc);
+								loc.toVector()) < map.getCenterRadius());
+				//System.out.println("filling chest entity at loc " + loc);
 				filled++;
 			}
 		}
-		System.out.println(String.format("filled %s chests", filled));
+		if(Skywars.config.getBoolean("debug.enabled"))
+			Skywars.get().sendMessage("filled %s chests", filled);
 	}
 	
 	public int getCountdown() {
@@ -759,7 +780,7 @@ public class Arena {
 	}
 
 	public void broadcastRefillMessage() {
-		broadcastMessage(Skywars.langConfig.getString("refill"));
+		broadcastMessage(Skywars.langConfig.getString("REFILL"));
 	}
 
 	private void broadcastMessage(String string, Object... format) {

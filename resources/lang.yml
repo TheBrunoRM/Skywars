@@ -76,6 +76,8 @@ countdown:
   subtitle: "&eRight-click the bow to select a kit!"
   color: 6
   range: 10
+  #message:
+  #sound:
 - title: "&c%count%"
   subtitle: "&ePrepare to fight!"
   color: c

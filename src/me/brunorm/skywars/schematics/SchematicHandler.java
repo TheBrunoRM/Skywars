@@ -3,10 +3,14 @@ package me.brunorm.skywars.schematics;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
@@ -21,6 +25,8 @@ import org.jnbt.Tag;
 
 import com.cryptomorin.xseries.XMaterial;
 
+import me.brunorm.skywars.Skywars;
+
 public class SchematicHandler {
 
 	public static Vector calculatePositionWithOffset(Map<String, Tag> values, Vector offset) {
@@ -33,6 +39,13 @@ public class SchematicHandler {
 			z + offset.getBlockZ());
 	}
 	
+	public static Vector getVector(Map<String, Tag> values) {
+		int x = (int) values.get("x").getValue();
+		int y = (int) values.get("y").getValue();
+		int z = (int) values.get("z").getValue();
+		return new Vector(x,y,z);
+	}
+	
 	public static Location calculatePositionWithOffset(Map<String, Tag> values, World world, Vector offset) {
 		int x = (int) values.get("x").getValue();
 		int y = (int) values.get("y").getValue();
@@ -42,6 +55,32 @@ public class SchematicHandler {
 			x + offset.getBlockX(),
 			y + offset.getBlockY(),
 			z + offset.getBlockZ());
+	}
+	
+	public static HashMap<String, String> materials = new HashMap<String, String>();
+	
+	public static void loadMaterials() {
+		System.out.println("Loading materials...");
+		InputStream stream = Skywars.get().getResource("resources/items.tsv");
+    	Scanner myReader = new Scanner(stream);
+        while (myReader.hasNextLine()) {
+          String d = myReader.nextLine();
+          String[] s = d.split("\t");
+          String _id = s[0];
+          String _data = s[1];
+          String _mat = s[3].toUpperCase();
+          if(Material.matchMaterial(_mat) == null)
+        	  _mat = s[2].replaceAll(" ", "_").toUpperCase();
+          if(Material.matchMaterial(_mat) == null)
+        	  System.out.println("Could not find material for " + String.join(", ", s));
+          materials.put(_id + ":" + _data, _mat);
+        }
+        myReader.close();
+		System.out.println("Loaded materials");
+	}
+	
+	public static String getMaterialNameByIDAndData(int id, int data) {
+		return materials.get(id+":"+data);
 	}
 	
 	public static void clear(Location loc, Schematic schematic) {
@@ -64,6 +103,7 @@ public class SchematicHandler {
 	
 	@SuppressWarnings("deprecation")
 	public static void pasteSchematic(Location loc, Schematic schematic) {
+		loadMaterials();
 		World world = loc.getWorld();
 		byte[] blocks = schematic.getBlocks();
 		byte[] blockData = schematic.getData();
@@ -88,7 +128,14 @@ public class SchematicHandler {
 						continue;
 					}
 					if(XMaterial.isNewVersion()) {
-						
+						String name = getMaterialNameByIDAndData(blocks[index], blockData[index]);
+						if(name != null) {							
+							Material mat = Material.getMaterial(name);
+							if(mat == null)
+								System.out.println("Unknown material: " + name);
+							else
+								block.setType(mat);
+						}
 					} else {						
 						if (!(blocks[index] == 0 && (block.getType() == XMaterial.WATER.parseMaterial()
 								|| block.getType() == XMaterial.LAVA.parseMaterial()))) {
@@ -121,14 +168,18 @@ public class SchematicHandler {
 				sign.setLine(3, getSignText((String) values.get("Text4").getValue()));
 				*/
 			}
-			if(values.get("id").getValue().equals("Beacon")) {
-				int x = (int) values.get("x").getValue();
-				int y = (int) values.get("y").getValue();
-				int z = (int) values.get("z").getValue();
-				
-				Block block = new Location(world, x + loc.getX() + offset.getX(), y + loc.getY() + offset.getY(),
-						z + loc.getZ() + offset.getZ()).getBlock();
+			int x = (int) values.get("x").getValue();
+			int y = (int) values.get("y").getValue();
+			int z = (int) values.get("z").getValue();
+			Block block = new Location(world, x + loc.getX() + offset.getX(), y + loc.getY() + offset.getY(),
+					z + loc.getZ() + offset.getZ()).getBlock();
+			switch(values.get("id").getValue().toString()) {
+			case "Beacon":
 				block.setType(XMaterial.BEACON.parseMaterial());
+				break;
+			case "Chest":
+				block.setType(XMaterial.CHEST.parseMaterial());
+				break;
 			}
 		}
 	}
