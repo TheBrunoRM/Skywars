@@ -17,10 +17,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Directional;
-import org.bukkit.block.data.Orientable;
-import org.bukkit.block.data.Rotatable;
 import org.bukkit.util.Vector;
 import org.jnbt.ByteArrayTag;
 import org.jnbt.CompoundTag;
@@ -110,20 +106,31 @@ public class SchematicHandler {
 	}
 	
 	public static void rotateBlock(Block block, BlockFace blockFace) {
-		try {			
+		try {
+			Class<?> blockDataClass = Class.forName("org.bukkit.block.data.BlockData");
+			Class<?> blockFaceClass = Class.forName("org.bukkit.block.BlockFace");
 			Class<?> blockClass = Class.forName("org.bukkit.block.Block");
+			Class<?> directionalClass = Class.forName("org.bukkit.block.data.Directional");
+			Class<?> orientableClass = Class.forName("org.bukkit.block.data.Orientable");
+			Class<?> rotatableClass = Class.forName("org.bukkit.block.data.Rotatable");
 			Method getBlockDataMethod = blockClass.getMethod("getBlockData");
-			Method setBlockDataMethod = blockClass.getMethod("setBlockData", BlockData.class);
-			BlockData blockData = (BlockData) getBlockDataMethod.invoke(block);
-			if (blockData instanceof Directional) {
+			Method setBlockDataMethod = blockClass.getMethod("setBlockData", blockDataClass);
+			Object blockData = blockDataClass.cast(getBlockDataMethod.invoke(block));
+			if (directionalClass.isInstance(blockData)) {
 				//System.out.println(block.getType().toString() + " facing " + blockFace.toString());
-				if (blockData instanceof Orientable) {
-					((Orientable) blockData).setAxis(convertBlockFaceToAxis(blockFace));
+				if (orientableClass.isInstance(blockData)) {
+					Class<?> axisClass = Class.forName("org.bukkit.Axis");
+					Method setAxisMethod = orientableClass.getMethod("setAxis", axisClass);
+					setAxisMethod.invoke(orientableClass.cast(blockData),
+							convertBlockFaceToAxis(blockFace));
 				}
-				if (blockData instanceof Rotatable) {
-					((Rotatable) blockData).setRotation(blockFace);
+				if (rotatableClass.isInstance(blockData)) {
+					Method setRotationMethod = rotatableClass.getMethod("setRotation",
+							blockFaceClass);
+					setRotationMethod.invoke(blockData, blockFace);
 				}
-				((Directional) blockData).setFacing(blockFace);
+				Method setFacingMethod = directionalClass.getMethod("setFacing", blockFaceClass);
+				setFacingMethod.invoke(directionalClass.cast(blockData), blockFace);
 				setBlockDataMethod.invoke(block, blockData);
 			}
 		} catch(Exception e) {
