@@ -65,6 +65,7 @@ public class MainCommand implements CommandExecutor {
 	Schematic schematic;
 	Schem schem;
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String cmd, String[] args) {
 		try {
@@ -87,17 +88,15 @@ public class MainCommand implements CommandExecutor {
 						player.sendMessage(Messager.getMessage("MAIN_LOBBY_SET"));
 					}
 				}
-				else if (args[0].equalsIgnoreCase("lobby")) {
-					if(CommandsUtils.permissionCheckWithMessage(player, "skywars.setmainlobby")) {	
-						if (joined) {
-							Skywars.get().getPlayerArena(player).leavePlayer(player);
-						}
-						if(Skywars.get().getLobby() != null) {
-							player.teleport(Skywars.get().getLobby());
-							player.sendMessage(Messager.getMessage("TELEPORTED_TO_MAIN_LOBBY"));
-						} else {
-							player.sendMessage(Messager.getMessage("MAIN_LOBBY_NOT_SET"));
-						}
+				else if (args[0].equalsIgnoreCase("lobby")) {	
+					if (joined) {
+						Skywars.get().getPlayerArena(player).leavePlayer(player);
+					}
+					if(Skywars.get().getLobby() != null) {
+						player.teleport(Skywars.get().getLobby());
+						player.sendMessage(Messager.getMessage("TELEPORTED_TO_MAIN_LOBBY"));
+					} else {
+						player.sendMessage(Messager.getMessage("MAIN_LOBBY_NOT_SET"));
 					}
 				}
 				else if(args[0].equalsIgnoreCase("play")) {
@@ -146,26 +145,32 @@ public class MainCommand implements CommandExecutor {
 					GamesMenu.OpenMenu(player);
 				} else if (args[0].equalsIgnoreCase("reload")
 						|| args[0].equalsIgnoreCase("rl")) {
-					if(CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin")) {						
-						Skywars.get().Reload();
-						sender.sendMessage(Messager.getMessage("RELOADED"));
-					}
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					Skywars.get().Reload();
+					sender.sendMessage(Messager.getMessage("RELOADED"));
 				}
 				
-				else if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.test")) return false;
+				//else if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.test")) return false;
 				// TEST COMMANDS
 				
-				if(args[0].equalsIgnoreCase("bigcase")) {
+				else if(args[0].equalsIgnoreCase("bigcase")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					Skywars.createBigCase(player.getLocation(), XMaterial.LIME_STAINED_GLASS);
 				}
-				if(args[0].equalsIgnoreCase("pasteschematic")) {
+				else if(args[0].equalsIgnoreCase("pasteschematic")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					if(schematic == null) {
 						sender.sendMessage("schematic not loaded");
 						return false;
 					}
 					SchematicHandler.pasteSchematic(player.getLocation(), schematic);
 				}
-				if(args[0].equalsIgnoreCase("loadschematic")) {
+				else if(args[0].equalsIgnoreCase("loadschematic")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					File file = new File(Skywars.get().getDataFolder() + "/schematics/" + args[1]);
 					if(!file.exists()) {
 						sender.sendMessage("file not found: " + args[1]);
@@ -181,70 +186,108 @@ public class MainCommand implements CommandExecutor {
 					} else
 						System.out.println("Unknown schematic type: " + loaded);
 				}
-				if(args[0].equalsIgnoreCase("testnms")) {
+				else if(args[0].equalsIgnoreCase("testnms")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					NMSHandler handler = new NMSHandler();
 					handler.sendTitle(player, "hola", "esto es una prueba");
 				}
-				if(args[0].equalsIgnoreCase("soundnms")) {
+				else if(args[0].equalsIgnoreCase("soundnms")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					player.playSound(player.getLocation(), Sounds.NOTE_STICKS.bukkitSound(), 1, 1);
 				}
-				if(args[0].equalsIgnoreCase("nms")) {
+				else if(args[0].equalsIgnoreCase("nms")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					player.sendMessage("NMS test sent");
 					Skywars.get().NMS().sendTitle(player, "Hello!", "This is a NMS test");
 				}
-				if(args[0].equalsIgnoreCase("worldname")) {
+				else if(args[0].equalsIgnoreCase("worldname")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					if(map.getWorldName() != null)
 						player.sendMessage(map.getWorldName());
 					else
 						player.sendMessage("not set");
 				}
-				if(args[0].equalsIgnoreCase("deleteplayer")) {
+				else if(args[0].equalsIgnoreCase("deleteplayer")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					if(player != null && player instanceof Entity) {
 						Entity entity = (Entity) player;
 						entity.remove();
 					}
 				}
-				if(args[0].equalsIgnoreCase("worlds")) {
+				else if(args[0].equalsIgnoreCase("worlds")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					player.sendMessage(String.join(", ",
 						Bukkit.getServer().getWorlds().stream().map(world -> world.getName())
 							.collect(Collectors.toList())));
 				}
-				if(args[0].equalsIgnoreCase("where")) {
+				else if(args[0].equalsIgnoreCase("where")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					player.sendMessage(player.getWorld().getName());
 				}
-				if(args[0].equalsIgnoreCase("tp")) {
+				else if(args[0].equalsIgnoreCase("tp")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					player.teleport(arena.getLocation());
 				}
-				if(args[0].equalsIgnoreCase("getarenaconfig")) {
+				else if(args[0].equalsIgnoreCase("getarenaconfig")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					Object xd = map.getConfig().get(args[2]);
 					if(xd == null) xd = "lmao it doesnt exist";
 					sender.sendMessage(xd.toString());
 				}
-				if(args[0].equalsIgnoreCase("getconfig")) {
+				else if(args[0].equalsIgnoreCase("getconfig")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					Object xd = Skywars.get().getConfig().get(args[1]);
 					if(xd == null) xd = "lmao it doesnt exist";
 					sender.sendMessage(xd.toString());
 				}
-				if (args[0].equalsIgnoreCase("scoreboard")) {
+				else if (args[0].equalsIgnoreCase("scoreboard")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					SkywarsScoreboard.update(player);
 				}
-				if (args[0].equalsIgnoreCase("getblock")) {
+				else if (args[0].equalsIgnoreCase("getblock")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					Block block = SkywarsUtils.getTargetBlock(player, 5);
 					Bukkit.broadcastMessage(String.format("block is at %s", block.getLocation()));
 				}
-				if (args[0].equalsIgnoreCase("fillchest")) {
+				else if (args[0].equalsIgnoreCase("fillchest")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					Block block = SkywarsUtils.getTargetBlock(player, 5);
 					ChestManager.fillChest(block.getLocation(), false);
 				}
-				if (args[0].equalsIgnoreCase("testschem")) {
+				else if(args[0].equalsIgnoreCase("set")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					Block block = SkywarsUtils.getTargetBlock(player, 5);
+					block.setData(Byte.parseByte(args[1]));
+				}
+				else if (args[0].equalsIgnoreCase("testschem")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					arena.pasteSchematic();
 					player.sendMessage("pasted");
 				}
-				if (args[0].equalsIgnoreCase("resetcases")) {
+				else if (args[0].equalsIgnoreCase("resetcases")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					arena.resetCases();
 					player.sendMessage("regenerated");
 				}
-				if (args[0].equalsIgnoreCase("players")) {
+				else if (args[0].equalsIgnoreCase("players")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					if (arena != null) {
 						for (SkywarsPlayer swp : arena.getAllPlayersIncludingAliveAndSpectators()) {
 							if (swp == null)
@@ -254,33 +297,47 @@ public class MainCommand implements CommandExecutor {
 						}
 					}
 				}
-				if(args[0].equalsIgnoreCase("restart")) {
+				else if(args[0].equalsIgnoreCase("restart")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					arena.clear();
 				}
-				if (args[0].equalsIgnoreCase("stop")) {
+				else if (args[0].equalsIgnoreCase("stop")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					if (playerArena != null) {
 						playerArena.startTimer(ArenaStatus.ENDING);
 					}
 				}
-				if (args[0].equalsIgnoreCase("forcestop")) {
+				else if (args[0].equalsIgnoreCase("forcestop")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					if (arena != null) {
 						arena.clear();
 					}
 				}
-				if(args[0].equalsIgnoreCase("calculatespawns")) {
+				else if(args[0].equalsIgnoreCase("calculatespawns")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					map.calculateSpawns();
 				}
-				if (args[0].equalsIgnoreCase("save")) {
+				else if (args[0].equalsIgnoreCase("save")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					// plugin.saveArenas();
 					// sender.sendMessage("saved");
 				}
-				if (args[0].equalsIgnoreCase("joined")) {
+				else if (args[0].equalsIgnoreCase("joined")) {
 					sender.sendMessage(Skywars.get().getPlayerArena(player) != null ? "joined" : "not joined");
 				}
-				if (args[0].equalsIgnoreCase("case")) {
+				else if (args[0].equalsIgnoreCase("case")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					Skywars.createCase(player.getLocation(), XMaterial.GLASS);
 				}
-				if (args[0].equalsIgnoreCase("spawn")) {
+				else if (args[0].equalsIgnoreCase("spawn")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					String nameMap = args[2];
 					SkywarsMap mapSpawn = Skywars.get().getMap(nameMap);
 					if (mapSpawn == null) {
@@ -307,20 +364,21 @@ public class MainCommand implements CommandExecutor {
 						Vector arenaSpawnLocation = mapSpawn.getSpawn(spawn);
 						sender.sendMessage(arenaSpawnLocation == null ? "spawn is null" : "spawn exists");
 					}
-					if (args[1].equalsIgnoreCase("set")) {
+					else if (args[1].equalsIgnoreCase("set")) {
 						// TODO: calculate location relative to arena location
 						//mapSpawn.setSpawn(spawn, player.getLocation().toVector());
 						player.sendMessage(String.format("Set spawn %s of arena '%s' to your current location", spawn,
 								mapSpawn.getName()));
 					}
-					if (args[1].equalsIgnoreCase("tp")) {
+					else if (args[1].equalsIgnoreCase("tp")) {
 						player.teleport(arena.getVectorInArena(mapSpawn.getSpawn(spawn)));
 						player.sendMessage(
 								String.format("Teleported to spawn %s of arena '%s'", spawn, mapSpawn.getName()));
 					}
 				}
-				if (args[0].equalsIgnoreCase("arenas")) {
-					if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.admin")) return false;
+				else if (args[0].equalsIgnoreCase("arenas")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					ArrayList<Arena> arenas = Skywars.get().getArenas();
 					if (arenas != null && arenas.size() > 0) {
 						List<String> arenaNames = arenas.stream()
@@ -330,8 +388,9 @@ public class MainCommand implements CommandExecutor {
 					} else
 						sender.sendMessage("No arenas");
 				}
-				if (args[0].equalsIgnoreCase("maps")) {
-					if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.admin")) return false;
+				else if (args[0].equalsIgnoreCase("maps")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					ArrayList<SkywarsMap> maps = Skywars.get().getMaps();
 					if (maps != null && maps.size() > 0) {
 						List<String> mapNames = maps.stream()
@@ -341,8 +400,9 @@ public class MainCommand implements CommandExecutor {
 					} else
 						sender.sendMessage("No maps");
 				}
-				if (args[0].equalsIgnoreCase("create")) {
-					if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.admin")) return false;
+				else if (args[0].equalsIgnoreCase("create")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					if (name != null) {
 						if (Skywars.get().getMap(name) == null) {
 							if(Skywars.get().createMap(name))
@@ -356,8 +416,9 @@ public class MainCommand implements CommandExecutor {
 						sender.sendMessage("No name");
 					}
 				}
-				if (args[0].equalsIgnoreCase("delete")) {
-					if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.admin")) return false;
+				else if (args[0].equalsIgnoreCase("delete")) {
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					if (name != null) {
 						if (Skywars.get().getMap(name) != null) {
 							if(Skywars.get().deleteMap(name))
@@ -370,6 +431,8 @@ public class MainCommand implements CommandExecutor {
 					} else {
 						sender.sendMessage("No name");
 					}
+				} else {
+					sender.sendMessage(Messager.color("&cInvalid arguments! &eUse &b/sw help"));
 				}
 				return true;
 			} else {
@@ -377,8 +440,12 @@ public class MainCommand implements CommandExecutor {
 			}
 
 		} catch (Exception e) {
-			sender.sendMessage("there was an error executing the command:");
-			//sender.sendMessage(e.getLocalizedMessage());
+			sender.sendMessage("there was an error executing the command");
+			String m = e.getLocalizedMessage();
+			if(m != null)
+				sender.sendMessage(m);
+			else
+				sender.sendMessage(e.getClass().getName());
 			e.printStackTrace();
 		}
 		return false;

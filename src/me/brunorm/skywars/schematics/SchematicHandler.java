@@ -4,15 +4,23 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import org.bukkit.Axis;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
+import org.bukkit.block.data.Orientable;
+import org.bukkit.block.data.Rotatable;
 import org.bukkit.util.Vector;
 import org.jnbt.ByteArrayTag;
 import org.jnbt.CompoundTag;
@@ -71,8 +79,8 @@ public class SchematicHandler {
           String _mat = s[3].toUpperCase();
           if(Material.matchMaterial(_mat) == null)
         	  _mat = s[2].replaceAll(" ", "_").toUpperCase();
-          if(Material.matchMaterial(_mat) == null)
-        	  System.out.println("Could not find material for " + String.join(", ", s));
+          //if(Material.matchMaterial(_mat) == null)
+        	  //System.out.println("Could not find material for " + String.join(", ", s));
           materials.put(_id + ":" + _data, _mat);
         }
         myReader.close();
@@ -101,6 +109,61 @@ public class SchematicHandler {
 		}
 	}
 	
+	public static void rotateBlock(Block block, BlockFace blockFace) {
+		try {			
+			Class<?> blockClass = Class.forName("org.bukkit.block.Block");
+			Method getBlockDataMethod = blockClass.getMethod("getBlockData");
+			Method setBlockDataMethod = blockClass.getMethod("setBlockData", BlockData.class);
+			BlockData blockData = (BlockData) getBlockDataMethod.invoke(block);
+			if (blockData instanceof Directional) {
+				//System.out.println(block.getType().toString() + " facing " + blockFace.toString());
+				if (blockData instanceof Orientable) {
+					((Orientable) blockData).setAxis(convertBlockFaceToAxis(blockFace));
+				}
+				if (blockData instanceof Rotatable) {
+					((Rotatable) blockData).setRotation(blockFace);
+				}
+				((Directional) blockData).setFacing(blockFace);
+				setBlockDataMethod.invoke(block, blockData);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static BlockFace convertNumberToBlockFace(int n) {
+		switch(n) {
+		case 0:
+			return BlockFace.UP;
+		case 1:
+			return BlockFace.SOUTH;
+		case 2:
+			return BlockFace.EAST;
+		case 3:
+			return BlockFace.NORTH;
+		case 4:
+			return BlockFace.WEST;
+		default:
+			return BlockFace.UP;
+		}
+ 	}
+	
+	private static Axis convertBlockFaceToAxis(BlockFace face) {
+	    switch (face) {
+	        case NORTH:
+	        case SOUTH:
+	            return Axis.Z;
+	        case EAST:
+	        case WEST:
+	            return Axis.X;
+	        case UP:
+	        case DOWN:
+	            return Axis.Y;
+	        default:
+	            return Axis.X;
+	    }
+	}
+	
 	@SuppressWarnings("deprecation")
 	public static void pasteSchematic(Location loc, Schematic schematic) {
 		loadMaterials();
@@ -121,6 +184,7 @@ public class SchematicHandler {
 			for (int y = 0; y < height; ++y) {
 				for (int z = 0; z < length; ++z) {
 					int index = y * width * length + z * width + x;
+					int id = blocks[index];
 					Block block = new Location(world, x + loc.getX() + offset.getX(), y + loc.getY() + offset.getY(),
 							z + loc.getZ() + offset.getZ()).getBlock();
 					if (blocks[index] < 0) {
@@ -128,15 +192,42 @@ public class SchematicHandler {
 						continue;
 					}
 					if(XMaterial.isNewVersion()) {
-						String name = getMaterialNameByIDAndData(blocks[index], blockData[index]);
+						String name = null;
+						switch(id) {
+						case 17: // log
+							name = getMaterialNameByIDAndData(id, blockData[index]%4);
+							break;
+						case (byte) 162: // log2
+							name = getMaterialNameByIDAndData(id, blockData[index]%2);
+							break;
+						case 50: // torch
+						case 54: // chest
+						case 61: // furnace
+						case 66: // rail
+							name = getMaterialNameByIDAndData(id, 0);
+							break;
+						default:
+							name = getMaterialNameByIDAndData(id, blockData[index]);
+						}
 						if(name != null) {							
 							Material mat = Material.getMaterial(name);
 							if(mat == null)
 								System.out.println("Unknown material: " + name);
 							else
 								block.setType(mat);
-						}
-					} else {						
+							int n = (int) Math.floor(blockData[index]/4);
+							List<Integer> ids = new ArrayList<Integer>();
+							ids.add(50);
+							ids.add(54);
+							ids.add(61);
+							ids.add(66);
+							// some blocks are not allowed to be facing up, so we skip the first value (up)
+							if(ids.contains(id)) n++;
+							rotateBlock(block, convertNumberToBlockFace(n));
+						} else
+							System.out.println("Could not set block for ID "
+									+ id + ":" + blockData[index]);
+					} else {
 						if (!(blocks[index] == 0 && (block.getType() == XMaterial.WATER.parseMaterial()
 								|| block.getType() == XMaterial.LAVA.parseMaterial()))) {
 							block.setTypeIdAndData(blocks[index], blockData[index], false);

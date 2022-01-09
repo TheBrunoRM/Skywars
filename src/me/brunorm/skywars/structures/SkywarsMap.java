@@ -246,6 +246,7 @@ public class SkywarsMap {
 	}
 	
 	public void loadSchematic() {
+		if(schematicFilename == null) return;
 		File schematicFile = Skywars.get().getSchematicFile(schematicFilename);
 		if(schematicFile == null) {
 			System.out.println("Could not get schematic file for map "

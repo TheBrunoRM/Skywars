@@ -23,7 +23,6 @@ import me.brunorm.skywars.structures.SkywarsPlayer;
 
 public class InteractEvent implements Listener {
 	
-	@SuppressWarnings("deprecation")
 	@EventHandler
 	void onInteract(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
