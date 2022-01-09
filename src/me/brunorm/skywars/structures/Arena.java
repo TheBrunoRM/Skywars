@@ -505,7 +505,11 @@ public class Arena {
 		}, 40);
 	}
 	
-	public void clear() {
+	public void clear() {		
+		clear(true);
+	}
+	
+	public void clear(boolean remove) {
 		cancelTimer();
 		Skywars.get().sendMessage("Clearing arena for map " + map.getName());
 		for(SkywarsPlayer player : getAllPlayersIncludingAliveAndSpectators()) {
@@ -657,7 +661,7 @@ public class Arena {
 	}
 	
 	public void pasteSchematic() {
-		if(map.getSchematic() == null) return;
+		if(location == null || map.getSchematic() == null) return;
 		System.out.println("pasting schematic at " + location.toString());
 		SchematicHandler.pasteSchematic(location, map.getSchematic());
 	}

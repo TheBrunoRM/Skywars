@@ -52,7 +52,7 @@ public class Events implements Listener {
 					//arena.leavePlayer(player);
 				else if(!swp.isSpectator())
 					arena.makeSpectator(swp, null);
-				else
+				else if (arena.isInBoundaries(arena.getLocation()))
 					arena.goBackToCenter(player);
 			}
 		}
@@ -91,11 +91,11 @@ public class Events implements Listener {
 	
 	@EventHandler
 	void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-		
 		Entity entity = event.getEntity();
+		if(!(entity instanceof LivingEntity)) return;
 		LivingEntity livingEntity = (LivingEntity) entity;
 		Entity damager = event.getDamager();
-		
+		if(damager == null) return;
 		if (damager instanceof Player) {
 			Player attacker = (Player) damager;
 			Arena attackerArena = Skywars.get().getPlayerArena(attacker);

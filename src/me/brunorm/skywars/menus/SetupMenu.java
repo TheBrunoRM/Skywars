@@ -73,7 +73,9 @@ public class SetupMenu implements Listener {
 				}
 			}
 			
-			if(!alreadyUsing)
+			if(schematicFile.getName().endsWith(".schem"))
+				lore.add(Messager.color("&cThe plugin does not support .schem files yet"));
+			else if(!alreadyUsing)
 				lore.add(Messager.color("&eClick to select this file"));
 
 			ItemStack item = new ItemStack(XMaterial.PAPER.parseItem());
@@ -118,9 +120,9 @@ public class SetupMenu implements Listener {
 
 		ItemStack world = new ItemStack(XMaterial.SADDLE.parseItem());
 		ItemMeta worldMeta = minPlayers.getItemMeta();
-		String currentWorld = currentArena.getWorld().getName();
-		if(currentWorld == null) currentWorld = "none";
-		worldMeta.setDisplayName(Messager.colorFormat(worldName, currentWorld));
+		String currentWorldName = currentMap.getWorldName();
+		if(currentWorldName == null) currentWorldName = "none";
+		worldMeta.setDisplayName(Messager.colorFormat(worldName, currentWorldName));
 		worldMeta.setLore(worldLore);
 		world.setItemMeta(worldMeta);
 		inventory.setItem(12, world);
@@ -249,10 +251,12 @@ public class SetupMenu implements Listener {
 			
 			if (name.equals(Messager.colorFormat(minPlayersName, currentMap.getMinPlayers()))) {
 				int n = currentMap.getMinPlayers() + (event.getClick() == ClickType.LEFT ? 1 : -1);
+				n = Math.min(Math.max(n, 0), currentMap.getMaxPlayers());
 				currentMap.setMinPlayers(n);
 			}
 			if (name.equals(Messager.colorFormat(maxPlayersName, currentMap.getMaxPlayers()))) {
 				int n = currentMap.getMaxPlayers() + (event.getClick() == ClickType.LEFT ? 1 : -1);
+				n = Math.max(n, 0);
 				currentMap.setMaxPlayers(n);
 			}
 			String currentWorld = currentMap.getWorldName();
@@ -268,11 +272,16 @@ public class SetupMenu implements Listener {
 				World world = player.getWorld();
 				Location location = new Location(world, x, y, z);
 				currentArena.setLocation(location);
+				currentMap.setLocation(location);
 				player.sendMessage(String.format("set location of %s to %s %s %s in world %s",
 						currentMap.getName(), location.getX(), location.getY(), location.getZ(),
 						location.getWorld().getName()));
 			}
 			if (name.equals(Messager.color(spawnName))) {
+				if(currentMap.getLocation() == null) {
+					player.sendMessage("Location not set");
+					return;
+				}
 				Arena arena = currentArenas.get(player);
 				ItemStack item = new ItemStack(XMaterial.BLAZE_ROD.parseItem());
 				ItemMeta meta = item.getItemMeta();
@@ -318,6 +327,7 @@ public class SetupMenu implements Listener {
 			if(name.equals(Messager.color(pasteSchematicName))) {
 				currentArena.pasteSchematic();
 				player.sendMessage("Pasted schematic.");
+				return;
 			}
 			if(name.equals(Messager.color(regenerateCasesName))) {
 				currentArena.resetCases();
@@ -326,6 +336,7 @@ public class SetupMenu implements Listener {
 				player.sendMessage(
 					Messager.colorFormat("Regenerated cases for %s spawns",
 							currentMap.getSpawns().size()));
+				return;
 			}
 			if(name.equals(Messager.color(clearName))) {
 				Skywars.get().clearArena(currentArena);
@@ -335,12 +346,19 @@ public class SetupMenu implements Listener {
 				player.closeInventory();
 			}
 			if(name.equals(Messager.color(teleportName))) {
-				player.teleport(currentArena.getLocation());
-				player.sendMessage("Teleported");
+				Location loc = currentArena.getLocation();
+				if(loc == null)
+					player.sendMessage("Location not set");
+				else {					
+					player.teleport(loc);
+					player.sendMessage("Teleported");
+				}
+				return;
 			}
 			if(name.equals(Messager.color(chestsName))) {
 				currentArena.calculateAndFillChests();
 				player.sendMessage("Chests filled");
+				return;
 			}
 			String currentSchematic = currentMap.getSchematicFilename();
 			if(currentSchematic == null) currentSchematic = "none";
@@ -348,7 +366,7 @@ public class SetupMenu implements Listener {
 				if(schematicsFolder.listFiles() == null) {
 					player.closeInventory();
 					player.sendMessage("&c&lThere are no schematic files!");
-					player.sendMessage("&e&lYou need to put schematics files in the schematics folder");
+					player.sendMessage("&e&lYou need to put &bschematics files &ein the &bschematics folder");
 					return;
 				} else OpenSchematicsMenu(player);
 			}
@@ -356,6 +374,10 @@ public class SetupMenu implements Listener {
 			String schematicName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
 			for(File schematicFile : schematicsFolder.listFiles()) {
 				if(schematicFile.getName().equals(schematicName)) {
+					if(schematicFile.getName().endsWith(".schem")) {
+						player.sendMessage("&cThe plugin does not support .schem files yet.");
+						return;
+					}
 					currentArena.clearBlocks();
 					currentMap.setSchematic(schematicName);
 					currentMap.loadSchematic();

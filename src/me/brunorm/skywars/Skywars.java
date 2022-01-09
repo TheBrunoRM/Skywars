@@ -41,6 +41,7 @@ import me.brunorm.skywars.menus.GamesMenu;
 import me.brunorm.skywars.menus.KitsMenu;
 import me.brunorm.skywars.menus.MapMenu;
 import me.brunorm.skywars.menus.SetupMenu;
+import me.brunorm.skywars.schematics.SchematicHandler;
 import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.Kit;
 import me.brunorm.skywars.structures.SkywarsMap;
@@ -117,8 +118,6 @@ public class Skywars extends JavaPlugin {
 	
 	public void onEnable() {
 		
-		System.out.println(XMaterial.matchXMaterial(35, (byte) 11));
-		
 		// set stuff
 		plugin = this;
 		mapsPath = getDataFolder() + "/maps";
@@ -129,6 +128,7 @@ public class Skywars extends JavaPlugin {
 		packageName = this.getServer().getClass().getPackage().getName();
 		serverPackageVersion = packageName.substring(packageName.lastIndexOf('.') + 1);
 		nmsHandler = new NMSHandler();
+		SchematicHandler.initializeReflection();
 		
 		// load stuff
 		loadConfig();
@@ -167,13 +167,15 @@ public class Skywars extends JavaPlugin {
 				arena.exitPlayer(player);
 			}
 		}
+		ItemStack item = SetupEvents.item;
 		SetupMenu.currentArenas.forEach((player, arena) -> {
-			player.getInventory().removeItem(SetupEvents.item);
+			if(item == null) return;
+			player.getInventory().removeItem(item);
 			SkywarsUtils.TeleportPlayerBack(player);
 		});
 		sendMessage("Stopping arenas...");
 		for (Arena arena : arenas) {
-			arena.clear();
+			arena.clear(false);
 		}
 		arenas.clear();
 	}
@@ -447,8 +449,8 @@ public class Skywars extends JavaPlugin {
 		for (File file : folder.listFiles()) {
 			String name = file.getName().replaceFirst("[.][^.]+$", "");
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-			ConfigurationUtils.createMissingKeys(config,
-					ConfigurationUtils.getDefaultConfig("maps/MiniTrees.yml"));
+			//ConfigurationUtils.createMissingKeys(config,
+			//		ConfigurationUtils.getDefaultConfig("maps/MiniTrees.yml"));
 			
 			// create map and set values from config
 			SkywarsMap map = new SkywarsMap(name,
@@ -468,16 +470,17 @@ public class Skywars extends JavaPlugin {
 								config.getConfigurationSection("location")));
 			}
 			
-			for (String spawn : config.getConfigurationSection("spawn").getKeys(false)) {
-				int i = Integer.parseInt(spawn);
-				if (config.get(String.format("spawn.%s", i)) == null)
-					continue;
-				double x = config.getDouble(String.format("spawn.%s.x", i));
-				double y = config.getDouble(String.format("spawn.%s.y", i));
-				double z = config.getDouble(String.format("spawn.%s.z", i));
-				Vector vector = new Vector(x, y, z);
-				map.getSpawns().put(i, vector);
-			}
+			if(config.get("spawn") != null)
+				for (String spawn : config.getConfigurationSection("spawn").getKeys(false)) {
+					int i = Integer.parseInt(spawn);
+					if (config.get(String.format("spawn.%s", i)) == null)
+						continue;
+					double x = config.getDouble(String.format("spawn.%s.x", i));
+					double y = config.getDouble(String.format("spawn.%s.y", i));
+					double z = config.getDouble(String.format("spawn.%s.z", i));
+					Vector vector = new Vector(x, y, z);
+					map.getSpawns().put(i, vector);
+				}
 			
 			maps.add(map);
 			sendMessage("&eLoaded map: &a%s", map.getName());
@@ -658,6 +661,7 @@ public class Skywars extends JavaPlugin {
 		return null;
 	}
 	
+	// TODO: make this a cached hashmap
 	public Arena getPlayerArena(Player player) {
 		for (int i = 0; i < arenas.size(); i++) {
 			List<SkywarsPlayer> players = arenas.get(i).getAllPlayersIncludingAliveAndSpectators();

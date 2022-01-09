@@ -7,16 +7,17 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import org.bukkit.Axis;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.Slab;
+import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
 import org.jnbt.ByteArrayTag;
 import org.jnbt.CompoundTag;
@@ -32,7 +33,20 @@ import com.cryptomorin.xseries.XMaterial;
 import me.brunorm.skywars.Skywars;
 
 public class SchematicHandler {
-
+	
+	static Class<?> blockClass;
+	static Method getBlockDataMethod;
+	static Method setBlockDataMethod;
+	
+	public static void initializeReflection() {
+		try {			
+			blockClass = Class.forName("org.bukkit.block.Block");
+			getBlockDataMethod = blockClass.getMethod("getBlockData");
+			setBlockDataMethod = blockClass.getMethod("setBlockData", BlockData.class);
+		} catch(Exception e) {
+		}
+	}
+	
 	public static Vector calculatePositionWithOffset(Map<String, Tag> values, Vector offset) {
 		int x = (int) values.get("x").getValue();
 		int y = (int) values.get("y").getValue();
@@ -64,7 +78,7 @@ public class SchematicHandler {
 	public static HashMap<String, String> materials = new HashMap<String, String>();
 	
 	public static void loadMaterials() {
-		System.out.println("Loading materials...");
+		Skywars.get().sendMessage("Loading materials...");
 		InputStream stream = Skywars.get().getResource("resources/items.tsv");
     	Scanner myReader = new Scanner(stream);
         while (myReader.hasNextLine()) {
@@ -88,6 +102,8 @@ public class SchematicHandler {
 	}
 	
 	public static void clear(Location loc, Schematic schematic) {
+		if(schematic == null) return;
+		
 		World world = loc.getWorld();
 		short length = schematic.getLength();
 		short width = schematic.getWidth();
@@ -105,70 +121,54 @@ public class SchematicHandler {
 		}
 	}
 	
-	public static void rotateBlock(Block block, BlockFace blockFace) {
-		try {
-			Class<?> blockDataClass = Class.forName("org.bukkit.block.data.BlockData");
-			Class<?> blockFaceClass = Class.forName("org.bukkit.block.BlockFace");
-			Class<?> blockClass = Class.forName("org.bukkit.block.Block");
-			Class<?> directionalClass = Class.forName("org.bukkit.block.data.Directional");
-			Class<?> orientableClass = Class.forName("org.bukkit.block.data.Orientable");
-			Class<?> rotatableClass = Class.forName("org.bukkit.block.data.Rotatable");
-			Method getBlockDataMethod = blockClass.getMethod("getBlockData");
-			Method setBlockDataMethod = blockClass.getMethod("setBlockData", blockDataClass);
-			Object blockData = blockDataClass.cast(getBlockDataMethod.invoke(block));
-			if (directionalClass.isInstance(blockData)) {
-				//System.out.println(block.getType().toString() + " facing " + blockFace.toString());
-				if (orientableClass.isInstance(blockData)) {
-					Class<?> axisClass = Class.forName("org.bukkit.Axis");
-					Method setAxisMethod = orientableClass.getMethod("setAxis", axisClass);
-					setAxisMethod.invoke(orientableClass.cast(blockData),
-							convertBlockFaceToAxis(blockFace));
-				}
-				if (rotatableClass.isInstance(blockData)) {
-					Method setRotationMethod = rotatableClass.getMethod("setRotation",
-							blockFaceClass);
-					setRotationMethod.invoke(blockData, blockFace);
-				}
-				Method setFacingMethod = directionalClass.getMethod("setFacing", blockFaceClass);
-				setFacingMethod.invoke(directionalClass.cast(blockData), blockFace);
-				setBlockDataMethod.invoke(block, blockData);
-			}
-		} catch(Exception e) {
-			e.printStackTrace();
+	public static String getColor(int id) {
+		switch(id) {
+		case 0:
+			return "WHITE";
+		case 1:
+			return "ORANGE";
+		case 2:
+			return "MAGENTA";
+		case 3:
+			return "LIGHT_BLUE";
+		case 4:
+			return "YELLOW";
+		case 5:
+			return "LIME";
+		case 6:
+			return "PINK";
+		case 7:
+			return "GRAY";
+		case 8:
+			return "LIGHT_GRAY";
+		case 9:
+			return "CYAN";
+		case 10:
+			return "PURPLE";
+		case 11:
+			return "BLUE";
+		case 12:
+			return "BROWN";
+		case 13:
+			return "GREEN";
+		case 14:
+			return "RED";
+		case 15:
+			return "BLACK";
+		default:
+			return "WHITE";
 		}
 	}
 	
-	public static BlockFace convertNumberToBlockFace(int n) {
-		switch(n) {
-		case 0:
-			return BlockFace.UP;
-		case 1:
-			return BlockFace.SOUTH;
-		case 2:
-			return BlockFace.EAST;
-		case 3:
-			return BlockFace.NORTH;
-		case 4:
-			return BlockFace.WEST;
+	public static String getColorableMaterialName(int id) {
+		switch(id) {
+		case 35:
+			return "WOOL";
+		case 160:
+			return "STAINED_GLASS_PANE";
 		default:
-			return BlockFace.UP;
+			return null;
 		}
- 	}
-	
-	private static Axis convertBlockFaceToAxis(BlockFace face) {
-	    switch (face) {
-	        case NORTH:
-	        case SOUTH:
-	            return Axis.Z;
-	        case EAST:
-	        case WEST:
-	            return Axis.X;
-	        case UP:
-	        case DOWN:
-	            return Axis.Y;
-	        default:
-	            return Axis.X;
-	    }
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -199,51 +199,74 @@ public class SchematicHandler {
 						continue;
 					}
 					if(XMaterial.isNewVersion()) {
+						// 1.13+ method for setting blocks
 						String name = null;
-						switch(id) {
-						case 17: // log
-							name = getMaterialNameByIDAndData(id, blockData[index]%4);
-							break;
-						case (byte) 162: // log2
-							name = getMaterialNameByIDAndData(id, blockData[index]%2);
-							break;
-						case 50: // torch
-						case 54: // chest
-						case 61: // furnace
-						case 66: // rail
-							name = getMaterialNameByIDAndData(id, 0);
-							break;
-						default:
-							name = getMaterialNameByIDAndData(id, blockData[index]);
-						}
-						if(name != null) {							
+                        switch(id) {
+                        case 17: // log
+                            name = getMaterialNameByIDAndData(id, blockData[index]%4);
+                            break;
+                        case (byte) 162: // log2
+                            name = getMaterialNameByIDAndData(id, blockData[index]%2);
+                            break;
+                        case 50: // torch
+                        case 54: // chest
+                        case 61: // furnace
+                        case 66: // rail
+                            name = getMaterialNameByIDAndData(id, 0);
+                            break;
+                        default:
+                            name = getMaterialNameByIDAndData(id, blockData[index]);
+                        }
+						if(name != null) {
+							boolean doubleSlab = false;
+							if(name.startsWith("DOUBLE") && name.endsWith("SLAB")) {
+								name = getMaterialNameByIDAndData(id+1, blockData[index]);
+								doubleSlab = true;
+							}
 							Material mat = Material.getMaterial(name);
-							if(mat == null)
-								System.out.println("Unknown material: " + name);
-							else
+							if(mat != null) {
+								// torches are not marked as "WALL_TORCH" in the schematic
+								// so we check for the data value to set it ourselves
+								if(mat == Material.valueOf("TORCH") && blockData[index] > 0)
+									mat = Material.valueOf("WALL_TORCH");
+								String m = getColorableMaterialName(id);
+								// if the material is colorizable (e.g. wool)
+								// then get the color from the id (e.g. 14 => red)
+								// and get the full material name (e.g. RED_WOOL)
+								if(m != null && blockData[index] > 0)
+									mat = Material.valueOf(getColor(blockData[index]) + "_" + m);
 								block.setType(mat);
-							int n = (int) Math.floor(blockData[index]/4);
-							List<Integer> ids = new ArrayList<Integer>();
-							ids.add(50);
-							ids.add(54);
-							ids.add(61);
-							ids.add(66);
-							// some blocks are not allowed to be facing up, so we skip the first value (up)
-							if(ids.contains(id)) n++;
-							rotateBlock(block, convertNumberToBlockFace(n));
-						} else
-							System.out.println("Could not set block for ID "
-									+ id + ":" + blockData[index]);
-					} else {
-						if (!(blocks[index] == 0 && (block.getType() == XMaterial.WATER.parseMaterial()
-								|| block.getType() == XMaterial.LAVA.parseMaterial()))) {
-							block.setTypeIdAndData(blocks[index], blockData[index], false);
+								if(doubleSlab) {									
+									try {
+										Slab slab = (Slab) getBlockDataMethod.invoke(block);
+										slab.setType(Slab.Type.DOUBLE);
+										setBlockDataMethod.invoke(block, slab);
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								} else {									
+									BlockState state = block.getState();
+									state.setData(
+											new MaterialData(mat, blockData[index]));
+									state.update();
+								}
+							} else {
+								Skywars.get().sendMessage("null material for %s, %s:%s",
+										name, id, blockData[index]);
+							}
+						} else {
+							Skywars.get().sendMessage("null name for %s:%s",
+									id, blockData[index]);
 						}
+					} else {
+						// 1.8 - 1.12 method for setting blocks
 						block.setTypeIdAndData(blocks[index], blockData[index], true);
 					}
 				}
 			}
 		}
+		
+		Skywars.get().sendMessage("Skipped " + skipped.size() + " blocks.");
 		
 		for(Tag tag : tileEntities.getValue()) {
 			@SuppressWarnings("unchecked")
@@ -251,19 +274,18 @@ public class SchematicHandler {
 			if(values.get("id").getValue().equals("Sign")) {
 				// TODO: parse sign
 				/*
-				System.out.println("its a sign");
+				//System.out.println("its a sign");
 				int x = (int) values.get("x").getValue();
 				int y = (int) values.get("y").getValue();
 				int z = (int) values.get("z").getValue();
 				Block block = new Location(world, x + loc.getX() + offset.getX(), y + loc.getY() + offset.getY(),
 						z + loc.getZ() + offset.getZ()).getBlock();
 				Sign sign = (Sign) block.getState();
-				System.out.println(sign.getBlock());
-				System.out.println(values);
-				sign.setLine(0, getSignText((String) values.get("Text1").getValue()));
-				sign.setLine(1, getSignText((String) values.get("Text2").getValue()));
-				sign.setLine(2, getSignText((String) values.get("Text3").getValue()));
-				sign.setLine(3, getSignText((String) values.get("Text4").getValue()));
+				//System.out.println(sign.getBlock());
+				//System.out.println(values);
+				for(int i = 0; i < 4; i++) {					
+					sign.setLine(i, getSignText((String) values.get("Text"+i).getValue()));
+				}
 				*/
 			}
 			int x = (int) values.get("x").getValue();
@@ -276,7 +298,7 @@ public class SchematicHandler {
 				block.setType(XMaterial.BEACON.parseMaterial());
 				break;
 			case "Chest":
-				block.setType(XMaterial.CHEST.parseMaterial());
+				//block.setType(XMaterial.CHEST.parseMaterial());
 				break;
 			}
 		}

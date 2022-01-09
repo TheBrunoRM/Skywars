@@ -29,6 +29,8 @@ public class SetupEvents implements Listener {
 		if (player == null)
 			return;
 		Arena arena = SetupMenu.currentArenas.get(player);
+		if(arena == null)
+			return;
 		SkywarsMap map = arena.getMap();
 		if (map == null)
 			return;

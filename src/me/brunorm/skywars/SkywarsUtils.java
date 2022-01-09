@@ -312,6 +312,10 @@ public class SkywarsUtils {
 			int slot = Integer.parseInt(slotName);
 			String itemType = itemTypes.getString((String) itemName);
 			Material material = Material.getMaterial(itemType);
+			if(material == null) {
+				Skywars.get().sendMessage("material is null for inventory item: %s", itemType);
+				continue;
+			}
 			ItemStack item = new ItemStack(material);
 			ItemMeta itemMeta = item.getItemMeta();
 			String configName = Skywars.langConfig.getString("items." + itemName + ".name");

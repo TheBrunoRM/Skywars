@@ -1,6 +1,6 @@
 # Skywars
 
-For Minecraft servers from version 1.8 to 1.12 (I plan to add support to more versions in the future)
+For Minecraft servers from version 1.8 to 1.17 (I plan to add support to more versions in the future)
 
 [spigotmc-link]: https://www.spigotmc.org/resources/98709/
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/786de08d9dfa4332bc1e15e8f4373bd6)](https://www.codacy.com/gh/TheBrunoRM/Skywars/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=TheBrunoRM/Skywars&amp;utm_campaign=Badge_Grade)
@@ -65,23 +65,27 @@ To create a sign, make it like this:
   - Custom language file (not 100% of the messages, still working on it)
   - Configuration options
   - Chest refills
+  - 1.13+ compatible (still working on it, but it kinda works)
+  - Vault support (economy)
 
 ## To do
   - More game events
   - More configuration options
   - Party options (?)
   - Team games
+  - Custom cases (schematic)
+  - Ability to buy kits (inside and outside a game)
+  - Ability to change case (inside and outside a game)
+  - Game options (time, weather, chests, etc)
   - Code optimization
-  - 1.13+ compatible
-  - Coins (?)
 
 ## Compatibility issues
   * **1.13+**\
-    The plugin works in 1.13+, and .schematic files work but\
-    there are some issues when pasting schematics.\
-    I will probably fix those at some point.\
     .schem files are not supported yet.\
-    Schematic files from versions lower than 1.13 (.schematic) use block IDs\
-    Instead, schematic files from 1.13+ (.schem) use block palettes with block names.\
-    I will have to remake the Schematic handler code (I will probably do at some point)\
-    but for now, the schematics do not work in 1.13+.
+    The plugin works with .schematic files,\
+    but it may have issues with certain block types.\
+    I will try to fix as many of those issues as I can.
+    If you find this type of issue, open an issue or a pull request.
+    The code that handles this is on the SchematicHandler class inside the schematics package.
+
+Contact me in Discord: BrunoRM#7316

@@ -102,7 +102,7 @@
 43	6	Double Nether Brick Slab	double_stone_slab
 43	7	Double Quartz Slab	double_stone_slab
 44	0	Stone Slab	stone_slab
-44	1	Sandstone Slab	stone_slab
+44	1	Sandstone Slab	sandstone_slab
 44	2	Wooden Slab	stone_slab
 44	3	Cobblestone Slab	stone_slab
 44	4	Brick Slab	stone_slab
@@ -175,7 +175,7 @@
 95	13	Green Stained Glass	stained_glass
 95	14	Red Stained Glass	stained_glass
 95	15	Black Stained Glass	stained_glass
-96	0	Wooden Trapdoor	trapdoor
+96	0	Wooden Trapdoor	oak_trapdoor
 97	0	Stone Monster Egg	monster_egg
 97	1	Cobblestone Monster Egg	monster_egg
 97	2	Stone Brick Monster Egg	monster_egg
@@ -218,12 +218,12 @@
 125	3	Double Jungle Wood Slab	double_wooden_slab
 125	4	Double Acacia Wood Slab	double_wooden_slab
 125	5	Double Dark Oak Wood Slab	double_wooden_slab
-126	0	Oak Wood Slab	wooden_slab
-126	1	Spruce Wood Slab	wooden_slab
-126	2	Birch Wood Slab	wooden_slab
-126	3	Jungle Wood Slab	wooden_slab
-126	4	Acacia Wood Slab	wooden_slab
-126	5	Dark Oak Wood Slab	wooden_slab
+126	0	Oak Wood Slab	oak_slab
+126	1	Spruce Wood Slab	spruce_slab
+126	2	Birch Wood Slab	birch_slab
+126	3	Jungle Wood Slab	jungle_slab
+126	4	Acacia Wood Slab	acacia_slab
+126	5	Dark Oak Wood Slab	dark_oak_slab
 127	0	Cocoa	cocoa
 128	0	Sandstone Stairs	sandstone_stairs
 129	0	Emerald Ore	emerald_ore

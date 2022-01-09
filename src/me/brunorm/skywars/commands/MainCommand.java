@@ -7,11 +7,13 @@ import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
 
 import com.cryptomorin.xseries.XMaterial;
@@ -103,13 +105,13 @@ public class MainCommand implements CommandExecutor {
 					MapMenu.open(player);
 				}
 				else if (args[0].equalsIgnoreCase("config") || args[0].equalsIgnoreCase("setup")) {
-					if(CommandsUtils.permissionCheckWithMessage(player, "skywars.config")) {
-						if(map == null) {
-							player.sendMessage(Messager.getMessage("NO_MAP"));
-							return false;
-						}
-						SetupMenu.OpenConfigurationMenu(player, map);
+					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.config"))
+						return true;
+					if(map == null) {
+						player.sendMessage(Messager.getMessage("NO_MAP"));
+						return true;
 					}
+					SetupMenu.OpenConfigurationMenu(player, map);
 				}
 				else if (args[0].equalsIgnoreCase("help")) {
 					for (String line : helpLines) {
@@ -133,11 +135,14 @@ public class MainCommand implements CommandExecutor {
 					}
 				}
 				else if (args[0].equalsIgnoreCase("join")) {
-					//if(!SkywarsUtils.JoinableCheck(arena, player)) return false;
+					//if(!SkywarsUtils.JoinableCheck(arena, player)) return true;
 					Skywars.get().joinMap(map, player);
 				}
-				else if (args[0].equalsIgnoreCase("version")) {
-					sender.sendMessage(String.format("%s version %s made by %s",
+				else if (args[0].equalsIgnoreCase("info")
+						|| args[0].equalsIgnoreCase("about")
+						|| args[0].equalsIgnoreCase("ver")
+						|| args[0].equalsIgnoreCase("version")) {
+					sender.sendMessage(Messager.colorFormat("&b%s &eversion &a%s &emade by &b%s",
 							Skywars.get().name, Skywars.get().version,
 							String.join(", ", Skywars.get().authors)));
 				}
@@ -151,7 +156,7 @@ public class MainCommand implements CommandExecutor {
 					sender.sendMessage(Messager.getMessage("RELOADED"));
 				}
 				
-				//else if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.test")) return false;
+				//else if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.test")) return true;
 				// TEST COMMANDS
 				
 				else if(args[0].equalsIgnoreCase("bigcase")) {
@@ -164,7 +169,7 @@ public class MainCommand implements CommandExecutor {
 						return true;
 					if(schematic == null) {
 						sender.sendMessage("schematic not loaded");
-						return false;
+						return true;
 					}
 					SchematicHandler.pasteSchematic(player.getLocation(), schematic);
 				}
@@ -174,7 +179,7 @@ public class MainCommand implements CommandExecutor {
 					File file = new File(Skywars.get().getDataFolder() + "/schematics/" + args[1]);
 					if(!file.exists()) {
 						sender.sendMessage("file not found: " + args[1]);
-						return false;
+						return true;
 					}
 					Object loaded = SchematicHandler.loadSchematic(file);
 					if(loaded instanceof Schematic) {
@@ -271,7 +276,12 @@ public class MainCommand implements CommandExecutor {
 					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
 					Block block = SkywarsUtils.getTargetBlock(player, 5);
-					block.setData(Byte.parseByte(args[1]));
+					MaterialData data = new MaterialData(block.getType(), Byte.parseByte(args[1]));
+					System.out.println("mat data: " + data);
+					BlockState state = block.getState();
+					System.out.println(" block state: " + state.getData().getData());
+					state.setData(data);
+					state.update();
 				}
 				else if (args[0].equalsIgnoreCase("testschem")) {
 					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
@@ -342,7 +352,7 @@ public class MainCommand implements CommandExecutor {
 					SkywarsMap mapSpawn = Skywars.get().getMap(nameMap);
 					if (mapSpawn == null) {
 						player.sendMessage(String.format("No arena found by '%s'", nameMap));
-						return false;
+						return true;
 					}
 					if(args[1].equalsIgnoreCase("list")) {
 						int n = mapSpawn.getSpawns().size();
@@ -448,7 +458,7 @@ public class MainCommand implements CommandExecutor {
 				sender.sendMessage(e.getClass().getName());
 			e.printStackTrace();
 		}
-		return false;
+		return true;
 	}
 
 }

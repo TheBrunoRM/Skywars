@@ -86,16 +86,19 @@ public class SkywarsMap {
 	public void saveParametersInConfig() {
 		if(config == null)
 			config = YamlConfiguration.loadConfiguration(getFile());
-		System.out.println("saving parameters in config");
+		//System.out.println("saving parameters in config");
 		config.set("minPlayers", this.getMinPlayers());
 		config.set("maxPlayers", this.getMaxPlayers());
 		config.set("schematic", this.getSchematicFilename());
 		config.set("centerRadius", this.getCenterRadius());
+		config.set("worldName", getWorldName());
+		if(getLocation() != null)
+			setVectorConfig("location", getLocation().toVector());
 		if (getSpawns() != null) {
-			System.out.println("setting spawns");
+			//System.out.println("setting spawns");
 			config.set("spawn", null); // clear all the previous set spawns
 			for (int i = 0; i < this.getSpawns().size(); i++) {
-				System.out.println("setting spawn " + i);
+				//System.out.println("setting spawn " + i);
 				Vector spawn = spawns.get(i);
 				setVectorConfig("spawn." + i, spawn);
 			}
@@ -124,14 +127,13 @@ public class SkywarsMap {
 	
 	public void calculateSpawns() {
 		
-		// get schematic data and beacon locations
-		
 		getSchematic();
+		if(schematic == null) return;
+		System.out.println("Calculating spawns for map " + this.name);
 		
+		// get schematic data and beacon locations
 		Vector offset = schematic.getOffset();
 		ListTag tileEntities = schematic.getTileEntities();
-		System.out.println("Calculating spawns for map " + this.name);
-	
 		ArrayList<Vector> beaconLocations = new ArrayList<Vector>();
 	
 		for (Tag tag : tileEntities.getValue()) {
