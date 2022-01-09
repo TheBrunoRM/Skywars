@@ -591,6 +591,7 @@ public class Arena {
 	
 	public boolean isInBoundaries(Location loc) {
 		Schematic schematic = map.getSchematic();
+		if(getLocation() == null || schematic == null) return true;
 		return loc.getX()>getLocation().getX()-schematic.getWidth()/2
 		&& loc.getX()<getLocation().getX()+schematic.getWidth()/2
 		&& loc.getY()>getLocation().getY()-schematic.getHeight()/2
