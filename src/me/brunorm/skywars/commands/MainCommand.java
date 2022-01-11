@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.command.Command;
@@ -14,6 +15,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import com.cryptomorin.xseries.XMaterial;
@@ -24,7 +26,6 @@ import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.SkywarsScoreboard;
 import me.brunorm.skywars.SkywarsUtils;
-import me.brunorm.skywars.NMS.NMSHandler;
 import me.brunorm.skywars.menus.GamesMenu;
 import me.brunorm.skywars.menus.MapMenu;
 import me.brunorm.skywars.menus.SetupMenu;
@@ -34,7 +35,6 @@ import me.brunorm.skywars.schematics.SchematicHandler;
 import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.SkywarsMap;
 import me.brunorm.skywars.structures.SkywarsPlayer;
-import mrblobman.sounds.Sounds;
 
 public class MainCommand implements CommandExecutor {
 
@@ -66,6 +66,12 @@ public class MainCommand implements CommandExecutor {
 	
 	Schematic schematic;
 	Schem schem;
+	
+	BukkitTask task;
+	void cancelTimer() {
+		if(task != null)
+			task.cancel();
+	}
 	
 	@SuppressWarnings("deprecation")
 	@Override
@@ -191,22 +197,24 @@ public class MainCommand implements CommandExecutor {
 					} else
 						System.out.println("Unknown schematic type: " + loaded);
 				}
-				else if(args[0].equalsIgnoreCase("testnms")) {
-					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
-						return true;
-					NMSHandler handler = new NMSHandler();
-					handler.sendTitle(player, "hola", "esto es una prueba");
-				}
-				else if(args[0].equalsIgnoreCase("soundnms")) {
-					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
-						return true;
-					player.playSound(player.getLocation(), Sounds.NOTE_STICKS.bukkitSound(), 1, 1);
-				}
 				else if(args[0].equalsIgnoreCase("nms")) {
 					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
-					player.sendMessage("NMS test sent");
-					Skywars.get().NMS().sendTitle(player, "Hello!", "This is a NMS test");
+					Skywars.get().NMS().sendTitle(player, "&6&lHello", "&eThis is a NMS test");
+					Skywars.get().NMS().sendActionbar(player, "&cHello! This is a NMS test");
+					Location loc = player.getLocation();
+					final Player p = player;
+					cancelTimer();
+					task = Bukkit.getScheduler().runTaskTimer(Skywars.get(), new Runnable() {
+						byte note = 0;
+						@Override
+						public void run() {
+							p.playNote(loc, (byte) 0, note);
+							note++;
+							if(note >= 25) cancelTimer();
+						}
+					}, 0L, 1L);
+					Skywars.get().NMS().sendParticles(player, "EXPLOSION_HUGE", 0);
 				}
 				else if(args[0].equalsIgnoreCase("worldname")) {
 					if(!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
