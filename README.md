@@ -78,6 +78,7 @@ To create a sign, make it like this:
   - Ability to change case (inside and outside a game)
   - Game options (time, weather, chests, etc)
   - Code optimization
+  - Plugin API events and methods
 
 ## Compatibility issues
   * **1.13+**\
