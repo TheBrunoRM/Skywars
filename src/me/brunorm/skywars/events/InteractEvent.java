@@ -34,8 +34,7 @@ public class InteractEvent implements Listener {
 			String kitSelectorTypeName = Skywars.get().getConfig().getString("item_types.KIT_SELECTOR");
 			Material kitSelectorType = XMaterial.matchXMaterial(kitSelectorTypeName).get().parseMaterial();
 			if (item.getType() == kitSelectorType) {
-				if (arena.getStatus() == ArenaStatus.WAITING ||
-						arena.getStatus() == ArenaStatus.STARTING) {
+				if (!arena.started()) {
 					KitsMenu.open(player);
 					event.setCancelled(true);
 				}

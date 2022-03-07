@@ -28,63 +28,45 @@ import me.brunorm.skywars.structures.SkywarsPlayer;
 
 public class Events implements Listener {
 	
-    @EventHandler
-    public void onMobTarget(EntityTargetLivingEntityEvent event) {
-        if (!(event.getTarget() instanceof Player)) return;
-        Player player = (Player) event.getTarget();
-		Arena arena = Skywars.get().getPlayerArena(player);
-		if(arena != null) {
-			SkywarsPlayer swp = arena.getPlayer(player);
-			if(swp.isSpectator())
-				event.setCancelled(true);
-		}
-    }
-	
 	@EventHandler
 	void onMove(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
 		Arena arena = Skywars.get().getPlayerArena(player);
-		if (arena != null) {
-			SkywarsPlayer swp = arena.getPlayer(event.getPlayer());
-			if(!arena.isInBoundaries(event.getPlayer())) {
-				if (arena.getStatus() == ArenaStatus.WAITING ||
-						arena.getStatus() == ArenaStatus.STARTING) {}
-					//arena.leavePlayer(player);
-				else if(!swp.isSpectator())
-					arena.makeSpectator(swp, null);
-				else if (arena.isInBoundaries(arena.getLocation()))
-					arena.goBackToCenter(player);
-			}
-		}
+		if (arena == null) return;
+		SkywarsPlayer swp = arena.getPlayer(player);
+		if(arena.isInBoundaries(player)) return;
+		if (!arena.started()) {}
+			//arena.leavePlayer(player);
+		else if(!swp.isSpectator())
+			arena.makeSpectator(swp, null);
+		else if (arena.isInBoundaries(arena.getLocation()))
+			arena.goBackToCenter(player);
 	}
 	
 	@EventHandler
 	void onLeave(PlayerQuitEvent event) {
 		Arena arena = Skywars.get().getPlayerArena(event.getPlayer());
-		if (arena != null) {
-			arena.leavePlayer(event.getPlayer());
-		}
+		if (arena == null) return;
+		arena.leavePlayer(event.getPlayer());
 	}
 	
 	@EventHandler
 	void onDamage(EntityDamageEvent event) {
 		Entity entity = event.getEntity();
-		if (entity instanceof Player) {
-			Player player = (Player) entity;
-			Arena arena = Skywars.get().getPlayerArena(player);
-			if (arena != null) {
-				SkywarsPlayer swPlayer = arena.getPlayer(player);
-				if(swPlayer.isSpectator()) event.setCancelled(true);
-				if(arena.getStatus() != ArenaStatus.PLAYING || arena.isInvencibility()) {
-					event.setCancelled(true);
-				} else if(arena.getStatus() == ArenaStatus.PLAYING) {					
-					if(swPlayer.isSpectator() && event.getCause() == DamageCause.VOID) {
-						arena.goBackToCenter(player);
-					} else if (event.getCause() == DamageCause.VOID) {
-						event.setCancelled(true);
-						arena.makeSpectator(swPlayer, null);
-					}
-				}
+		if (!(entity instanceof Player)) return;
+		Player player = (Player) entity;
+		Arena arena = Skywars.get().getPlayerArena(player);
+		if (arena == null) return;
+		SkywarsPlayer swPlayer = arena.getPlayer(player);
+		if(swPlayer.isSpectator()) event.setCancelled(true);
+		if(arena.getStatus() != ArenaStatus.PLAYING || arena.isInvencibility()) {
+			event.setCancelled(true);
+		} else if(arena.getStatus() == ArenaStatus.PLAYING) {					
+			if(swPlayer.isSpectator() && event.getCause() == DamageCause.VOID) {
+				arena.goBackToCenter(player);
+			} else if (event.getCause() == DamageCause.VOID) {
+				event.setCancelled(true);
+				arena.makeSpectator(swPlayer, null);
 			}
 		}
 	}
@@ -95,162 +77,150 @@ public class Events implements Listener {
 		if(!(entity instanceof LivingEntity)) return;
 		LivingEntity livingEntity = (LivingEntity) entity;
 		Entity damager = event.getDamager();
-		if(damager == null) return;
-		if (damager instanceof Player) {
-			Player attacker = (Player) damager;
-			Arena attackerArena = Skywars.get().getPlayerArena(attacker);
-			if(attackerArena != null) {					
-				SkywarsPlayer swAttacker = attackerArena.getPlayer(attacker);
-				if(swAttacker != null && swAttacker.isSpectator()) {
-					event.setCancelled(true);
-				}
-			}
-			if (entity instanceof Player) {
-				Player victim = (Player) entity;
-				Arena victimArena = Skywars.get().getPlayerArena(victim);
-				if(victimArena != null) {				
-					SkywarsPlayer swVictim = victimArena.getPlayer(victim);
-					if(livingEntity.getHealth() - event.getDamage() <= 0) {
-						//event.setCancelled(true);
-						// instead of cancelling the event,
-						// we set the damage to 0 so the damage sound sounds
-						// and it doesnt feel like the player just disappears when we hit
-						event.setDamage(0);
-						victimArena.makeSpectator(swVictim, attacker);
-					}
-					swVictim.setLastHit(attacker);
-				}
+		if(damager == null || !(damager instanceof Player)) return;
+		Player attacker = (Player) damager;
+		Arena attackerArena = Skywars.get().getPlayerArena(attacker);
+		if(attackerArena != null) {					
+			SkywarsPlayer swAttacker = attackerArena.getPlayer(attacker);
+			if(swAttacker != null && swAttacker.isSpectator()) {
+				event.setCancelled(true);
 			}
 		}
+		if (!(entity instanceof Player)) return;
+		Player victim = (Player) entity;
+		Arena victimArena = Skywars.get().getPlayerArena(victim);
+		if(victimArena == null) return;
+		SkywarsPlayer swVictim = victimArena.getPlayer(victim);
+		if(livingEntity.getHealth() - event.getDamage() <= 0) {
+			//event.setCancelled(true);
+			// instead of cancelling the event,
+			// we set the damage to 0 so the damage sound sounds
+			// and it doesnt feel like the player just disappears when we hit
+			event.setDamage(0);
+			victimArena.makeSpectator(swVictim, attacker);
+		}
+		swVictim.setLastHit(attacker);
 	}
 	
+	// prevent spectators from being targeted by mobs
+    @EventHandler
+    public void onMobTarget(EntityTargetLivingEntityEvent event) {
+        if (!(event.getTarget() instanceof Player)) return;
+        Player player = (Player) event.getTarget();
+		Arena arena = Skywars.get().getPlayerArena(player);
+		if(arena == null) return;
+		SkywarsPlayer swp = arena.getPlayer(player);
+		if(!swp.isSpectator()) return;
+		event.setCancelled(true);
+    }
+	
+	// prevent spectators from being hungry
 	@EventHandler
 	void onFoodLevelChange(FoodLevelChangeEvent event) {
 		Entity entity = event.getEntity();
-		if (entity instanceof Player) {
-			Player player = (Player) entity;
-			Arena arena = Skywars.get().getPlayerArena(player);
-			if (arena != null) {
-				SkywarsPlayer swp = arena.getPlayer(player);
-				if (swp != null) {
-					if ((arena.getStatus() != ArenaStatus.PLAYING
-							&& arena.getWinner() != swp)
-							|| swp.isSpectator()) {
-						event.setCancelled(true);
-					}
-				}
-			}
-		}
+		if (!(entity instanceof Player)) return;
+		Player player = (Player) entity;
+		Arena arena = Skywars.get().getPlayerArena(player);
+		if (arena == null) return;
+		SkywarsPlayer swp = arena.getPlayer(player);
+		if (swp == null) return;
+		if (!swp.isSpectator()) return;
+		
+		event.setCancelled(true);
 	}
 
+	// prevent spectators from dropping items
 	@EventHandler
 	void onDrop(PlayerDropItemEvent event) {
 		Player player = event.getPlayer();
 		Arena arena = Skywars.get().getPlayerArena(player);
-		if (arena != null) {
-			SkywarsPlayer swp = arena.getPlayer(player);
-			if (swp != null) {
-				if ((arena.getStatus() != ArenaStatus.PLAYING
-						&& arena.getWinner() != swp)
-						|| swp.isSpectator()) {
-					event.setCancelled(true);
-				}
-			}
-		}
+		if(arena == null) return;
+		SkywarsPlayer swp = arena.getPlayer(player);
+		if (swp == null) return;
+		if(!swp.isSpectator()) return;
+		
+		event.setCancelled(true);
 	}
 	
+	// prevent spectators from interacting
 	@EventHandler
 	void onInteract(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
 		Arena arena = Skywars.get().getPlayerArena(player);
-		if (arena != null) {
-			SkywarsPlayer swp = arena.getPlayer(player);
-			if (swp != null) {
-				if ((arena.getStatus() == ArenaStatus.WAITING
-						&& arena.getWinner() != swp)
-						|| swp.isSpectator()) {
-					event.setCancelled(true);
-				}
-			}
-		}
+		if(arena == null) return;
+		SkywarsPlayer swp = arena.getPlayer(player);
+		if (swp == null) return;
+		if(!swp.isSpectator()) return;
+		
+		event.setCancelled(true);
 	}
 	
+	// prevent spectators from picking up items
 	@EventHandler
-	void onPickUp(PlayerPickupItemEvent event) {
+	void onPickup(PlayerPickupItemEvent event) {
 		Player player = event.getPlayer();
 		Arena arena = Skywars.get().getPlayerArena(player);
+		if(arena == null) return;
+		SkywarsPlayer swp = arena.getPlayer(player);
+		if (swp == null) return;
+		if(!swp.isSpectator()) return;
 		
-		if(arena != null) {
-			SkywarsPlayer swp = arena.getPlayer(player);
-			if (swp != null) {
-				if ((arena.getStatus() != ArenaStatus.PLAYING
-						&& arena.getWinner() != swp)
-						|| swp.isSpectator()) {					
-					event.setCancelled(true);
-				}
-			}
-		}
+		event.setCancelled(true);
 	}
 	
+	// prevent spectators from grabbing experience orbs
 	@EventHandler
 	void onEntityTarget(EntityTargetEvent event) {
 		Entity entity = event.getEntity();
+		if (!(entity instanceof ExperienceOrb)) return;
+		
 		Entity target = event.getTarget();
-		if(target instanceof Player) {			
-			Player player = (Player) target;
-			Arena arena = Skywars.get().getPlayerArena(player);
-			
-			if(arena != null) {
-				SkywarsPlayer swp = arena.getPlayer(player);
-				if (swp != null) {
-					if ((arena.getStatus() != ArenaStatus.PLAYING
-							&& arena.getWinner() != swp)
-							|| swp.isSpectator()) {
-						if (entity instanceof ExperienceOrb){
-							event.setCancelled(true);
-							event.setTarget(null);
-							// TODO: do something else
-						}
-					}
-				}
-			}
-		}
+		if(!(target instanceof Player)) return;
+		
+		Player player = (Player) target;
+		Arena arena = Skywars.get().getPlayerArena(player);
+		
+		if(arena == null) return;
+		SkywarsPlayer swp = arena.getPlayer(player);
+		if (swp == null) return;
+		/*
+		if ((arena.getStatus() != ArenaStatus.PLAYING
+				&& arena.getWinner() != swp)
+				|| swp.isSpectator())
+		*/
+		if(!swp.isSpectator()) return;
+		
+		event.setCancelled(true);
+		event.setTarget(null);
+		// TODO: do something else
 	}
 	
+	// prevent spectators from obtaining XP
 	@EventHandler
 	void onXPChange(PlayerExpChangeEvent event) {
 		Player player = event.getPlayer();
 		Arena arena = Skywars.get().getPlayerArena(player);
+		if(arena == null) return;
+		SkywarsPlayer swp = arena.getPlayer(player);
+		if (swp == null) return;
+		if(!swp.isSpectator()) return;
 		
-		if(arena != null) {
-			SkywarsPlayer swp = arena.getPlayer(player);
-			if (swp != null) {
-				if ((arena.getStatus() != ArenaStatus.PLAYING
-						&& arena.getWinner() != swp)
-						|| swp.isSpectator()) {
-					// TODO: do something since this cant be cancelled
-					//event.setCancelled(true);
-				}
-			}
-		}
+		// TODO: do something since this cant be cancelled
+		//event.setCancelled(true);
 	}
 	
+	// prevent spectators from clicking their inventory
 	@EventHandler
-	void onInventoryCLick(InventoryClickEvent event) {
+	void onInventoryClick(InventoryClickEvent event) {
 		HumanEntity whoClicked = event.getWhoClicked();
-		if(whoClicked instanceof Player) {
-			Player player = (Player) whoClicked;
-			Arena arena = Skywars.get().getPlayerArena(player);
-			if(arena != null) {
-				SkywarsPlayer swp = arena.getPlayer(player);
-				if (swp != null) {
-					if((arena.getStatus() != ArenaStatus.PLAYING
-							&& arena.getWinner() != swp)
-							|| swp.isSpectator()) {
-						event.setCancelled(true);
-					}
-				}
-			}
-		}
+		if(!(whoClicked instanceof Player)) return;
+		Player player = (Player) whoClicked;
+		Arena arena = Skywars.get().getPlayerArena(player);
+		if(arena == null) return;
+		SkywarsPlayer swp = arena.getPlayer(player);
+		if (swp == null) return;
+		if(!swp.isSpectator()) return;
+		
+		event.setCancelled(true);
 	}
 }

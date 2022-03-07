@@ -11,8 +11,7 @@ public class SkywarsActionbar {
 		Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena != null) {
 			SkywarsPlayer swp = arena.getPlayer(player);
-			if ((arena.getStatus() == ArenaStatus.WAITING
-					|| arena.getStatus() == ArenaStatus.STARTING) && !swp.isSpectator()) {
+			if (!arena.started() && !swp.isSpectator()) {
 				Skywars.get().NMS().sendActionbar(player, Messager.color(
 						SkywarsUtils.format(Skywars.langConfig
 								.getString("actionbar.waiting"), player, arena, swp)));

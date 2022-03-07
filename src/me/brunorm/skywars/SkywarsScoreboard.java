@@ -21,9 +21,7 @@ public class SkywarsScoreboard {
 	
 	public static void update(Player player) {
 		
-		if (config == null) {
-			return;
-		}
+		if (config == null) return;
 		
 		ArrayList<String> texts = new ArrayList<String>();
 
@@ -41,7 +39,6 @@ public class SkywarsScoreboard {
 					stringList = config.getStringList("arena.intermission");
 				}
 			}
-
 		} else {
 			stringList = config.getStringList("lobby");
 		}
@@ -49,8 +46,7 @@ public class SkywarsScoreboard {
 		if (stringList != null) {
 			ScoreboardManager manager = Bukkit.getScoreboardManager();
 			Scoreboard board = manager.getNewScoreboard();
-			// Team team = board.registerNewTeam("teamname");
-			Objective objective = board.registerNewObjective("test", "dummy");
+			Objective objective = board.registerNewObjective("skywars", "");
 
 			objective.setDisplayName(Messager.color(config.getString("title")));
 			objective.setDisplaySlot(DisplaySlot.SIDEBAR);
@@ -71,7 +67,11 @@ public class SkywarsScoreboard {
 				textIndex++;
 			}
 			
-			player.setScoreboard(board);
+			try {
+				// just in case
+				player.setScoreboard(board);
+			} catch(Exception e) {
+			}
 		}
 
 	}

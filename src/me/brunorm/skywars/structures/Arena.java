@@ -194,9 +194,11 @@ public class Arena {
 			players.hidePlayer(player);
 		}
 		
+		// give spectator items (player tracker, spectator settings, leave item)
 		SkywarsUtils.setPlayerInventory(player, "spectator");
 
 		if(getStatus() == ArenaStatus.PLAYING)
+			// send death message to players
 			for (SkywarsPlayer players : getAllPlayersIncludingAliveAndSpectators()) {
 				// TODO: add more death messages
 				if(killer != null)
@@ -235,9 +237,7 @@ public class Arena {
 		player.getPlayer().sendMessage(
 				Messager.getFormattedMessage("LEAVE_SELF",
 						player.getPlayer(), this, player, map.getName()));
-		if(getStatus() == ArenaStatus.WAITING
-				|| getStatus() == ArenaStatus.STARTING)
-			joinable = true;
+		if(!started()) joinable = true;
 		players.remove(player);
 		removePlayer(player);
 		if (this.getStatus() != ArenaStatus.ENDING && !player.isSpectator()) {
@@ -254,6 +254,7 @@ public class Arena {
 						splitted.length > 2 ? Float.parseFloat(splitted[2]) : 1);
 			}
 		}
+		// restore player
 		exitPlayer(player);
 		
 		if (this.getStatus() == ArenaStatus.STARTING
@@ -719,6 +720,11 @@ public class Arena {
 		}
 		if(Skywars.config.getBoolean("debug.enabled"))
 			Skywars.get().sendMessage("filled %s chests", filled);
+	}
+	
+	public boolean started() {
+		return !(getStatus() == ArenaStatus.WAITING
+				|| getStatus() == ArenaStatus.STARTING);
 	}
 	
 	public int getCountdown() {
