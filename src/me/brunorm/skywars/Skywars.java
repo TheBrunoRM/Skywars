@@ -33,9 +33,9 @@ import me.brunorm.skywars.commands.WhereCommand;
 import me.brunorm.skywars.events.DisableWeather;
 import me.brunorm.skywars.events.Events;
 import me.brunorm.skywars.events.InteractEvent;
-import me.brunorm.skywars.events.SetupEvents;
 import me.brunorm.skywars.events.MessageSound;
 import me.brunorm.skywars.events.ProjectileTrails;
+import me.brunorm.skywars.events.SetupEvents;
 import me.brunorm.skywars.events.SignEvents;
 import me.brunorm.skywars.menus.GamesMenu;
 import me.brunorm.skywars.menus.KitsMenu;
@@ -193,11 +193,19 @@ public class Skywars extends JavaPlugin {
 		loadMaps();
 		loadKits();
 	}
-
-    private boolean setupEconomy() {
+	
+	private boolean setupEconomy() {
     	if(!economyEnabled) return false;
-        economyProvider = getServer().getServicesManager()
-        		.getRegistration(net.milkbowl.vault.economy.Economy.class);
+    	/*
+    	Class<?> economyClass;
+		try {
+			economyClass = Class.forName("net.milkbowl.vault.economy.Economy");
+			economyProvider = (RegisteredServiceProvider<Economy>) getServer().getServicesManager().getRegistration(economyClass);
+		} catch (ClassNotFoundException e) {
+			System.out.println("Could not find economy class!");
+		}
+		*/
+    	economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
         if (economyProvider != null)   	
         	economy = economyProvider.getProvider();
         return economy != null;

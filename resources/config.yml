@@ -26,7 +26,7 @@ lastHitResetCooldown: 15
 # --
 # if the option is SINGLE_ARENA then every arena
 # has its own position in an specified world
-# and cannot be played mor than once at the same time
+# and cannot be played more than once at the same time
 # --
 # if the option is MULTI_ARENA then every arena
 # does NOT have any position nor world assigned, and instead

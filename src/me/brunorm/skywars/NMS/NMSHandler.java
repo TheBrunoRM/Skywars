@@ -1,7 +1,5 @@
 package me.brunorm.skywars.NMS;
 
-import java.io.File;
-import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -28,6 +26,8 @@ public class NMSHandler {
 	Class<?> enumTitleAction = getEnumTitleAction();
 	Class<?> craftPlayerClass = getCraftPlayerClass();
 	Class<?> chatMessageTypeClass = getChatMessageTypeClass();
+	
+	// getters
 	
 	public Class<?> getChatSerializer() {
 		try {
@@ -139,13 +139,16 @@ public class NMSHandler {
         return playerConnection;
     }
     
+    // methods
+    
     public void sendParticles(Player player, String particle, int amount) {
     	sendParticles(player, player.getLocation(), particle, amount);
     }
     
     public void sendParticles(Player player, Location loc, String particle, int amount) {
+    	// TODO instead of a try-catch, check version
     	try {
-			// 1.13+ particles
+			// 1.13
     		Class<?> particleClass = Class.forName("org.bukkit.Particle");
 			Method spawnParticleMethod = player.getClass()
 					.getMethod("spawnParticle", particleClass,
@@ -156,7 +159,7 @@ public class NMSHandler {
 					loc.getX(), loc.getY(), loc.getZ(), 10);
 		} catch(Exception e) {
 			try {				
-				// 1.8 - 1.12 particles
+				// 1.8
 				Method playEffectMethod = player.getClass()
 						.getMethod("playEffect", Location.class, Effect.class, int.class);
 				playEffectMethod.invoke(player, loc, Effect.valueOf(particle), 10);
@@ -167,6 +170,7 @@ public class NMSHandler {
     }
 	
 	public void sendActionbar(Player player, String text) {
+    	// TODO instead of a try-catch, check version
 		try {
 			Method a = chatSerializer.getMethod("a", String.class);
 			Object chat = a.invoke(chatSerializer, "{\"text\":\"" + Messager.color(text) + "\"}");
@@ -194,7 +198,7 @@ public class NMSHandler {
 
 			sendPacket.invoke(playerConnection, packet);
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 	
@@ -207,33 +211,41 @@ public class NMSHandler {
 	}
 
 	public void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+    	// TODO instead of a try-catch, check version
 		try {
-
-			Method a = chatSerializer.getMethod("a", String.class);
-			Object chatTitle = a.invoke(chatSerializer, "{\"text\":\"" + Messager.color(title) + "\"}");
-			Object chatSubtitle = a.invoke(chatSerializer, "{\"text\":\"" + Messager.color(subtitle) + "\"}");
-			
-			Object enumTitleActionTitle = enumTitleAction.getEnumConstants()[0];
-			Object enumTitleActionSubtitle = enumTitleAction.getEnumConstants()[1];
-
-			Constructor<?> packetPlayOutTitleConstructor = packetPlayOutTitle.getConstructor(enumTitleAction,
-					iChatBaseComponent);
-			Constructor<?> packetPlayOutTitleLengthConstructor = packetPlayOutTitle.getConstructor(int.class, int.class,
-					int.class);
-
-			Object titlePacket = packetPlayOutTitleConstructor.newInstance(enumTitleActionTitle, chatTitle);
-			Object subtitlePacket = packetPlayOutTitleConstructor.newInstance(enumTitleActionSubtitle, chatSubtitle);
-			Object lengthPacket = packetPlayOutTitleLengthConstructor.newInstance(fadeIn, stay, fadeOut);
-
-			Object playerConnection = getConnection(player);
-			
-			Method sendPacket = playerConnection.getClass().getMethod("sendPacket", getNMS("Packet"));
-
-			sendPacket.invoke(playerConnection, titlePacket);
-			sendPacket.invoke(playerConnection, subtitlePacket);
-			sendPacket.invoke(playerConnection, lengthPacket);
-		} catch (Exception e) {
-			e.printStackTrace();
+			// player.sendTitle();
+			Method m = player.getClass().getMethod("sendTitle", String.class, String.class, int.class, int.class, int.class);
+			m.invoke(player, Messager.color(title), Messager.color(subtitle), fadeIn, stay, fadeOut);
+		} catch(Exception e) {
+			// 1.8
+			try {
+				
+				Method a = chatSerializer.getMethod("a", String.class);
+				Object chatTitle = a.invoke(chatSerializer, "{\"text\":\"" + Messager.color(title) + "\"}");
+				Object chatSubtitle = a.invoke(chatSerializer, "{\"text\":\"" + Messager.color(subtitle) + "\"}");
+				
+				Object enumTitleActionTitle = enumTitleAction.getEnumConstants()[0];
+				Object enumTitleActionSubtitle = enumTitleAction.getEnumConstants()[1];
+				
+				Constructor<?> packetPlayOutTitleConstructor = packetPlayOutTitle.getConstructor(enumTitleAction,
+						iChatBaseComponent);
+				Constructor<?> packetPlayOutTitleLengthConstructor = packetPlayOutTitle.getConstructor(int.class, int.class,
+						int.class);
+				
+				Object titlePacket = packetPlayOutTitleConstructor.newInstance(enumTitleActionTitle, chatTitle);
+				Object subtitlePacket = packetPlayOutTitleConstructor.newInstance(enumTitleActionSubtitle, chatSubtitle);
+				Object lengthPacket = packetPlayOutTitleLengthConstructor.newInstance(fadeIn, stay, fadeOut);
+				
+				Object playerConnection = getConnection(player);
+				
+				Method sendPacket = playerConnection.getClass().getMethod("sendPacket", getNMS("Packet"));
+				
+				sendPacket.invoke(playerConnection, titlePacket);
+				sendPacket.invoke(playerConnection, subtitlePacket);
+				sendPacket.invoke(playerConnection, lengthPacket);
+			} catch (Exception e2) {
+				//e2.printStackTrace();
+			}
 		}
 	}
 }

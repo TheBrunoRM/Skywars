@@ -43,7 +43,9 @@ public class SkywarsUtils {
 	
 	public static String format(String text, Player player, Arena arena, SkywarsPlayer swp, boolean status) {
 		Date date = new Date();
-		SimpleDateFormat formatter = new SimpleDateFormat(Skywars.get().getConfig().getString("dateFormat"));
+		String format = Skywars.get().getConfig().getString("dateFormat");
+		if(format == null) return "";
+		SimpleDateFormat formatter = new SimpleDateFormat(format);
 		String strDate = formatter.format(date);
 		text = text.replaceAll(getVariableCode("date"), strDate)
 				.replaceAll(getVariableCode("url"), url);
