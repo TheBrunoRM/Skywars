@@ -24,7 +24,7 @@ import org.bukkit.util.Vector;
 
 import com.cryptomorin.xseries.XMaterial;
 
-import me.brunorm.skywars.NMS.NMSHandler;
+import me.brunorm.skywars.NMS.ReflectionNMS;
 import me.brunorm.skywars.commands.ForceStartCommand;
 import me.brunorm.skywars.commands.LeaveCommand;
 import me.brunorm.skywars.commands.MainCommand;
@@ -50,38 +50,38 @@ import net.milkbowl.vault.economy.Economy;
 
 @SuppressWarnings("deprecation")
 public class Skywars extends JavaPlugin {
-	
+
 	// get plugin data
-	public String name = getDescription().getName();
-	public String version = getDescription().getVersion();
-	public List<String> authors = getDescription().getAuthors();
-	private String prefix = Messager.colorFormat("&6[&e%s&6]&e", name);
+	public String name = this.getDescription().getName();
+	public String version = this.getDescription().getVersion();
+	public List<String> authors = this.getDescription().getAuthors();
+	private final String prefix = Messager.colorFormat("&6[&e%s&6]&e", this.name);
 	public static String kitsPath;
 	public static String mapsPath;
 	public static String schematicsPath;
 	public static String playersPath;
-	
+
 	public static boolean economyEnabled;
 	Economy economy;
 	RegisteredServiceProvider<Economy> economyProvider;
-	
+
 	public Economy getEconomy() {
-		return economy;
+		return this.economy;
 	}
-	
+
 	public static YamlConfiguration config;
 	public static YamlConfiguration scoreboardConfig;
 	public static YamlConfiguration langConfig;
 	public static YamlConfiguration lobbyConfig;
 
-	public HashMap<Player, Location> playerLocations =
-			new HashMap<Player, Location>();
-	
-    private String packageName;
-    private String serverPackageVersion;
-    private NMSHandler nmsHandler;
+	public HashMap<Player, Location> playerLocations = new HashMap<Player, Location>();
+
+	private String packageName;
+	private String serverPackageVersion;
+	private ReflectionNMS nmsHandler;
 
 	public static Skywars plugin;
+
 	public static Skywars get() {
 		return plugin;
 	}
@@ -100,529 +100,508 @@ public class Skywars extends JavaPlugin {
 	public Location getLobby() {
 		return this.lobby;
 	}
-	
+
 	public void setLobbyFromConfig() {
 		if (lobbyConfig.get("lobby") != null) {
-			String worldName = lobbyConfig.getString("lobby.world");
-			if(worldName != null) {				
-				World world = Bukkit.getWorld(worldName);
-				if(world != null) {					
-					double x = lobbyConfig.getDouble("lobby.x");
-					double y = lobbyConfig.getDouble("lobby.y");
-					double z = lobbyConfig.getDouble("lobby.z");
+			final String worldName = lobbyConfig.getString("lobby.world");
+			if (worldName != null) {
+				final World world = Bukkit.getWorld(worldName);
+				if (world != null) {
+					final double x = lobbyConfig.getDouble("lobby.x");
+					final double y = lobbyConfig.getDouble("lobby.y");
+					final double z = lobbyConfig.getDouble("lobby.z");
 					this.lobby = new Location(world, x, y, z);
-				} else sendMessage("&cLobby world (&b%s&c) does not exist!", worldName);
+				} else
+					this.sendMessage("&cLobby world (&b%s&c) does not exist!", worldName);
 			}
-		} else this.lobby = null;
+		} else
+			this.lobby = null;
 	}
-	
+
+	@Override
 	public void onEnable() {
-		
+
 		// set stuff
 		plugin = this;
-		mapsPath = getDataFolder() + "/maps";
-		kitsPath = getDataFolder() + "/kits";
-		schematicsPath = getDataFolder() + "/schematics";
-		playersPath = getDataFolder() + "/players";
-		
-		packageName = this.getServer().getClass().getPackage().getName();
-		serverPackageVersion = packageName.substring(packageName.lastIndexOf('.') + 1);
-		nmsHandler = new NMSHandler();
+		mapsPath = this.getDataFolder() + "/maps";
+		kitsPath = this.getDataFolder() + "/kits";
+		schematicsPath = this.getDataFolder() + "/schematics";
+		playersPath = this.getDataFolder() + "/players";
+
+		this.packageName = this.getServer().getClass().getPackage().getName();
+		this.serverPackageVersion = this.packageName.substring(this.packageName.lastIndexOf('.') + 1);
+		this.nmsHandler = new ReflectionNMS();
 		SchematicHandler.initializeReflection();
-		
+
 		// load stuff
-		loadConfig();
-		loadCommands();
-		loadEvents();
-		loadMaps();
-		loadKits();
-		
+		this.loadConfig();
+		this.loadCommands();
+		this.loadEvents();
+		this.loadMaps();
+		this.loadKits();
+
 		economyEnabled = Skywars.get().getConfig().getBoolean("economy.enabled");
-		if(economyEnabled && setupEconomy()) {
-			sendMessage("&eHooked with Vault!");
-			sendMessage("&eEconomy service provider: &a%s",
-					economyProvider.getPlugin().getName());
+		if (economyEnabled && this.setupEconomy()) {
+			this.sendMessage("&eHooked with Vault!");
+			this.sendMessage("&eEconomy service provider: &a%s", this.economyProvider.getPlugin().getName());
 		}
-		
+
 		// done
-		sendMessage("&ahas been enabled: &bv%s", version);
-		
-		if(!Skywars.get().getConfig().getBoolean("taskUpdate.disabled"))
+		this.sendMessage("&ahas been enabled: &bv%s", this.version);
+
+		if (!Skywars.get().getConfig().getBoolean("taskUpdate.disabled"))
 			Bukkit.getScheduler().runTaskTimer(Skywars.get(), new Runnable() {
 				@Override
 				public void run() {
-					for (Player player : Bukkit.getOnlinePlayers()) {
+					for (final Player player : Bukkit.getOnlinePlayers()) {
 						SkywarsScoreboard.update(player);
 						SkywarsActionbar.update(player);
 					}
 				}
-			}, 0L, Skywars.get().getConfig().getLong("taskUpdate.interval")*20);
+			}, 0L, Skywars.get().getConfig().getLong("taskUpdate.interval") * 20);
 	}
-	
+
+	@Override
 	public void onDisable() {
-		
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			Arena arena = getPlayerArena(player);
+
+		for (final Player player : Bukkit.getOnlinePlayers()) {
+			final Arena arena = this.getPlayerArena(player);
 			if (arena != null) {
 				arena.exitPlayer(player);
 			}
 		}
-		ItemStack item = SetupEvents.item;
+		final ItemStack item = SetupEvents.item;
 		SetupMenu.currentArenas.forEach((player, arena) -> {
-			if(item == null) return;
+			if (item == null)
+				return;
 			player.getInventory().removeItem(item);
 			SkywarsUtils.TeleportPlayerBack(player);
 		});
-		sendMessage("Stopping arenas...");
-		for (Arena arena : arenas) {
+		this.sendMessage("Stopping arenas...");
+		for (final Arena arena : this.arenas) {
 			arena.clear(false);
 		}
-		arenas.clear();
+		this.arenas.clear();
 	}
 
-	public NMSHandler NMS() {
-		return nmsHandler;
+	public ReflectionNMS NMS() {
+		return this.nmsHandler;
 	}
-	
+
 	public String getServerPackageVersion() {
-		return serverPackageVersion;
+		return this.serverPackageVersion;
 	}
-	
+
 	public void Reload() {
-		loadConfig();
-		loadMaps();
-		loadKits();
+		this.loadConfig();
+		this.loadMaps();
+		this.loadKits();
 	}
-	
+
 	private boolean setupEconomy() {
-    	if(!economyEnabled) return false;
-    	/*
-    	Class<?> economyClass;
-		try {
-			economyClass = Class.forName("net.milkbowl.vault.economy.Economy");
-			economyProvider = (RegisteredServiceProvider<Economy>) getServer().getServicesManager().getRegistration(economyClass);
-		} catch (ClassNotFoundException e) {
-			System.out.println("Could not find economy class!");
-		}
-		*/
-    	economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
-        if (economyProvider != null)   	
-        	economy = economyProvider.getProvider();
-        return economy != null;
-    }
-    
+		if (!economyEnabled)
+			return false;
+		/*
+		 * Class<?> economyClass; try { economyClass =
+		 * Class.forName("net.milkbowl.vault.economy.Economy"); economyProvider =
+		 * (RegisteredServiceProvider<Economy>)
+		 * getServer().getServicesManager().getRegistration(economyClass); } catch
+		 * (ClassNotFoundException e) {
+		 * Skywars.get().sendDebugMessage("Could not find economy class!"); }
+		 */
+		this.economyProvider = this.getServer().getServicesManager().getRegistration(Economy.class);
+		if (this.economyProvider != null)
+			this.economy = this.economyProvider.getProvider();
+		return this.economy != null;
+	}
+
 	public void loadEvents() {
-		//sendMessage("Loading events...");
-		FileConfiguration config = getConfig();
-		PluginManager pluginManager = getServer().getPluginManager();
-		if(config.getBoolean("signsEnabled")) {
+		// sendMessage("Loading events...");
+		final FileConfiguration config = this.getConfig();
+		final PluginManager pluginManager = this.getServer().getPluginManager();
+		if (config.getBoolean("signsEnabled")) {
 			pluginManager.registerEvents(new SignEvents(), this);
 		}
-		if(config.getBoolean("messageSounds.enabled")) {
+		if (config.getBoolean("messageSounds.enabled")) {
 			pluginManager.registerEvents(new MessageSound(), this);
 		}
-		if(config.getBoolean("disableWeather")) {			
+		if (config.getBoolean("disableWeather")) {
 			pluginManager.registerEvents(new DisableWeather(), this);
 		}
-		if(config.getBoolean("debug.projectileTests")) {
+		if (config.getBoolean("debug.projectileTests")) {
 			pluginManager.registerEvents(new ProjectileTrails(), this);
 		}
-		Listener[] listeners = {
-				new InteractEvent(),
-				new Events(),
-				new GamesMenu(),
-				new MapMenu(),
-				new KitsMenu(),
-				new SetupEvents(),
-				new ChestManager(),
-				new SetupMenu(),
-				new PlayerInventoryManager(),
-		};
-		for(Listener listener : listeners) {			
+		final Listener[] listeners = { new InteractEvent(), new Events(), new GamesMenu(), new MapMenu(),
+				new KitsMenu(), new SetupEvents(), new ChestManager(), new SetupMenu(), new PlayerInventoryManager(), };
+		for (final Listener listener : listeners) {
 			pluginManager.registerEvents(listener, this);
 		}
 	}
-	
+
 	public void loadCommands() {
-		sendMessage("Loading commands...");
-		HashMap<String, CommandExecutor> cmds = new HashMap<String, CommandExecutor>();
+		this.sendMessage("Loading commands...");
+		final HashMap<String, CommandExecutor> cmds = new HashMap<String, CommandExecutor>();
 		cmds.put("skywars", new MainCommand());
 		cmds.put("where", new WhereCommand());
 		cmds.put("start", new StartCommand());
 		cmds.put("forcestart", new ForceStartCommand());
 		cmds.put("leave", new LeaveCommand());
-		for(String cmd : cmds.keySet()) {
-			if(!getConfig().getStringList("disabledCommands").contains(cmd)) {
-				sendMessage("&eLoading command &a%s&e...", cmd);
+		for (final String cmd : cmds.keySet()) {
+			if (!this.getConfig().getStringList("disabledCommands").contains(cmd)) {
+				this.sendMessage("&eLoading command &a%s&e...", cmd);
 				this.getCommand(cmd).setExecutor(cmds.get(cmd));
-			} else sendMessage("&7Skipping command &c%s&e...", cmd);
+			} else
+				this.sendMessage("&7Skipping command &c%s&e...", cmd);
 		}
-		sendMessage("&eFinished loading commands.");
+		this.sendMessage("&eFinished loading commands.");
 	}
-	
+
 	// maps
-	
-	private ArrayList<SkywarsMap> maps = new ArrayList<SkywarsMap>();
-	
+
+	private final ArrayList<SkywarsMap> maps = new ArrayList<SkywarsMap>();
+
 	public SkywarsMap getMap(String name) {
-		for(SkywarsMap map : maps) {
-			if(map.getName().equalsIgnoreCase(name)) return map;
+		for (final SkywarsMap map : this.maps) {
+			if (map.getName().equalsIgnoreCase(name))
+				return map;
 		}
 		return null;
 	}
-	
+
 	public SkywarsMap getRandomMap() {
-		return maps.get((int) (Math.floor(Math.random() * maps.size()+1)-1));
+		return this.maps.get((int) (Math.floor(Math.random() * this.maps.size() + 1) - 1));
 	}
-	
+
 	public ArrayList<SkywarsMap> getMaps() {
-		return maps;
+		return this.maps;
 	}
-	
+
 	public Arena getJoinableArenaByMap(SkywarsMap map) {
-		for(Arena arena : arenas) {
-			if(arena.getStatus() != ArenaStatus.WAITING &&
-					arena.getStatus() != ArenaStatus.STARTING)
+		for (final Arena arena : this.arenas) {
+			if (arena.getStatus() != ArenaStatus.WAITING && arena.getStatus() != ArenaStatus.STARTING)
 				continue;
-			if(!arena.isJoinable())
+			if (!arena.isJoinable())
 				continue;
-			if(arena.getMap() == map) return arena;
+			if (arena.getMap() == map)
+				return arena;
 		}
 		return null;
 	}
-	
+
 	public Arena getArenaByMap(SkywarsMap map) {
-		for(Arena arena : arenas) {
-			if(arena.getMap() == map) return arena;
+		for (final Arena arena : this.arenas) {
+			if (arena.getMap() == map)
+				return arena;
 		}
 		return null;
 	}
-	
+
 	public ArrayList<Arena> getArenasByMap(SkywarsMap map) {
-		return getArenas().stream()
-				.filter(arena -> arena.getMap() == map)
+		return this.getArenas().stream().filter(arena -> arena.getMap() == map)
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
-	
+
 	public Arena getArenaAndCreateIfNotFound(SkywarsMap map) {
-		Arena arena = getJoinableArenaByMap(map);
-		if(arena == null) {
-			switch(config.getString("arenasMethod")) {
+		Arena arena = this.getJoinableArenaByMap(map);
+		if (arena == null) {
+			switch (config.getString("arenasMethod")) {
 			case "MULTI_ARENA":
-				arena = createNewArena(map);
+				arena = this.createNewArena(map);
 				break;
 			case "SINGLE_ARENA":
-				if(getArenaByMap(map) == null)
-					arena = createNewArena(map);
+				if (this.getArenaByMap(map) == null)
+					arena = this.createNewArena(map);
 				break;
 			}
 		}
 		return arena;
 	}
-	
+
 	public boolean joinMap(SkywarsMap map, Player player) {
-		Arena arena = getArenaAndCreateIfNotFound(map);
-		if(arena != null) {			
-			System.out.println("joining player to map");
+		final Arena arena = this.getArenaAndCreateIfNotFound(map);
+		if (arena != null) {
+			Skywars.get().sendDebugMessage("joining player to map");
 			arena.joinPlayer(player);
 			return true;
 		}
-		System.out.println("no arena found");
+		Skywars.get().sendDebugMessage("no arena found");
 		return false;
 	}
-	
+
 	public void joinRandomMap(Player player) {
-		SkywarsMap map = getRandomMap();
-		joinMap(map, player);
+		final SkywarsMap map = this.getRandomMap();
+		this.joinMap(map, player);
 	}
-	
+
 	public Arena createNewArena(SkywarsMap map) {
-		if(config.getString("arenasMethod")
-				.equalsIgnoreCase("MULTI_ARENA")) {			
-			System.out.println("creating new arena for map " + map.getName());
-			Arena arena = new Arena(map);
-			arena.setWorld(getWorld(map));
-			arena.setLocation(getNextFreeLocation());
+		if (config.getString("arenasMethod").equalsIgnoreCase("MULTI_ARENA")) {
+			Skywars.get().sendDebugMessage("creating new arena for map " + map.getName());
+			final Arena arena = new Arena(map);
+			arena.setWorld(this.getWorld(map));
+			arena.setLocation(this.getNextFreeLocation());
 			arena.pasteSchematic();
 			arena.resetCases();
-			arenas.add(arena);
+			this.arenas.add(arena);
 			return arena;
-		} else if (config.getString("arenasMethod")
-				.equalsIgnoreCase("SINGLE_ARENA")) {
-			Arena arena = getJoinableArenaByMap(map);
-			if(arena == null) {
-				if(getArenaByMap(map) != null)
+		} else if (config.getString("arenasMethod").equalsIgnoreCase("SINGLE_ARENA")) {
+			Arena arena = this.getJoinableArenaByMap(map);
+			if (arena == null) {
+				if (this.getArenaByMap(map) != null)
 					return null;
 				arena = new Arena(map);
-				arena.setWorld(getWorld(map));
+				arena.setWorld(this.getWorld(map));
 				arena.setLocation(map.getLocation());
-				System.out.println("location: " + map.getLocation());
+				Skywars.get().sendDebugMessage("location: " + map.getLocation());
 				arena.pasteSchematic();
-				arenas.add(arena);
-				System.out.println("creating single arena for map " + map.getName());
+				this.arenas.add(arena);
+				Skywars.get().sendDebugMessage("creating single arena for map " + map.getName());
 			}
 			return arena;
 		}
 		return null;
 	}
-	
+
 	public void clearArena(Arena arena) {
-		System.out.println("removing arena " + arena.getMap().getName());
-		arenas.remove(arena);
+		Skywars.get().sendDebugMessage("removing arena " + arena.getMap().getName());
+		this.arenas.remove(arena);
 		arena = null;
 	}
 
 	public Location getNextFreeLocation() {
-		if(!config.getString("arenasMethod")
-				.equalsIgnoreCase("MULTI_ARENA")) {
-			System.out.println("warning: getNextFreeLocation called though MULTI_ARENA is disabled!");
+		if (!config.getString("arenasMethod").equalsIgnoreCase("MULTI_ARENA")) {
+			Skywars.get().sendDebugMessage("warning: getNextFreeLocation called though MULTI_ARENA is disabled!");
 			return null;
 		}
-		
+
 		int x = 0;
 		int z = 0;
 
-		for (int i = 0; i < arenas.size(); i++) {	
+		for (int i = 0; i < this.arenas.size(); i++) {
 			if (i % 2 == 0) {
 				z += 1;
 			} else {
 				x += 1;
 			}
 		}
-		return new Location(Bukkit.getWorld(config.getString("arenas.world")),
-				x*config.getInt("arenas.separation"),
-				config.getInt("arenas.Y"),
-				z*config.getInt("arenas.separation"));
+		return new Location(Bukkit.getWorld(config.getString("arenas.world")), x * config.getInt("arenas.separation"),
+				config.getInt("arenas.Y"), z * config.getInt("arenas.separation"));
 	}
-	
+
 	public boolean createMap(String name) {
-		if(getMap(name) != null) return false;
-		SkywarsMap map = new SkywarsMap(name);
-		File file = new File(mapsPath, name + ".yml");
+		if (this.getMap(name) != null)
+			return false;
+		final SkywarsMap map = new SkywarsMap(name);
+		final File file = new File(mapsPath, name + ".yml");
 		try {
 			file.createNewFile();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 		map.setFile(file);
 		map.saveParametersInConfig();
 		map.saveConfig();
-		maps.add(map);
+		this.maps.add(map);
 		return true;
 	}
-	
+
 	public boolean deleteMap(String name) {
-		SkywarsMap map = getMap(name);
-		if(map == null) return false;
+		final SkywarsMap map = this.getMap(name);
+		if (map == null)
+			return false;
 		map.getFile().delete();
-		maps.remove(map);
+		this.maps.remove(map);
 		return true;
 	}
-	
+
 	public void loadMaps() {
-		String arenasMethod = config.getString("arenasMethod");
-		sendMessage("&eLoading arenas (&b%s&e)", arenasMethod.toUpperCase());
-		if(arenasMethod.equalsIgnoreCase("MULTI_ARENA")) {
-			String worldName = config.getString("arenas.world");
+		final String arenasMethod = config.getString("arenasMethod");
+		this.sendMessage("&eLoading arenas (&b%s&e)", arenasMethod.toUpperCase());
+		if (arenasMethod.equalsIgnoreCase("MULTI_ARENA")) {
+			final String worldName = config.getString("arenas.world");
 			boolean aborted = false;
-			if(worldName == null) {					
-				sendMessage("World for arenas in config (&barenas.world&e) is not set!");
+			if (worldName == null) {
+				this.sendMessage("World for arenas in config (&barenas.world&e) is not set!");
 				aborted = true;
-			} else if (Bukkit.getWorld(worldName) == null) {					
-				sendMessage("World for arenas in config (&barenas.world&e) does not exist!");
+			} else if (Bukkit.getWorld(worldName) == null) {
+				this.sendMessage("World for arenas in config (&barenas.world&e) does not exist!");
 				aborted = true;
 			}
-			if(aborted) {
-				sendMessage("&cCancelled map loading. &eUse &b/skywars reload &eto reload the plugin!");
+			if (aborted) {
+				this.sendMessage("&cCancelled map loading. &eUse &b/skywars reload &eto reload the plugin!");
 				return;
 			}
 		}
-		
-		maps.clear();
-		File folder = new File(mapsPath);
+
+		this.maps.clear();
+		final File folder = new File(mapsPath);
 		if (!folder.exists()) {
 			folder.mkdirs();
 		}
-		if(folder.listFiles().length <= 0) {
+		if (folder.listFiles().length <= 0) {
 			Bukkit.getConsoleSender().sendMessage(Messager.color("&eSetting up default map."));
 			ConfigurationUtils.copyDefaultContentsToFile("maps/MiniTrees.yml", new File(mapsPath, "MiniTrees.yml"));
 		}
-		File schematics = new File(schematicsPath);
-		if(!schematics.exists()) schematics.mkdir();
-		if(schematics.listFiles().length <= 0) {
+		final File schematics = new File(schematicsPath);
+		if (!schematics.exists())
+			schematics.mkdir();
+		if (schematics.listFiles().length <= 0) {
 			Bukkit.getConsoleSender().sendMessage(Messager.color("&eSetting up default schematic."));
 			ConfigurationUtils.copyDefaultContentsToFile("schematics/mini_trees.schematic",
 					new File(schematicsPath, "mini_trees.schematic"));
 		}
-		for (File file : folder.listFiles()) {
-			String name = file.getName().replaceFirst("[.][^.]+$", "");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-			//ConfigurationUtils.createMissingKeys(config,
-			//		ConfigurationUtils.getDefaultConfig("maps/MiniTrees.yml"));
-			
+		for (final File file : folder.listFiles()) {
+			final String name = file.getName().replaceFirst("[.][^.]+$", "");
+			final YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+			// ConfigurationUtils.createMissingKeys(config,
+			// ConfigurationUtils.getDefaultConfig("maps/MiniTrees.yml"));
+
 			// create map and set values from config
-			SkywarsMap map = new SkywarsMap(name,
-					config.getString("schematic"),
-					config.getInt("minPlayers"),
-					config.getInt("maxPlayers"),
-					config.getInt("teamSize"));
-			
+			final SkywarsMap map = new SkywarsMap(name, config.getString("schematic"), config.getInt("minPlayers"),
+					config.getInt("maxPlayers"), config.getInt("teamSize"));
+
 			map.setConfig(config);
 			map.setFile(file);
-			
-			if(arenasMethod.equalsIgnoreCase("SINGLE_ARENA")) {
-				//System.out.println("setting worldname and location for map " + map.getName());
+
+			if (arenasMethod.equalsIgnoreCase("SINGLE_ARENA")) {
+				// Skywars.get().sendDebugMessage("setting worldname and location for map " +
+				// map.getName());
 				map.setWorldName(config.getString("worldName"));
-				map.setLocation(
-						ConfigurationUtils.getLocationConfig(map.getWorldName(),
-								config.getConfigurationSection("location")));
+				map.setLocation(ConfigurationUtils.getLocationConfig(map.getWorldName(),
+						config.getConfigurationSection("location")));
 			}
-			
-			if(config.get("spawn") != null)
-				for (String spawn : config.getConfigurationSection("spawn").getKeys(false)) {
-					int i = Integer.parseInt(spawn);
+
+			if (config.get("spawn") != null)
+				for (final String spawn : config.getConfigurationSection("spawn").getKeys(false)) {
+					final int i = Integer.parseInt(spawn);
 					if (config.get(String.format("spawn.%s", i)) == null)
 						continue;
-					double x = config.getDouble(String.format("spawn.%s.x", i));
-					double y = config.getDouble(String.format("spawn.%s.y", i));
-					double z = config.getDouble(String.format("spawn.%s.z", i));
-					Vector vector = new Vector(x, y, z);
+					final double x = config.getDouble(String.format("spawn.%s.x", i));
+					final double y = config.getDouble(String.format("spawn.%s.y", i));
+					final double z = config.getDouble(String.format("spawn.%s.z", i));
+					final Vector vector = new Vector(x, y, z);
 					map.getSpawns().put(i, vector);
 				}
-			
-			maps.add(map);
-			sendMessage("&eLoaded map: &a%s", map.getName());
+
+			this.maps.add(map);
+			this.sendMessage("&eLoaded map: &a%s", map.getName());
 		}
-		sendMessage("&eFinished loading maps.");
+		this.sendMessage("&eFinished loading maps.");
 	}
-	
+
 	private World getWorld(SkywarsMap map) {
 		String worldName = map.getWorldName();
-		if(worldName == null)
+		if (worldName == null)
 			worldName = Skywars.config.getString("arenas.world");
 		return Bukkit.getWorld(worldName);
 	}
 
 	// kits
-	
-	private ArrayList<Kit> kits = new ArrayList<Kit>();
-	
+
+	private final ArrayList<Kit> kits = new ArrayList<Kit>();
+
 	public ArrayList<Kit> getKits() {
 		return this.kits;
 	}
-	
+
 	public void loadKits() {
-		sendMessage("Loading kits...");
-		kits.clear();
-		File folder = new File(kitsPath);
+		this.sendMessage("Loading kits...");
+		this.kits.clear();
+		final File folder = new File(kitsPath);
 		if (!folder.exists()) {
 			folder.mkdirs();
 		}
-		if(folder.listFiles().length <= 0) {
+		if (folder.listFiles().length <= 0) {
 			Bukkit.getConsoleSender().sendMessage(Messager.color("&eSetting up default kit."));
 			ConfigurationUtils.copyDefaultContentsToFile("kits/default.yml", new File(kitsPath, "default.yml"));
 		}
-		for (File file : folder.listFiles()) {
-			String name = file.getName().replaceFirst("[.][^.]+$", "");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-			ConfigurationUtils.createMissingKeys(config,
-					ConfigurationUtils.getDefaultConfig("kits/default.yml"));
-			
+		for (final File file : folder.listFiles()) {
+			final String name = file.getName().replaceFirst("[.][^.]+$", "");
+			final YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+			ConfigurationUtils.createMissingKeys(config, ConfigurationUtils.getDefaultConfig("kits/default.yml"));
+
 			// create kit and set values from config
-			Kit kit = new Kit(name);
+			final Kit kit = new Kit(name);
 			kit.setConfig(config);
 			kit.setFile(file);
 			kit.setDisplayName(config.getString("name"));
-			
+
 			// load items
-			List<String> configItems = config.getStringList("items");
-			ItemStack[] items = new ItemStack[configItems.size()];
-			for(int i = 0; i < configItems.size(); i++) {
-				String string = configItems.get(i);
-				if(string.split(";").length > 1) {
-					String item = string.split(";")[0];
-					int amount = Integer.parseInt(string.split(";")[1]);
+			final List<String> configItems = config.getStringList("items");
+			final ItemStack[] items = new ItemStack[configItems.size()];
+			for (int i = 0; i < configItems.size(); i++) {
+				final String string = configItems.get(i);
+				if (string.split(";").length > 1) {
+					final String item = string.split(";")[0];
+					final int amount = Integer.parseInt(string.split(";")[1]);
 					items[i] = new ItemStack(XMaterial.valueOf(item).parseMaterial(), amount);
 				} else {
 					items[i] = XMaterial.valueOf(string).parseItem();
 				}
 			}
-			
+
 			kit.setItems(items);
 			kit.setIcon(XMaterial.valueOf(config.getString("icon")).parseItem());
 			kit.setPrice(config.getInt("price"));
-			
+
 			// add kit to the arena list
-			kits.add(kit);
-			sendMessage("&eLoaded kit: &a%s", kit.getName());
+			this.kits.add(kit);
+			this.sendMessage("&eLoaded kit: &a%s", kit.getName());
 		}
-		sendMessage("Finished loading kits.");
+		this.sendMessage("Finished loading kits.");
 	}
-	
+
 	public static void createBigCase(Location location, XMaterial material) {
-		int[][] blocks = {
+		final int[][] blocks = {
 				// base
-				{-1,-1,-1},{0,-1,-1},{1,-1,-1},
-				{-1,-1,0},{0,-1,0},{1,-1,0},
-				{-1,-1,1},{0,-1,1},{1,-1,1},
-				
+				{ -1, -1, -1 }, { 0, -1, -1 }, { 1, -1, -1 }, { -1, -1, 0 }, { 0, -1, 0 }, { 1, -1, 0 }, { -1, -1, 1 },
+				{ 0, -1, 1 }, { 1, -1, 1 },
+
 				// top
-				{-1,3,1},{0,3,-1},{1,3,-1},
-				{-1,3,0},{0,3,0},{1,3,0},
-				{-1,3,1},{0,3,1},{1,3,1},
-				
+				{ -1, 3, 1 }, { 0, 3, -1 }, { 1, 3, -1 }, { -1, 3, 0 }, { 0, 3, 0 }, { 1, 3, 0 }, { -1, 3, 1 },
+				{ 0, 3, 1 }, { 1, 3, 1 },
+
 				// left wall
-				{2,0,-1},{2,0,0},{2,0,1},
-				{2,1,-1},{2,1,0},{2,1,1},
-				{2,2,-1},{2,2,0},{2,2,1},
-				
+				{ 2, 0, -1 }, { 2, 0, 0 }, { 2, 0, 1 }, { 2, 1, -1 }, { 2, 1, 0 }, { 2, 1, 1 }, { 2, 2, -1 },
+				{ 2, 2, 0 }, { 2, 2, 1 },
+
 				// front wall
-				{-1,0,2},{0,0,2},{1,0,2},
-				{-1,1,2},{0,1,2},{1,1,2},
-				{-1,2,2},{0,2,2},{1,2,2},
-				
+				{ -1, 0, 2 }, { 0, 0, 2 }, { 1, 0, 2 }, { -1, 1, 2 }, { 0, 1, 2 }, { 1, 1, 2 }, { -1, 2, 2 },
+				{ 0, 2, 2 }, { 1, 2, 2 },
+
 				// right wall
-				{-2,0,-1},{-2,0,0},{-2,0,1},
-				{-2,1,-1},{-2,1,0},{-2,1,1},
-				{-2,2,-1},{-2,2,0},{-2,2,1},
-				
+				{ -2, 0, -1 }, { -2, 0, 0 }, { -2, 0, 1 }, { -2, 1, -1 }, { -2, 1, 0 }, { -2, 1, 1 }, { -2, 2, -1 },
+				{ -2, 2, 0 }, { -2, 2, 1 },
+
 				// back wall
-				{-1,0,-2},{0,0,-2},{1,0,-2},
-				{-1,1,-2},{0,1,-2},{1,1,-2},
-				{-1,2,-2},{0,2,-2},{1,2,-2},
-		};
-		int[][] airBlocks = {
-				{-1,0,-1},{0,0,-1},{1,0,-1},
-				{-1,0,0},{0,0,0},{1,0,0},
-				{-1,0,1},{0,0,1},{1,0,1},
-				
-				{-1,1,-1},{0,1,-1},{1,1,-1},
-				{-1,1,0},{0,1,0},{1,1,0},
-				{-1,1,1},{0,1,1},{1,1,1},
-				
-				{-1,2,-1},{0,2,-1},{1,2,-1},
-				{-1,2,0},{0,2,0},{1,2,0},
-				{-1,2,1},{0,2,1},{1,2,1},
-		};
-		for (int[] relative : airBlocks) {
-			Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
+				{ -1, 0, -2 }, { 0, 0, -2 }, { 1, 0, -2 }, { -1, 1, -2 }, { 0, 1, -2 }, { 1, 1, -2 }, { -1, 2, -2 },
+				{ 0, 2, -2 }, { 1, 2, -2 }, };
+		final int[][] airBlocks = { { -1, 0, -1 }, { 0, 0, -1 }, { 1, 0, -1 }, { -1, 0, 0 }, { 0, 0, 0 }, { 1, 0, 0 },
+				{ -1, 0, 1 }, { 0, 0, 1 }, { 1, 0, 1 },
+
+				{ -1, 1, -1 }, { 0, 1, -1 }, { 1, 1, -1 }, { -1, 1, 0 }, { 0, 1, 0 }, { 1, 1, 0 }, { -1, 1, 1 },
+				{ 0, 1, 1 }, { 1, 1, 1 },
+
+				{ -1, 2, -1 }, { 0, 2, -1 }, { 1, 2, -1 }, { -1, 2, 0 }, { 0, 2, 0 }, { 1, 2, 0 }, { -1, 2, 1 },
+				{ 0, 2, 1 }, { 1, 2, 1 }, };
+		for (final int[] relative : airBlocks) {
+			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
 			block.setType(XMaterial.AIR.parseMaterial());
 		}
-		for (int[] relative : blocks) {
-			Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
+		for (final int[] relative : blocks) {
+			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
 			block.setType(material.parseMaterial());
-			if(!XMaterial.isNewVersion()) {					
+			if (!XMaterial.isNewVersion()) {
 				block.setData(material.getData());
 			}
 		}
 	}
-	
+
 	public static void createCase(Location location, XMaterial material) {
-		if(config.getBoolean("debug.bigCases")) {
+		if (config.getBoolean("debug.bigCases")) {
 			createBigCase(location, material);
 			return;
 		}
-		int[][] blocks = {
+		final int[][] blocks = {
 				// first layer
 				{ -1, 0, 0 }, { 1, 0, 0 }, { 0, 0, -1 }, { 0, 0, 1 },
 				// second layer
@@ -634,165 +613,167 @@ public class Skywars extends JavaPlugin {
 				// base joints
 				{ -1, -1, 0 }, { 1, -1, 0 }, { 0, -1, -1 }, { 0, -1, 1 },
 				// top joints
-				{ -1, 3, 0 }, { 1, 3, 0 }, { 0, 3, -1 }, { 0, 3, 1 },
-		};
-		int[][] airBlocks = {
-				{ 0, 0, 0 }, { 0, 1, 0 }, { 0, 2, 0 }
-		};
-		for (int[] relative : airBlocks) {
-			Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
+				{ -1, 3, 0 }, { 1, 3, 0 }, { 0, 3, -1 }, { 0, 3, 1 }, };
+		final int[][] airBlocks = { { 0, 0, 0 }, { 0, 1, 0 }, { 0, 2, 0 } };
+		for (final int[] relative : airBlocks) {
+			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
 			block.setType(XMaterial.AIR.parseMaterial());
 		}
-		for (int[] relative : blocks) {
-			Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
+		for (final int[] relative : blocks) {
+			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
 			block.setType(material.parseMaterial());
-			if(!XMaterial.isNewVersion()) {					
+			if (!XMaterial.isNewVersion()) {
 				block.setData(material.getData());
 			}
 		}
 	}
-	
+
 	// arenas
-	
-	private ArrayList<Arena> arenas = new ArrayList<Arena>();
+
+	private final ArrayList<Arena> arenas = new ArrayList<Arena>();
 
 	public ArrayList<Arena> getArenas() {
 		return this.arenas;
 	}
-	
+
 	public Arena getRandomJoinableArena() {
-		for (Arena arena : arenas) {
+		for (final Arena arena : this.arenas) {
 			if (arena.isJoinable()) {
 				return arena;
 			}
 		}
 		return null;
 	}
-	
+
 	// TODO: make this a cached hashmap
 	public Arena getPlayerArena(Player player) {
-		for (int i = 0; i < arenas.size(); i++) {
-			List<SkywarsPlayer> players = arenas.get(i).getAllPlayersIncludingAliveAndSpectators();
+		for (int i = 0; i < this.arenas.size(); i++) {
+			final List<SkywarsPlayer> players = this.arenas.get(i).getUsers();
 			for (int j = 0; j < players.size(); j++) {
 				if (players.get(j).getPlayer().equals(player)) {
-					return arenas.get(i);
+					return this.arenas.get(i);
 				}
 			}
 		}
 		return null;
 	}
-	
-	public HashMap<Player, YamlConfiguration> playerConfigurations =
-			new HashMap<Player, YamlConfiguration>();
-	
+
+	public HashMap<Player, YamlConfiguration> playerConfigurations = new HashMap<Player, YamlConfiguration>();
+
 	public File getPlayerConfigFile(Player player) {
 		return new File(playersPath, player.getUniqueId() + ".yml");
 	}
-	
+
 	public File getSchematicFile(String schematicName) {
-		File schematic = new File(schematicsPath, schematicName);
-		if(!schematic.exists())
+		final File schematic = new File(schematicsPath, schematicName);
+		if (!schematic.exists())
 			try {
 				schematic.createNewFile();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		return schematic;
 	}
-	
+
 	public YamlConfiguration getPlayerConfig(Player player) {
-		if(playerConfigurations.get(player) != null)
-			return playerConfigurations.get(player);
-		File folder = new File(playersPath);
-		if(!folder.exists()) folder.mkdir();
-		File file = getPlayerConfigFile(player);
-		if(!file.exists())
+		if (this.playerConfigurations.get(player) != null)
+			return this.playerConfigurations.get(player);
+		final File folder = new File(playersPath);
+		if (!folder.exists())
+			folder.mkdir();
+		final File file = this.getPlayerConfigFile(player);
+		if (!file.exists())
 			ConfigurationUtils.copyDefaultContentsToFile("players/default.yml", file);
-		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		playerConfigurations.put(player, config);
+		final YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		this.playerConfigurations.put(player, config);
 		return config;
 	}
-	
+
 	public void savePlayerConfig(Player player) {
 		try {
-			File file = getPlayerConfigFile(player);
-			YamlConfiguration config = getPlayerConfig(player);
+			final File file = this.getPlayerConfigFile(player);
+			final YamlConfiguration config = this.getPlayerConfig(player);
 			config.save(file);
-			ConfigurationUtils.createMissingKeys(config,
-					ConfigurationUtils.getDefaultConfig("players/default.yml"));
-		} catch (IOException e) {
+			ConfigurationUtils.createMissingKeys(config, ConfigurationUtils.getDefaultConfig("players/default.yml"));
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public Kit getKit(String name) {
-		for (int i = 0; i < kits.size(); i++) {
-			if (kits.get(i).getName().equals(name) || kits.get(i).getDisplayName().equals(name)) {
-				return kits.get(i);
+		for (int i = 0; i < this.kits.size(); i++) {
+			if (this.kits.get(i).getName().equals(name) || this.kits.get(i).getDisplayName().equals(name)) {
+				return this.kits.get(i);
 			}
 		}
 		return null;
 	}
 
 	public void setPlayerKit(Player player, Kit kit) {
-		getPlayerConfig(player).set("kit", kit.getName());
-		savePlayerConfig(player);
+		this.getPlayerConfig(player).set("kit", kit.getName());
+		this.savePlayerConfig(player);
 	}
-	
+
 	public Kit getPlayerKit(Player player) {
-		String kitName = getPlayerConfig(player).getString("kit");
-		Kit kit = getKit(kitName);
+		final String kitName = this.getPlayerConfig(player).getString("kit");
+		final Kit kit = this.getKit(kitName);
 		return kit;
 	}
 
 	public Integer getPlayerTotalKills(Player player) {
-		return getPlayerConfig(player).getInt("stats.solo.kills");
+		return this.getPlayerConfig(player).getInt("stats.solo.kills");
 	}
-	
+
 	public void setPlayerTotalKills(Player player, int kills) {
-		getPlayerConfig(player).set("stats.solo.kills", kills);
+		this.getPlayerConfig(player).set("stats.solo.kills", kills);
 	}
-	
+
 	public void incrementPlayerTotalKills(Player player) {
-		setPlayerTotalKills(player, getPlayerTotalKills(player)+1);
+		this.setPlayerTotalKills(player, this.getPlayerTotalKills(player) + 1);
 	}
-	
+
 	public Integer getPlayerTotalDeaths(Player player) {
-		return getPlayerConfig(player).getInt("stats.solo.deaths");
+		return this.getPlayerConfig(player).getInt("stats.solo.deaths");
 	}
-	
+
 	public void setPlayerTotalDeaths(Player player, int kills) {
-		getPlayerConfig(player).set("stats.solo.deaths", kills);
+		this.getPlayerConfig(player).set("stats.solo.deaths", kills);
 	}
-	
+
 	public void incrementPlayerTotalDeaths(Player player) {
-		setPlayerTotalKills(player, getPlayerTotalKills(player)+1);
+		this.setPlayerTotalKills(player, this.getPlayerTotalKills(player) + 1);
 	}
-	
+
 	public void loadConfig() {
-		
-		sendMessage("Loading configuration...");
-		
+
+		this.sendMessage("Loading configuration...");
+
 		// config.yml
 		config = ConfigurationUtils.loadConfiguration("config.yml", "resources/config.yml");
-		
+
 		// scoreboard.yml
 		scoreboardConfig = ConfigurationUtils.loadConfiguration("scoreboard.yml", "resources/scoreboard.yml");
-		
+
 		// lang.yml
 		langConfig = ConfigurationUtils.loadConfiguration("lang.yml", "resources/lang.yml");
-		
+
 		// lobby.yml
 		lobbyConfig = ConfigurationUtils.loadConfiguration("lobby.yml", "resources/lobby.yml");
-		
+
 		// load lobby
-		setLobbyFromConfig();
-		
-		sendMessage("Finished loading configuration.");
+		this.setLobbyFromConfig();
+
+		this.sendMessage("Finished loading configuration.");
 	}
-    
-    public void sendMessage(String text, Object... format) {
-    	Bukkit.getConsoleSender().sendMessage(prefix + " " + Messager.colorFormat(text, format));
-    }
+
+	public void sendDebugMessage(String text, Object... format) {
+		if (!Skywars.config.getBoolean("debug.enabled"))
+			return;
+		this.sendMessage(text, format);
+	}
+
+	public void sendMessage(String text, Object... format) {
+		Bukkit.getConsoleSender().sendMessage(this.prefix + " " + Messager.colorFormat(text, format));
+	}
 }

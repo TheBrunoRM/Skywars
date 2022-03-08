@@ -1,0 +1,37 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>me.brunorm.skywars</groupId>
+  <artifactId>Skywars</artifactId>
+  <version>0.2.9</version>
+  <name>Skywars</name>
+  <properties>
+    <mainClass>me.brunorm.skywars.Skywars</mainClass>
+  </properties>
+  <repositories>
+    <!-- This adds the Spigot Maven repository to the build -->
+    <repository>
+        <id>spigot-repo</id>
+        <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+    </repository>
+  </repositories>
+  <dependencies>
+  	<dependency>
+		<groupId>org.spigotmc</groupId>
+		<artifactId>spigot</artifactId>
+		<version>1.18.2-R0.1-SNAPSHOT</version>
+		<scope>provided</scope>
+  	</dependency>
+  </dependencies>
+  <build>
+    <resources>
+        <resource>
+            <directory>src/main/resources</directory>
+            <filtering>true</filtering>
+            <includes>
+                <include>plugin.yml</include>
+            </includes>
+         </resource>
+    </resources>
+</build>
+</project>

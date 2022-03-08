@@ -25,18 +25,18 @@ public class SetupEvents implements Listener {
 
 	@EventHandler
 	void onDrop(PlayerDropItemEvent event) {
-		Player player = event.getPlayer();
+		final Player player = event.getPlayer();
 		if (player == null)
 			return;
-		Arena arena = SetupMenu.currentArenas.get(player);
-		if(arena == null)
+		final Arena arena = SetupMenu.currentArenas.get(player);
+		if (arena == null)
 			return;
-		SkywarsMap map = arena.getMap();
+		final SkywarsMap map = arena.getMap();
 		if (map == null)
 			return;
 		if (event.getItemDrop().getItemStack().equals(item)) {
 			player.teleport(SetupMenu.playerLocations.get(player));
-			//Skywars.get().clearArena(arena);
+			// Skywars.get().clearArena(arena);
 			map.saveParametersInConfig();
 			map.saveConfig();
 			SetupMenu.playerLocations.put(player, null);
@@ -52,45 +52,44 @@ public class SetupEvents implements Listener {
 	public void onPlayerItemHoldEvent(PlayerItemHeldEvent event) {
 		if (SetupEvents.item == null)
 			return;
-		ItemStack oldItem = event.getPlayer().getInventory().getItem(event.getPreviousSlot());
+		final ItemStack oldItem = event.getPlayer().getInventory().getItem(event.getPreviousSlot());
 		if (oldItem != null && oldItem.equals(SetupEvents.item)) {
 			Skywars.get().NMS().sendTitle(event.getPlayer(), "&cWarning!", "&eDrop the blaze rod to exit edit mode!");
 		} else {
 			Skywars.get().NMS().sendTitle(event.getPlayer(), "", "");
 		}
 	}
-	
+
 	@EventHandler
 	void onInteract(PlayerInteractEvent event) {
-		Player player = event.getPlayer();
+		final Player player = event.getPlayer();
 		if (player == null)
 			return;
 		if (item == null)
 			return;
-		Block block = event.getClickedBlock();
+		final Block block = event.getClickedBlock();
 		if (block == null)
 			return;
-		Arena arena = SetupMenu.currentArenas.get(player);
+		final Arena arena = SetupMenu.currentArenas.get(player);
 		if (arena == null)
 			return;
-		SkywarsMap map = arena.getMap();
+		final SkywarsMap map = arena.getMap();
 		if (event.getItem() == null)
 			return;
 		if (event.getItem().equals(item)) {
 			int n = map.getSpawns().size();
-			float t = (float) n / (map.getMaxPlayers() - 1);
+			final float t = (float) n / (map.getMaxPlayers() - 1);
 			player.playSound(player.getLocation(), Sounds.NOTE_PLING.bukkitSound(), 3, 1 + t);
 			if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
-				Location loc = block.getLocation();
+				final Location loc = block.getLocation();
 				loc.add(new Vector(0.5, 1, 0.5));
-				Vector vector = loc.subtract(arena.getLocation()).toVector();
-				System.out.println("spawn set to vector " + vector);
+				final Vector vector = loc.subtract(arena.getLocation()).toVector();
+				Skywars.get().sendDebugMessage("spawn set to vector " + vector);
 				map.setSpawn(n, vector);
-				Skywars.get().NMS().sendTitle(player, "", String.format("&eSpawn %s set!", n+1));
-				if (n+1 > map.getMaxPlayers()) {
+				Skywars.get().NMS().sendTitle(player, "", String.format("&eSpawn %s set!", n + 1));
+				if (n + 1 > map.getMaxPlayers()) {
 					player.sendMessage(Messager.colorFormat(
-							"&cWarning: spawn overload! &6Max players is set to &b%s&6!",
-							map.getMaxPlayers()));
+							"&cWarning: spawn overload! &6Max players is set to &b%s&6!", map.getMaxPlayers()));
 				}
 			} else if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 				n--;
@@ -99,7 +98,7 @@ public class SetupEvents implements Listener {
 					return;
 				}
 				map.getSpawns().remove(n);
-				Skywars.get().NMS().sendTitle(player, "", String.format("&cSpawn %s removed!", n+1));
+				Skywars.get().NMS().sendTitle(player, "", String.format("&cSpawn %s removed!", n + 1));
 			}
 			event.setCancelled(true);
 		}

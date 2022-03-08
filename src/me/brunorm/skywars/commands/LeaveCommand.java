@@ -13,9 +13,9 @@ public class LeaveCommand implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String cmd, String[] args) {
-		if(sender instanceof Player) {
-			Player player = (Player) sender;
-			Arena playerArena = Skywars.get().getPlayerArena(player);
+		if (sender instanceof Player) {
+			final Player player = (Player) sender;
+			final Arena playerArena = Skywars.get().getPlayerArena(player);
 			if (CommandsUtils.arenaCheckWithMessage(player))
 				playerArena.leavePlayer(player);
 		} else {

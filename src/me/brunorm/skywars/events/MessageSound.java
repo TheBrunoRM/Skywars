@@ -12,13 +12,13 @@ import mrblobman.sounds.Sounds;
 public class MessageSound implements Listener {
 
 	String sound = Skywars.config.getString("messageSounds.sound");
-	
+
 	@EventHandler
 	void onMessage(AsyncPlayerChatEvent event) {
-		float random = (float) (Math.random() + 0.5f);
-		for(Player player : Bukkit.getOnlinePlayers()) {
-			player.playSound(player.getLocation(), Sounds.valueOf(sound).bukkitSound(), 1, random);
+		final float random = (float) (Math.random() + 0.5f);
+		for (final Player player : Bukkit.getOnlinePlayers()) {
+			player.playSound(player.getLocation(), Sounds.valueOf(this.sound).bukkitSound(), 1, random);
 		}
 	}
-	
+
 }

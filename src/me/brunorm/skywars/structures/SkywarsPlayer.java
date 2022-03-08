@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import me.brunorm.skywars.Skywars;
 
 public class SkywarsPlayer {
-	
+
 	Player player;
 	Arena arena;
 	int kills = 0;
@@ -17,34 +17,35 @@ public class SkywarsPlayer {
 	SavedPlayer savedPlayer;
 	Player lastHit;
 	long lastHitTimestamp;
-	
+
 	SkywarsPlayer(Player player, Arena arena, int number) {
 		this.player = player;
 		this.arena = arena;
 		this.teamNumber = number;
 	}
-	
+
 	public Player getLastHit() {
-		return lastHit;
+		return this.lastHit;
 	}
-	
+
 	public void setLastHit(Player lastHit) {
 		this.lastHit = lastHit;
-		if(lastHit == null) return;
-		long timestamp = new Date().getTime();
+		if (lastHit == null)
+			return;
+		final long timestamp = new Date().getTime();
 		this.lastHitTimestamp = timestamp;
 		Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
 			@Override
 			public void run() {
-				if(timestamp == lastHitTimestamp) {
-					setLastHit(null);
+				if (timestamp == SkywarsPlayer.this.lastHitTimestamp) {
+					SkywarsPlayer.this.setLastHit(null);
 				}
 			}
-		}, Skywars.get().getConfig().getLong("lastHitResetCooldown")*20);
+		}, Skywars.get().getConfig().getLong("lastHitResetCooldown") * 20);
 	}
-	
+
 	public SavedPlayer getSavedPlayer() {
-		return savedPlayer;
+		return this.savedPlayer;
 	}
 
 	public void setSavedPlayer(SavedPlayer savedPlayer) {
@@ -54,29 +55,29 @@ public class SkywarsPlayer {
 	public int getKills() {
 		return this.kills;
 	}
-	
+
 	public void incrementKills() {
 		this.kills++;
 	}
-	
+
 	public boolean isSpectator() {
-		return spectator;
+		return this.spectator;
 	}
 
 	public void setSpectator(boolean spectator) {
 		this.spectator = spectator;
 	}
-	
+
 	public int getNumber() {
-		return teamNumber;
+		return this.teamNumber;
 	}
-	
+
 	public Player getPlayer() {
-		return player;
+		return this.player;
 	}
-	
+
 	Arena getArena() {
-		return arena;
+		return this.arena;
 	}
-	
+
 }

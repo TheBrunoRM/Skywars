@@ -9,13 +9,13 @@ import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.structures.Arena;
 
 public class StartCommand implements CommandExecutor {
-	
+
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String cmd, String[] args) {
-		if(sender instanceof Player) {
-			Player player = (Player) sender;
-			Arena playerArena = Skywars.get().getPlayerArena(player);
-			if(CommandsUtils.permissionCheckWithMessage(player, "skywars.start")) {
+		if (sender instanceof Player) {
+			final Player player = (Player) sender;
+			final Arena playerArena = Skywars.get().getPlayerArena(player);
+			if (CommandsUtils.permissionCheckWithMessage(player, "skywars.start")) {
 				if (CommandsUtils.arenaCheckWithMessage(player)) {
 					playerArena.softStart(player);
 					return true;

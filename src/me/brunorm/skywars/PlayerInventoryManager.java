@@ -11,15 +11,20 @@ import org.bukkit.inventory.Inventory;
 public class PlayerInventoryManager implements Listener {
 
 	private static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();
-	
-	public static Inventory getInventory(Player player) { return inventories.get(player); }
-	public static void setInventory(Player player, Inventory inventory) { inventories.put(player, inventory); }
-	
+
+	public static Inventory getInventory(Player player) {
+		return inventories.get(player);
+	}
+
+	public static void setInventory(Player player, Inventory inventory) {
+		inventories.put(player, inventory);
+	}
+
 	@EventHandler
 	void onInventoryClose(InventoryCloseEvent event) {
-		for(Inventory inventory : inventories.values()) {			
-			if(inventory.equals(event.getInventory())) {		
-				inventories.remove((Player) event.getInventory().getViewers().get(0));
+		for (final Inventory inventory : inventories.values()) {
+			if (inventory.equals(event.getInventory())) {
+				inventories.remove(event.getInventory().getViewers().get(0));
 			}
 		}
 	}

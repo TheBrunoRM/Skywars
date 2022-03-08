@@ -22,20 +22,19 @@ import me.brunorm.skywars.structures.Kit;
 public class KitsMenu implements Listener {
 
 	static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();
-	
+
 	public static void open(Player player) {
-		Inventory inventory = Bukkit.createInventory(null, 9 * 3, Messager.color("&aKits"));
+		final Inventory inventory = Bukkit.createInventory(null, 9 * 3, Messager.color("&aKits"));
 		inventories.put(player, inventory);
-		
+
 		int index = 0;
-		for (Kit kit : Skywars.get().getKits()) {
-			ItemStack item = kit.getIcon();
-			ItemMeta meta = item.getItemMeta();
+		for (final Kit kit : Skywars.get().getKits()) {
+			final ItemStack item = kit.getIcon();
+			final ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName(Messager.color("&a" + kit.getDisplayName()));
-			List<String> lore = new ArrayList<String>();
-			for(ItemStack i : kit.getItems()) {
-				lore.add(Messager.color("&8"
-						+ WordUtils.capitalizeFully(i.getType().name().replace("_", " "))));
+			final List<String> lore = new ArrayList<String>();
+			for (final ItemStack i : kit.getItems()) {
+				lore.add(Messager.color("&8" + WordUtils.capitalizeFully(i.getType().name().replace("_", " "))));
 			}
 			lore.add(Messager.color("&r"));
 			if (Skywars.get().getPlayerKit(player) == kit)
@@ -45,23 +44,24 @@ public class KitsMenu implements Listener {
 			meta.setLore(lore);
 			item.setItemMeta(meta);
 			inventory.setItem(index, item);
-			
+
 			index++;
 		}
 		player.openInventory(inventory);
 	}
-	
+
 	@EventHandler
 	void onClick(InventoryClickEvent event) {
-		Player player = (Player) event.getWhoClicked();
-		Inventory inventory = inventories.get(player);
+		final Player player = (Player) event.getWhoClicked();
+		final Inventory inventory = inventories.get(player);
 		if (event.getInventory().equals(inventory)) {
 			event.setCancelled(true);
-			ItemStack clicked = event.getCurrentItem();
-			if (clicked == null || clicked.getItemMeta() == null) return;
-			String name = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
-			Kit kit = Skywars.get().getKit(name);
-			if(kit != null) {
+			final ItemStack clicked = event.getCurrentItem();
+			if (clicked == null || clicked.getItemMeta() == null)
+				return;
+			final String name = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
+			final Kit kit = Skywars.get().getKit(name);
+			if (kit != null) {
 				Skywars.get().setPlayerKit(player, kit);
 				player.sendMessage("Selected kit " + name);
 			} else {
@@ -69,5 +69,5 @@ public class KitsMenu implements Listener {
 			}
 		}
 	}
-	
+
 }

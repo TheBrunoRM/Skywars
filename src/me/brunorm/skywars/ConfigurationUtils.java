@@ -15,42 +15,39 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public class ConfigurationUtils {
-	
-    public static final int DEFAULT_BUFFER_SIZE = 8192;
-	
-    private static void copyInputStreamToFile(InputStream inputStream, File file)
-            throws IOException {
-    	
-        try (FileOutputStream outputStream = new FileOutputStream(file, false)) {
-            int read;
-            byte[] bytes = new byte[DEFAULT_BUFFER_SIZE];
-            while ((read = inputStream.read(bytes)) != -1) {
-                outputStream.write(bytes, 0, read);
-            }
-            outputStream.close();
-        }
 
-    }
-	
+	public static final int DEFAULT_BUFFER_SIZE = 8192;
+
+	private static void copyInputStreamToFile(InputStream inputStream, File file) throws IOException {
+
+		try (FileOutputStream outputStream = new FileOutputStream(file, false)) {
+			int read;
+			final byte[] bytes = new byte[DEFAULT_BUFFER_SIZE];
+			while ((read = inputStream.read(bytes)) != -1) {
+				outputStream.write(bytes, 0, read);
+			}
+			outputStream.close();
+		}
+
+	}
+
 	public static YamlConfiguration loadConfiguration(String name, String defaultFileName) {
-		File file = new File(Skywars.get().getDataFolder(), name);
+		final File file = new File(Skywars.get().getDataFolder(), name);
 		if (!file.exists()) {
-			System.out.println("creating file " + name);
+			Skywars.get().sendDebugMessage("creating file " + name);
 			copyDefaultContentsToFile(defaultFileName, file);
 		}
-		return createMissingKeys(
-				YamlConfiguration.loadConfiguration(file),
-				getDefaultConfig(defaultFileName));
+		return createMissingKeys(YamlConfiguration.loadConfiguration(file), getDefaultConfig(defaultFileName));
 	}
-	
+
 	public static YamlConfiguration createMissingKeys(YamlConfiguration conf, YamlConfiguration defaultConfig) {
-		
+
 		try {
-			ConfigurationSection section = defaultConfig.getConfigurationSection("");
-			
+			final ConfigurationSection section = defaultConfig.getConfigurationSection("");
+
 			boolean modified = false;
-			
-			for (String key : section.getKeys(true)) {
+
+			for (final String key : section.getKeys(true)) {
 				if (conf.get(key) == null) {
 					Skywars.get().sendMessage("&cWarning: key &b%s &cis not set.", key);
 					modified = true;
@@ -61,39 +58,41 @@ public class ConfigurationUtils {
 					conf.set(key, defaultConfig.get(key));
 				}
 			}
-			if(modified) {				
+			if (modified) {
 				Skywars.get().sendMessage("&cYou should not delete keys in the configuration files.");
 				Skywars.get().sendMessage("&6The plugin will use the default values for the deleted keys.");
 			}
 			return conf;
-		} catch(Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
-    
+
 	static YamlConfiguration getDefaultConfig(String defaultFileName) {
 		try {
-			Reader defaultConfigStream = new InputStreamReader(Skywars.get().getResource(defaultFileName), "UTF-8");
+			final Reader defaultConfigStream = new InputStreamReader(Skywars.get().getResource(defaultFileName),
+					"UTF-8");
 			return YamlConfiguration.loadConfiguration(defaultConfigStream);
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
+
 	public static void copyDefaultContentsToFile(String defaultFileName, File file) {
 		try {
-			System.out.println("copying default contents to file " + file.getPath());
-			if(!file.exists()) file.createNewFile();
+			Skywars.get().sendDebugMessage("copying default contents to file " + file.getPath());
+			if (!file.exists())
+				file.createNewFile();
 			try {
 				copyInputStreamToFile(Skywars.get().getResource(defaultFileName), file);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -101,26 +100,26 @@ public class ConfigurationUtils {
 	public static void saveConfiguration(YamlConfiguration config, String path) {
 		try {
 			config.save(new File(Skywars.get().getDataFolder(), path));
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static Location getLocationConfig(String worldName, ConfigurationSection config) {
-		if(worldName == null) {
-			System.out.println("warning, getlocationconfig: worldname is null");
+		if (worldName == null) {
+			Skywars.get().sendDebugMessage("warning, getlocationconfig: worldname is null");
 			return null;
 		}
-		World world = Bukkit.getWorld(worldName);
-		if(world != null)
+		final World world = Bukkit.getWorld(worldName);
+		if (world != null)
 			return getLocationConfig(world, config);
-		System.out.println("warning, getlocationconfig: world is null");
+		Skywars.get().sendDebugMessage("warning, getlocationconfig: world is null");
 		return null;
 	}
-	
+
 	public static Location getLocationConfig(World world, ConfigurationSection config) {
-		Location loc = new Location(world, config.getInt("x"), config.getInt("y"), config.getInt("z"));
+		final Location loc = new Location(world, config.getInt("x"), config.getInt("y"), config.getInt("z"));
 		return loc;
 	}
 }

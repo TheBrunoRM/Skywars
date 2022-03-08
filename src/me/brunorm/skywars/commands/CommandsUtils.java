@@ -7,25 +7,25 @@ import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
 
 public class CommandsUtils {
-	
+
 	public static boolean permissionCheckWithMessage(CommandSender sender, String permission) {
-		if(!sender.hasPermission(permission)) {
+		if (!sender.hasPermission(permission)) {
 			sender.sendMessage(Messager.color(Skywars.langConfig.getString("NO_PERMISSION")));
 			return false;
 		}
 		return true;
 	}
-	
+
 	public static boolean permissionCheckWithMessage(Player player, String permission) {
-		if(!player.hasPermission(permission)) {
+		if (!player.hasPermission(permission)) {
 			player.sendMessage(Messager.color(Skywars.langConfig.getString("NO_PERMISSION")));
 			return false;
 		}
 		return true;
 	}
-	
+
 	public static boolean arenaCheckWithMessage(Player player) {
-		if(Skywars.get().getPlayerArena(player) == null) {
+		if (Skywars.get().getPlayerArena(player) == null) {
 			player.sendMessage(Messager.color(Skywars.langConfig.getString("NOT_JOINED")));
 			return false;
 		}

@@ -8,7 +8,8 @@ public class DisableWeather implements Listener {
 
 	@EventHandler
 	void onWeatherChange(WeatherChangeEvent event) {
-		if(event.toWeatherState()) event.setCancelled(true);
+		if (event.toWeatherState())
+			event.setCancelled(true);
 	}
-	
+
 }

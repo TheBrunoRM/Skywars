@@ -19,82 +19,75 @@ import org.jnbt.ListTag;
 *    along with this class.  If not, see <http://www.gnu.org/licenses/>.
 *
 */
- 
+
 /**
-*
-* @author Max
-*/
-public class Schematic
-{
- 
-    private byte[] blocks;
-    private byte[] data;
-    private short width;
-    private short length;
-    private short height;
-    private Vector offset;
-    private ListTag tileEntities;
- 
-    public Schematic(byte[] blocks, byte[] data, short width,
-    		short length, short height, Vector offset, ListTag tileEntities)
-    {
-        this.blocks = blocks;
-        this.data = data;
-        this.width = width;
-        this.length = length;
-        this.height = height;
-        this.offset = offset;
-        this.tileEntities = tileEntities;
-    }
- 
-    /**
-    * @return the blocks
-    */
-    public byte[] getBlocks()
-    {
-        return blocks;
-    }
- 
-    /**
-    * @return the data
-    */
-    public byte[] getData()
-    {
-        return data;
-    }
- 
-    /**
-    * @return the width
-    */
-    public short getWidth()
-    {
-        return width;
-    }
- 
-    /**
-    * @return the lenght
-    */
-    public short getLength()
-    {
-        return length;
-    }
- 
-    /**
-    * @return the height
-    */
-    public short getHeight()
-    {
-        return height;
-    }
-    
-    /**
-    * @return the offset from WorldEdit
-    */
-    public Vector getOffset() {
-    	return offset;
-    }
-    
-    public ListTag getTileEntities() {
-    	return tileEntities;
-    }
+ *
+ * @author Max
+ */
+public class Schematic {
+
+	private final byte[] blocks;
+	private final byte[] data;
+	private final short width;
+	private final short length;
+	private final short height;
+	private final Vector offset;
+	private final ListTag tileEntities;
+
+	public Schematic(byte[] blocks, byte[] data, short width, short length, short height, Vector offset,
+			ListTag tileEntities) {
+		this.blocks = blocks;
+		this.data = data;
+		this.width = width;
+		this.length = length;
+		this.height = height;
+		this.offset = offset;
+		this.tileEntities = tileEntities;
+	}
+
+	/**
+	 * @return the blocks
+	 */
+	public byte[] getBlocks() {
+		return this.blocks;
+	}
+
+	/**
+	 * @return the data
+	 */
+	public byte[] getData() {
+		return this.data;
+	}
+
+	/**
+	 * @return the width
+	 */
+	public short getWidth() {
+		return this.width;
+	}
+
+	/**
+	 * @return the lenght
+	 */
+	public short getLength() {
+		return this.length;
+	}
+
+	/**
+	 * @return the height
+	 */
+	public short getHeight() {
+		return this.height;
+	}
+
+	/**
+	 * @return the offset from WorldEdit
+	 */
+	public Vector getOffset() {
+		return this.offset;
+	}
+
+	public ListTag getTileEntities() {
+		return this.tileEntities;
+	}
 }

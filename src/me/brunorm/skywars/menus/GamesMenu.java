@@ -20,14 +20,14 @@ import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.structures.Arena;
 
 public class GamesMenu implements Listener {
-	
+
 	public static void OpenMenu(Player player) {
-		Inventory inventory = Bukkit.createInventory(null, 9 * 3, "Skywars");
+		final Inventory inventory = Bukkit.createInventory(null, 9 * 3, "Skywars");
 		PlayerInventoryManager.setInventory(player, inventory);
-		ItemStack item = new ItemStack(XMaterial.BOW.parseItem());
-		ItemMeta meta = item.getItemMeta();
+		final ItemStack item = new ItemStack(XMaterial.BOW.parseItem());
+		final ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(Messager.color("&aclick to join random game"));
-		List<String> lore = new ArrayList<String>();
+		final List<String> lore = new ArrayList<String>();
 		lore.add(Messager.color("&eliterally just click this"));
 		lore.add(Messager.color("&eto join the game that"));
 		lore.add(Messager.color("&ehas the most players in it"));
@@ -36,18 +36,20 @@ public class GamesMenu implements Listener {
 		inventory.setItem(11, item);
 		player.openInventory(inventory);
 	}
-	
+
 	@EventHandler
 	void onClick(InventoryClickEvent event) {
-		Player player = (Player) event.getWhoClicked();
-		if(player == null) return;
-		Inventory inventory = PlayerInventoryManager.getInventory(player);
-		if(inventory == null) return;
+		final Player player = (Player) event.getWhoClicked();
+		if (player == null)
+			return;
+		final Inventory inventory = PlayerInventoryManager.getInventory(player);
+		if (inventory == null)
+			return;
 		if (event.getInventory().getName().equals(inventory.getName())) {
-			ItemStack clicked = event.getCurrentItem();
+			final ItemStack clicked = event.getCurrentItem();
 			if (clicked.getType() == XMaterial.BOW.parseMaterial()) {
 				event.setCancelled(true);
-				Arena arena = Skywars.get().getRandomJoinableArena();
+				final Arena arena = Skywars.get().getRandomJoinableArena();
 				if (arena == null) {
 					player.sendMessage("couldn't find joinable arena");
 					return;

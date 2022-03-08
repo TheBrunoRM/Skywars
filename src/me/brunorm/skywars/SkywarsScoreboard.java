@@ -16,16 +16,17 @@ import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.SkywarsPlayer;
 
 public class SkywarsScoreboard {
-	
-	public static YamlConfiguration config = Skywars.scoreboardConfig;
-	
-	public static void update(Player player) {
-		
-		if (config == null) return;
-		
-		ArrayList<String> texts = new ArrayList<String>();
 
-		Arena arena = Skywars.get().getPlayerArena(player);
+	public static YamlConfiguration config = Skywars.scoreboardConfig;
+
+	public static void update(Player player) {
+
+		if (config == null)
+			return;
+
+		final ArrayList<String> texts = new ArrayList<String>();
+
+		final Arena arena = Skywars.get().getPlayerArena(player);
 		SkywarsPlayer swp = null;
 		List<String> stringList = null;
 		if (arena != null) {
@@ -42,19 +43,19 @@ public class SkywarsScoreboard {
 		} else {
 			stringList = config.getStringList("lobby");
 		}
-		
+
 		if (stringList != null) {
-			ScoreboardManager manager = Bukkit.getScoreboardManager();
-			Scoreboard board = manager.getNewScoreboard();
-			Objective objective = board.registerNewObjective("skywars", "");
+			final ScoreboardManager manager = Bukkit.getScoreboardManager();
+			final Scoreboard board = manager.getNewScoreboard();
+			final Objective objective = board.registerNewObjective("skywars", "");
 
 			objective.setDisplayName(Messager.color(config.getString("title")));
 			objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 			for (int i = 0; i < stringList.size(); i++) {
-				String text = SkywarsUtils.format(stringList.get(i), player, arena, swp);
+				final String text = SkywarsUtils.format(stringList.get(i), player, arena, swp);
 				texts.add(i, Messager.color(text));
 			}
-			
+
 			int textIndex = 0;
 			for (int i = texts.size(); i > 0; i--) {
 				String text = texts.get(textIndex);
@@ -62,15 +63,15 @@ public class SkywarsScoreboard {
 					continue;
 				if (text.equals(""))
 					text = Messager.color("&" + SkywarsUtils.colorSymbols[textIndex]);
-				Score score = objective.getScore(text);
+				final Score score = objective.getScore(text);
 				score.setScore(i);
 				textIndex++;
 			}
-			
+
 			try {
 				// just in case
 				player.setScoreboard(board);
-			} catch(Exception e) {
+			} catch (final Exception e) {
 			}
 		}
 

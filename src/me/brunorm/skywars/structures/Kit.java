@@ -14,29 +14,29 @@ public class Kit {
 	int price;
 	YamlConfiguration config;
 	File file;
-	
+
 	public Kit(String name) {
 		this.name = name;
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public String getDisplayName() {
-		return displayName;
+		return this.displayName;
 	}
-	
+
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
 
 	public ItemStack getIcon() {
-		return icon;
+		return this.icon;
 	}
 
 	public void setIcon(ItemStack icon) {
@@ -44,15 +44,15 @@ public class Kit {
 	}
 
 	public ItemStack[] getItems() {
-		return items;
+		return this.items;
 	}
 
 	public void setItems(ItemStack[] items) {
 		this.items = items;
 	}
-	
+
 	public int getPrice() {
-		return price;
+		return this.price;
 	}
 
 	public void setPrice(int price) {
@@ -60,19 +60,19 @@ public class Kit {
 	}
 
 	public YamlConfiguration getConfig() {
-		return config;
+		return this.config;
 	}
-	
+
 	public void setConfig(YamlConfiguration config) {
 		this.config = config;
 	}
-	
+
 	public File getFile() {
-		return file;
+		return this.file;
 	}
-	
+
 	public void setFile(File file) {
 		this.file = file;
 	}
-	
+
 }

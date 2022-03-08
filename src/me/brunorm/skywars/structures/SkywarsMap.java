@@ -18,7 +18,7 @@ import me.brunorm.skywars.schematics.Schematic;
 import me.brunorm.skywars.schematics.SchematicHandler;
 
 public class SkywarsMap {
-	
+
 	String name;
 	int minPlayers;
 	int maxPlayers;
@@ -28,29 +28,29 @@ public class SkywarsMap {
 	Schematic schematic;
 	YamlConfiguration config;
 	File file;
-	
+
 	// this is in case the arenas method is set to SINGLE_ARENA
 	Location location;
 	String worldName;
-	
+
 	public void setLocation(Location location) {
 		this.location = location;
 	}
-	
+
 	public Location getLocation() {
-		return location;
+		return this.location;
 	}
-	
+
 	public void setWorldName(String worldName) {
 		this.worldName = worldName;
 	}
-	
+
 	public String getWorldName() {
-		return worldName;
+		return this.worldName;
 	}
-	
+
 	HashMap<Integer, Vector> spawns = new HashMap<Integer, Vector>();
-	
+
 	public SkywarsMap(String name, String schematicFile, int minPlayers, int maxPlayers, int teamSize) {
 		this.name = name;
 		this.schematicFilename = schematicFile;
@@ -58,157 +58,158 @@ public class SkywarsMap {
 		this.maxPlayers = maxPlayers;
 		this.teamSize = teamSize;
 	}
-	
+
 	public SkywarsMap(String name) {
 		this.name = name;
 	}
 
 	public void setLocationConfig(String string, Location location) {
 		if (location == null) {
-			config.set(string, null);
+			this.config.set(string, null);
 		} else {
-			config.set(string + ".x", location.getBlockX());
-			config.set(string + ".y", location.getBlockY());
-			config.set(string + ".z", location.getBlockZ());
+			this.config.set(string + ".x", location.getBlockX());
+			this.config.set(string + ".y", location.getBlockY());
+			this.config.set(string + ".z", location.getBlockZ());
 		}
 	}
-	
+
 	public void setVectorConfig(String string, Vector vector) {
 		if (vector == null) {
-			config.set(string, null);
+			this.config.set(string, null);
 		} else {
-			config.set(string + ".x", vector.getBlockX());
-			config.set(string + ".y", vector.getBlockY());
-			config.set(string + ".z", vector.getBlockZ());
+			this.config.set(string + ".x", vector.getBlockX());
+			this.config.set(string + ".y", vector.getBlockY());
+			this.config.set(string + ".z", vector.getBlockZ());
 		}
 	}
-	
+
 	public void saveParametersInConfig() {
-		if(config == null)
-			config = YamlConfiguration.loadConfiguration(getFile());
-		//System.out.println("saving parameters in config");
-		config.set("minPlayers", this.getMinPlayers());
-		config.set("maxPlayers", this.getMaxPlayers());
-		config.set("schematic", this.getSchematicFilename());
-		config.set("centerRadius", this.getCenterRadius());
-		config.set("worldName", getWorldName());
-		if(getLocation() != null)
-			setVectorConfig("location", getLocation().toVector());
-		if (getSpawns() != null) {
-			//System.out.println("setting spawns");
-			config.set("spawn", null); // clear all the previous set spawns
+		if (this.config == null)
+			this.config = YamlConfiguration.loadConfiguration(this.getFile());
+		// Skywars.get().sendDebugMessage("saving parameters in config");
+		this.config.set("minPlayers", this.getMinPlayers());
+		this.config.set("maxPlayers", this.getMaxPlayers());
+		this.config.set("schematic", this.getSchematicFilename());
+		this.config.set("centerRadius", this.getCenterRadius());
+		this.config.set("worldName", this.getWorldName());
+		if (this.getLocation() != null)
+			this.setVectorConfig("location", this.getLocation().toVector());
+		if (this.getSpawns() != null) {
+			// Skywars.get().sendDebugMessage("setting spawns");
+			this.config.set("spawn", null); // clear all the previous set spawns
 			for (int i = 0; i < this.getSpawns().size(); i++) {
-				//System.out.println("setting spawn " + i);
-				Vector spawn = spawns.get(i);
-				setVectorConfig("spawn." + i, spawn);
+				// Skywars.get().sendDebugMessage("setting spawn " + i);
+				final Vector spawn = this.spawns.get(i);
+				this.setVectorConfig("spawn." + i, spawn);
 			}
 		} else {
-			System.out.println("warning: spawns is null");
+			Skywars.get().sendDebugMessage("warning: spawns is null");
 		}
 	}
-	
+
 	public void saveConfig() {
-		if(getFile() == null) {			
-			File mapFile = new File(Skywars.mapsPath, String.format("%s.yml", this.getName()));
+		if (this.getFile() == null) {
+			final File mapFile = new File(Skywars.mapsPath, String.format("%s.yml", this.getName()));
 			if (!mapFile.exists()) {
 				try {
 					mapFile.createNewFile();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 				}
 			}
-			setFile(mapFile);
+			this.setFile(mapFile);
 		}
 		try {
-			getConfig().save(file);
-		} catch (IOException e) {
+			this.getConfig().save(this.file);
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void calculateSpawns() {
-		
-		getSchematic();
-		if(schematic == null) return;
-		System.out.println("Calculating spawns for map " + this.name);
-		
+
+		this.getSchematic();
+		if (this.schematic == null)
+			return;
+		Skywars.get().sendDebugMessage("Calculating spawns for map " + this.name);
+
 		// get schematic data and beacon locations
-		Vector offset = schematic.getOffset();
-		ListTag tileEntities = schematic.getTileEntities();
-		ArrayList<Vector> beaconLocations = new ArrayList<Vector>();
-	
-		for (Tag tag : tileEntities.getValue()) {
+		final Vector offset = this.schematic.getOffset();
+		final ListTag tileEntities = this.schematic.getTileEntities();
+		final ArrayList<Vector> beaconLocations = new ArrayList<Vector>();
+
+		for (final Tag tag : tileEntities.getValue()) {
 			@SuppressWarnings("unchecked")
-			Map<String, Tag> values = (Map<String, Tag>) tag.getValue();
+			final Map<String, Tag> values = (Map<String, Tag>) tag.getValue();
 			if (values.get("id").getValue().equals("Beacon")) {
-				Vector vector = SchematicHandler.calculatePositionWithOffset(values, offset)
-						.add(new Vector(0,1,0));
+				final Vector vector = SchematicHandler.calculatePositionWithOffset(values, offset)
+						.add(new Vector(0, 1, 0));
 				beaconLocations.add(vector);
 			}
 		}
-		
+
 		// saving the number of beacons
-		int totalBeacons = beaconLocations.size();
-		
+		final int totalBeacons = beaconLocations.size();
+
 		// check if there are beacons before resetting spawns
-		if(totalBeacons <= 0) {
-			System.out.println("no beacons");
+		if (totalBeacons <= 0) {
+			Skywars.get().sendDebugMessage("no beacons");
 			return;
 		}
-		
+
 		// clear spawns
-		spawns.clear();
-		config.set("spawn", null);
-		
+		this.spawns.clear();
+		this.config.set("spawn", null);
+
 		// set the first spawn
-		spawns.put(0, beaconLocations.get(0));
+		this.spawns.put(0, beaconLocations.get(0));
 		beaconLocations.remove(0);
-		
-		for(int i = 1; i < totalBeacons; i++) {
-			Vector previousSpawn = spawns.get(i-1);
+
+		for (int i = 1; i < totalBeacons; i++) {
+			final Vector previousSpawn = this.spawns.get(i - 1);
 			Vector closest = beaconLocations.get(0);
-			if(beaconLocations.size() > 1) {
-				for(Vector currentSpawn : beaconLocations) {
-					if(SkywarsUtils.distance(previousSpawn, currentSpawn)
-							< SkywarsUtils.distance(previousSpawn, closest)) {
+			if (beaconLocations.size() > 1) {
+				for (final Vector currentSpawn : beaconLocations) {
+					if (SkywarsUtils.distance(previousSpawn, currentSpawn) < SkywarsUtils.distance(previousSpawn,
+							closest)) {
 						closest = currentSpawn;
 					}
 				}
 				beaconLocations.remove(closest);
 			}
-			spawns.put(i, closest);
+			this.spawns.put(i, closest);
 		}
-		
-		saveParametersInConfig();
-		saveConfig();
-		System.out.println("spawns calculated");
+
+		this.saveParametersInConfig();
+		this.saveConfig();
+		Skywars.get().sendDebugMessage("spawns calculated");
 	}
-	
+
 	public HashMap<Integer, Vector> getSpawns() {
-		return spawns;
+		return this.spawns;
 	}
-	
+
 	public Vector getSpawn(Object key) {
-		return spawns.get(key);
+		return this.spawns.get(key);
 	}
-	
+
 	public void setSpawn(int spawn, Vector vector) {
-		spawns.put(spawn, vector);
+		this.spawns.put(spawn, vector);
 	}
-	
+
 	public YamlConfiguration getConfig() {
-		return config;
+		return this.config;
 	}
 
 	public void setConfig(YamlConfiguration config) {
 		this.config = config;
 	}
-	
+
 	public String getName() {
-		return name;
+		return this.name;
 	}
-	
+
 	public int getMinPlayers() {
-		return minPlayers;
+		return this.minPlayers;
 	}
 
 	public void setMinPlayers(int minPlayers) {
@@ -216,53 +217,54 @@ public class SkywarsMap {
 	}
 
 	public int getMaxPlayers() {
-		return maxPlayers;
+		return this.maxPlayers;
 	}
 
 	public void setMaxPlayers(int maxPlayers) {
 		this.maxPlayers = maxPlayers;
 	}
-	
+
 	public File getFile() {
-		return file;
+		return this.file;
 	}
 
 	public void setFile(File file) {
 		this.file = file;
 	}
-	
+
 	public int getCenterRadius() {
-		return centerRadius;
+		return this.centerRadius;
 	}
 
 	public void setCenterRadius(int centerRadius) {
 		this.centerRadius = centerRadius;
 	}
-	
+
 	public String getSchematicFilename() {
-		return schematicFilename;
+		return this.schematicFilename;
 	}
 
 	public void setSchematic(String schematic) {
 		this.schematicFilename = schematic;
 	}
-	
+
 	public void loadSchematic() {
-		if(schematicFilename == null) return;
-		File schematicFile = Skywars.get().getSchematicFile(schematicFilename);
-		if(schematicFile == null) {
-			System.out.println("Could not get schematic file for map "
-					+ getName() + "! (Maybe it doesnt exist?)");
+		if (this.schematicFilename == null)
+			return;
+		final File schematicFile = Skywars.get().getSchematicFile(this.schematicFilename);
+		if (schematicFile == null) {
+			Skywars.get().sendDebugMessage("Could not get schematic file for map " + this.getName() + "! (Maybe it doesnt exist?)");
 		}
 		try {
-			schematic = SchematicHandler.loadSchematic(schematicFile);
-		} catch (IOException e) {
+			this.schematic = SchematicHandler.loadSchematic(schematicFile);
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public Schematic getSchematic() {
-		if(schematic == null) loadSchematic();
-		return schematic;
+		if (this.schematic == null)
+			this.loadSchematic();
+		return this.schematic;
 	}
 }

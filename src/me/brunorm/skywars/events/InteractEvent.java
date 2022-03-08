@@ -22,43 +22,41 @@ import me.brunorm.skywars.structures.SkywarsMap;
 import me.brunorm.skywars.structures.SkywarsPlayer;
 
 public class InteractEvent implements Listener {
-	
+
 	@EventHandler
 	void onInteract(PlayerInteractEvent event) {
-		Player player = event.getPlayer();
-		Arena arena = Skywars.get().getPlayerArena(player);
-		if (arena != null) {		
-			SkywarsPlayer swp = arena.getPlayer(player);
+		final Player player = event.getPlayer();
+		final Arena arena = Skywars.get().getPlayerArena(player);
+		if (arena != null) {
+			final SkywarsPlayer swp = arena.getPlayer(player);
 			ItemStack item;
 			item = player.getItemInHand();
-			String kitSelectorTypeName = Skywars.get().getConfig().getString("item_types.KIT_SELECTOR");
-			Material kitSelectorType = XMaterial.matchXMaterial(kitSelectorTypeName).get().parseMaterial();
+			final String kitSelectorTypeName = Skywars.get().getConfig().getString("item_types.KIT_SELECTOR");
+			final Material kitSelectorType = XMaterial.matchXMaterial(kitSelectorTypeName).get().parseMaterial();
 			if (item.getType() == kitSelectorType) {
 				if (!arena.started()) {
 					KitsMenu.open(player);
 					event.setCancelled(true);
 				}
 			}
-			String leaveTypeName = Skywars.get().getConfig().getString("item_types.LEAVE");
-			Material leaveType = XMaterial.matchXMaterial(leaveTypeName).get().parseMaterial();
+			final String leaveTypeName = Skywars.get().getConfig().getString("item_types.LEAVE");
+			final Material leaveType = XMaterial.matchXMaterial(leaveTypeName).get().parseMaterial();
 			if (item.getType() == leaveType) {
-				if (arena.getStatus() != ArenaStatus.PLAYING
-						|| swp.isSpectator()) {
+				if (arena.getStatus() != ArenaStatus.PLAYING || swp.isSpectator()) {
 					arena.leavePlayer(swp);
 					event.setCancelled(true);
 				}
 			}
-		} else if (Skywars.get().getConfig().getBoolean("signsEnabled")
-				&& event.getClickedBlock() != null) {
+		} else if (Skywars.get().getConfig().getBoolean("signsEnabled") && event.getClickedBlock() != null) {
 			if (event.getClickedBlock().getType() == XMaterial.OAK_SIGN.parseMaterial()
 					|| event.getClickedBlock().getType() == XMaterial.OAK_WALL_SIGN.parseMaterial()) {
-				if(player.getGameMode() == GameMode.CREATIVE && player.isSneaking())
+				if (player.getGameMode() == GameMode.CREATIVE && player.isSneaking())
 					return;
-				Sign sign = (Sign) event.getClickedBlock().getState();
+				final Sign sign = (Sign) event.getClickedBlock().getState();
 				if (sign.getLine(1).equals(Messager.color("&e[&bSkyWars&e]"))) {
-					String mapName = sign.getLine(2);
+					final String mapName = sign.getLine(2);
 					if (mapName != null) {
-						SkywarsMap map = Skywars.get().getMap(ChatColor.stripColor(mapName));
+						final SkywarsMap map = Skywars.get().getMap(ChatColor.stripColor(mapName));
 						if (map != null) {
 							Skywars.get().joinMap(map, player);
 						} else

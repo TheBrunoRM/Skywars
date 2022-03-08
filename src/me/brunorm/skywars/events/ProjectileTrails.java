@@ -20,38 +20,38 @@ import me.brunorm.skywars.Skywars;
 import mrblobman.sounds.Sounds;
 
 public class ProjectileTrails implements Listener {
-	
-	private Map<Projectile, BukkitTask> tasks = new HashMap<>();
-	
+
+	private final Map<Projectile, BukkitTask> tasks = new HashMap<>();
+
 	@EventHandler
 	public void onProjectileLaunch(ProjectileLaunchEvent e) {
-        Projectile entity = e.getEntity();
-        EntityType type = entity.getType();
-	    if (e.getEntity().getShooter() instanceof Player) {
-            if(type == EntityType.ARROW) {
-		        tasks.put(e.getEntity(), new BukkitRunnable() {
-		            @Override
-		            public void run() {
-	                    World w = entity.getWorld();
-	                    Location l = entity.getLocation();
-	    	            w.playEffect(l, Effect.SMOKE, 2);
-		            }
-		        }.runTaskTimer(Skywars.get(), 0L, 1L));
-            }
-	    }
+		final Projectile entity = e.getEntity();
+		final EntityType type = entity.getType();
+		if (e.getEntity().getShooter() instanceof Player) {
+			if (type == EntityType.ARROW) {
+				this.tasks.put(e.getEntity(), new BukkitRunnable() {
+					@Override
+					public void run() {
+						final World w = entity.getWorld();
+						final Location l = entity.getLocation();
+						w.playEffect(l, Effect.SMOKE, 2);
+					}
+				}.runTaskTimer(Skywars.get(), 0L, 1L));
+			}
+		}
 	}
 
 	@EventHandler
 	public void onProjectileHit(ProjectileHitEvent e) {
-	    if (e.getEntity().getShooter() instanceof Player) {
-	        BukkitTask task = tasks.get(e.getEntity());
-	        if (task != null) {
-	            task.cancel();
-	            tasks.remove(e.getEntity());
-	            Location loc = e.getEntity().getLocation();
-	            e.getEntity().getWorld().playEffect(loc, Effect.SMOKE, 1, 1);
-	            e.getEntity().getWorld().playSound(loc, Sounds.EXPLODE.bukkitSound(), 3, 1);
-	        }
-	    }
+		if (e.getEntity().getShooter() instanceof Player) {
+			final BukkitTask task = this.tasks.get(e.getEntity());
+			if (task != null) {
+				task.cancel();
+				this.tasks.remove(e.getEntity());
+				final Location loc = e.getEntity().getLocation();
+				e.getEntity().getWorld().playEffect(loc, Effect.SMOKE, 1, 1);
+				e.getEntity().getWorld().playSound(loc, Sounds.EXPLODE.bukkitSound(), 3, 1);
+			}
+		}
 	}
 }

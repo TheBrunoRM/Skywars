@@ -10,7 +10,7 @@ import org.bukkit.potion.PotionEffect;
 import me.brunorm.skywars.SkywarsUtils;
 
 public class SavedPlayer {
-	
+
 	Player player;
 	ItemStack[] inventoryItems;
 	ItemStack[] equipmentItems;
@@ -25,7 +25,7 @@ public class SavedPlayer {
 	boolean allowFlight;
 	int fireTicks;
 	int heldItemSlot;
-	
+
 	public SavedPlayer(Player player) {
 		this.player = player;
 		this.inventoryItems = player.getInventory().getContents();
@@ -42,31 +42,31 @@ public class SavedPlayer {
 		this.fireTicks = player.getFireTicks();
 		this.heldItemSlot = player.getInventory().getHeldItemSlot();
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	public void Restore() {
-		SkywarsUtils.ClearPlayer(player);
-		
+		SkywarsUtils.ClearPlayer(this.player);
+
 		// clear inventory
-		
-		player.getInventory().setContents(inventoryItems);
-		player.getEquipment().setArmorContents(equipmentItems);
-		player.updateInventory();
+
+		this.player.getInventory().setContents(this.inventoryItems);
+		this.player.getEquipment().setArmorContents(this.equipmentItems);
+		this.player.updateInventory();
 
 		// clear player
-		player.setGameMode(gamemode);
-		player.setExp(exp);
-		player.setLevel(level);
-		player.setFoodLevel(hunger);
-		player.setHealth(health);
-		player.setMaxHealth(maxHealth);
-		player.setFlying(flying);
-		player.setAllowFlight(allowFlight);
-		player.setFireTicks(fireTicks);
-		player.getInventory().setHeldItemSlot(heldItemSlot);
-		
-		for (PotionEffect effect : potionEffects) {
-			player.addPotionEffect(effect);
+		this.player.setGameMode(this.gamemode);
+		this.player.setExp(this.exp);
+		this.player.setLevel(this.level);
+		this.player.setFoodLevel(this.hunger);
+		this.player.setHealth(this.health);
+		this.player.setMaxHealth(this.maxHealth);
+		this.player.setFlying(this.flying);
+		this.player.setAllowFlight(this.allowFlight);
+		this.player.setFireTicks(this.fireTicks);
+		this.player.getInventory().setHeldItemSlot(this.heldItemSlot);
+
+		for (final PotionEffect effect : this.potionEffects) {
+			this.player.addPotionEffect(effect);
 		}
 	}
 }
