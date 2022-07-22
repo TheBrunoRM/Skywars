@@ -20,13 +20,14 @@ Steps to reproduce the behavior:
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
+**Additional context**
+Add any other context about the problem here.
+
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
 **Versions (please complete the following information):**
- - Plugin version
- - Server version
- - Client version
-
-**Additional context**
-Add any other context about the problem here.
+ - Plugin version: (e.g. 0.1.1)
+ - Server version: (e.g. 1.8.8)
+ - Server software: (e.g. Bukkit)
+ - Client version (game version): (e.g. 1.13.2)
