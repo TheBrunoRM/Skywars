@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>me.brunorm.skywars</groupId>
   <artifactId>Skywars</artifactId>
-  <version>0.2.9</version>
+  <version>0.3.0</version>
   <name>Skywars</name>
   <properties>
     <mainClass>me.brunorm.skywars.Skywars</mainClass>
@@ -14,13 +14,23 @@
         <id>spigot-repo</id>
         <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
   </repositories>
   <dependencies>
   	<dependency>
 		<groupId>org.spigotmc</groupId>
 		<artifactId>spigot</artifactId>
-		<version>1.18.2-R0.1-SNAPSHOT</version>
+		<version>1.8.8-R0.1-SNAPSHOT</version>
 		<scope>provided</scope>
+  	</dependency>
+  	<dependency>
+        <groupId>com.github.MilkBowl</groupId>
+        <artifactId>VaultAPI</artifactId>
+        <version>1.7</version>
+        <scope>provided</scope>
   	</dependency>
   </dependencies>
   <build>

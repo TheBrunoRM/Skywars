@@ -1,0 +1,123 @@
+# Skywars configuration file
+
+# the url for displaying the %url% placeholder (scoreboard)
+url: "&ewww.example.com"
+
+# the format for displaying the %date% placeholder (scoreboard)
+dateFormat: "dd/MM/yyyy"
+
+# you may want to disable these
+signsEnabled: true
+messageSounds:
+  enabled: true
+  sound: ITEM_PICKUP
+disableWeather: true
+
+sounds: # sound name; volume; pitch
+  join: HORSE_ARMOR; 5; 0.1
+  leave: ITEM_PICKUP; 5; 0.1
+  countdown: NOTE_STICKS; 5; 1
+
+# this is the reset cooldown for last hits (in seconds)
+lastHitResetCooldown: 15
+
+# this is the arena location method
+# possible options are SINGLE_ARENA or MULTI_ARENA
+# --
+# if the option is SINGLE_ARENA then every arena
+# has its own position in an specified world
+# and cannot be played more than once at the same time
+# --
+# if the option is MULTI_ARENA then every arena
+# does NOT have any position nor world assigned, and instead
+# you can set a default world for all the arenas
+# and then have the plugin place the arenas in the world.
+# this allows for a single map being playable in multiple arenas at the same time
+arenasMethod: SINGLE_ARENA
+
+# this is in case you set the arenas method to MULTI_ARENA
+arenas:
+  world: SkywarsMaps
+  Y: 150 # altitude of the schematics
+  separation: 200 # blocks per arena
+
+# update task for actionbar and scoreboard
+taskUpdate:
+  disabled: false
+  interval: 1 # seconds
+
+time: # seconds
+  starting: 10
+  ending: 10
+
+economy:
+  enabled: true
+  play: 10
+  kill: 25
+  win: 100
+
+# souls is the economy used for buying soul crates
+souls:
+  enabled: true
+  kill: 10
+
+# this is used to format money
+decimalFormat: "0.#"
+
+# this is displayed when the game starts
+startLines:
+  - "&a&l---------------------------------------------"
+  - ""
+  - "                                  &f&lSkyWars"
+  - ""
+  - "    &e&lGather resources and equipment on your island"
+  - "      &e&lin order to eliminate every other player."
+  - "     &e&lGo to the center island for special chests"
+  - "                       &e&lwith special items!"
+  - ""
+  - "&a&l---------------------------------------------"
+
+# you can disable the plugin commands here
+# possible options: start, forcestart, leave, where, skywars
+# you probably dont want to disable the last one lol
+disabledCommands: []
+
+# this is represented as
+# slot: item type
+# possible item types:
+# KIT_SELECTOR - clickable kit menu to select kit
+# GAME_OPTIONS - not yet implemented
+# LEAVE - same as /sw leave or /leave
+# TELEPORTER - not yet implemented - menu for selecting someone to spectate
+# SPECTATOR_OPTIONS - not yet implemented - spectator options as speed, night vision, etc
+# ARENAS_MENU - clickable arena menu to join a game
+# JOIN_RANDOM_ARENA - not yet implemented - instantly join an arena
+items:
+  waiting:
+    0: KIT_SELECTOR
+    1: GAME_OPTIONS
+    8: LEAVE
+  spectator:
+    0: TELEPORTER
+    1: SPECTATOR_OPTIONS
+    8: LEAVE
+  # if for some reason you want to give items when the game starts
+  # you can do so here
+  # (not yet implemented)
+  playing: {}
+
+# this is self explanatory
+# its the item types
+# you can make custom items by adding them here
+# you can add the details (name, description) in the lang file
+item_types:
+  KIT_SELECTOR: BOW
+  GAME_OPTIONS: PAPER
+  LEAVE: BED # RED_BED if 1.13+
+  SPECTATOR_OPTIONS: REDSTONE_COMPARATOR # COMPARATOR if 1.13+
+  TELEPORTER: COMPASS
+
+debug:
+  enabled: false
+  bigCases: false
+  projectileTests: false
