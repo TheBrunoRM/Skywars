@@ -11,31 +11,28 @@ public class CommandsUtils {
 	public static boolean consoleCheckWithMessage(CommandSender sender) {
 		if (sender instanceof Player)
 			return true;
-		sender.sendMessage("Can't execute as console.");
+		sender.sendMessage(Messager.getMessage("CANT_EXECUTE_COMMAND_IN_CONSOLE"));
 		return false;
 	}
 
 	public static boolean permissionCheckWithMessage(CommandSender sender, String permission) {
-		if (!sender.hasPermission(permission)) {
-			sender.sendMessage(Messager.color(Skywars.langConfig.getString("NO_PERMISSION")));
-			return false;
-		}
-		return true;
+		if (sender.hasPermission(permission))
+			return true;
+		sender.sendMessage(Messager.color(Skywars.langConfig.getString("NO_PERMISSION")));
+		return false;
 	}
 
 	public static boolean permissionCheckWithMessage(Player player, String permission) {
-		if (!player.hasPermission(permission)) {
-			player.sendMessage(Messager.color(Skywars.langConfig.getString("NO_PERMISSION")));
-			return false;
-		}
-		return true;
+		if (player.hasPermission(permission))
+			return true;
+		player.sendMessage(Messager.color(Skywars.langConfig.getString("NO_PERMISSION")));
+		return false;
 	}
 
 	public static boolean arenaCheckWithMessage(Player player) {
-		if (Skywars.get().getPlayerArena(player) == null) {
-			player.sendMessage(Messager.color(Skywars.langConfig.getString("NOT_JOINED")));
-			return false;
-		}
-		return true;
+		if (Skywars.get().getPlayerArena(player) != null)
+			return true;
+		player.sendMessage(Messager.color(Skywars.langConfig.getString("NOT_JOINED")));
+		return false;
 	}
 }

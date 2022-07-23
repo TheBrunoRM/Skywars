@@ -106,6 +106,8 @@ startLines:
   - ""
   - "&a&l---------------------------------------------"
 
+where: "&eYou are in &a{0}"
+
 countdown:
 - title: "&e%count% seconds"
   subtitle: "&eRight-click the bow to select a kit!"

@@ -12,17 +12,16 @@ public class ForceStartCommand implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String cmd, String[] args) {
-		if (sender instanceof Player) {
-			final Player player = (Player) sender;
-			final Arena playerArena = Skywars.get().getPlayerArena(player);
-			if (CommandsUtils.permissionCheckWithMessage(player, "skywars.forcestart")) {
-				if (CommandsUtils.arenaCheckWithMessage(player)) {
-					playerArena.startGame();
-					return true;
-				}
-			}
-		}
-		return false;
+		if (!CommandsUtils.consoleCheckWithMessage(sender))
+			return true;
+		final Player player = (Player) sender;
+		if (!CommandsUtils.permissionCheckWithMessage(player, "skywars.forcestart"))
+			return true;
+		if (!CommandsUtils.arenaCheckWithMessage(player))
+			return true;
+		final Arena playerArena = Skywars.get().getPlayerArena(player);
+		playerArena.startGame();
+		return true;
 	}
 
 }

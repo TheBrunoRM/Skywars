@@ -5,7 +5,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.structures.Arena;
 
@@ -13,14 +12,13 @@ public class LeaveCommand implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String cmd, String[] args) {
-		if (sender instanceof Player) {
-			final Player player = (Player) sender;
-			final Arena playerArena = Skywars.get().getPlayerArena(player);
-			if (CommandsUtils.arenaCheckWithMessage(player))
-				playerArena.leavePlayer(player);
-		} else {
-			sender.sendMessage(Messager.getMessage("CANT_EXECUTE_COMMAND_IN_CONSOLE"));
-		}
+		if (!CommandsUtils.consoleCheckWithMessage(sender))
+			return true;
+		final Player player = (Player) sender;
+		final Arena playerArena = Skywars.get().getPlayerArena(player);
+		if (!CommandsUtils.arenaCheckWithMessage(player))
+			return true;
+		playerArena.leavePlayer(player);
 		return true;
 	}
 
