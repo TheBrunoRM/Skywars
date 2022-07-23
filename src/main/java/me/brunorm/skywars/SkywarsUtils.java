@@ -30,18 +30,19 @@ import org.bukkit.util.Vector;
 import com.cryptomorin.xseries.XMaterial;
 
 import me.brunorm.skywars.structures.Arena;
-import me.brunorm.skywars.structures.SkywarsPlayer;
+import me.brunorm.skywars.structures.SkywarsUser;
+import mrblobman.sounds.Sounds;
 
 public class SkywarsUtils {
 
 	public static String url = getUrl();
 	public static String[] colorSymbols = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "f" };
 
-	public static String format(String text, Player player, Arena arena, SkywarsPlayer swp) {
+	public static String format(String text, Player player, Arena arena, SkywarsUser swp) {
 		return format(text, player, arena, swp, false);
 	}
 
-	public static String format(String text, Player player, Arena arena, SkywarsPlayer swp, boolean status) {
+	public static String format(String text, Player player, Arena arena, SkywarsUser swp, boolean status) {
 		final Date date = new Date();
 		final String format = Skywars.get().getConfig().getString("dateFormat");
 		if (format == null)
@@ -309,7 +310,7 @@ public class SkywarsUtils {
 			final Object itemName = itemsSection.get(slotName);
 			final int slot = Integer.parseInt(slotName);
 			final String itemType = itemTypes.getString((String) itemName);
-			final Material material = Material.getMaterial(itemType);
+			final Material material = XMaterial.matchXMaterial(itemType).get().parseMaterial();
 			if (material == null) {
 				Skywars.get().sendMessage("material is null for inventory item: %s", itemType);
 				continue;
@@ -331,6 +332,25 @@ public class SkywarsUtils {
 			itemMeta.setLore(itemLore);
 			item.setItemMeta(itemMeta);
 			player.getInventory().setItem(slot, item);
+		}
+	}
+
+	public static void playSound(Player player, String sound) {
+		final String[] splitted = sound.split(";");
+		player.playSound(player.getLocation(), Sounds.valueOf(splitted[0]).bukkitSound(),
+				splitted.length > 1 ? Float.parseFloat(splitted[1]) : 1,
+				splitted.length > 2 ? Float.parseFloat(splitted[2]) : 1);
+	}
+
+	public static void playSoundsFromConfig(Player player, String configLocation) {
+		final List<String> list = Skywars.config.getStringList(configLocation);
+		final String singleSound = Skywars.config.getString(configLocation);
+		if (list.size() > 0)
+			for (final String sound : list) {
+				playSound(player, sound);
+			}
+		else if (singleSound != null) {
+			playSound(player, singleSound);
 		}
 	}
 }

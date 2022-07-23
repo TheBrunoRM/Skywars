@@ -13,7 +13,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
 import me.brunorm.skywars.structures.Arena;
-import me.brunorm.skywars.structures.SkywarsPlayer;
+import me.brunorm.skywars.structures.SkywarsUser;
 
 public class SkywarsScoreboard {
 
@@ -27,10 +27,10 @@ public class SkywarsScoreboard {
 		final ArrayList<String> texts = new ArrayList<String>();
 
 		final Arena arena = Skywars.get().getPlayerArena(player);
-		SkywarsPlayer swp = null;
+		SkywarsUser swp = null;
 		List<String> stringList = null;
 		if (arena != null) {
-			swp = arena.getPlayer(player);
+			swp = arena.getUser(player);
 			if (swp.isSpectator()) {
 				stringList = config.getStringList("arena.spectator");
 			} else {

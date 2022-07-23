@@ -2,8 +2,13 @@ main: me.brunorm.skywars.Skywars
 version: 0.3.0
 name: Skywars
 author: BrunoRM
-softdepend: [WorldEdit, Vault]
-api-version: "1.13"
+softdepend: 
+  - Vault
+  - WorldEdit
+  - PlaceholderAPI
+  - HolographicDisplays
+  - DecentHolograms
+api-version: 1.13
 
 commands:
   skywars:
@@ -23,13 +28,14 @@ permissions:
   skywars.*:
     description: Gives access to all Skywars commands.
     children:
-    - skywars.admin
-    - skywars.config
-    - skywars.setmainlobby
-    - skywars.forcestart
-    - skywars.start
+      skywars.admin: true
+      skywars.config: true
+      skywars.setmainlobby: true
+      skywars.forcestart: true
+      skywars.start: true
   skywars.admin:
     description: Gives access to admin Skywars commands.
+    default: op
   skywars.config:
     description: Gives access to config subcommand.
   skywars.setmainlobby:

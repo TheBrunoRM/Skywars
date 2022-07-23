@@ -34,13 +34,16 @@ public class SkywarsEvent {
 
 	public void decreaseTime() {
 		this.setTime(this.getTime() - 1);
+		if (this.getType() == SkywarsEventType.REFILL)
+			this.arena.displayChestHolograms(this.arena.getNextEventText());
 	}
 
 	public void run() {
 		switch (this.type) {
 		case REFILL:
 			this.arena.broadcastRefillMessage();
-			this.arena.calculateAndFillChests();
+			this.arena.fillChests();
+			this.arena.displayChestHolograms("&eRefilled!");
 			break;
 		}
 	}

@@ -45,7 +45,7 @@ import me.brunorm.skywars.schematics.SchematicHandler;
 import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.Kit;
 import me.brunorm.skywars.structures.SkywarsMap;
-import me.brunorm.skywars.structures.SkywarsPlayer;
+import me.brunorm.skywars.structures.SkywarsUser;
 import net.milkbowl.vault.economy.Economy;
 
 @SuppressWarnings("deprecation")
@@ -61,6 +61,7 @@ public class Skywars extends JavaPlugin {
 	public static String schematicsPath;
 	public static String playersPath;
 
+	public static boolean holograms = false;
 	public static boolean economyEnabled;
 	Economy economy;
 	RegisteredServiceProvider<Economy> economyProvider;
@@ -141,6 +142,7 @@ public class Skywars extends JavaPlugin {
 		this.nmsHandler = new ReflectionNMS();
 		SchematicHandler.initializeReflection();
 
+		holograms = Bukkit.getPluginManager().isPluginEnabled("DecentHolograms");
 		economyEnabled = Skywars.get().getConfig().getBoolean("economy.enabled");
 		if (economyEnabled)
 			try {
@@ -213,13 +215,12 @@ public class Skywars extends JavaPlugin {
 			return false;
 		}
 
-		final RegisteredServiceProvider<Economy> rsp = this.getServer().getServicesManager()
-				.getRegistration(Economy.class);
-		if (rsp == null) {
+		this.economyProvider = this.getServer().getServicesManager().getRegistration(Economy.class);
+		if (this.economyProvider == null) {
 			this.sendDebugMessage("No registered service provider!");
 			return false;
 		}
-		this.economy = rsp.getProvider();
+		this.economy = this.economyProvider.getProvider();
 		return this.economy != null;
 	}
 
@@ -649,7 +650,7 @@ public class Skywars extends JavaPlugin {
 	// TODO: make this a cached hashmap
 	public Arena getPlayerArena(Player player) {
 		for (int i = 0; i < this.arenas.size(); i++) {
-			final List<SkywarsPlayer> players = this.arenas.get(i).getUsers();
+			final List<SkywarsUser> players = this.arenas.get(i).getUsers();
 			for (int j = 0; j < players.size(); j++) {
 				if (players.get(j).getPlayer().equals(player)) {
 					return this.arenas.get(i);
@@ -769,7 +770,7 @@ public class Skywars extends JavaPlugin {
 	}
 
 	public void sendDebugMessage(String text, Object... format) {
-		if (!Skywars.config.getBoolean("debug.enabled"))
+		if (Skywars.config == null || !Skywars.config.getBoolean("debug.enabled"))
 			return;
 		this.sendMessage(text, format);
 	}

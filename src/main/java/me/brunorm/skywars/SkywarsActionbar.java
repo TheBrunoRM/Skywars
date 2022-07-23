@@ -3,7 +3,7 @@ package me.brunorm.skywars;
 import org.bukkit.entity.Player;
 
 import me.brunorm.skywars.structures.Arena;
-import me.brunorm.skywars.structures.SkywarsPlayer;
+import me.brunorm.skywars.structures.SkywarsUser;
 
 public class SkywarsActionbar {
 
@@ -11,7 +11,7 @@ public class SkywarsActionbar {
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;
-		final SkywarsPlayer swp = arena.getPlayer(player);
+		final SkywarsUser swp = arena.getUser(player);
 		if (arena.started() || swp.isSpectator())
 			return;
 		Skywars.get().NMS().sendActionbar(player, Messager

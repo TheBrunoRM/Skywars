@@ -1,5 +1,7 @@
 package me.brunorm.skywars.events;
 
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.HumanEntity;
@@ -7,6 +9,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
@@ -24,7 +27,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import me.brunorm.skywars.ArenaStatus;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.structures.Arena;
-import me.brunorm.skywars.structures.SkywarsPlayer;
+import me.brunorm.skywars.structures.SkywarsUser;
 
 public class Events implements Listener {
 
@@ -34,7 +37,7 @@ public class Events implements Listener {
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;
-		final SkywarsPlayer swp = arena.getPlayer(player);
+		final SkywarsUser swp = arena.getUser(player);
 		if (arena.isInBoundaries(player))
 			return;
 		if (player.getWorld() != arena.getWorld())
@@ -43,7 +46,7 @@ public class Events implements Listener {
 		}
 		// arena.leavePlayer(player);
 		else if (!swp.isSpectator())
-			arena.makeSpectator(swp, null);
+			arena.makeSpectator(swp);
 		else if (arena.isInBoundaries(arena.getLocation()))
 			arena.goBackToCenter(player);
 	}
@@ -65,7 +68,7 @@ public class Events implements Listener {
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;
-		final SkywarsPlayer swPlayer = arena.getPlayer(player);
+		final SkywarsUser swPlayer = arena.getUser(player);
 		if (swPlayer.isSpectator())
 			event.setCancelled(true);
 		if (arena.getStatus() != ArenaStatus.PLAYING || arena.isInvencibility()) {
@@ -75,8 +78,16 @@ public class Events implements Listener {
 				arena.goBackToCenter(player);
 			} else if (event.getCause() == DamageCause.VOID) {
 				event.setCancelled(true);
-				arena.makeSpectator(swPlayer, null);
+				arena.makeSpectator(swPlayer);
 			}
+		}
+		if (player.getHealth() - event.getDamage() <= 0) {
+			// event.setCancelled(true);
+			// instead of cancelling the event,
+			// we set the damage to 0 so the damage sound sounds
+			// and it doesnt feel like the player just disappears when we hit
+			event.setDamage(0);
+			arena.makeSpectator(swPlayer);
 		}
 	}
 
@@ -92,7 +103,7 @@ public class Events implements Listener {
 		final Player attacker = (Player) damager;
 		final Arena attackerArena = Skywars.get().getPlayerArena(attacker);
 		if (attackerArena != null) {
-			final SkywarsPlayer swAttacker = attackerArena.getPlayer(attacker);
+			final SkywarsUser swAttacker = attackerArena.getUser(attacker);
 			if (swAttacker != null && swAttacker.isSpectator()) {
 				event.setCancelled(true);
 			}
@@ -103,7 +114,7 @@ public class Events implements Listener {
 		final Arena victimArena = Skywars.get().getPlayerArena(victim);
 		if (victimArena == null)
 			return;
-		final SkywarsPlayer swVictim = victimArena.getPlayer(victim);
+		final SkywarsUser swVictim = victimArena.getUser(victim);
 		if (livingEntity.getHealth() - event.getDamage() <= 0) {
 			// event.setCancelled(true);
 			// instead of cancelling the event,
@@ -124,7 +135,7 @@ public class Events implements Listener {
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;
-		final SkywarsPlayer swp = arena.getPlayer(player);
+		final SkywarsUser swp = arena.getUser(player);
 		if (!swp.isSpectator())
 			return;
 		event.setCancelled(true);
@@ -140,7 +151,7 @@ public class Events implements Listener {
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;
-		final SkywarsPlayer swp = arena.getPlayer(player);
+		final SkywarsUser swp = arena.getUser(player);
 		if (swp == null)
 			return;
 		if (!swp.isSpectator())
@@ -156,13 +167,35 @@ public class Events implements Listener {
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;
-		final SkywarsPlayer swp = arena.getPlayer(player);
+		final SkywarsUser swp = arena.getUser(player);
 		if (swp == null)
 			return;
 		if (!swp.isSpectator())
 			return;
 
 		event.setCancelled(true);
+	}
+
+	@EventHandler
+	void onBlockBreak(BlockBreakEvent event) {
+		final Player player = event.getPlayer();
+		final Arena arena = Skywars.get().getPlayerArena(player);
+		if (arena == null)
+			return;
+		final SkywarsUser swp = arena.getUser(player);
+		if (swp == null)
+			return;
+		if (swp.isSpectator())
+			event.setCancelled(true);
+		else {
+			final Block block = event.getBlock();
+			if (!(block.getState() instanceof Chest))
+				return;
+			final Chest chest = (Chest) block.getState();
+			if (!arena.getChests().contains(chest))
+				return;
+			arena.removeChest(chest);
+		}
 	}
 
 	// prevent spectators from interacting
@@ -172,13 +205,22 @@ public class Events implements Listener {
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;
-		final SkywarsPlayer swp = arena.getPlayer(player);
+		final SkywarsUser swp = arena.getUser(player);
 		if (swp == null)
 			return;
-		if (!swp.isSpectator())
-			return;
-
-		event.setCancelled(true);
+		if (swp.isSpectator())
+			event.setCancelled(true);
+		else {
+			final Block block = event.getClickedBlock();
+			if (block == null)
+				return;
+			if (!(block.getState() instanceof Chest))
+				return;
+			final Chest chest = (Chest) block.getState();
+			if (!arena.getChests().contains(chest))
+				return;
+			arena.addChestHologram(chest);
+		}
 	}
 
 	// prevent spectators from picking up items
@@ -188,7 +230,7 @@ public class Events implements Listener {
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;
-		final SkywarsPlayer swp = arena.getPlayer(player);
+		final SkywarsUser swp = arena.getUser(player);
 		if (swp == null)
 			return;
 		if (!swp.isSpectator())
@@ -213,7 +255,7 @@ public class Events implements Listener {
 
 		if (arena == null)
 			return;
-		final SkywarsPlayer swp = arena.getPlayer(player);
+		final SkywarsUser swp = arena.getUser(player);
 		if (swp == null)
 			return;
 		/*
@@ -235,7 +277,7 @@ public class Events implements Listener {
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;
-		final SkywarsPlayer swp = arena.getPlayer(player);
+		final SkywarsUser swp = arena.getUser(player);
 		if (swp == null)
 			return;
 		if (!swp.isSpectator()) {
@@ -255,7 +297,7 @@ public class Events implements Listener {
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;
-		final SkywarsPlayer swp = arena.getPlayer(player);
+		final SkywarsUser swp = arena.getUser(player);
 		if (swp == null)
 			return;
 		if (!swp.isSpectator())

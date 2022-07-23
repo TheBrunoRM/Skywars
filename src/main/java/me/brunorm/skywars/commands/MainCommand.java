@@ -20,6 +20,8 @@ import org.bukkit.util.Vector;
 
 import com.cryptomorin.xseries.XMaterial;
 
+import eu.decentsoftware.holograms.api.DHAPI;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
 import me.brunorm.skywars.ArenaStatus;
 import me.brunorm.skywars.ChestManager;
 import me.brunorm.skywars.Messager;
@@ -34,7 +36,7 @@ import me.brunorm.skywars.schematics.Schematic;
 import me.brunorm.skywars.schematics.SchematicHandler;
 import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.SkywarsMap;
-import me.brunorm.skywars.structures.SkywarsPlayer;
+import me.brunorm.skywars.structures.SkywarsUser;
 
 public class MainCommand implements CommandExecutor {
 
@@ -92,19 +94,15 @@ public class MainCommand implements CommandExecutor {
 				final SkywarsMap map = Skywars.get().getMap(name);
 				final Arena arena = Skywars.get().getArenaAndCreateIfNotFound(map);
 				if (args[0].equalsIgnoreCase("setmainlobby")) {
-					if (player == null) {
-						sender.sendMessage("Can't execute as console.");
+					if (!CommandsUtils.consoleCheckWithMessage(sender))
 						return true;
-					}
 					if (CommandsUtils.permissionCheckWithMessage(player, "skywars.setmainlobby")) {
 						Skywars.get().setLobby(player.getLocation());
 						player.sendMessage(Messager.getMessage("MAIN_LOBBY_SET"));
 					}
 				} else if (args[0].equalsIgnoreCase("lobby")) {
-					if (player == null) {
-						sender.sendMessage("Can't execute as console.");
+					if (!CommandsUtils.consoleCheckWithMessage(sender))
 						return true;
-					}
 					if (joined) {
 						Skywars.get().getPlayerArena(player).leavePlayer(player);
 					}
@@ -117,10 +115,8 @@ public class MainCommand implements CommandExecutor {
 				} else if (args[0].equalsIgnoreCase("play")) {
 					MapMenu.open(player);
 				} else if (args[0].equalsIgnoreCase("config") || args[0].equalsIgnoreCase("setup")) {
-					if (player == null) {
-						sender.sendMessage("Can't execute as console.");
+					if (!CommandsUtils.consoleCheckWithMessage(sender))
 						return true;
-					}
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.config"))
 						return true;
 					if (map == null) {
@@ -133,37 +129,31 @@ public class MainCommand implements CommandExecutor {
 						sender.sendMessage(Messager.color(line));
 					}
 				} else if (args[0].equalsIgnoreCase("leave")) {
-					if (player == null) {
-						sender.sendMessage("Can't execute as console.");
+					if (!CommandsUtils.consoleCheckWithMessage(sender))
 						return true;
-					}
 					if (CommandsUtils.arenaCheckWithMessage(player))
 						playerArena.leavePlayer(player);
 
 					// TODO add the option to pass an arena name as an argument
 				} else if (args[0].equalsIgnoreCase("forcestart")) {
-					if (player == null) {
-						sender.sendMessage("Can't execute as console.");
+					if (!CommandsUtils.consoleCheckWithMessage(sender))
 						return true;
-					}
-					if (CommandsUtils.permissionCheckWithMessage(player, "skywars.forcestart"))
-						if (CommandsUtils.arenaCheckWithMessage(player))
-							playerArena.startGame();
+					if (!CommandsUtils.permissionCheckWithMessage(player, "skywars.forcestart"))
+						return true;
+					if (!CommandsUtils.arenaCheckWithMessage(player))
+						return true;
+					playerArena.startGame();
 				} else if (args[0].equalsIgnoreCase("start")) {
-					if (player == null) {
-						sender.sendMessage("Can't execute as console.");
+					if (!CommandsUtils.consoleCheckWithMessage(sender))
 						return true;
-					}
-					if (CommandsUtils.permissionCheckWithMessage(player, "skywars.start")) {
-						if (CommandsUtils.arenaCheckWithMessage(player)) {
-							playerArena.softStart(player);
-						}
-					}
+					if (!CommandsUtils.permissionCheckWithMessage(player, "skywars.start"))
+						return true;
+					if (!CommandsUtils.arenaCheckWithMessage(player))
+						return true;
+					playerArena.softStart(player);
 				} else if (args[0].equalsIgnoreCase("join")) {
-					if (player == null) {
-						sender.sendMessage("Can't execute as console.");
+					if (!CommandsUtils.consoleCheckWithMessage(sender))
 						return true;
-					}
 					// if(!SkywarsUtils.JoinableCheck(arena, player)) return true;
 					Skywars.get().joinMap(map, player);
 				} else if (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("about")
@@ -171,14 +161,21 @@ public class MainCommand implements CommandExecutor {
 					sender.sendMessage(Messager.colorFormat("&b%s &eversion &a%s &emade by &b%s", Skywars.get().name,
 							Skywars.get().version, String.join(", ", Skywars.get().authors)));
 				} else if (args[0].equalsIgnoreCase("server")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					sender.sendMessage("Server version:");
 					sender.sendMessage(Bukkit.getServer().getVersion());
 					sender.sendMessage(Bukkit.getServer().getBukkitVersion());
-				} else if (args[0].equalsIgnoreCase("menu")) {
-					if (player == null) {
-						sender.sendMessage("Can't execute as console.");
+				} else if (args[0].equalsIgnoreCase("refill")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
-					}
+					if (!CommandsUtils.arenaCheckWithMessage(player))
+						return true;
+					playerArena.fillChests();
+					playerArena.broadcastRefillMessage();
+				} else if (args[0].equalsIgnoreCase("menu")) {
+					if (!CommandsUtils.consoleCheckWithMessage(sender))
+						return true;
 					GamesMenu.OpenMenu(player);
 				} else if (args[0].equalsIgnoreCase("reload") || args[0].equalsIgnoreCase("rl")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
@@ -191,7 +188,26 @@ public class MainCommand implements CommandExecutor {
 				// return true;
 				// TEST COMMANDS
 
-				else if (args[0].equalsIgnoreCase("tinylittletest")) {
+				else if (args[0].equalsIgnoreCase("xmat")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					player.getInventory().addItem(XMaterial.matchXMaterial(args[1]).get().parseItem());
+				} else if (args[0].equalsIgnoreCase("hd")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+//					final Hologram holo = HologramsAPI.createHologram(Skywars.get(), player.getLocation());
+//					holo.appendTextLine("hola que tal bro");
+//					holo.appendTextLine("&6aver ese colorsito");
+//					holo.appendTextLine(Messager.color("&6la prueba con el messager"));
+//					holo.appendItemLine(XMaterial.IRON_SWORD.parseItem());
+					final Hologram holo = DHAPI.createHologram("test", player.getLocation().add(new Vector(0, 2, 0)));
+					DHAPI.addHologramLine(holo, "hola bro");
+					DHAPI.addHologramLine(holo, "&6aver ese colorsito");
+					DHAPI.addHologramLine(holo, Messager.color("&e&lla prueba del color"));
+					DHAPI.addHologramLine(holo, XMaterial.IRON_SWORD.parseItem());
+				} else if (args[0].equalsIgnoreCase("tinylittletest")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					final Player p = player;
 					int e = 0;
 					for (int i = -arena.getMap().getCenterRadius(); i < arena.getMap().getCenterRadius(); i++) {
@@ -349,7 +365,7 @@ public class MainCommand implements CommandExecutor {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
 					if (arena != null) {
-						for (final SkywarsPlayer swp : arena.getUsers()) {
+						for (final SkywarsUser swp : arena.getUsers()) {
 							if (swp == null)
 								sender.sendMessage("null");
 							else

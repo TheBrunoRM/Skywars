@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 
 import me.brunorm.skywars.Skywars;
 
-public class SkywarsPlayer {
+public class SkywarsUser {
 
 	Player player;
 	Arena arena;
@@ -18,7 +18,7 @@ public class SkywarsPlayer {
 	Player lastHit;
 	long lastHitTimestamp;
 
-	SkywarsPlayer(Player player, Arena arena, int number) {
+	SkywarsUser(Player player, Arena arena, int number) {
 		this.player = player;
 		this.arena = arena;
 		this.teamNumber = number;
@@ -37,8 +37,8 @@ public class SkywarsPlayer {
 		Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
 			@Override
 			public void run() {
-				if (timestamp == SkywarsPlayer.this.lastHitTimestamp) {
-					SkywarsPlayer.this.setLastHit(null);
+				if (timestamp == SkywarsUser.this.lastHitTimestamp) {
+					SkywarsUser.this.setLastHit(null);
 				}
 			}
 		}, Skywars.get().getConfig().getLong("lastHitResetCooldown") * 20);

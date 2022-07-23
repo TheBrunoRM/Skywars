@@ -42,10 +42,13 @@ public class GamesMenu implements Listener {
 		final Player player = (Player) event.getWhoClicked();
 		if (player == null)
 			return;
+		final Inventory inv = event.getInventory();
+		if (inv == null)
+			return;
 		final Inventory inventory = PlayerInventoryManager.getInventory(player);
 		if (inventory == null)
 			return;
-		if (event.getInventory().getName().equals(inventory.getName())) {
+		if (inv.getName().equals(inventory.getName())) {
 			final ItemStack clicked = event.getCurrentItem();
 			if (clicked.getType() == XMaterial.BOW.parseMaterial()) {
 				event.setCancelled(true);

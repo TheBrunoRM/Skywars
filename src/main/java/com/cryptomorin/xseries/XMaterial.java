@@ -96,8 +96,7 @@ public enum XMaterial {
 	ANDESITE(5, "STONE"), ANDESITE_SLAB, ANDESITE_STAIRS, ANDESITE_WALL, ANVIL, APPLE, ARMOR_STAND, ARROW,
 	ATTACHED_MELON_STEM(7, "MELON_STEM"), ATTACHED_PUMPKIN_STEM(7, "PUMPKIN_STEM"), AXOLOTL_BUCKET, AXOLOTL_SPAWN_EGG,
 	AZALEA, AZALEA_LEAVES, AZURE_BLUET(3, "RED_ROSE"), BAKED_POTATO, BAMBOO(0, 14), BAMBOO_SAPLING(14), BARREL(0, 14),
-	BARRIER, BASALT(16), BAT_SPAWN_EGG(65, "MONSTER_EGG"), BEACON, BED(0, "BED_BLOCK", "BED"), BEDROCK,
-	BEEF("RAW_BEEF"), BEEHIVE(15),
+	BARRIER, BASALT(16), BAT_SPAWN_EGG(65, "MONSTER_EGG"), BEACON, BEDROCK, BEEF("RAW_BEEF"), BEEHIVE(15),
 	/**
 	 * Beetroot is a known material in pre-1.13
 	 */
@@ -773,7 +772,7 @@ public enum XMaterial {
 	 * <p>
 	 * <b>Examples</b>
 	 * <p>
-	 * 
+	 *
 	 * <pre>
 	 *     {@code INK_SACK:1 -> RED_DYE}
 	 *     {@code WOOL: 14  -> RED_WOOL}
@@ -1064,12 +1063,12 @@ public enum XMaterial {
 	 * {@code REGEX:PATTERN} formats.
 	 * <p>
 	 * <b>Example:</b> <blockquote>
-	 * 
+	 *
 	 * <pre>
 	 *     XMaterial material = {@link #matchXMaterial(ItemStack)};
 	 *     if (material.isOneOf(plugin.getConfig().getStringList("disabled-items")) return;
 	 * </pre>
-	 * 
+	 *
 	 * </blockquote> <br>
 	 * <b>{@code CONTAINS} Examples:</b>
 	 *

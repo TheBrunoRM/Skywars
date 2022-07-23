@@ -19,7 +19,7 @@ import me.brunorm.skywars.menus.KitsMenu;
 import me.brunorm.skywars.menus.MapMenu;
 import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.SkywarsMap;
-import me.brunorm.skywars.structures.SkywarsPlayer;
+import me.brunorm.skywars.structures.SkywarsUser;
 
 public class InteractEvent implements Listener {
 
@@ -28,7 +28,7 @@ public class InteractEvent implements Listener {
 		final Player player = event.getPlayer();
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena != null) {
-			final SkywarsPlayer swp = arena.getPlayer(player);
+			final SkywarsUser swp = arena.getUser(player);
 			ItemStack item;
 			item = player.getItemInHand();
 			final String kitSelectorTypeName = Skywars.get().getConfig().getString("item_types.KIT_SELECTOR");

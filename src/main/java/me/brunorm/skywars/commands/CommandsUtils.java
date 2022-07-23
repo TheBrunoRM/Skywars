@@ -8,6 +8,13 @@ import me.brunorm.skywars.Skywars;
 
 public class CommandsUtils {
 
+	public static boolean consoleCheckWithMessage(CommandSender sender) {
+		if (sender instanceof Player)
+			return true;
+		sender.sendMessage("Can't execute as console.");
+		return false;
+	}
+
 	public static boolean permissionCheckWithMessage(CommandSender sender, String permission) {
 		if (!sender.hasPermission(permission)) {
 			sender.sendMessage(Messager.color(Skywars.langConfig.getString("NO_PERMISSION")));

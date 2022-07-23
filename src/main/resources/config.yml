@@ -17,6 +17,9 @@ sounds: # sound name; volume; pitch
   join: HORSE_ARMOR; 5; 0.1
   leave: ITEM_PICKUP; 5; 0.1
   countdown: NOTE_STICKS; 5; 1
+  start:
+    - NOTE_PLING; 0.5; 1
+    - PORTAL_TRIGGER; 0.5; 5
 
 # this is the reset cooldown for last hits (in seconds)
 lastHitResetCooldown: 15
@@ -50,6 +53,9 @@ time: # seconds
   starting: 10
   ending: 10
 
+# the amount of fireworks throwed at the end of a game
+endFireworks: 3
+
 economy:
   enabled: true
   play: 10
@@ -59,23 +65,10 @@ economy:
 # souls is the economy used for buying soul crates
 souls:
   enabled: true
-  kill: 10
+  kill: 1
 
 # this is used to format money
 decimalFormat: "0.#"
-
-# this is displayed when the game starts
-startLines:
-  - "&a&l---------------------------------------------"
-  - ""
-  - "                                  &f&lSkyWars"
-  - ""
-  - "    &e&lGather resources and equipment on your island"
-  - "      &e&lin order to eliminate every other player."
-  - "     &e&lGo to the center island for special chests"
-  - "                       &e&lwith special items!"
-  - ""
-  - "&a&l---------------------------------------------"
 
 # you can disable the plugin commands here
 # possible options: start, forcestart, leave, where, skywars

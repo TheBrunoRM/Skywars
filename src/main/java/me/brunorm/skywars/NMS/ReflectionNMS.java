@@ -202,7 +202,7 @@ public class ReflectionNMS implements NMS {
 
 				final Object value_actionbar = cmt.getMethod("valueOf", String.class).invoke(cmt, "ACTION_BAR");
 
-				final Object newInstanceOfThis = tc.getConstructor(String.class).newInstance(text);
+				final Object newInstanceOfThis = tc.getConstructor(String.class).newInstance(Messager.color(text));
 
 				m_sm.setAccessible(true); // make the method public
 				m_sm.invoke(cp, cmt.cast(value_actionbar), bc.cast(newInstanceOfThis));
