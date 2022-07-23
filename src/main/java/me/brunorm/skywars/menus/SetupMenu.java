@@ -293,7 +293,7 @@ public class SetupMenu implements Listener {
 				lore.add(Messager.color("&eClick the blocks that"));
 				lore.add(Messager.color("&eyou want to add spawns for."));
 				lore.add(Messager.color("&eYou can also rightclick"));
-				lore.add(Messager.color("to remove the last set spawn."));
+				lore.add(Messager.color("&eto remove the last set spawn."));
 				meta.setDisplayName(Messager.color("&eSpawn Configurator"));
 				meta.setLore(lore);
 				item.setItemMeta(meta);
