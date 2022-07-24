@@ -7,9 +7,9 @@ maxPlayers: 12
 disabled: false
 restartNeeded: true
 schematic: mini_trees.schematic
-worldName: world
 teamSize: 1
 location:
+  world: world
   x: 200
   y: 150
   z: 200

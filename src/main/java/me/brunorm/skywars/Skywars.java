@@ -56,6 +56,7 @@ public class Skywars extends JavaPlugin {
 	public String version = this.getDescription().getVersion();
 	public List<String> authors = this.getDescription().getAuthors();
 	private final String prefix = Messager.colorFormat("&6[&e%s&6]&e", this.name);
+	private final String debugPrefix = Messager.colorFormat("&7[&c%s-Debug&7]&e", this.name);
 	public static String kitsPath;
 	public static String mapsPath;
 	public static String schematicsPath;
@@ -103,20 +104,21 @@ public class Skywars extends JavaPlugin {
 	}
 
 	public void setLobbyFromConfig() {
-		if (lobbyConfig.get("lobby") != null) {
-			final String worldName = lobbyConfig.getString("lobby.world");
-			if (worldName != null) {
-				final World world = Bukkit.getWorld(worldName);
-				if (world != null) {
-					final double x = lobbyConfig.getDouble("lobby.x");
-					final double y = lobbyConfig.getDouble("lobby.y");
-					final double z = lobbyConfig.getDouble("lobby.z");
-					this.lobby = new Location(world, x, y, z);
-				} else
-					this.sendMessage("&cLobby world (&b%s&c) does not exist!", worldName);
-			}
-		} else
+		if (lobbyConfig == null || lobbyConfig.get("lobby") == null) {
 			this.lobby = null;
+			return;
+		}
+		final String worldName = lobbyConfig.getString("lobby.world");
+		if (worldName != null) {
+			final World world = Bukkit.getWorld(worldName);
+			if (world != null) {
+				final double x = lobbyConfig.getDouble("lobby.x");
+				final double y = lobbyConfig.getDouble("lobby.y");
+				final double z = lobbyConfig.getDouble("lobby.z");
+				this.lobby = new Location(world, x, y, z);
+			} else
+				this.sendMessage("&cLobby world (&b%s&c) does not exist!", worldName);
+		}
 	}
 
 	@Override
@@ -133,7 +135,11 @@ public class Skywars extends JavaPlugin {
 		this.serverPackageVersion = this.packageName.substring(this.packageName.lastIndexOf('.') + 1);
 
 		// load stuff
-		this.loadConfig();
+		if (!this.loadConfig()) {
+			this.sendMessage("Could not load configuration files! Disabling plugin.");
+			this.setEnabled(false);
+			return;
+		}
 		this.loadCommands();
 		this.loadEvents();
 		this.loadMaps();
@@ -476,7 +482,8 @@ public class Skywars extends JavaPlugin {
 			if (arenasMethod.equalsIgnoreCase("SINGLE_ARENA")) {
 				// Skywars.get().sendDebugMessage("setting worldname and location for map " +
 				// map.getName());
-				map.setLocation(ConfigurationUtils.getLocationConfig(mapConfig.getConfigurationSection("location")));
+				map.setLocation(
+						ConfigurationUtils.getLocationConfig(mapConfig.getConfigurationSection("location"), mapConfig));
 			}
 
 			if (mapConfig.get("spawn") != null)
@@ -542,7 +549,10 @@ public class Skywars extends JavaPlugin {
 			}
 
 			kit.setItems(items);
-			kit.setIcon(XMaterial.valueOf(config.getString("icon")).parseItem());
+			String iconItem = config.getString("icon");
+			if (iconItem == null)
+				iconItem = "BEDROCK";
+			kit.setIcon(XMaterial.valueOf(iconItem).parseItem());
 			kit.setPrice(config.getInt("price"));
 
 			// add kit to the arena list
@@ -747,45 +757,49 @@ public class Skywars extends JavaPlugin {
 		this.setPlayerTotalKills(player, this.getPlayerTotalKills(player) + 1);
 	}
 
-	public void loadConfig() {
+	public boolean loadConfig() {
 
 		this.sendMessage("Loading configuration...");
 
 		// config.yml
-		config = ConfigurationUtils.loadConfiguration("config.yml", "resources/config.yml");
+		config = ConfigurationUtils.loadConfiguration("config.yml", "config.yml");
 
 		// scoreboard.yml
-		scoreboardConfig = ConfigurationUtils.loadConfiguration("scoreboard.yml", "resources/scoreboard.yml");
+		scoreboardConfig = ConfigurationUtils.loadConfiguration("scoreboard.yml", "scoreboard.yml");
 
 		// lang.yml
-		langConfig = ConfigurationUtils.loadConfiguration("lang.yml", "resources/lang.yml");
+		langConfig = ConfigurationUtils.loadConfiguration("lang.yml", "lang.yml");
 
 		// lobby.yml
-		lobbyConfig = ConfigurationUtils.loadConfiguration("lobby.yml", "resources/lobby.yml");
+		lobbyConfig = ConfigurationUtils.loadConfiguration("lobby.yml", "lobby.yml");
+
+		if (config == null || scoreboardConfig == null || langConfig == null || lobbyConfig == null)
+			return false;
 
 		// load lobby
 		this.setLobbyFromConfig();
 
 		this.sendMessage("Finished loading configuration.");
+		return true;
 	}
 
 	public void sendDebugMessage(String text, Object... format) {
-		if (Skywars.config == null || !Skywars.config.getBoolean("debug.enabled"))
+		if (Skywars.config != null && !Skywars.config.getBoolean("debug.enabled"))
 			return;
-		this.sendMessage(text, format);
+		this.sendMessageWithPrefix(this.debugPrefix, text, format);
 	}
 
 	public void sendDebugMessageWithPrefix(String prefix, String text, Object... format) {
-		if (Skywars.config == null || !Skywars.config.getBoolean("debug.enabled"))
+		if (Skywars.config != null && !Skywars.config.getBoolean("debug.enabled"))
 			return;
 		this.sendMessageWithPrefix(prefix, text, format);
 	}
 
 	public void sendMessage(String text, Object... format) {
-		this.sendMessageWithPrefix(this.prefix, Messager.colorFormat(text, format));
+		this.sendMessageWithPrefix(Messager.color(this.prefix), Messager.colorFormat(text, format));
 	}
 
 	public void sendMessageWithPrefix(String prefix, String text, Object... format) {
-		Bukkit.getConsoleSender().sendMessage(prefix + " " + Messager.colorFormat(text, format));
+		Bukkit.getConsoleSender().sendMessage(Messager.color(prefix) + " " + Messager.colorFormat(text, format));
 	}
 }

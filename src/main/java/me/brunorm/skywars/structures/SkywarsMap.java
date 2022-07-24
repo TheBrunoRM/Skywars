@@ -27,6 +27,7 @@ public class SkywarsMap {
 	int teamSize = 1;
 	String schematicFilename;
 	Schematic schematic;
+	boolean schematicError = false;
 	YamlConfiguration config;
 	File file;
 
@@ -251,6 +252,8 @@ public class SkywarsMap {
 	}
 
 	public void loadSchematic() {
+		if (this.schematicError)
+			return;
 		if (this.schematicFilename == null)
 			return;
 		final File schematicFile = Skywars.get().getSchematicFile(this.schematicFilename);
@@ -261,7 +264,8 @@ public class SkywarsMap {
 		try {
 			this.schematic = SchematicHandler.loadSchematic(schematicFile);
 		} catch (final IOException e) {
-			e.printStackTrace();
+			Skywars.get().sendMessage("&cCould not load schematic for map &b" + this.getName());
+			this.schematicError = true;
 		}
 	}
 

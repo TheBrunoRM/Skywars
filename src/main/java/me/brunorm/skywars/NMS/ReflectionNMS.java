@@ -14,7 +14,7 @@ import me.brunorm.skywars.Skywars;
 
 public class ReflectionNMS implements NMS {
 
-	String prefix = "&7[&cSkywars-NMS-Debug&7] ";
+	String prefix = "&7[&cSkywars-NMS-Debug&7]";
 
 	String version = Skywars.get().getServerPackageVersion();
 	String nms = "net.minecraft.server." + this.version;
@@ -31,14 +31,14 @@ public class ReflectionNMS implements NMS {
 
 	public Class<?> getChatSerializer() {
 		try {
-			Skywars.get().sendDebugMessage(Messager.color(this.prefix + "&6Loading &cold &bChatSerializer"));
+			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&6Loading &cold &bChatSerializer");
 			return this.getNMS("ChatSerializer");
 		} catch (final Exception e) {
 			try {
-				Skywars.get().sendDebugMessage(Messager.color(this.prefix + "&6Loading &anew &bChatSerializer"));
+				Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&6Loading &anew &bChatSerializer");
 				return this.getNMS("IChatBaseComponent$ChatSerializer");
 			} catch (final Exception e2) {
-				Skywars.get().sendDebugMessage(Messager.color(this.prefix + "&cCould not load &bChatSerializer"));
+				Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&cCould not load &bChatSerializer");
 				return null;
 			}
 		}
@@ -46,44 +46,44 @@ public class ReflectionNMS implements NMS {
 
 	public Class<?> getIChatBaseComponent() {
 		try {
-			Skywars.get().sendDebugMessage(this.prefix, "&6Loading &bChatBaseComponent Interface");
+			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&6Loading &bChatBaseComponent Interface");
 			return this.getNMS("IChatBaseComponent");
 		} catch (final Exception e) {
-			Skywars.get().sendDebugMessage(this.prefix, "&cCould not load &bChatBaseComponent Interface");
+			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&cCould not load &bChatBaseComponent Interface");
 			return null;
 		}
 	}
 
 	public Class<?> getPacketPlayOutTitle() {
 		try {
-			Skywars.get().sendDebugMessage(this.prefix, "&6Loading &bPacketPlayOutTitle");
+			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&6Loading &bPacketPlayOutTitle");
 			return this.getNMS("PacketPlayOutTitle");
 		} catch (final Exception e) {
-			Skywars.get().sendDebugMessage(this.prefix, "&cCould not load &bPacketPlayOutTitle");
+			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&cCould not load &bPacketPlayOutTitle");
 			return null;
 		}
 	}
 
 	public Class<?> getPacketPlayOutChat() {
 		try {
-			Skywars.get().sendDebugMessage(this.prefix, "&6Loading &bPacketPlayOutChat");
+			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&6Loading &bPacketPlayOutChat");
 			return this.getNMS("PacketPlayOutChat");
 		} catch (final Exception e) {
-			Skywars.get().sendDebugMessage(this.prefix, "&cCould not load &bPacketPlayOutChat");
+			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&cCould not load &bPacketPlayOutChat");
 			return null;
 		}
 	}
 
 	public Class<?> getEnumTitleAction() {
 		try {
-			Skywars.get().sendDebugMessage(this.prefix, "&6Loading &cold &bEnumTitleAction");
+			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&6Loading &cold &bEnumTitleAction");
 			return this.getNMS("EnumTitleAction");
 		} catch (final Exception e) {
 			try {
-				Skywars.get().sendDebugMessage(this.prefix, "&6Loading &anew &bEnumTitleAction");
+				Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&6Loading &anew &bEnumTitleAction");
 				return this.getNMS("PacketPlayOutTitle$EnumTitleAction");
 			} catch (final Exception e2) {
-				Skywars.get().sendDebugMessage(this.prefix, "&cCould not load &bEnumTitleAction");
+				Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&cCould not load &bEnumTitleAction");
 				return null;
 			}
 		}
@@ -99,10 +99,10 @@ public class ReflectionNMS implements NMS {
 
 	public Class<?> getChatMessageTypeClass() {
 		try {
-			Skywars.get().sendDebugMessage(this.prefix, "&6Loading &bChatMessageType");
+			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&6Loading &bChatMessageType");
 			return this.getNMS("ChatMessageType");
 		} catch (final Exception e) {
-			Skywars.get().sendDebugMessage(this.prefix, "&cCould not find &bChatMessageType");
+			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&cCould not find &bChatMessageType");
 			return null;
 		}
 	}

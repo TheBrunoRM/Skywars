@@ -694,6 +694,8 @@ public class Arena {
 
 	public void calculateChests() {
 		final Schematic schematic = this.map.getSchematic();
+		if (schematic == null)
+			return;
 		final World world = this.location.getWorld();
 		final Vector offset = schematic.getOffset();
 		final ListTag tileEntities = schematic.getTileEntities();

@@ -84,6 +84,9 @@ public class ConfigurationUtils {
 	public static void copyDefaultContentsToFile(String defaultFileName, File file) {
 		try {
 			Skywars.get().sendDebugMessage("copying default contents to file " + file.getPath());
+			final File parent = new File(file.getParent());
+			if (!parent.exists())
+				parent.mkdir();
 			if (!file.exists())
 				file.createNewFile();
 			try {
@@ -106,8 +109,12 @@ public class ConfigurationUtils {
 		}
 	}
 
-	public static Location getLocationConfig(ConfigurationSection section) {
-		final String worldName = section.getString("world");
+	public static Location getLocationConfig(ConfigurationSection section, YamlConfiguration config) {
+		if (section == null)
+			return null;
+		String worldName = section.getString("world");
+		if (worldName == null)
+			worldName = config.getString("worldName");
 		if (worldName == null) {
 			Skywars.get().sendDebugMessage("warning, getlocationconfig: worldname is null");
 			return null;

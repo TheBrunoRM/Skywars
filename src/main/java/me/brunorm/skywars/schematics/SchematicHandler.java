@@ -76,7 +76,7 @@ public class SchematicHandler {
 
 	public static void loadMaterials() {
 		Skywars.get().sendMessage("Loading materials...");
-		final InputStream stream = Skywars.get().getResource("resources/items.tsv");
+		final InputStream stream = Skywars.get().getResource("items.tsv");
 		final Scanner myReader = new Scanner(stream);
 		while (myReader.hasNextLine()) {
 			final String d = myReader.nextLine();
