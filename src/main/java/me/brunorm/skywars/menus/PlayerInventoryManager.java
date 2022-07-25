@@ -1,6 +1,7 @@
-package me.brunorm.skywars;
+package me.brunorm.skywars.menus;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,7 +11,7 @@ import org.bukkit.inventory.Inventory;
 
 public class PlayerInventoryManager implements Listener {
 
-	private static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();
+	private static HashMap<Player, Inventory> inventories = new HashMap<>();
 
 	public static Inventory getInventory(Player player) {
 		return inventories.get(player);
@@ -22,10 +23,15 @@ public class PlayerInventoryManager implements Listener {
 
 	@EventHandler
 	void onInventoryClose(InventoryCloseEvent event) {
-		for (final Inventory inventory : inventories.values()) {
-			if (inventory.equals(event.getInventory())) {
-				inventories.remove(event.getInventory().getViewers().get(0));
+		GameSettingsMenu.currentMenus.remove(event.getPlayer());
+		for (final Entry<Player, Inventory> set : inventories.entrySet()) {
+			if (set.getKey().equals(event.getPlayer()) && set.getValue().equals(event.getInventory())) {
+				inventories.remove(event.getPlayer());
 			}
 		}
+	}
+
+	public static HashMap<Player, Inventory> getInventories() {
+		return inventories;
 	}
 }

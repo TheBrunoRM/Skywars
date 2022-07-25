@@ -35,8 +35,9 @@ import mrblobman.sounds.Sounds;
 
 public class SkywarsUtils {
 
-	public static String url = getUrl();
-	public static String[] colorSymbols = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "f" };
+	public static final String URL = getUrl();
+	public static final String[] COLOR_SYMBOLS = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d",
+			"f" };
 
 	public static String format(String text, Player player, Arena arena, SkywarsUser swp) {
 		return format(text, player, arena, swp, false);
@@ -49,7 +50,7 @@ public class SkywarsUtils {
 			return "";
 		final SimpleDateFormat formatter = new SimpleDateFormat(format);
 		final String strDate = formatter.format(date);
-		text = text.replaceAll(getVariableCode("date"), strDate).replaceAll(getVariableCode("url"), url);
+		text = text.replaceAll(getVariableCode("date"), strDate).replaceAll(getVariableCode("url"), URL);
 
 		if (player != null) {
 
@@ -94,7 +95,7 @@ public class SkywarsUtils {
 
 	public static String getUrl() {
 		final FileConfiguration config = Skywars.get().getConfig();
-		url = config.getString("url");
+		final String url = config.getString("url");
 		if (url != null)
 			return url;
 		else
@@ -130,7 +131,7 @@ public class SkywarsUtils {
 		}
 	}
 
-	public static void TeleportPlayerBack(Player player) {
+	public static void teleportPlayerBack(Player player) {
 		final Location lobby = Skywars.get().getLobby();
 		final Location lastLocation = Skywars.get().playerLocations.get(player);
 		if (lobby != null)
@@ -142,7 +143,7 @@ public class SkywarsUtils {
 	}
 
 	@Deprecated
-	public static void GiveBedItem(Player player) {
+	public static void giveBedItem(Player player) {
 		final ItemStack bed = new ItemStack(XMaterial.RED_BED.parseMaterial());
 		final ItemMeta meta = bed.getItemMeta();
 		meta.setDisplayName(SkywarsUtils.parseItemName("leave"));
@@ -150,7 +151,18 @@ public class SkywarsUtils {
 		player.getInventory().setItem(8, bed);
 	}
 
-	public static void ClearPlayer(Player player) {
+	public static void resetPlayerServer(Player player) {
+		player.resetPlayerTime();
+		player.resetPlayerWeather();
+	}
+
+	public static void clearPlayer(Player player, boolean sync) {
+		clearPlayer(player);
+		if (sync)
+			resetPlayerServer(player);
+	}
+
+	public static void clearPlayer(Player player) {
 
 		// make visible
 		for (final Player players : Bukkit.getOnlinePlayers()) {
@@ -184,11 +196,11 @@ public class SkywarsUtils {
 		player.resetPlayerTime();
 	}
 
-	public static boolean JoinableCheck(Arena arena) {
-		return JoinableCheck(arena, null);
+	public static boolean joinableCheck(Arena arena) {
+		return joinableCheck(arena, null);
 	}
 
-	public static boolean JoinableCheck(Arena arena, Player player) {
+	public static boolean joinableCheck(Arena arena, Player player) {
 		// TODO add messages
 		if (player != null)
 			if (Skywars.get().getPlayerArena(player) != null) {

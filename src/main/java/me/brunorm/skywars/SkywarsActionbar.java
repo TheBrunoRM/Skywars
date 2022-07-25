@@ -7,6 +7,9 @@ import me.brunorm.skywars.structures.SkywarsUser;
 
 public class SkywarsActionbar {
 
+	private SkywarsActionbar() {
+	}
+
 	public static void update(Player player) {
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)

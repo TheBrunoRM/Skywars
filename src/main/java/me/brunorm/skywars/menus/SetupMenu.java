@@ -44,7 +44,6 @@ public class SetupMenu implements Listener {
 	static String teleportName = "&6&lTeleport";
 	static String chestsName = "&6&lFill chests";
 
-	public static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();
 	public static HashMap<Player, Location> playerLocations = new HashMap<Player, Location>();
 	public static HashMap<Player, Arena> currentArenas = new HashMap<Player, Arena>();
 	File schematicsFolder = new File(Skywars.schematicsPath);
@@ -52,7 +51,7 @@ public class SetupMenu implements Listener {
 	static void OpenSchematicsMenu(Player player) {
 		final File folder = new File(Skywars.get().getDataFolder() + "/schematics");
 		final Inventory inventory = Bukkit.createInventory(null, 9 * 6, Messager.color("&aSchematic files"));
-		inventories.put(player, inventory);
+		PlayerInventoryManager.setInventory(player, inventory);
 
 		int index = 10;
 		for (final File schematicFile : folder.listFiles()) {
@@ -220,7 +219,7 @@ public class SetupMenu implements Listener {
 	public static void OpenConfigurationMenu(Player player, SkywarsMap map) {
 		currentArenas.put(player, Skywars.get().getArenaAndCreateIfNotFound(map));
 		final Inventory inventory = Bukkit.createInventory(null, 9 * 3, Messager.color("&a&l" + map.getName()));
-		inventories.put(player, inventory);
+		PlayerInventoryManager.setInventory(player, inventory);
 
 		UpdateInventory(inventory, player);
 
@@ -238,17 +237,18 @@ public class SetupMenu implements Listener {
 	@EventHandler
 	void onClick(InventoryClickEvent event) {
 		final Player player = (Player) event.getWhoClicked();
-		final Inventory inventory = inventories.get(player);
+		final Inventory inventory = PlayerInventoryManager.getInventory(player);
 		if (event.getInventory().equals(inventory)) {
 			event.setCancelled(true);
 			final ItemStack clicked = event.getCurrentItem();
-			if (clicked == null)
-				return;
-			if (clicked.getItemMeta() == null)
+			if (clicked == null || clicked.getItemMeta() == null)
 				return;
 			final String name = clicked.getItemMeta().getDisplayName();
 
 			Arena currentArena = currentArenas.get(player);
+			if (currentArena == null)
+				return;
+
 			final SkywarsMap currentMap = currentArena.getMap();
 
 			if (name.equals(Messager.colorFormat(minPlayersName, currentMap.getMinPlayers()))) {
@@ -271,9 +271,9 @@ public class SetupMenu implements Listener {
 			 * currentMap.getWorldName()); }
 			 */
 			if (name.equals(locationName(currentArena.getLocation()))) {
-				final double x = Math.round(player.getLocation().getBlockX());
-				final double y = Math.round(player.getLocation().getBlockY());
-				final double z = Math.round(player.getLocation().getBlockZ());
+				final double x = player.getLocation().getBlockX();
+				final double y = player.getLocation().getBlockY();
+				final double z = player.getLocation().getBlockZ();
 				final World world = player.getWorld();
 				final Location location = new Location(world, x, y, z);
 				currentArena.setLocation(location);
@@ -341,13 +341,6 @@ public class SetupMenu implements Listener {
 						Messager.colorFormat("Regenerated cases for %s spawns", currentMap.getSpawns().size()));
 				return;
 			}
-			if (name.equals(Messager.color(clearName))) {
-				Skywars.get().clearArena(currentArena);
-				currentArenas.remove(player);
-				currentArena = null;
-				player.sendMessage("Cleared");
-				player.closeInventory();
-			}
 			if (name.equals(Messager.color(teleportName))) {
 				final Location loc = currentArena.getLocation();
 				if (loc == null)
@@ -362,6 +355,13 @@ public class SetupMenu implements Listener {
 				currentArena.calculateAndFillChests();
 				player.sendMessage("Chests filled");
 				return;
+			}
+			if (name.equals(Messager.color(clearName))) {
+				Skywars.get().clearArena(currentArena);
+				currentArenas.remove(player);
+				currentArena = null;
+				player.sendMessage("Cleared");
+				player.closeInventory();
 			}
 			String currentSchematic = currentMap.getSchematicFilename();
 			if (currentSchematic == null)
@@ -396,7 +396,7 @@ public class SetupMenu implements Listener {
 			currentMap.saveParametersInConfig();
 			currentMap.saveConfig();
 
-			inventories.forEach((p, inv) -> {
+			PlayerInventoryManager.getInventories().forEach((p, inv) -> {
 				if (inv == inventory) {
 					UpdateInventory(inv, p);
 				}

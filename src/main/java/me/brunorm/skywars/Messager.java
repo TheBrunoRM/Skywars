@@ -8,14 +8,17 @@ import me.brunorm.skywars.structures.SkywarsUser;
 
 public class Messager {
 
-	public static char ALT_COLOR_CHAR = '&';
-
-	public static String color(String thing) {
-		return ChatColor.translateAlternateColorCodes(ALT_COLOR_CHAR, thing);
+	private Messager() {
 	}
 
-	public static String colorFormat(String thing, Object... format) {
-		return Messager.color(String.format(thing, format));
+	public static final char ALT_COLOR_CHAR = '&';
+
+	public static String color(String text) {
+		return ChatColor.translateAlternateColorCodes(ALT_COLOR_CHAR, text);
+	}
+
+	public static String colorFormat(String text, Object... format) {
+		return Messager.color(String.format(text, format));
 	}
 
 	public static String getMessage(String name, Object... format) {

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -24,7 +25,6 @@ import org.bukkit.util.Vector;
 
 import com.cryptomorin.xseries.XMaterial;
 
-import me.brunorm.skywars.NMS.ReflectionNMS;
 import me.brunorm.skywars.commands.ForceStartCommand;
 import me.brunorm.skywars.commands.LeaveCommand;
 import me.brunorm.skywars.commands.MainCommand;
@@ -37,10 +37,13 @@ import me.brunorm.skywars.events.MessageSound;
 import me.brunorm.skywars.events.ProjectileTrails;
 import me.brunorm.skywars.events.SetupEvents;
 import me.brunorm.skywars.events.SignEvents;
+import me.brunorm.skywars.menus.GameSettingsMenu;
 import me.brunorm.skywars.menus.GamesMenu;
 import me.brunorm.skywars.menus.KitsMenu;
 import me.brunorm.skywars.menus.MapMenu;
+import me.brunorm.skywars.menus.PlayerInventoryManager;
 import me.brunorm.skywars.menus.SetupMenu;
+import me.brunorm.skywars.nms.ReflectionNMS;
 import me.brunorm.skywars.schematics.SchematicHandler;
 import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.Kit;
@@ -190,7 +193,7 @@ public class Skywars extends JavaPlugin {
 			if (item == null)
 				return;
 			player.getInventory().removeItem(item);
-			SkywarsUtils.TeleportPlayerBack(player);
+			SkywarsUtils.teleportPlayerBack(player);
 		});
 		this.sendDebugMessage("Stopping arenas...");
 		for (final Arena arena : this.arenas) {
@@ -247,7 +250,8 @@ public class Skywars extends JavaPlugin {
 			pluginManager.registerEvents(new ProjectileTrails(), this);
 		}
 		final Listener[] listeners = { new InteractEvent(), new Events(), new GamesMenu(), new MapMenu(),
-				new KitsMenu(), new SetupEvents(), new ChestManager(), new SetupMenu(), new PlayerInventoryManager(), };
+				new KitsMenu(), new SetupEvents(), new ChestManager(), new SetupMenu(), new GameSettingsMenu(),
+				new PlayerInventoryManager(), };
 		for (final Listener listener : listeners) {
 			pluginManager.registerEvents(listener, this);
 		}
@@ -255,7 +259,7 @@ public class Skywars extends JavaPlugin {
 
 	public void loadCommands() {
 		this.sendMessage("Loading commands...");
-		final HashMap<String, CommandExecutor> cmds = new HashMap<String, CommandExecutor>();
+		final HashMap<String, CommandExecutor> cmds = new HashMap<>();
 		cmds.put("skywars", new MainCommand());
 		cmds.put("where", new WhereCommand());
 		cmds.put("start", new StartCommand());
@@ -273,7 +277,7 @@ public class Skywars extends JavaPlugin {
 
 	// maps
 
-	private final ArrayList<SkywarsMap> maps = new ArrayList<SkywarsMap>();
+	private final ArrayList<SkywarsMap> maps = new ArrayList<>();
 
 	public SkywarsMap getMap(String name) {
 		for (final SkywarsMap map : this.maps) {
@@ -506,9 +510,9 @@ public class Skywars extends JavaPlugin {
 
 	// kits
 
-	private final ArrayList<Kit> kits = new ArrayList<Kit>();
+	private final List<Kit> kits = new ArrayList<Kit>();
 
-	public ArrayList<Kit> getKits() {
+	public List<Kit> getKits() {
 		return this.kits;
 	}
 
@@ -553,7 +557,7 @@ public class Skywars extends JavaPlugin {
 			if (iconItem == null)
 				iconItem = "BEDROCK";
 			kit.setIcon(XMaterial.valueOf(iconItem).parseItem());
-			kit.setPrice(config.getInt("price"));
+			kit.setPrice(config.getDouble("price"));
 
 			// add kit to the arena list
 			this.kits.add(kit);
@@ -642,9 +646,9 @@ public class Skywars extends JavaPlugin {
 
 	// arenas
 
-	private final ArrayList<Arena> arenas = new ArrayList<Arena>();
+	private final ArrayList<Arena> arenas = new ArrayList<>();
 
-	public ArrayList<Arena> getArenas() {
+	public List<Arena> getArenas() {
 		return this.arenas;
 	}
 
@@ -657,7 +661,7 @@ public class Skywars extends JavaPlugin {
 		return null;
 	}
 
-	// TODO: make this a cached hashmap
+	// TODO make this a cached hashmap
 	public Arena getPlayerArena(Player player) {
 		for (int i = 0; i < this.arenas.size(); i++) {
 			final List<SkywarsUser> players = this.arenas.get(i).getUsers();
@@ -669,8 +673,6 @@ public class Skywars extends JavaPlugin {
 		}
 		return null;
 	}
-
-	public HashMap<Player, YamlConfiguration> playerConfigurations = new HashMap<Player, YamlConfiguration>();
 
 	public File getPlayerConfigFile(Player player) {
 		return new File(playersPath, player.getUniqueId() + ".yml");
@@ -687,6 +689,8 @@ public class Skywars extends JavaPlugin {
 			}
 		return schematic;
 	}
+
+	private final Map<Player, YamlConfiguration> playerConfigurations = new HashMap<>();
 
 	public YamlConfiguration getPlayerConfig(Player player) {
 		if (this.playerConfigurations.get(player) != null)
@@ -715,7 +719,8 @@ public class Skywars extends JavaPlugin {
 
 	public Kit getKit(String name) {
 		for (int i = 0; i < this.kits.size(); i++) {
-			if (this.kits.get(i).getName().equals(name) || this.kits.get(i).getDisplayName().equals(name)) {
+			if (this.kits.get(i).getName().equalsIgnoreCase(name)
+					|| this.kits.get(i).getDisplayName().equalsIgnoreCase(name)) {
 				return this.kits.get(i);
 			}
 		}
@@ -729,8 +734,9 @@ public class Skywars extends JavaPlugin {
 
 	public Kit getPlayerKit(Player player) {
 		final String kitName = this.getPlayerConfig(player).getString("kit");
-		final Kit kit = this.getKit(kitName);
-		return kit;
+		if (kitName == null)
+			return null;
+		return this.getKit(kitName);
 	}
 
 	public Integer getPlayerTotalKills(Player player) {

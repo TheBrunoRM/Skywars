@@ -1,7 +1,6 @@
 package me.brunorm.skywars.menus;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -24,11 +23,9 @@ import me.brunorm.skywars.structures.SkywarsMap;
 
 public class MapMenu implements Listener {
 
-	static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();
-
 	public static void open(Player player) {
 		final Inventory inventory = Bukkit.createInventory(null, 9 * 6, Messager.color("&aMaps"));
-		inventories.put(player, inventory);
+		PlayerInventoryManager.setInventory(player, inventory);
 
 		int index = 10;
 		for (final SkywarsMap map : Skywars.get().getMaps()) {
@@ -70,7 +67,7 @@ public class MapMenu implements Listener {
 	@EventHandler
 	void onClick(InventoryClickEvent event) {
 		final Player player = (Player) event.getWhoClicked();
-		final Inventory inventory = inventories.get(player);
+		final Inventory inventory = PlayerInventoryManager.getInventory(player);
 		if (event.getInventory().equals(inventory)) {
 			event.setCancelled(true);
 			final ItemStack clicked = event.getCurrentItem();

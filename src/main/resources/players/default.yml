@@ -1,6 +1,8 @@
 # PLAYER CONFIGURATION FILE
 
 kit: default
+ownedKits:
+
 stats:
   solo:
     kills: 0

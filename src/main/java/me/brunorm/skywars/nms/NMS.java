@@ -1,4 +1,4 @@
-package me.brunorm.skywars.NMS;
+package me.brunorm.skywars.nms;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;

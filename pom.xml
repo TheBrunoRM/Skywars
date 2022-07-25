@@ -1,6 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>me.brunorm.skywars</groupId>
@@ -65,20 +63,22 @@
 	</dependencies>
 
 	<build>
-	    <defaultGoal>compile</defaultGoal>
+		<defaultGoal>package</defaultGoal>
 		<finalName>${project.name}</finalName>
-		
+
 		<resources>
+			<!--
 			<resource>
 				<directory>src/main/resources/schematics</directory>
 				<filtering>false</filtering>
-				<includes>
-					<include>mini_trees.schematic</include>
-				</includes>
-			</resource>
+					<includes>
+						<include>mini_trees.schematic</include>
+					</includes>
+				</resource>
+			-->
 			<resource>
 				<directory>src/main/resources</directory>
-				<filtering>false</filtering>
+				<filtering>true</filtering>
 			</resource>
 		</resources>
 
@@ -103,6 +103,20 @@
 					<nonFilteredFileExtensions>
 						<nonFilteredFileExtension>schematic</nonFilteredFileExtension>
 					</nonFilteredFileExtensions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.1</version>
+				<configuration>
+					<outputDirectory>${outputDirectory}</outputDirectory>
+					<archive>
+						<manifest>
+							<addDefaultImplementationEntries>false</addDefaultImplementationEntries>
+						</manifest>
+						<addMavenDescriptor>false</addMavenDescriptor>
+					</archive>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -46,14 +46,8 @@ public class SchematicHandler {
 			getBlockDataMethod = blockClass.getMethod("getBlockData");
 			setBlockDataMethod = blockClass.getMethod("setBlockData", blockDataClass);
 		} catch (final Exception e) {
+			e.printStackTrace();
 		}
-	}
-
-	public static Vector calculatePositionWithOffset(Map<String, Tag> values, Vector offset) {
-		final int x = (int) values.get("x").getValue();
-		final int y = (int) values.get("y").getValue();
-		final int z = (int) values.get("z").getValue();
-		return new Vector(x + offset.getBlockX(), y + offset.getBlockY(), z + offset.getBlockZ());
 	}
 
 	public static Vector getVector(Map<String, Tag> values) {
@@ -61,6 +55,13 @@ public class SchematicHandler {
 		final int y = (int) values.get("y").getValue();
 		final int z = (int) values.get("z").getValue();
 		return new Vector(x, y, z);
+	}
+
+	public static Vector calculatePositionWithOffset(Map<String, Tag> values, Vector offset) {
+		final int x = (int) values.get("x").getValue();
+		final int y = (int) values.get("y").getValue();
+		final int z = (int) values.get("z").getValue();
+		return new Vector(x + offset.getBlockX(), y + offset.getBlockY(), z + offset.getBlockZ());
 	}
 
 	public static Location calculatePositionWithOffset(Map<String, Tag> values, World world, Vector offset) {
@@ -122,51 +123,51 @@ public class SchematicHandler {
 
 	public static String getColor(int id) {
 		switch (id) {
-		case 0:
-			return "WHITE";
-		case 1:
-			return "ORANGE";
-		case 2:
-			return "MAGENTA";
-		case 3:
-			return "LIGHT_BLUE";
-		case 4:
-			return "YELLOW";
-		case 5:
-			return "LIME";
-		case 6:
-			return "PINK";
-		case 7:
-			return "GRAY";
-		case 8:
-			return "LIGHT_GRAY";
-		case 9:
-			return "CYAN";
-		case 10:
-			return "PURPLE";
-		case 11:
-			return "BLUE";
-		case 12:
-			return "BROWN";
-		case 13:
-			return "GREEN";
-		case 14:
-			return "RED";
-		case 15:
-			return "BLACK";
-		default:
-			return "WHITE";
+			case 0:
+				return "WHITE";
+			case 1:
+				return "ORANGE";
+			case 2:
+				return "MAGENTA";
+			case 3:
+				return "LIGHT_BLUE";
+			case 4:
+				return "YELLOW";
+			case 5:
+				return "LIME";
+			case 6:
+				return "PINK";
+			case 7:
+				return "GRAY";
+			case 8:
+				return "LIGHT_GRAY";
+			case 9:
+				return "CYAN";
+			case 10:
+				return "PURPLE";
+			case 11:
+				return "BLUE";
+			case 12:
+				return "BROWN";
+			case 13:
+				return "GREEN";
+			case 14:
+				return "RED";
+			case 15:
+				return "BLACK";
+			default:
+				return "WHITE";
 		}
 	}
 
 	public static String getColorableMaterialName(int id) {
 		switch (id) {
-		case 35:
-			return "WOOL";
-		case 160:
-			return "STAINED_GLASS_PANE";
-		default:
-			return null;
+			case 35:
+				return "WOOL";
+			case 160:
+				return "STAINED_GLASS_PANE";
+			default:
+				return null;
 		}
 	}
 
@@ -201,20 +202,20 @@ public class SchematicHandler {
 						// 1.13+ method for setting blocks
 						String name = null;
 						switch (id) {
-						case 17: // log
-							name = getMaterialNameByIDAndData(id, blockData[index] % 4);
-							break;
-						case (byte) 162: // log2
-							name = getMaterialNameByIDAndData(id, blockData[index] % 2);
-							break;
-						case 50: // torch
-						case 54: // chest
-						case 61: // furnace
-						case 66: // rail
-							name = getMaterialNameByIDAndData(id, 0);
-							break;
-						default:
-							name = getMaterialNameByIDAndData(id, blockData[index]);
+							case 17: // log
+								name = getMaterialNameByIDAndData(id, blockData[index] % 4);
+								break;
+							case (byte) 162: // log2
+								name = getMaterialNameByIDAndData(id, blockData[index] % 2);
+								break;
+							case 50: // torch
+							case 54: // chest
+							case 61: // furnace
+							case 66: // rail
+								name = getMaterialNameByIDAndData(id, 0);
+								break;
+							default:
+								name = getMaterialNameByIDAndData(id, blockData[index]);
 						}
 						if (name != null) {
 							boolean doubleSlab = false;
@@ -289,12 +290,12 @@ public class SchematicHandler {
 			final Block block = new Location(world, x + loc.getX() + offset.getX(), y + loc.getY() + offset.getY(),
 					z + loc.getZ() + offset.getZ()).getBlock();
 			switch (values.get("id").getValue().toString()) {
-			case "Beacon":
-				block.setType(XMaterial.BEACON.parseMaterial());
-				break;
-			case "Chest":
-				// block.setType(XMaterial.CHEST.parseMaterial());
-				break;
+				case "Beacon":
+					block.setType(XMaterial.BEACON.parseMaterial());
+					break;
+				case "Chest":
+					// block.setType(XMaterial.CHEST.parseMaterial());
+					break;
 			}
 		}
 	}

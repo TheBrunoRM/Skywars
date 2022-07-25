@@ -1,4 +1,4 @@
-package me.brunorm.skywars.NMS;
+package me.brunorm.skywars.nms;
 
 public interface MethodInterface {
 

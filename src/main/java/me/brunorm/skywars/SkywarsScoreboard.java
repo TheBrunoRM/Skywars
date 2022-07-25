@@ -62,7 +62,7 @@ public class SkywarsScoreboard {
 				if (text == null)
 					continue;
 				if (text.equals(""))
-					text = Messager.color("&" + SkywarsUtils.colorSymbols[textIndex]);
+					text = Messager.color("&" + SkywarsUtils.COLOR_SYMBOLS[textIndex]);
 				final Score score = objective.getScore(text);
 				score.setScore(i);
 				textIndex++;

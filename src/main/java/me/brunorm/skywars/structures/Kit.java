@@ -7,13 +7,13 @@ import org.bukkit.inventory.ItemStack;
 
 public class Kit {
 
-	String name;
-	String displayName;
-	ItemStack icon;
-	ItemStack[] items;
-	int price;
-	YamlConfiguration config;
-	File file;
+	private String name;
+	private String displayName;
+	private ItemStack icon;
+	private ItemStack[] items;
+	private double price;
+	private YamlConfiguration config;
+	private File file;
 
 	public Kit(String name) {
 		this.name = name;
@@ -24,7 +24,7 @@ public class Kit {
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		this.name = name.toLowerCase();
 	}
 
 	public String getDisplayName() {
@@ -51,11 +51,11 @@ public class Kit {
 		this.items = items;
 	}
 
-	public int getPrice() {
+	public double getPrice() {
 		return this.price;
 	}
 
-	public void setPrice(int price) {
+	public void setPrice(double price) {
 		this.price = price;
 	}
 

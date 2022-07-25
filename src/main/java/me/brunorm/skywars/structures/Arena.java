@@ -48,6 +48,8 @@ public class Arena {
 	private Player forcedStartPlayer;
 	private SkywarsUser winner;
 
+	private final ArenaGameSettings gameSettings = new ArenaGameSettings();
+
 	private final SkywarsMap map;
 
 	public Arena get() {
@@ -95,7 +97,7 @@ public class Arena {
 	}
 
 	public boolean joinPlayer(Player player) {
-		if (!SkywarsUtils.JoinableCheck(this, player))
+		if (!SkywarsUtils.joinableCheck(this, player))
 			return false;
 		if (!this.checkProblems()) {
 			for (final String problem : this.getProblems()) {
@@ -128,7 +130,7 @@ public class Arena {
 		Skywars.get().playerLocations.put(player, player.getLocation());
 		player.teleport(SkywarsUtils.getCenteredLocation(spawn));
 		swPlayer.setSavedPlayer(new SavedPlayer(player));
-		SkywarsUtils.ClearPlayer(player);
+		SkywarsUtils.clearPlayer(player, true);
 
 		SkywarsUtils.setPlayerInventory(player, "waiting");
 
@@ -199,7 +201,7 @@ public class Arena {
 
 		// TODO: make customizable spectator mode
 
-		SkywarsUtils.ClearPlayer(player);
+		SkywarsUtils.clearPlayer(player);
 		player.setAllowFlight(true);
 		player.setFlying(true);
 		player.setGameMode(GameMode.ADVENTURE);
@@ -294,45 +296,50 @@ public class Arena {
 	public void exitPlayer(SkywarsUser player) {
 		if (player == null)
 			return;
-		SkywarsUtils.ClearPlayer(player.getPlayer());
+		SkywarsUtils.clearPlayer(player.getPlayer());
 		player.getSavedPlayer().Restore();
 		if (this.isInBoundaries(player.getPlayer()))
-			SkywarsUtils.TeleportPlayerBack(player.getPlayer());
+			SkywarsUtils.teleportPlayerBack(player.getPlayer());
 	}
 
 	void removePlayer(SkywarsUser player) {
 		if (this.getStatus() != ArenaStatus.PLAYING)
 			return;
-		if (this.getAlivePlayers().size() > 1) {
-			for (final SkywarsUser p : this.getUsers()) {
-				Skywars.get().NMS().sendActionbar(p.getPlayer(),
-						Messager.getMessage("PLAYERS_REMAINING", this.getAlivePlayerCount()));
-			}
-		} else {
-			final List<SkywarsUser> winners = new ArrayList<>(this.getAlivePlayers());
-			if (winners.size() > 0) {
-				this.setWinner(winners.get(0));
-			}
-
-			final double winMoney = Skywars.get().getConfig().getDouble("economy.win");
-
-			for (final SkywarsUser p : this.getUsers()) {
-				if (p == this.getWinner()) {
-					if (Skywars.get().getEconomy() != null && winMoney > 0)
-						Skywars.get().getEconomy().depositPlayer(p.getPlayer(), winMoney);
-					Skywars.get().NMS().sendTitle(p.getPlayer(), "&6&lYOU WON", "&7Congratulations!", 0, 80, 0);
-				} else {
-					Skywars.get().NMS().sendTitle(p.getPlayer(), "&c&lGAME ENDED", "&7You didn't win this time.", 0, 80,
-							0);
-				}
-				if (this.winner == null) {
-					p.getPlayer().sendMessage(Messager.color("&cnobody &ewon"));
-				} else {
-					p.getPlayer().sendMessage(Messager.colorFormat("&c%s &ewon!", this.winner.getPlayer().getName()));
-				}
-			}
-			this.startTimer(ArenaStatus.ENDING);
+		if (this.getAlivePlayers().size() <= 1) {
+			this.endGame();
+			return;
 		}
+
+		for (final SkywarsUser p : this.getUsers()) {
+			Skywars.get().NMS().sendActionbar(p.getPlayer(),
+					Messager.getMessage("PLAYERS_REMAINING", this.getAlivePlayerCount()));
+		}
+	}
+
+	void endGame() {
+		final List<SkywarsUser> winners = new ArrayList<>(this.getAlivePlayers());
+		if (winners.size() > 0) {
+			this.setWinner(winners.get(0));
+		}
+
+		final double winMoney = Skywars.get().getConfig().getDouble("economy.win");
+
+		if (this.getWinner() != null && winMoney > 0 && Skywars.get().getEconomy() != null)
+			Skywars.get().getEconomy().depositPlayer(this.getWinner().getPlayer(), winMoney);
+		for (final SkywarsUser p : this.getUsers()) {
+			if (p == this.getWinner()) {
+				Skywars.get().NMS().sendTitle(p.getPlayer(), "&6&lYOU WON", "&7Congratulations!", 0, 80, 0);
+			} else {
+				Skywars.get().NMS().sendTitle(p.getPlayer(), "&c&lGAME ENDED", "&7You didn't win this time.", 0, 80, 0);
+			}
+			if (this.winner == null) {
+				p.getPlayer().sendMessage(Messager.color("&cnobody &ewon"));
+			} else {
+				p.getPlayer().sendMessage(Messager.colorFormat("&c%s &ewon!", this.winner.getPlayer().getName()));
+			}
+		}
+		this.removeHolograms();
+		this.startTimer(ArenaStatus.ENDING);
 	}
 
 	BukkitTask task;
@@ -476,11 +483,12 @@ public class Arena {
 		this.startTimer(this.getStatus());
 		this.calculateChests();
 		this.fillChests();
+		this.applyGameSettings();
 		for (final Vector spawn : this.map.getSpawns().values()) {
 			Skywars.createCase(this.getVectorInArena(spawn), XMaterial.AIR);
 		}
 		for (final SkywarsUser player : this.getAlivePlayers()) {
-			SkywarsUtils.ClearPlayer(player.getPlayer());
+			SkywarsUtils.clearPlayer(player.getPlayer());
 			player.getPlayer().setGameMode(GameMode.SURVIVAL);
 			final Kit kit = Skywars.get().getPlayerKit(player.getPlayer());
 			if (kit != null) {
@@ -528,6 +536,14 @@ public class Arena {
 		}, 40);
 	}
 
+	private void applyGameSettings() {
+		// TODO apply chest type
+		for (final SkywarsUser user : this.getUsers()) {
+			user.getPlayer().setPlayerWeather(this.gameSettings.weather);
+			user.getPlayer().setPlayerTime(this.gameSettings.time, false);
+		}
+	}
+
 	public void clear() {
 		this.clear(true);
 	}
@@ -550,11 +566,15 @@ public class Arena {
 				}
 			}
 		}
+		if (remove)
+			Skywars.get().clearArena(this);
+	}
+
+	void removeHolograms() {
 		for (final String holoName : this.chestHolograms.values()) {
 			DHAPI.removeHologram(holoName);
 		}
-		if (remove)
-			Skywars.get().clearArena(this);
+		this.chestHolograms.clear();
 	}
 
 	public void resetCases() {
@@ -904,6 +924,20 @@ public class Arena {
 			final Hologram holo = DHAPI.getHologram(holoName);
 			DHAPI.setHologramLine(holo, 0, text);
 		}
+	}
+
+	public ArenaGameSettings getGameSettings() {
+		return this.gameSettings;
+	}
+
+	public void changeGameSettings(Object obj) {
+		this.gameSettings.change(obj);
+		this.broadcastMessage("Changed game settings: " + obj.toString());
+	}
+
+	private void broadcastMessage(String string) {
+		for (final SkywarsUser user : this.getUsers())
+			user.getPlayer().sendMessage(string);
 	}
 
 }

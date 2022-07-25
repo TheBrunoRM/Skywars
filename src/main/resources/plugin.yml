@@ -1,8 +1,8 @@
-main: me.brunorm.skywars.Skywars
-version: 0.3.0
-name: Skywars
+main: ${mainClass}
+version: ${project.version}
+name: ${project.name}
 author: BrunoRM
-softdepend: 
+softdepend:
   - Vault
   - WorldEdit
   - PlaceholderAPI

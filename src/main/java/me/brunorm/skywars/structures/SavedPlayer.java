@@ -44,7 +44,8 @@ public class SavedPlayer {
 	}
 
 	public void Restore() {
-		SkywarsUtils.ClearPlayer(this.player);
+		SkywarsUtils.clearPlayer(this.player);
+		SkywarsUtils.resetPlayerServer(this.player);
 
 		// clear inventory
 

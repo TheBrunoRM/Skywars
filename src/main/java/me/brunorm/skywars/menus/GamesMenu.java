@@ -15,13 +15,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import com.cryptomorin.xseries.XMaterial;
 
 import me.brunorm.skywars.Messager;
-import me.brunorm.skywars.PlayerInventoryManager;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.structures.Arena;
 
 public class GamesMenu implements Listener {
 
-	public static void OpenMenu(Player player) {
+	public static void open(Player player) {
 		final Inventory inventory = Bukkit.createInventory(null, 9 * 3, "Skywars");
 		PlayerInventoryManager.setInventory(player, inventory);
 		final ItemStack item = new ItemStack(XMaterial.BOW.parseItem());

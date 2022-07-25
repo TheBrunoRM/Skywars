@@ -176,7 +176,7 @@ public class MainCommand implements CommandExecutor {
 				} else if (args[0].equalsIgnoreCase("menu")) {
 					if (!CommandsUtils.consoleCheckWithMessage(sender))
 						return true;
-					GamesMenu.OpenMenu(player);
+					GamesMenu.open(player);
 				} else if (args[0].equalsIgnoreCase("reload") || args[0].equalsIgnoreCase("rl")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
@@ -195,11 +195,12 @@ public class MainCommand implements CommandExecutor {
 				} else if (args[0].equalsIgnoreCase("hd")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
-//					final Hologram holo = HologramsAPI.createHologram(Skywars.get(), player.getLocation());
-//					holo.appendTextLine("hola que tal bro");
-//					holo.appendTextLine("&6aver ese colorsito");
-//					holo.appendTextLine(Messager.color("&6la prueba con el messager"));
-//					holo.appendItemLine(XMaterial.IRON_SWORD.parseItem());
+					// final Hologram holo = HologramsAPI.createHologram(Skywars.get(),
+					// player.getLocation());
+					// holo.appendTextLine("hola que tal bro");
+					// holo.appendTextLine("&6aver ese colorsito");
+					// holo.appendTextLine(Messager.color("&6la prueba con el messager"));
+					// holo.appendItemLine(XMaterial.IRON_SWORD.parseItem());
 					final Hologram holo = DHAPI.createHologram("test", player.getLocation().add(new Vector(0, 2, 0)));
 					DHAPI.addHologramLine(holo, "hola bro");
 					DHAPI.addHologramLine(holo, "&6aver ese colorsito");
@@ -428,7 +429,7 @@ public class MainCommand implements CommandExecutor {
 						final Vector arenaSpawnLocation = mapSpawn.getSpawn(spawn);
 						sender.sendMessage(arenaSpawnLocation == null ? "spawn is null" : "spawn exists");
 					} else if (args[1].equalsIgnoreCase("set")) {
-						// TODO: calculate location relative to arena location
+						// TODO calculate location relative to arena location
 						// mapSpawn.setSpawn(spawn, player.getLocation().toVector());
 						player.sendMessage(String.format("Set spawn %s of arena '%s' to your current location", spawn,
 								mapSpawn.getName()));
@@ -440,7 +441,7 @@ public class MainCommand implements CommandExecutor {
 				} else if (args[0].equalsIgnoreCase("arenas")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
-					final ArrayList<Arena> arenas = Skywars.get().getArenas();
+					final List<Arena> arenas = Skywars.get().getArenas();
 					if (arenas != null && arenas.size() > 0) {
 						final List<String> arenaNames = arenas.stream().map(m -> m.getMap().getName())
 								.collect(Collectors.toList());
