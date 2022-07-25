@@ -1,2 +1,5 @@
 /bin/
 /target/
+*.args
+.vscode
+.settings

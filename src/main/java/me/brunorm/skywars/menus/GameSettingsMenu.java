@@ -30,8 +30,6 @@ public class GameSettingsMenu implements Listener {
 	public static void open(Player player, SettingMenu menu) {
 		Inventory inventory = null;
 		currentMenus.put(player.getUniqueId(), menu);
-		System.out.println("opening setting menu: " + menu);
-		System.out.println("menu: " + currentMenus.get(player.getUniqueId()));
 		switch (menu) {
 		case MAIN:
 			inventory = Bukkit.createInventory(null, 9 * 3, "Game settings");
@@ -74,26 +72,19 @@ public class GameSettingsMenu implements Listener {
 	@EventHandler
 	void onClick(InventoryClickEvent event) {
 		final Player player = (Player) event.getWhoClicked();
-		System.out.println("test");
 		final Inventory inventory = inventories.get(player);
-		System.out.println("test1");
 		if (!event.getInventory().equals(inventory))
 			return;
-		System.out.println("test2");
 		event.setCancelled(true);
 		final ItemStack clicked = event.getCurrentItem();
 		if (clicked == null || clicked.getItemMeta() == null)
 			return;
-		System.out.println("test3");
 		final SettingMenu currentMenu = currentMenus.get(player.getUniqueId());
-		System.out.println("current menu: " + currentMenu);
 		if (currentMenu == null)
 			return;
-		System.out.println("test4");
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;
-		System.out.println("test5");
 		switch (currentMenu) {
 		case MAIN:
 			switch (event.getSlot()) {
