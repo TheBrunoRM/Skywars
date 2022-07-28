@@ -1,5 +1,5 @@
 package me.brunorm.skywars.menus;
 
-public enum SettingMenu {
+public enum OptionMenu {
 	MAIN, WEATHER, TIME, CHESTS
 }

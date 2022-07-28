@@ -1,13 +1,13 @@
 package me.brunorm.skywars.schematics;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 
 import org.bukkit.Location;
@@ -17,60 +17,67 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
-import org.jnbt.ByteArrayTag;
-import org.jnbt.CompoundTag;
-import org.jnbt.IntTag;
-import org.jnbt.ListTag;
-import org.jnbt.NBTInputStream;
-import org.jnbt.ShortTag;
-import org.jnbt.StringTag;
-import org.jnbt.Tag;
 
 import com.cryptomorin.xseries.XMaterial;
 
 import me.brunorm.skywars.Skywars;
+import net.querz.nbt.io.NBTUtil;
+import net.querz.nbt.io.NamedTag;
+import net.querz.nbt.tag.CompoundTag;
+import net.querz.nbt.tag.IntTag;
+import net.querz.nbt.tag.ListTag;
+import net.querz.nbt.tag.Tag;
 
 public class SchematicHandler {
 
 	static Class<?> blockClass;
-	static Class<?> blockDataClass;
 	static Class<?> slabType;
+	static Class<?> blockDataClass;
 	static Method getBlockDataMethod;
 	static Method setBlockDataMethod;
 
 	public static void initializeReflection() {
 		try {
+			// available in 1.8
 			blockClass = Class.forName("org.bukkit.block.Block");
-			blockDataClass = Class.forName("org.bukkit.block.data.BlockData");
+
+			// available since 1.13
 			slabType = Class.forName("org.bukkit.block.data.type.Slab");
+			blockDataClass = Class.forName("org.bukkit.block.data.BlockData");
 			getBlockDataMethod = blockClass.getMethod("getBlockData");
 			setBlockDataMethod = blockClass.getMethod("setBlockData", blockDataClass);
 		} catch (final Exception e) {
-			e.printStackTrace();
 		}
 	}
 
-	public static Vector getVector(Map<String, Tag> values) {
-		final int x = (int) values.get("x").getValue();
-		final int y = (int) values.get("y").getValue();
-		final int z = (int) values.get("z").getValue();
+	public static Vector getVector(int[] pos) {
+		return new Vector(pos[0], pos[1], pos[2]);
+	}
+
+	public static Vector getVector(CompoundTag tag) {
+		final int x = tag.getInt("x");
+		final int y = tag.getInt("y");
+		final int z = tag.getInt("z");
 		return new Vector(x, y, z);
 	}
 
-	public static Vector calculatePositionWithOffset(Map<String, Tag> values, Vector offset) {
-		final int x = (int) values.get("x").getValue();
-		final int y = (int) values.get("y").getValue();
-		final int z = (int) values.get("z").getValue();
-		return new Vector(x + offset.getBlockX(), y + offset.getBlockY(), z + offset.getBlockZ());
+	public static Vector getVector(Map<String, IntTag> values) {
+		final int x = values.get("x").asInt();
+		final int y = values.get("y").asInt();
+		final int z = values.get("z").asInt();
+		return new Vector(x, y, z);
 	}
 
-	public static Location calculatePositionWithOffset(Map<String, Tag> values, World world, Vector offset) {
-		final int x = (int) values.get("x").getValue();
-		final int y = (int) values.get("y").getValue();
-		final int z = (int) values.get("z").getValue();
-		// Skywars.get().sendDebugMessage("schematic values: " + x + ", " + y + ", " +
-		// z);
-		return new Location(world, x + offset.getBlockX(), y + offset.getBlockY(), z + offset.getBlockZ());
+	public static Vector calculatePositionWithOffset(Map<String, IntTag> values, Vector offset) {
+		final Vector vector = getVector(values);
+		return new Vector(vector.getX() + offset.getBlockX(), vector.getY() + offset.getBlockY(),
+				vector.getZ() + offset.getBlockZ());
+	}
+
+	public static Location calculatePositionWithOffset(Map<String, IntTag> values, World world, Vector offset) {
+		final Vector vector = getVector(values);
+		return new Location(world, vector.getX() + offset.getBlockX(), vector.getY() + offset.getBlockY(),
+				vector.getZ() + offset.getBlockZ());
 	}
 
 	public static HashMap<String, String> materials = new HashMap<String, String>();
@@ -105,6 +112,27 @@ public class SchematicHandler {
 			return;
 
 		final World world = loc.getWorld();
+		final int length = schematic.getLength();
+		final int width = schematic.getWidth();
+		final int height = schematic.getHeight();
+		final Vector offset = schematic.getOffset();
+
+		for (int x = 0; x < width; ++x) {
+			for (int y = 0; y < height; ++y) {
+				for (int z = 0; z < length; ++z) {
+					final Block block = new Location(world, x + loc.getX() + offset.getX(),
+							y + loc.getY() + offset.getY(), z + loc.getZ() + offset.getZ()).getBlock();
+					block.setType(XMaterial.AIR.parseMaterial(), true);
+				}
+			}
+		}
+	}
+
+	public static void clear(Location loc, Schematic_old schematic) {
+		if (schematic == null)
+			return;
+
+		final World world = loc.getWorld();
 		final short length = schematic.getLength();
 		final short width = schematic.getWidth();
 		final short height = schematic.getHeight();
@@ -123,56 +151,56 @@ public class SchematicHandler {
 
 	public static String getColor(int id) {
 		switch (id) {
-			case 0:
-				return "WHITE";
-			case 1:
-				return "ORANGE";
-			case 2:
-				return "MAGENTA";
-			case 3:
-				return "LIGHT_BLUE";
-			case 4:
-				return "YELLOW";
-			case 5:
-				return "LIME";
-			case 6:
-				return "PINK";
-			case 7:
-				return "GRAY";
-			case 8:
-				return "LIGHT_GRAY";
-			case 9:
-				return "CYAN";
-			case 10:
-				return "PURPLE";
-			case 11:
-				return "BLUE";
-			case 12:
-				return "BROWN";
-			case 13:
-				return "GREEN";
-			case 14:
-				return "RED";
-			case 15:
-				return "BLACK";
-			default:
-				return "WHITE";
+		case 0:
+			return "WHITE";
+		case 1:
+			return "ORANGE";
+		case 2:
+			return "MAGENTA";
+		case 3:
+			return "LIGHT_BLUE";
+		case 4:
+			return "YELLOW";
+		case 5:
+			return "LIME";
+		case 6:
+			return "PINK";
+		case 7:
+			return "GRAY";
+		case 8:
+			return "LIGHT_GRAY";
+		case 9:
+			return "CYAN";
+		case 10:
+			return "PURPLE";
+		case 11:
+			return "BLUE";
+		case 12:
+			return "BROWN";
+		case 13:
+			return "GREEN";
+		case 14:
+			return "RED";
+		case 15:
+			return "BLACK";
+		default:
+			return "WHITE";
 		}
 	}
 
 	public static String getColorableMaterialName(int id) {
 		switch (id) {
-			case 35:
-				return "WOOL";
-			case 160:
-				return "STAINED_GLASS_PANE";
-			default:
-				return null;
+		case 35:
+			return "WOOL";
+		case 160:
+			return "STAINED_GLASS_PANE";
+		default:
+			return null;
 		}
 	}
 
 	@SuppressWarnings("deprecation")
-	public static void pasteSchematic(Location loc, Schematic schematic) {
+	public static void pasteSchematic_old(Location loc, Schematic_old schematic) {
 		loadMaterials();
 		final World world = loc.getWorld();
 		final byte[] blocks = schematic.getBlocks();
@@ -183,7 +211,7 @@ public class SchematicHandler {
 		final short height = schematic.getHeight();
 
 		final Vector offset = schematic.getOffset();
-		final ListTag tileEntities = schematic.getTileEntities();
+		final ListTag<CompoundTag> tileEntities = schematic.getTileEntities();
 
 		final ArrayList<Integer> skipped = new ArrayList<>();
 
@@ -202,20 +230,20 @@ public class SchematicHandler {
 						// 1.13+ method for setting blocks
 						String name = null;
 						switch (id) {
-							case 17: // log
-								name = getMaterialNameByIDAndData(id, blockData[index] % 4);
-								break;
-							case (byte) 162: // log2
-								name = getMaterialNameByIDAndData(id, blockData[index] % 2);
-								break;
-							case 50: // torch
-							case 54: // chest
-							case 61: // furnace
-							case 66: // rail
-								name = getMaterialNameByIDAndData(id, 0);
-								break;
-							default:
-								name = getMaterialNameByIDAndData(id, blockData[index]);
+						case 17: // log
+							name = getMaterialNameByIDAndData(id, blockData[index] % 4);
+							break;
+						case (byte) 162: // log2
+							name = getMaterialNameByIDAndData(id, blockData[index] % 2);
+							break;
+						case 50: // torch
+						case 54: // chest
+						case 61: // furnace
+						case 66: // rail
+							name = getMaterialNameByIDAndData(id, 0);
+							break;
+						default:
+							name = getMaterialNameByIDAndData(id, blockData[index]);
 						}
 						if (name != null) {
 							boolean doubleSlab = false;
@@ -260,18 +288,19 @@ public class SchematicHandler {
 						}
 					} else {
 						// 1.8 - 1.12 method for setting blocks
+						if (id == 54)
+							Skywars.get().sendDebugMessage("data for chest: " + blockData[index]);
 						block.setTypeIdAndData(id, blockData[index], true);
 					}
 				}
 			}
 		}
 
-		Skywars.get().sendMessage("Skipped " + skipped.size() + " blocks.");
+		Skywars.get().sendDebugMessage("Skipped " + skipped.size() + " blocks: "
+				+ String.join(", ", skipped.stream().map(a -> a.toString()).toList()));
 
-		for (final Tag tag : tileEntities.getValue()) {
-			@SuppressWarnings("unchecked")
-			final Map<String, Tag> values = (Map<String, Tag>) tag.getValue();
-			if (values.get("id").getValue().equals("Sign")) {
+		for (final CompoundTag values : tileEntities) {
+			if (values.getString("id").equals("Sign")) {
 				// TODO: parse sign
 				/*
 				 * //Skywars.get().sendDebugMessage("its a sign"); int x = (int)
@@ -284,55 +313,127 @@ public class SchematicHandler {
 				 * sign.setLine(i, getSignText((String) values.get("Text"+i).getValue())); }
 				 */
 			}
-			final int x = (int) values.get("x").getValue();
-			final int y = (int) values.get("y").getValue();
-			final int z = (int) values.get("z").getValue();
+			final int x = values.getInt("x");
+			final int y = values.getInt("y");
+			final int z = values.getInt("z");
 			final Block block = new Location(world, x + loc.getX() + offset.getX(), y + loc.getY() + offset.getY(),
 					z + loc.getZ() + offset.getZ()).getBlock();
-			switch (values.get("id").getValue().toString()) {
-				case "Beacon":
-					block.setType(XMaterial.BEACON.parseMaterial());
-					break;
-				case "Chest":
-					// block.setType(XMaterial.CHEST.parseMaterial());
-					break;
+			switch (values.getString("id")) {
+			case "Beacon":
+				block.setType(XMaterial.BEACON.parseMaterial());
+				break;
+			case "Chest":
+				// block.setType(XMaterial.CHEST.parseMaterial());
+				break;
 			}
 		}
 	}
 
-	@SuppressWarnings("unused")
-	public static void pasteSchematic(Location loc, Schem schematic) {
+	public static byte getHorizontalIndex(String direction) {
+		return getHorizontalIndex(direction, (byte) 0);
+	}
+
+	public static byte getHorizontalIndex(String direction, byte offset) {
+		switch (direction.toLowerCase()) {
+		case "south":
+			return (byte) (offset + 1);
+		case "west":
+			return (byte) (offset + 2);
+		case "east":
+			return (byte) (offset + 3);
+		case "north":
+			return (byte) (offset + 4);
+		default:
+			return 0;
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	public static void pasteSchematic(Location loc, Schematic schematic) {
 		final World world = loc.getWorld();
-		final byte[] blockData = schematic.getBlockData();
-		final Map<String, Tag> palette = schematic.getPalette();
+		final byte[] blocks = schematic.getBlocks();
+		final byte[] blockData = schematic.getData();
+		final HashMap<Integer, String> dataMap = schematic.getDataMap();
 
 		final short length = schematic.getLength();
 		final short width = schematic.getWidth();
 		final short height = schematic.getHeight();
 
 		final Vector offset = schematic.getOffset();
-		final ListTag tileEntities = schematic.getTileEntities();
+		final ListTag<CompoundTag> blockEntities = schematic.getBlockEntities();
 
 		final ArrayList<Integer> skipped = new ArrayList<>();
 
-		Skywars.get().sendDebugMessage("SCHEM DEBUG");
-		Skywars.get().sendDebugMessage("blockData: " + blockData);
-		Skywars.get().sendDebugMessage("palette: " + palette);
+		Skywars.get().sendDebugMessage("size: " + length + ", " + width + ", " + height);
 
-		for (final Tag tag : tileEntities.getValue()) {
-			@SuppressWarnings("unchecked")
-			final Map<String, Tag> values = (Map<String, Tag>) tag.getValue();
-			if (values.get("id").getValue().equals("Sign")) {
-				// TODO: parse sign
+		for (int x = 0; x < width; ++x) {
+			for (int y = 0; y < height; ++y) {
+				for (int z = 0; z < length; ++z) {
+					final int index = y * width * length + z * width + x;
+					final int id = blocks[index];
+					final Block block = new Location(world, x + loc.getX() + offset.getX(),
+							y + loc.getY() + offset.getY(), z + loc.getZ() + offset.getZ()).getBlock();
+					// schem file
+					if (dataMap != null && blockData == null) {
+						final String data = dataMap.get(id);
+						final String matName = data.split("minecraft:")[1].split("\\[")[0];
+						String[] metadata = {};
+						if (data.endsWith("]"))
+							metadata = data.split("\\[")[1].split("\\]")[0].split(",");
+						final XMaterial xmat = XMaterial.matchXMaterial(matName).get();
+						if (xmat == null) {
+							Skywars.get().sendDebugMessage("Could not get material for: " + matName);
+							continue;
+						}
+						final Material mat = xmat.parseMaterial();
+						// Skywars.get().sendDebugMessage("matName: " + matName);
+						// Skywars.get().sendDebugMessage("mat: " + mat);
+						if (mat == null) {
+							skipped.add(id);
+							continue;
+						}
+						block.setType(mat);
+						// Skywars.get().sendDebugMessage("setting block at " + block.getLocation() + " to " + mat);
+						for (final String m : metadata) {
+							// final String key = m.split("=")[0];
+							final String value = m.split("=")[1];
+							block.setData(getHorizontalIndex(value, (byte) 2));
+							// Skywars.get().sendDebugMessage("setting metadata of " + mat + " to: " + String.join(", ",
+							// metadata));
+							// block.setMetadata(, new FixedMetadataValue(Skywars.get(), m.split("=")[1]));
+						}
+					} else {
+						// schematic file
+						if (blocks[index] < 0) {
+							skipped.add((int) blocks[index]);
+							continue;
+						}
+						block.setTypeIdAndData(id, blockData[index], true);
+					}
+				}
 			}
-			if (values.get("id").getValue().equals("Beacon")) {
-				final int x = (int) values.get("x").getValue();
-				final int y = (int) values.get("y").getValue();
-				final int z = (int) values.get("z").getValue();
+		}
 
-				final Block block = new Location(world, x + loc.getX() + offset.getX(), y + loc.getY() + offset.getY(),
-						z + loc.getZ() + offset.getZ()).getBlock();
-				block.setType(XMaterial.BEACON.parseMaterial());
+		Skywars.get().sendDebugMessage("Skipped " + skipped.size() + " materials: "
+				+ String.join(", ", skipped.stream().map(a -> a.toString()).toList()));
+
+		for (final CompoundTag values : blockEntities) {
+			switch (values.getString("id").toLowerCase()) {
+			case "sign":
+				// TODO: parse sign
+				break;
+			case "beacon":
+				/*
+				 * final int x = values.getInt("x"); final int y = values.getInt("y"); final int
+				 * z = values.getInt("z");
+				 *
+				 * final Block block = new Location(world, x + loc.getX() + offset.getX(), y +
+				 * loc.getY() + offset.getY(), z + loc.getZ() + offset.getZ()).getBlock();
+				 * block.setType(XMaterial.BEACON.parseMaterial());
+				 */
+				break;
+			case "chest":
+				break;
 			}
 		}
 	}
@@ -346,62 +447,61 @@ public class SchematicHandler {
 	}
 
 	public static Schematic loadSchematic(File file) throws IOException {
-		final FileInputStream stream = new FileInputStream(file);
-		final NBTInputStream nbtStream = new NBTInputStream(stream);
+		final NamedTag schematic = NBTUtil.read(file);
 
-		final CompoundTag schematicTag = (CompoundTag) nbtStream.readTag();
-		nbtStream.close();
-		if (!schematicTag.getName().equals("Schematic")) {
-			throw new IllegalArgumentException("Tag \"Schematic\" does not exist or is not first");
-		}
+		final CompoundTag compound = (CompoundTag) schematic.getTag();
+		final CompoundTag palette = compound.getCompoundTag("Palette");
 
-		final Map<String, Tag> schematic = schematicTag.getValue();
-		final String materials = getChildTag(schematic, "Materials", StringTag.class).getValue();
-		if (materials.equals("Alpha")) {
-			// handle schematic file from below 1.13
-			if (!schematic.containsKey("Blocks")) {
-				throw new IllegalArgumentException("Schematic file is missing a \"Blocks\" tag");
+		final HashMap<Integer, String> dataMap = new HashMap<Integer, String>();
+		if (palette != null) {
+			final Iterable<Entry<String, Tag<?>>> set = palette.entrySet();
+
+			for (final Entry<String, Tag<?>> entry : set) {
+				final Tag<?> val = entry.getValue();
+				if (!(val instanceof IntTag)) {
+					Skywars.get().sendDebugMessage("Value in palette is not int: " + val.toString());
+					continue;
+				}
+				final int i = ((IntTag) val).asInt();
+				final String data = entry.getKey();
+				dataMap.put(i, data);
 			}
-
-			final short width = getChildTag(schematic, "Width", ShortTag.class).getValue();
-			final short length = getChildTag(schematic, "Length", ShortTag.class).getValue();
-			final short height = getChildTag(schematic, "Height", ShortTag.class).getValue();
-
-			final int offsetX = getChildTag(schematic, "WEOffsetX", IntTag.class).getValue();
-			final int offsetY = getChildTag(schematic, "WEOffsetY", IntTag.class).getValue();
-			final int offsetZ = getChildTag(schematic, "WEOffsetZ", IntTag.class).getValue();
-
-			final Vector offset = new Vector(offsetX, offsetY, offsetZ);
-
-			final ListTag tileEntities = getChildTag(schematic, "TileEntities", ListTag.class);
-
-			final byte[] blocks = getChildTag(schematic, "Blocks", ByteArrayTag.class).getValue();
-			final byte[] blockData = getChildTag(schematic, "Data", ByteArrayTag.class).getValue();
-
-			return new Schematic(blocks, blockData, width, length, height, offset, tileEntities);
 		}
-		return null;
-	}
 
-	/**
-	 * Get child tag of a NBT structure.
-	 *
-	 * @param items    The parent tag map
-	 * @param key      The name of the tag to get
-	 * @param expected The expected type of the tag
-	 * @return child tag casted to the expected type
-	 * @throws DataException if the tag does not exist or the tag is not of the
-	 *                       expected type
-	 */
-	private static <T extends Tag> T getChildTag(Map<String, Tag> items, String key, Class<T> expected)
-			throws IllegalArgumentException {
-		if (!items.containsKey(key)) {
-			throw new IllegalArgumentException("Schematic file is missing a \"" + key + "\" tag");
-		}
-		final Tag tag = items.get(key);
-		if (!expected.isInstance(tag)) {
-			throw new IllegalArgumentException(key + " tag is not of tag type " + expected.getName());
-		}
-		return expected.cast(tag);
+		final short length = compound.getShort("Length");
+		final short width = compound.getShort("Width");
+		final short height = compound.getShort("Height");
+
+		final CompoundTag metadata = compound.getCompoundTag("Metadata");
+		Vector offset;
+		if (metadata != null)
+			offset = new Vector(metadata.getInt("WEOffsetX"), metadata.getInt("WEOffsetY"),
+					metadata.getInt("WEOffsetZ"));
+		else
+			offset = new Vector(compound.getInt("WEOffsetX"), compound.getInt("WEOffsetY"),
+					compound.getInt("WEOffsetZ"));
+
+		Skywars.get().sendDebugMessage("offset: " + offset);
+
+		byte[] blocks = compound.getByteArray("BlockData");
+		// Skywars.get().sendDebugMessage("blocks: " +
+		// Arrays.toString(Bytes.asList(blocks).toArray()));
+		if (blocks.length <= 0)
+			blocks = compound.getByteArray("Blocks");
+		// Skywars.get().sendDebugMessage("blocks: " +
+		// Arrays.toString(Bytes.asList(blocks).toArray()));
+
+		final byte[] blockData = compound.getByteArray("Data");
+		// Skywars.get().sendDebugMessage("block data: " +
+		// Arrays.toString(Bytes.asList(blockData).toArray()));
+
+		// TODO check version
+		ListTag<?> entitiesTag = compound.getListTag("BlockEntities");
+		if (entitiesTag == null)
+			entitiesTag = compound.getListTag("TileEntities");
+
+		final ListTag<CompoundTag> entities = entitiesTag.asCompoundTagList();
+
+		return new Schematic(offset, length, width, height, blocks, blockData, dataMap, entities);
 	}
 }

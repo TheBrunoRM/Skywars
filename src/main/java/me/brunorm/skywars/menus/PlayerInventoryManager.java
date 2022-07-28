@@ -1,37 +1,34 @@
 package me.brunorm.skywars.menus;
 
 import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
+
+import me.brunorm.skywars.Skywars;
 
 public class PlayerInventoryManager implements Listener {
 
-	private static HashMap<Player, Inventory> inventories = new HashMap<>();
+	private static HashMap<UUID, MenuType> currentMenu = new HashMap<>();
 
-	public static Inventory getInventory(Player player) {
-		return inventories.get(player);
+	public static MenuType getCurrentMenu(Player player) {
+		return currentMenu.get(player.getUniqueId());
 	}
 
-	public static void setInventory(Player player, Inventory inventory) {
-		inventories.put(player, inventory);
+	public static void setMenu(Player player, MenuType menu) {
+		Skywars.get().sendDebugMessage("inventory set to " + menu + ": " + player.getName());
+		currentMenu.put(player.getUniqueId(), menu);
 	}
 
 	@EventHandler
 	void onInventoryClose(InventoryCloseEvent event) {
-		GameSettingsMenu.currentMenus.remove(event.getPlayer());
-		for (final Entry<Player, Inventory> set : inventories.entrySet()) {
-			if (set.getKey().equals(event.getPlayer()) && set.getValue().equals(event.getInventory())) {
-				inventories.remove(event.getPlayer());
-			}
-		}
-	}
-
-	public static HashMap<Player, Inventory> getInventories() {
-		return inventories;
+		final Player player = (Player) event.getPlayer();
+		if (getCurrentMenu(player) == null)
+			return;
+		Skywars.get().sendDebugMessage("inventory closed: " + event.getPlayer().getName());
+		setMenu(player, null);
 	}
 }

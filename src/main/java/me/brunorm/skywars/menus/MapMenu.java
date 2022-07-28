@@ -25,7 +25,7 @@ public class MapMenu implements Listener {
 
 	public static void open(Player player) {
 		final Inventory inventory = Bukkit.createInventory(null, 9 * 6, Messager.color("&aMaps"));
-		PlayerInventoryManager.setInventory(player, inventory);
+		PlayerInventoryManager.setMenu(player, MenuType.MAP_SELECTION);
 
 		int index = 10;
 		for (final SkywarsMap map : Skywars.get().getMaps()) {
@@ -67,16 +67,16 @@ public class MapMenu implements Listener {
 	@EventHandler
 	void onClick(InventoryClickEvent event) {
 		final Player player = (Player) event.getWhoClicked();
-		final Inventory inventory = PlayerInventoryManager.getInventory(player);
-		if (event.getInventory().equals(inventory)) {
-			event.setCancelled(true);
-			final ItemStack clicked = event.getCurrentItem();
-			if (clicked == null || clicked.getItemMeta() == null)
-				return;
-			final String name = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
-			final SkywarsMap map = Skywars.get().getMap(name);
-			Skywars.get().joinMap(map, player);
-		}
+		final MenuType menu = PlayerInventoryManager.getCurrentMenu(player);
+		if (menu != MenuType.MAP_SELECTION)
+			return;
+		event.setCancelled(true);
+		final ItemStack clicked = event.getCurrentItem();
+		if (clicked == null || clicked.getItemMeta() == null)
+			return;
+		final String name = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
+		final SkywarsMap map = Skywars.get().getMap(name);
+		Skywars.get().joinMap(map, player);
 	}
 
 }

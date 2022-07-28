@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -37,7 +36,7 @@ import me.brunorm.skywars.events.MessageSound;
 import me.brunorm.skywars.events.ProjectileTrails;
 import me.brunorm.skywars.events.SetupEvents;
 import me.brunorm.skywars.events.SignEvents;
-import me.brunorm.skywars.menus.GameSettingsMenu;
+import me.brunorm.skywars.menus.GameOptionsMenu;
 import me.brunorm.skywars.menus.GamesMenu;
 import me.brunorm.skywars.menus.KitsMenu;
 import me.brunorm.skywars.menus.MapMenu;
@@ -250,7 +249,7 @@ public class Skywars extends JavaPlugin {
 			pluginManager.registerEvents(new ProjectileTrails(), this);
 		}
 		final Listener[] listeners = { new InteractEvent(), new Events(), new GamesMenu(), new MapMenu(),
-				new KitsMenu(), new SetupEvents(), new ChestManager(), new SetupMenu(), new GameSettingsMenu(),
+				new KitsMenu(), new SetupEvents(), new ChestManager(), new SetupMenu(), new GameOptionsMenu(),
 				new PlayerInventoryManager(), };
 		for (final Listener listener : listeners) {
 			pluginManager.registerEvents(listener, this);
@@ -299,12 +298,13 @@ public class Skywars extends JavaPlugin {
 		if (map == null)
 			return null;
 		for (final Arena arena : this.arenas) {
-			if (arena.getStatus() != ArenaStatus.WAITING && arena.getStatus() != ArenaStatus.STARTING)
+			if (arena.started())
 				continue;
 			if (!arena.isJoinable())
 				continue;
-			if (arena.getMap() == map)
-				return arena;
+			if (arena.getMap() != map)
+				continue;
+			return arena;
 		}
 		return null;
 	}
@@ -654,9 +654,9 @@ public class Skywars extends JavaPlugin {
 
 	public Arena getRandomJoinableArena() {
 		for (final Arena arena : this.arenas) {
-			if (arena.isJoinable()) {
-				return arena;
-			}
+			if (!arena.isJoinable())
+				continue;
+			return arena;
 		}
 		return null;
 	}
@@ -674,10 +674,6 @@ public class Skywars extends JavaPlugin {
 		return null;
 	}
 
-	public File getPlayerConfigFile(Player player) {
-		return new File(playersPath, player.getUniqueId() + ".yml");
-	}
-
 	public File getSchematicFile(String schematicName) {
 		final File schematic = new File(schematicsPath, schematicName);
 		if (!schematic.exists())
@@ -690,26 +686,23 @@ public class Skywars extends JavaPlugin {
 		return schematic;
 	}
 
-	private final Map<Player, YamlConfiguration> playerConfigurations = new HashMap<>();
+	public File getPlayerConfigFile(Player player) {
+		return new File(playersPath, player.getUniqueId() + ".yml");
+	}
 
 	public YamlConfiguration getPlayerConfig(Player player) {
-		if (this.playerConfigurations.get(player) != null)
-			return this.playerConfigurations.get(player);
 		final File folder = new File(playersPath);
 		if (!folder.exists())
 			folder.mkdir();
 		final File file = this.getPlayerConfigFile(player);
 		if (!file.exists())
 			ConfigurationUtils.copyDefaultContentsToFile("players/default.yml", file);
-		final YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		this.playerConfigurations.put(player, config);
-		return config;
+		return YamlConfiguration.loadConfiguration(file);
 	}
 
-	public void savePlayerConfig(Player player) {
+	public void savePlayerConfig(Player player, YamlConfiguration config) {
 		try {
 			final File file = this.getPlayerConfigFile(player);
-			final YamlConfiguration config = this.getPlayerConfig(player);
 			config.save(file);
 			ConfigurationUtils.createMissingKeys(config, ConfigurationUtils.getDefaultConfig("players/default.yml"));
 		} catch (final IOException e) {
@@ -728,8 +721,9 @@ public class Skywars extends JavaPlugin {
 	}
 
 	public void setPlayerKit(Player player, Kit kit) {
-		this.getPlayerConfig(player).set("kit", kit.getName());
-		this.savePlayerConfig(player);
+		final YamlConfiguration conf = this.getPlayerConfig(player);
+		conf.set("kit", kit.getName());
+		this.savePlayerConfig(player, conf);
 	}
 
 	public Kit getPlayerKit(Player player) {

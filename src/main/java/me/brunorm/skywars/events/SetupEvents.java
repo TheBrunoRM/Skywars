@@ -53,11 +53,11 @@ public class SetupEvents implements Listener {
 	public void onPlayerItemHoldEvent(PlayerItemHeldEvent event) {
 		if (SetupEvents.item == null)
 			return;
-		final ItemStack oldItem = event.getPlayer().getInventory().getItem(event.getPreviousSlot());
-		if (oldItem != null && oldItem.equals(SetupEvents.item)) {
-			Skywars.get().NMS().sendTitle(event.getPlayer(), "&cWarning!", "&eDrop the blaze rod to exit edit mode!");
-		} else {
+		final ItemStack newItem = event.getPlayer().getInventory().getItem(event.getNewSlot());
+		if (newItem.equals(SetupEvents.item)) {
 			Skywars.get().NMS().sendTitle(event.getPlayer(), "&6Please", "&eDrop the blaze rod to exit edit mode.");
+		} else {
+			Skywars.get().NMS().sendTitle(event.getPlayer(), "&cWarning!", "&eDrop the blaze rod to exit edit mode!");
 		}
 	}
 

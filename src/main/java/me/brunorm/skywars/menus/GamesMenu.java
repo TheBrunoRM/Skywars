@@ -22,7 +22,7 @@ public class GamesMenu implements Listener {
 
 	public static void open(Player player) {
 		final Inventory inventory = Bukkit.createInventory(null, 9 * 3, "Skywars");
-		PlayerInventoryManager.setInventory(player, inventory);
+		PlayerInventoryManager.setMenu(player, MenuType.GAMES_MENU);
 		final ItemStack item = new ItemStack(XMaterial.BOW.parseItem());
 		final ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(Messager.color("&aclick to join random game"));
@@ -44,20 +44,20 @@ public class GamesMenu implements Listener {
 		final Inventory inv = event.getInventory();
 		if (inv == null)
 			return;
-		final Inventory inventory = PlayerInventoryManager.getInventory(player);
-		if (inventory == null)
+		final MenuType menu = PlayerInventoryManager.getCurrentMenu(player);
+		if (menu != MenuType.GAMES_MENU)
 			return;
-		if (inv.getName().equals(inventory.getName())) {
-			final ItemStack clicked = event.getCurrentItem();
-			if (clicked.getType() == XMaterial.BOW.parseMaterial()) {
-				event.setCancelled(true);
-				final Arena arena = Skywars.get().getRandomJoinableArena();
-				if (arena == null) {
-					player.sendMessage("couldn't find joinable arena");
-					return;
-				}
-				arena.joinPlayer(player);
+		final ItemStack clicked = event.getCurrentItem();
+		if (clicked == null)
+			return;
+		if (clicked.getType() == XMaterial.BOW.parseMaterial()) {
+			event.setCancelled(true);
+			final Arena arena = Skywars.get().getRandomJoinableArena();
+			if (arena == null) {
+				player.sendMessage("couldn't find joinable arena");
+				return;
 			}
+			arena.joinPlayer(player);
 		}
 	}
 

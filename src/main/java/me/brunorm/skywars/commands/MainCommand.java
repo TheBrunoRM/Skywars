@@ -15,6 +15,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
@@ -31,7 +32,6 @@ import me.brunorm.skywars.SkywarsUtils;
 import me.brunorm.skywars.menus.GamesMenu;
 import me.brunorm.skywars.menus.MapMenu;
 import me.brunorm.skywars.menus.SetupMenu;
-import me.brunorm.skywars.schematics.Schem;
 import me.brunorm.skywars.schematics.Schematic;
 import me.brunorm.skywars.schematics.SchematicHandler;
 import me.brunorm.skywars.structures.Arena;
@@ -66,7 +66,6 @@ public class MainCommand implements CommandExecutor {
 			"&b/skywars start &e- starts a game", "&b/skywars forcestart &e- starts a game immediately" };
 
 	Schematic schematic;
-	Schem schem;
 
 	BukkitTask task;
 	BukkitTask anotherTask;
@@ -188,7 +187,9 @@ public class MainCommand implements CommandExecutor {
 				// return true;
 				// TEST COMMANDS
 
-				else if (args[0].equalsIgnoreCase("xmat")) {
+				else if (args[0].equalsIgnoreCase("configstring")) {
+					Skywars.get().getPlayerConfig(player);
+				} else if (args[0].equalsIgnoreCase("xmat")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
 					player.getInventory().addItem(XMaterial.matchXMaterial(args[1]).get().parseItem());
@@ -250,6 +251,41 @@ public class MainCommand implements CommandExecutor {
 						return true;
 					}
 					SchematicHandler.pasteSchematic(player.getLocation(), this.schematic);
+				} else if (args[0].equalsIgnoreCase("debugdata")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					final Block block = SkywarsUtils.getTargetBlock(player, 10);
+					if (block != null)
+						block.setData((byte) (block.getData() + 1));
+					player.sendMessage("data: " + block.getData());
+				} else if (args[0].equalsIgnoreCase("metadata")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					final Block block = SkywarsUtils.getTargetBlock(player, 10);
+					if (block == null)
+						return true;
+					for (final MetadataValue value : block.getMetadata("facing")) {
+						player.sendMessage("data: " + value.asString());
+					}
+				} else if (args[0].equalsIgnoreCase("setdata")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					final Block block = SkywarsUtils.getTargetBlock(player, 10);
+					if (block == null)
+						return true;
+					if (args[1] == null)
+						return true;
+					block.setData(Byte.parseByte(args[1]));
+				} else if (args[0].equalsIgnoreCase("setmetadata")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					final String newmeta = args[1];
+					if (newmeta == null)
+						return true;
+					final Block block = SkywarsUtils.getTargetBlock(player, 10);
+					if (block == null)
+						return true;
+					block.setData(SchematicHandler.getHorizontalIndex(newmeta, Byte.parseByte(args[2])));
 				} else if (args[0].equalsIgnoreCase("loadschematic")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
@@ -258,15 +294,8 @@ public class MainCommand implements CommandExecutor {
 						sender.sendMessage("file not found: " + args[1]);
 						return true;
 					}
-					final Object loaded = SchematicHandler.loadSchematic(file);
-					if (loaded instanceof Schematic) {
-						System.out.println("Loading schematic!");
-						this.schematic = (Schematic) loaded;
-					} else if (loaded instanceof Schem) {
-						System.out.println("Loading schem!");
-						this.schem = (Schem) loaded;
-					} else
-						System.out.println("Unknown schematic type: " + loaded);
+					final Schematic loaded = SchematicHandler.loadSchematic(file);
+					sender.sendMessage("Loaded schematic " + file.getName());
 				} else if (args[0].equalsIgnoreCase("nms")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
@@ -347,9 +376,9 @@ public class MainCommand implements CommandExecutor {
 						return true;
 					final Block block = SkywarsUtils.getTargetBlock(player, 5);
 					final MaterialData data = new MaterialData(block.getType(), Byte.parseByte(args[1]));
-					System.out.println("mat data: " + data);
+					Skywars.get().sendDebugMessage("mat data: " + data);
 					final BlockState state = block.getState();
-					System.out.println(" block state: " + state.getData().getData());
+					Skywars.get().sendDebugMessage(" block state: " + state.getData().getData());
 					state.setData(data);
 					state.update();
 				} else if (args[0].equalsIgnoreCase("testschem")) {
