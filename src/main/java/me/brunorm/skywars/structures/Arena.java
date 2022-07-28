@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -21,8 +20,6 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
-import org.jnbt.ListTag;
-import org.jnbt.Tag;
 
 import com.cryptomorin.xseries.XMaterial;
 
@@ -36,6 +33,8 @@ import me.brunorm.skywars.SkywarsUtils;
 import me.brunorm.skywars.schematics.Schematic;
 import me.brunorm.skywars.schematics.SchematicHandler;
 import mrblobman.sounds.Sounds;
+import net.querz.nbt.tag.CompoundTag;
+import net.querz.nbt.tag.ListTag;
 
 public class Arena {
 
@@ -718,14 +717,14 @@ public class Arena {
 			return;
 		final World world = this.location.getWorld();
 		final Vector offset = schematic.getOffset();
-		final ListTag tileEntities = schematic.getTileEntities();
+		final ListTag<CompoundTag> tileEntities = schematic.getBlockEntities();
 		// Skywars.get().sendDebugMessage("tile entities: " +
 		// tileEntities.getValue().size());
 
 		final byte[] blocks = schematic.getBlocks();
-		final short length = schematic.getLength();
-		final short width = schematic.getWidth();
-		final short height = schematic.getHeight();
+		final int length = schematic.getLength();
+		final int width = schematic.getWidth();
+		final int height = schematic.getHeight();
 
 		this.chests.clear();
 
@@ -746,11 +745,12 @@ public class Arena {
 			}
 		}
 
-		for (final Tag tag : tileEntities.getValue()) {
-			@SuppressWarnings("unchecked")
-			final Map<String, Tag> values = (Map<String, Tag>) tag.getValue();
-			if (values.get("id").getValue().equals("Chest")) {
-				final Vector v = SchematicHandler.getVector(values);
+		for (final CompoundTag tag : tileEntities) {
+			String id = tag.getString("id");
+			if (id == null)
+				id = tag.getString("Id");
+			if (id.equalsIgnoreCase("chest")) {
+				final Vector v = SchematicHandler.getVector(tag);
 				final Location loc = new Location(world, v.getX(), v.getY(), v.getZ()).add(offset).add(this.location);
 				final Chest chest = (Chest) loc.getBlock().getState();
 				if (this.chests.contains(chest))
@@ -772,54 +772,49 @@ public class Arena {
 	}
 
 	public void calculateAndFillChests() {
-		final Schematic schematic = this.map.getSchematic();
-		final World world = this.location.getWorld();
-		final Vector offset = schematic.getOffset();
-		final ListTag tileEntities = schematic.getTileEntities();
-		// Skywars.get().sendDebugMessage("tile entities: " +
-		// tileEntities.getValue().size());
-
-		final byte[] blocks = schematic.getBlocks();
-		final short length = schematic.getLength();
-		final short width = schematic.getWidth();
-		final short height = schematic.getHeight();
-
-		int filled = 0;
-
-		for (int x = 0; x < width; ++x) {
-			for (int y = 0; y < height; ++y) {
-				for (int z = 0; z < length; ++z) {
-					final int index = y * width * length + z * width + x;
-					final Location loc = new Location(world, x, y, z).add(offset).add(this.location);
-					final Block block = loc.getBlock();
-					if (block.getType() == XMaterial.CHEST.parseMaterial() || blocks[index] == 54 /* chest id */) {
-						this.chests.add((Chest) block.getState());
-						ChestManager.fillChest(loc, SkywarsUtils.distance(this.getLocation().toVector(),
-								loc.toVector()) < this.map.getCenterRadius());
-						// Skywars.get().sendDebugMessage("filling chest at loc " + loc);
-						filled++;
-					}
-				}
-			}
-		}
-
-		for (final Tag tag : tileEntities.getValue()) {
-			@SuppressWarnings("unchecked")
-			final Map<String, Tag> values = (Map<String, Tag>) tag.getValue();
-			if (values.get("id").getValue().equals("Chest")) {
-				final Vector v = SchematicHandler.getVector(values);
-				final Location loc = new Location(world, v.getX(), v.getY(), v.getZ()).add(offset).add(this.location);
-				final Chest chest = (Chest) loc.getBlock().getState();
-				if (this.chests.contains(chest))
-					continue;
-				ChestManager.fillChest(loc, SkywarsUtils.distance(this.getLocation().toVector(),
-						loc.toVector()) < this.map.getCenterRadius());
-				// Skywars.get().sendDebugMessage("filling chest entity at loc " + loc);
-				filled++;
-			}
-		}
-		Skywars.get().sendDebugMessage("filled %s chests", filled);
-	}
+		this.calculateChests();
+		this.fillChests();
+		/*
+		 * final Schematic schematic = this.map.getSchematic(); final World world =
+		 * this.location.getWorld(); final Vector offset = schematic.getOffset(); final
+		 * ListTag tileEntities = schematic.getTileEntities(); //
+		 * Skywars.get().sendDebugMessage("tile entities: " + //
+		 * tileEntities.getValue().size());
+		 *
+		 * final byte[] blocks = schematic.getBlocks(); final short length =
+		 * schematic.getLength(); final short width = schematic.getWidth(); final short
+		 * height = schematic.getHeight();
+		 *
+		 * int filled = 0;
+		 *
+		 * for (int x = 0; x < width; ++x) { for (int y = 0; y < height; ++y) { for (int
+		 * z = 0; z < length; ++z) { final int index = y * width * length + z * width +
+		 * x; final Location loc = new Location(world, x, y,
+		 * z).add(offset).add(this.location); final Block block = loc.getBlock(); if
+		 * (block.getType() == XMaterial.CHEST.parseMaterial() || blocks[index] == 54 /*
+		 * chest id * /) { this.chests.add((Chest) block.getState());
+		 * ChestManager.fillChest(this.loc,
+		 * SkywarsUtils.distance(this.getLocation().toVector(), this.loc.toVector()) <
+		 * this.map.getCenterRadius()); //
+		 * Skywars.get().sendDebugMessage("filling chest at loc " + this.loc); filled++;
+		 * } }*}}**for(
+		 *
+		 * final Tag tag:tileEntities.getValue()){**
+		 *
+		 * @SuppressWarnings("unchecked") final Map<String, Tag> values = (Map<String,
+		 * Tag>) tag.getValue(); if (values.get("id").getValue().equals("Chest")) {
+		 *
+		 * final Vector v = SchematicHandler.getVector(this.values); final Location loc
+		 * = new Location(world, v.getX(), v.getY(),
+		 * v.getZ()).add(offset).add(this.location);
+		 *
+		 * final Chest chest = (Chest) this.loc.getBlock()
+		 * .getState();if*(this.chests.contains(chest))continue;ChestManager.fillChest(
+		 * loc,*SkywarsUtils.distance(this.getLocation().toVector(),loc.toVector())<*
+		 * this.map.getCenterRadius()); //
+		 * Skywars.get().sendDebugMessage("filling chest entity at loc "+loc);*filled++;
+		 * }}Skywars.get().sendDebugMessage("filled %s chests",filled);
+		 */}
 
 	public void softStart(Player player) {
 		if (this.getStatus() == ArenaStatus.WAITING && this.getTask() == null) {

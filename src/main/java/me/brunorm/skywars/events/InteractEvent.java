@@ -15,7 +15,7 @@ import com.cryptomorin.xseries.XMaterial;
 import me.brunorm.skywars.ArenaStatus;
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
-import me.brunorm.skywars.menus.GameSettingsMenu;
+import me.brunorm.skywars.menus.GameOptionsMenu;
 import me.brunorm.skywars.menus.KitsMenu;
 import me.brunorm.skywars.menus.MapMenu;
 import me.brunorm.skywars.structures.Arena;
@@ -52,7 +52,7 @@ public class InteractEvent implements Listener {
 			final Material gameOptionsType = XMaterial.matchXMaterial(gameOptionsTypeName).get().parseMaterial();
 			if (item.getType() == gameOptionsType) {
 				if (!arena.started()) {
-					GameSettingsMenu.open(player);
+					GameOptionsMenu.open(player);
 					event.setCancelled(true);
 				}
 			}

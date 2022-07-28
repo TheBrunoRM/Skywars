@@ -18,16 +18,16 @@ import me.brunorm.skywars.InventoryUtils;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.structures.Arena;
 
-public class GameSettingsMenu implements Listener {
+public class GameOptionsMenu implements Listener {
 
 	static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();
-	static HashMap<UUID, SettingMenu> currentMenus = new HashMap<UUID, SettingMenu>();
+	static HashMap<UUID, OptionMenu> currentMenus = new HashMap<UUID, OptionMenu>();
 
 	public static void open(Player player) {
-		open(player, SettingMenu.MAIN);
+		open(player, OptionMenu.MAIN);
 	}
 
-	public static void open(Player player, SettingMenu menu) {
+	public static void open(Player player, OptionMenu menu) {
 		Inventory inventory = null;
 		currentMenus.put(player.getUniqueId(), menu);
 		switch (menu) {
@@ -35,9 +35,7 @@ public class GameSettingsMenu implements Listener {
 			inventory = Bukkit.createInventory(null, 9 * 3, "Game settings");
 
 			InventoryUtils.addItem(inventory, "&aWeather", 10, XMaterial.NETHER_STAR.parseItem());
-
 			InventoryUtils.addItem(inventory, "&aTime", 13, XMaterial.CLOCK.parseItem());
-
 			InventoryUtils.addItem(inventory, "&aChests", 16, XMaterial.CHEST.parseItem());
 
 			break;
@@ -79,7 +77,7 @@ public class GameSettingsMenu implements Listener {
 		final ItemStack clicked = event.getCurrentItem();
 		if (clicked == null || clicked.getItemMeta() == null)
 			return;
-		final SettingMenu currentMenu = currentMenus.get(player.getUniqueId());
+		final OptionMenu currentMenu = currentMenus.get(player.getUniqueId());
 		if (currentMenu == null)
 			return;
 		final Arena arena = Skywars.get().getPlayerArena(player);
@@ -89,16 +87,16 @@ public class GameSettingsMenu implements Listener {
 		case MAIN:
 			switch (event.getSlot()) {
 			case 10:
-				open(player, SettingMenu.WEATHER);
+				open(player, OptionMenu.WEATHER);
 				break;
 			case 13:
-				open(player, SettingMenu.TIME);
+				open(player, OptionMenu.TIME);
 				break;
 			case 16:
-				open(player, SettingMenu.CHESTS);
+				open(player, OptionMenu.CHESTS);
 				break;
 			default:
-				open(player, SettingMenu.MAIN);
+				open(player, OptionMenu.MAIN);
 			}
 			return;
 		case TIME:

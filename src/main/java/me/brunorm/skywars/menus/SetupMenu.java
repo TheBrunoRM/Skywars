@@ -15,6 +15,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
@@ -51,7 +52,7 @@ public class SetupMenu implements Listener {
 	static void OpenSchematicsMenu(Player player) {
 		final File folder = new File(Skywars.get().getDataFolder() + "/schematics");
 		final Inventory inventory = Bukkit.createInventory(null, 9 * 6, Messager.color("&aSchematic files"));
-		PlayerInventoryManager.setInventory(player, inventory);
+		PlayerInventoryManager.setMenu(player, MenuType.MAP_SCHEMATIC);
 
 		int index = 10;
 		for (final File schematicFile : folder.listFiles()) {
@@ -90,7 +91,13 @@ public class SetupMenu implements Listener {
 		player.openInventory(inventory);
 	}
 
-	static void UpdateInventory(Inventory inventory, Player player) {
+	static void UpdateInventory(Player player) {
+		final InventoryView openInv = player.getOpenInventory();
+		if (openInv == null)
+			return;
+		final Inventory inventory = openInv.getTopInventory();
+		if (inventory == null)
+			return;
 		final Arena currentArena = currentArenas.get(player);
 		if (currentArena == null)
 			return;
@@ -219,11 +226,9 @@ public class SetupMenu implements Listener {
 	public static void OpenConfigurationMenu(Player player, SkywarsMap map) {
 		currentArenas.put(player, Skywars.get().getArenaAndCreateIfNotFound(map));
 		final Inventory inventory = Bukkit.createInventory(null, 9 * 3, Messager.color("&a&l" + map.getName()));
-		PlayerInventoryManager.setInventory(player, inventory);
-
-		UpdateInventory(inventory, player);
-
+		PlayerInventoryManager.setMenu(player, MenuType.MAP_CONFIGURATION);
 		player.openInventory(inventory);
+		UpdateInventory(player);
 	}
 
 	static String locationName(Location location) {
@@ -237,171 +242,161 @@ public class SetupMenu implements Listener {
 	@EventHandler
 	void onClick(InventoryClickEvent event) {
 		final Player player = (Player) event.getWhoClicked();
-		final Inventory inventory = PlayerInventoryManager.getInventory(player);
-		if (event.getInventory().equals(inventory)) {
-			event.setCancelled(true);
-			final ItemStack clicked = event.getCurrentItem();
-			if (clicked == null || clicked.getItemMeta() == null)
-				return;
-			final String name = clicked.getItemMeta().getDisplayName();
+		final MenuType currentMenu = PlayerInventoryManager.getCurrentMenu(player);
+		if (currentMenu != MenuType.MAP_CONFIGURATION)
+			return;
+		event.setCancelled(true);
+		final ItemStack clicked = event.getCurrentItem();
+		if (clicked == null || clicked.getItemMeta() == null)
+			return;
+		final String name = clicked.getItemMeta().getDisplayName();
 
-			Arena currentArena = currentArenas.get(player);
-			if (currentArena == null)
-				return;
+		Arena currentArena = currentArenas.get(player);
+		if (currentArena == null)
+			return;
 
-			final SkywarsMap currentMap = currentArena.getMap();
+		final SkywarsMap currentMap = currentArena.getMap();
 
-			if (name.equals(Messager.colorFormat(minPlayersName, currentMap.getMinPlayers()))) {
-				int n = currentMap.getMinPlayers() + (event.getClick() == ClickType.LEFT ? 1 : -1);
-				n = Math.min(Math.max(n, 0), currentMap.getMaxPlayers());
-				currentMap.setMinPlayers(n);
-			}
-			if (name.equals(Messager.colorFormat(maxPlayersName, currentMap.getMaxPlayers()))) {
-				int n = currentMap.getMaxPlayers() + (event.getClick() == ClickType.LEFT ? 1 : -1);
-				n = Math.max(n, 0);
-				currentMap.setMaxPlayers(n);
-			}
-			String currentWorldName = currentMap.getWorldName();
-			if (currentWorldName == null)
-				currentWorldName = "none";
-			/*
-			 * if (name.equals(Messager.colorFormat(worldName, currentWorld))) {
-			 * currentMap.setWorldName(player.getWorld().getName());
-			 * Skywars.get().sendDebugMessage("world changed to " +
-			 * currentMap.getWorldName()); }
-			 */
-			if (name.equals(locationName(currentArena.getLocation()))) {
-				final double x = player.getLocation().getBlockX();
-				final double y = player.getLocation().getBlockY();
-				final double z = player.getLocation().getBlockZ();
-				final World world = player.getWorld();
-				final Location location = new Location(world, x, y, z);
-				currentArena.setLocation(location);
-				currentMap.setLocation(location);
-				player.sendMessage(String.format("set location of %s to %s %s %s in world %s", currentMap.getName(),
-						location.getX(), location.getY(), location.getZ(), location.getWorld().getName()));
-			}
-			if (name.equals(Messager.color(spawnName))) {
-				if (currentMap.getLocation() == null) {
-					player.sendMessage("Location not set");
-					return;
-				}
-				final Arena arena = currentArenas.get(player);
-				final ItemStack item = new ItemStack(XMaterial.BLAZE_ROD.parseItem());
-				final ItemMeta meta = item.getItemMeta();
-				final List<String> lore = new ArrayList<String>();
-				lore.add(Messager.color("&eClick the blocks that"));
-				lore.add(Messager.color("&eyou want to add spawns for."));
-				lore.add(Messager.color("&eYou can also rightclick"));
-				lore.add(Messager.color("&eto remove the last set spawn."));
-				meta.setDisplayName(Messager.color("&eSpawn Configurator"));
-				meta.setLore(lore);
-				item.setItemMeta(meta);
-
-				SetupEvents.item = item;
-				player.getInventory().setItem(player.getInventory().getHeldItemSlot(), SetupEvents.item);
-				player.closeInventory();
-
-				playerLocations.put(player, player.getLocation());
-				player.teleport(arena.getLocation().clone().add(new Vector(0, 5, 0)));
-				player.setVelocity(new Vector(0, 1f, 0));
-
-				player.setAllowFlight(true);
-				player.setFlying(true);
-
-				Skywars.get().NMS().sendTitle(player, "&a&lENABLED", "&eSpawn edit mode");
-				player.playSound(player.getLocation(), Sounds.NOTE_PLING.bukkitSound(), 3, 2);
-
-				if (currentMap.getSpawns().size() > 0)
-					player.sendMessage(Messager.color("&6Old arena spawns deleted."));
-				currentMap.getSpawns().clear();
-
-				player.sendMessage(Messager.color("&eYou are now in &a&lspawn edit mode"));
-				player.sendMessage(Messager.color("&eUse the &6&lblaze rod &eto &b&lset and remove spawns"));
-				player.sendMessage(Messager.color("&eYou can &a&lright-click &ea block to &a&ladd an spawn"));
-				player.sendMessage(
-						Messager.color("&eYou can &c&lright-click &ea block to &c&lremove &4&lthe last set spawn"));
-				player.sendMessage(Messager.color("&e&lTo exit, &b&ldrop the blaze rod"));
-				return;
-			}
-			if (name.equals(Messager.color(calculateSpawnsName))) {
-				currentMap.calculateSpawns();
-				player.sendMessage("Spawns have been calculated and saved.");
-			}
-			if (name.equals(Messager.color(pasteSchematicName))) {
-				currentArena.pasteSchematic();
-				player.sendMessage("Pasted schematic.");
-				return;
-			}
-			if (name.equals(Messager.color(regenerateCasesName))) {
-				currentArena.resetCases();
-				if (currentMap.getSpawns().size() <= 0)
-					player.sendMessage(Messager.color("&cWarning: &7no spawns to create cases for."));
-				player.sendMessage(
-						Messager.colorFormat("Regenerated cases for %s spawns", currentMap.getSpawns().size()));
-				return;
-			}
-			if (name.equals(Messager.color(teleportName))) {
-				final Location loc = currentArena.getLocation();
-				if (loc == null)
-					player.sendMessage("Location not set");
-				else {
-					player.teleport(loc);
-					player.sendMessage("Teleported");
-				}
-				return;
-			}
-			if (name.equals(Messager.color(chestsName))) {
-				currentArena.calculateAndFillChests();
-				player.sendMessage("Chests filled");
-				return;
-			}
-			if (name.equals(Messager.color(clearName))) {
-				Skywars.get().clearArena(currentArena);
-				currentArenas.remove(player);
-				currentArena = null;
-				player.sendMessage("Cleared");
-				player.closeInventory();
-			}
-			String currentSchematic = currentMap.getSchematicFilename();
-			if (currentSchematic == null)
-				currentSchematic = "none";
-			if (name.equals(Messager.colorFormat(schematicName, currentSchematic))) {
-				if (this.schematicsFolder.listFiles() == null) {
-					player.closeInventory();
-					player.sendMessage("&c&lThere are no schematic files!");
-					player.sendMessage("&e&lYou need to put &bschematics files &ein the &bschematics folder");
-					return;
-				} else
-					OpenSchematicsMenu(player);
-			}
-
-			final String schematicName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
-			for (final File schematicFile : this.schematicsFolder.listFiles()) {
-				if (schematicFile.getName().equals(schematicName)) {
-					if (schematicFile.getName().endsWith(".schem")) {
-						player.sendMessage("&cThe plugin does not support .schem files yet.");
-						return;
-					}
-					currentArena.clearBlocks();
-					currentMap.setSchematic(schematicName);
-					currentMap.loadSchematic();
-					currentArena.pasteSchematic();
-					player.sendMessage(
-							Messager.colorFormat("&eSchematic set to &b%s", currentMap.getSchematicFilename()));
-					player.sendMessage(Messager.color("&eSchematic pasted."));
-				}
-			}
-
-			currentMap.saveParametersInConfig();
-			currentMap.saveConfig();
-
-			PlayerInventoryManager.getInventories().forEach((p, inv) -> {
-				if (inv == inventory) {
-					UpdateInventory(inv, p);
-				}
-			});
+		if (name.equals(Messager.colorFormat(minPlayersName, currentMap.getMinPlayers()))) {
+			int n = currentMap.getMinPlayers() + (event.getClick() == ClickType.LEFT ? 1 : -1);
+			n = Math.min(Math.max(n, 0), currentMap.getMaxPlayers());
+			currentMap.setMinPlayers(n);
 		}
+		if (name.equals(Messager.colorFormat(maxPlayersName, currentMap.getMaxPlayers()))) {
+			int n = currentMap.getMaxPlayers() + (event.getClick() == ClickType.LEFT ? 1 : -1);
+			n = Math.max(n, 0);
+			currentMap.setMaxPlayers(n);
+		}
+		String currentWorldName = currentMap.getWorldName();
+		if (currentWorldName == null)
+			currentWorldName = "none";
+		/*
+		 * if (name.equals(Messager.colorFormat(worldName, currentWorld))) {
+		 * currentMap.setWorldName(player.getWorld().getName());
+		 * Skywars.get().sendDebugMessage("world changed to " +
+		 * currentMap.getWorldName()); }
+		 */
+		if (name.equals(locationName(currentArena.getLocation()))) {
+			final double x = player.getLocation().getBlockX();
+			final double y = player.getLocation().getBlockY();
+			final double z = player.getLocation().getBlockZ();
+			final World world = player.getWorld();
+			final Location location = new Location(world, x, y, z);
+			currentArena.setLocation(location);
+			currentMap.setLocation(location);
+			player.sendMessage(String.format("set location of %s to %s %s %s in world %s", currentMap.getName(),
+					location.getX(), location.getY(), location.getZ(), location.getWorld().getName()));
+		}
+		if (name.equals(Messager.color(spawnName))) {
+			if (currentMap.getLocation() == null) {
+				player.sendMessage("Location not set");
+				return;
+			}
+			final Arena arena = currentArenas.get(player);
+			final ItemStack item = new ItemStack(XMaterial.BLAZE_ROD.parseItem());
+			final ItemMeta meta = item.getItemMeta();
+			final List<String> lore = new ArrayList<String>();
+			lore.add(Messager.color("&eClick the blocks that"));
+			lore.add(Messager.color("&eyou want to add spawns for."));
+			lore.add(Messager.color("&eYou can also rightclick"));
+			lore.add(Messager.color("&eto remove the last set spawn."));
+			meta.setDisplayName(Messager.color("&eSpawn Configurator"));
+			meta.setLore(lore);
+			item.setItemMeta(meta);
+
+			SetupEvents.item = item;
+			player.getInventory().setItem(player.getInventory().getHeldItemSlot(), SetupEvents.item);
+			player.closeInventory();
+
+			playerLocations.put(player, player.getLocation());
+			player.teleport(arena.getLocation().clone().add(new Vector(0, 5, 0)));
+			player.setVelocity(new Vector(0, 1f, 0));
+
+			player.setAllowFlight(true);
+			player.setFlying(true);
+
+			Skywars.get().NMS().sendTitle(player, "&a&lENABLED", "&eSpawn edit mode");
+			player.playSound(player.getLocation(), Sounds.NOTE_PLING.bukkitSound(), 3, 2);
+
+			if (currentMap.getSpawns().size() > 0)
+				player.sendMessage(Messager.color("&6Old arena spawns deleted."));
+			currentMap.getSpawns().clear();
+
+			player.sendMessage(Messager.color("&eYou are now in &a&lspawn edit mode"));
+			player.sendMessage(Messager.color("&eUse the &6&lblaze rod &eto &b&lset and remove spawns"));
+			player.sendMessage(Messager.color("&eYou can &a&lright-click &ea block to &a&ladd an spawn"));
+			player.sendMessage(
+					Messager.color("&eYou can &c&lright-click &ea block to &c&lremove &4&lthe last set spawn"));
+			player.sendMessage(Messager.color("&e&lTo exit, &b&ldrop the blaze rod"));
+			return;
+		}
+		if (name.equals(Messager.color(calculateSpawnsName))) {
+			currentMap.calculateSpawns();
+			player.sendMessage("Spawns have been calculated and saved.");
+		}
+		if (name.equals(Messager.color(pasteSchematicName))) {
+			currentArena.pasteSchematic();
+			player.sendMessage("Pasted schematic.");
+			return;
+		}
+		if (name.equals(Messager.color(regenerateCasesName))) {
+			currentArena.resetCases();
+			if (currentMap.getSpawns().size() <= 0)
+				player.sendMessage(Messager.color("&cWarning: &7no spawns to create cases for."));
+			player.sendMessage(Messager.colorFormat("Regenerated cases for %s spawns", currentMap.getSpawns().size()));
+			return;
+		}
+		if (name.equals(Messager.color(teleportName))) {
+			final Location loc = currentArena.getLocation();
+			if (loc == null)
+				player.sendMessage("Location not set");
+			else {
+				player.teleport(loc);
+				player.sendMessage("Teleported");
+			}
+			return;
+		}
+		if (name.equals(Messager.color(chestsName))) {
+			currentArena.calculateAndFillChests();
+			player.sendMessage("Chests filled");
+			return;
+		}
+		if (name.equals(Messager.color(clearName))) {
+			Skywars.get().clearArena(currentArena);
+			currentArenas.remove(player);
+			currentArena = null;
+			player.sendMessage("Cleared");
+			player.closeInventory();
+		}
+		String currentSchematic = currentMap.getSchematicFilename();
+		if (currentSchematic == null)
+			currentSchematic = "none";
+		if (name.equals(Messager.colorFormat(schematicName, currentSchematic))) {
+			if (this.schematicsFolder.listFiles() == null) {
+				player.closeInventory();
+				player.sendMessage("&c&lThere are no schematic files!");
+				player.sendMessage("&e&lYou need to put &bschematics files &ein the &bschematics folder");
+				return;
+			} else
+				OpenSchematicsMenu(player);
+		}
+
+		final String schematicName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
+		for (final File schematicFile : this.schematicsFolder.listFiles()) {
+			if (schematicFile.getName().equals(schematicName)) {
+				currentArena.clearBlocks();
+				currentMap.setSchematic(schematicName);
+				currentMap.loadSchematic();
+				currentArena.pasteSchematic();
+				player.sendMessage(Messager.colorFormat("&eSchematic set to &b%s", currentMap.getSchematicFilename()));
+				player.sendMessage(Messager.color("&eSchematic pasted."));
+			}
+		}
+
+		currentMap.saveParametersInConfig();
+		currentMap.saveConfig();
+
+		UpdateInventory(player);
 	}
 
 }

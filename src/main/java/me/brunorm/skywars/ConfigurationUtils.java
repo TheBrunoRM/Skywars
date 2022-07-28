@@ -71,8 +71,12 @@ public class ConfigurationUtils {
 
 	static YamlConfiguration getDefaultConfig(String defaultFileName) {
 		try {
-			final Reader defaultConfigStream = new InputStreamReader(Skywars.get().getResource(defaultFileName),
-					"UTF-8");
+			final InputStream stream = Skywars.get().getResource(defaultFileName);
+			if (stream == null) {
+				Skywars.get().sendMessage("Could not get resource: " + defaultFileName);
+				return null;
+			}
+			final Reader defaultConfigStream = new InputStreamReader(stream, "UTF-8");
 			return YamlConfiguration.loadConfiguration(defaultConfigStream);
 		} catch (final UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
@@ -89,12 +93,12 @@ public class ConfigurationUtils {
 				parent.mkdir();
 			if (!file.exists())
 				file.createNewFile();
-			try {
-				copyInputStreamToFile(Skywars.get().getResource(defaultFileName), file);
-			} catch (final IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			final InputStream stream = Skywars.get().getResource(defaultFileName);
+			if (stream == null) {
+				Skywars.get().sendMessage("Could not get resource: " + defaultFileName);
+				return;
 			}
+			copyInputStreamToFile(stream, file);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}

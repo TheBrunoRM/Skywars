@@ -1,7 +1,6 @@
 package me.brunorm.skywars.menus;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang.WordUtils;
@@ -22,11 +21,9 @@ import me.brunorm.skywars.structures.Kit;
 
 public class KitsMenu implements Listener {
 
-	static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();
-
 	public static void open(Player player) {
 		final Inventory inventory = Bukkit.createInventory(null, 9 * 3, Messager.color("&aKits"));
-		inventories.put(player, inventory);
+		PlayerInventoryManager.setMenu(player, MenuType.KIT_SELECTION);
 
 		final double playerMoney = Skywars.get().getEconomy().getBalance(player);
 
@@ -82,8 +79,7 @@ public class KitsMenu implements Listener {
 	@EventHandler
 	void onClick(InventoryClickEvent event) {
 		final Player player = (Player) event.getWhoClicked();
-		final Inventory inventory = inventories.get(player);
-		if (!event.getInventory().equals(inventory))
+		if (PlayerInventoryManager.getCurrentMenu(player) != MenuType.KIT_SELECTION)
 			return;
 		event.setCancelled(true);
 		final ItemStack clicked = event.getCurrentItem();
@@ -106,7 +102,7 @@ public class KitsMenu implements Listener {
 				final List<String> list = conf.getStringList("ownedKits");
 				list.add(kit.getName());
 				conf.set("ownedKits", list);
-				Skywars.get().savePlayerConfig(player);
+				Skywars.get().savePlayerConfig(player, conf);
 				selected = true;
 				player.sendMessage(Messager.color("&bBought kit &e" + name));
 			} else {

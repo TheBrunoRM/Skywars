@@ -4,19 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.util.Vector;
-import org.jnbt.ListTag;
-import org.jnbt.Tag;
 
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.SkywarsUtils;
 import me.brunorm.skywars.schematics.Schematic;
 import me.brunorm.skywars.schematics.SchematicHandler;
+import net.querz.nbt.tag.CompoundTag;
+import net.querz.nbt.tag.ListTag;
 
 public class SkywarsMap {
 
@@ -130,22 +129,24 @@ public class SkywarsMap {
 
 	public void calculateSpawns() {
 
-		this.getSchematic();
-		if (this.schematic == null)
+		if (this.getSchematic() == null)
 			return;
 		Skywars.get().sendDebugMessage("Calculating spawns for map " + this.name);
 
 		// get schematic data and beacon locations
 		final Vector offset = this.schematic.getOffset();
-		final ListTag tileEntities = this.schematic.getTileEntities();
+		final ListTag<CompoundTag> blockEntities = this.schematic.getBlockEntities().asCompoundTagList();
 		final ArrayList<Vector> beaconLocations = new ArrayList<Vector>();
 
-		for (final Tag tag : tileEntities.getValue()) {
-			@SuppressWarnings("unchecked")
-			final Map<String, Tag> values = (Map<String, Tag>) tag.getValue();
-			if (values.get("id").getValue().equals("Beacon")) {
-				final Vector vector = SchematicHandler.calculatePositionWithOffset(values, offset)
-						.add(new Vector(0, 1, 0));
+		for (final CompoundTag tag : blockEntities) {
+			String type = tag.getString("id");
+			if (type == null)
+				type = tag.getString("Id");
+			if (type.equalsIgnoreCase("beacon")) {
+				final int[] posArray = tag.getIntArray("Pos");
+				final Vector pos = posArray.length > 0 ? SchematicHandler.getVector(posArray)
+						: SchematicHandler.getVector(tag);
+				final Vector vector = pos.add(offset).add(new Vector(0, 1, 0));
 				beaconLocations.add(vector);
 			}
 		}
