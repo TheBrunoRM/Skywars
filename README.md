@@ -81,13 +81,10 @@ To create a sign, make it like this:
   * Plugin API events and methods
 
 ## Compatibility issues
-  * **1.13+ schematic files**\
-    .schem files are not supported yet.\
-    The plugin works with .schematic files,\
-    but it may have issues with certain block types.\
-    I will try to fix as many of those issues as I can.
-    If you find this type of issue, please open an issue or a pull request.
-    The code that handles this is on the SchematicHandler class inside the schematics package.
+  * **Schematic files**\
+    The plugin currently works with both .schematic and .schem file types,\
+    but there are some problems with some block types and metadata, like with chests.
+    If you find any way to improve it, you're welcome to help!
   * **Actionbar messages on Bukkit**\
     do not work because of Bukkit limitations on message sending.\
     If you find a way to send an actionbar message on Bukkit, please open an issue or a pull request.
