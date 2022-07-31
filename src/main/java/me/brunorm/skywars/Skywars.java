@@ -36,6 +36,10 @@ import me.brunorm.skywars.events.MessageSound;
 import me.brunorm.skywars.events.ProjectileTrails;
 import me.brunorm.skywars.events.SetupEvents;
 import me.brunorm.skywars.events.SignEvents;
+import me.brunorm.skywars.holograms.DecentHologramsController;
+import me.brunorm.skywars.holograms.HologramController;
+import me.brunorm.skywars.holograms.HolographicDisplaysNewController;
+import me.brunorm.skywars.holograms.HolographicDisplaysOldController;
 import me.brunorm.skywars.menus.GameOptionsMenu;
 import me.brunorm.skywars.menus.GamesMenu;
 import me.brunorm.skywars.menus.KitsMenu;
@@ -58,13 +62,14 @@ public class Skywars extends JavaPlugin {
 	public String version = this.getDescription().getVersion();
 	public List<String> authors = this.getDescription().getAuthors();
 	private final String prefix = Messager.colorFormat("&6[&e%s&6]&e", this.name);
-	private final String debugPrefix = Messager.colorFormat("&7[&c%s-Debug&7]&e", this.name);
+	private final String debugPrefix = Messager.colorFormat("&7[&c%s&7]&e", this.name);
 	public static String kitsPath;
 	public static String mapsPath;
 	public static String schematicsPath;
 	public static String playersPath;
 
 	public static boolean holograms = false;
+	HologramController hologramController;
 	public static boolean economyEnabled;
 	Economy economy;
 	RegisteredServiceProvider<Economy> economyProvider;
@@ -150,7 +155,34 @@ public class Skywars extends JavaPlugin {
 		this.nmsHandler = new ReflectionNMS();
 		SchematicHandler.initializeReflection();
 
-		holograms = Bukkit.getPluginManager().isPluginEnabled("DecentHolograms");
+		if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
+			this.hologramController = new DecentHologramsController();
+		} else if (Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays")) {
+			if (SkywarsUtils.checkClass("com.gmail.filoghost.holographicdisplays.api.HologramsAPI"))
+				this.hologramController = new HolographicDisplaysOldController();
+			else if (SkywarsUtils.checkClass("me.filoghost.holographicdisplays.api.HolographicDisplaysAPI"))
+				this.hologramController = new HolographicDisplaysNewController();
+			else
+				this.sendDebugMessage("Unknown version of HolographicDisplays");
+		}
+		this.sendDebugMessage("Holograms API: " + SkywarsUtils.getHologramsAPIName(this.hologramController));
+		if (this.hologramController == null)
+			this.hologramController = new HologramController() {
+				@Override
+				public void removeHologram(Object id) {
+				}
+
+				@Override
+				public String createHologram(Object id, Location location, String text) {
+					return null;
+				}
+
+				@Override
+				public boolean changeHologram(Object id, String text) {
+					return false;
+				}
+			};
+
 		economyEnabled = Skywars.get().getConfig().getBoolean("economy.enabled");
 		if (economyEnabled)
 			try {
@@ -233,7 +265,6 @@ public class Skywars extends JavaPlugin {
 	}
 
 	public void loadEvents() {
-		// sendMessage("Loading events...");
 		final FileConfiguration config = this.getConfig();
 		final PluginManager pluginManager = this.getServer().getPluginManager();
 		if (config.getBoolean("signsEnabled")) {
@@ -257,7 +288,6 @@ public class Skywars extends JavaPlugin {
 	}
 
 	public void loadCommands() {
-		this.sendMessage("Loading commands...");
 		final HashMap<String, CommandExecutor> cmds = new HashMap<>();
 		cmds.put("skywars", new MainCommand());
 		cmds.put("where", new WhereCommand());
@@ -271,7 +301,6 @@ public class Skywars extends JavaPlugin {
 			} else
 				this.sendDebugMessage("&7Skipping command &c%s&e...", cmd);
 		}
-		this.sendMessage("&eFinished loading commands.");
 	}
 
 	// maps
@@ -436,7 +465,7 @@ public class Skywars extends JavaPlugin {
 
 	public void loadMaps() {
 		final String arenasMethod = config.getString("arenasMethod");
-		this.sendMessage("&eLoading maps (&b%s&e)", arenasMethod.toUpperCase());
+		this.sendDebugMessage("&eLoading maps (&b%s&e)", arenasMethod.toUpperCase());
 		if (arenasMethod.equalsIgnoreCase("MULTI_ARENA")) {
 			final String worldName = config.getString("arenas.world");
 			boolean aborted = false;
@@ -459,14 +488,14 @@ public class Skywars extends JavaPlugin {
 			folder.mkdirs();
 		}
 		if (folder.listFiles().length <= 0) {
-			this.sendMessage(Messager.color("&eSetting up default map."));
+			this.sendDebugMessage(Messager.color("&eSetting up default map."));
 			ConfigurationUtils.copyDefaultContentsToFile("maps/MiniTrees.yml", new File(mapsPath, "MiniTrees.yml"));
 		}
 		final File schematics = new File(schematicsPath);
 		if (!schematics.exists())
 			schematics.mkdir();
 		if (schematics.listFiles().length <= 0) {
-			this.sendMessage(Messager.color("&eSetting up default schematic."));
+			this.sendDebugMessage(Messager.color("&eSetting up default schematic."));
 			ConfigurationUtils.copyDefaultContentsToFile("schematics/mini_trees.schematic",
 					new File(schematicsPath, "mini_trees.schematic"));
 		}
@@ -505,7 +534,7 @@ public class Skywars extends JavaPlugin {
 			this.maps.add(map);
 			this.sendDebugMessage("&eLoaded map: &a%s", map.getName());
 		}
-		this.sendMessage("&eFinished loading maps.");
+		this.sendDebugMessage("&eFinished loading maps.");
 	}
 
 	// kits
@@ -517,14 +546,13 @@ public class Skywars extends JavaPlugin {
 	}
 
 	public void loadKits() {
-		this.sendMessage("Loading kits...");
 		this.kits.clear();
 		final File folder = new File(kitsPath);
 		if (!folder.exists()) {
 			folder.mkdirs();
 		}
 		if (folder.listFiles().length <= 0) {
-			Bukkit.getConsoleSender().sendMessage(Messager.color("&eSetting up default kit."));
+			this.sendDebugMessage("&eSetting up default kit.");
 			ConfigurationUtils.copyDefaultContentsToFile("kits/default.yml", new File(kitsPath, "default.yml"));
 		}
 		for (final File file : folder.listFiles()) {
@@ -561,9 +589,9 @@ public class Skywars extends JavaPlugin {
 
 			// add kit to the arena list
 			this.kits.add(kit);
-			this.sendMessage("&eLoaded kit: &a%s", kit.getName());
+			this.sendDebugMessage("&eLoaded kit: &a%s", kit.getName());
 		}
-		this.sendMessage("Finished loading kits.");
+		this.sendDebugMessage("Finished loading kits.");
 	}
 
 	public static void createBigCase(Location location, XMaterial material) {
@@ -738,7 +766,9 @@ public class Skywars extends JavaPlugin {
 	}
 
 	public void setPlayerTotalKills(Player player, int kills) {
-		this.getPlayerConfig(player).set("stats.solo.kills", kills);
+		final YamlConfiguration config = this.getPlayerConfig(player);
+		config.set("stats.solo.kills", kills);
+		this.savePlayerConfig(player, config);
 	}
 
 	public void incrementPlayerTotalKills(Player player) {
@@ -749,28 +779,44 @@ public class Skywars extends JavaPlugin {
 		return this.getPlayerConfig(player).getInt("stats.solo.deaths");
 	}
 
-	public void setPlayerTotalDeaths(Player player, int kills) {
-		this.getPlayerConfig(player).set("stats.solo.deaths", kills);
+	public void setPlayerTotalDeaths(Player player, int deaths) {
+		final YamlConfiguration config = this.getPlayerConfig(player);
+		config.set("stats.solo.deaths", deaths);
+		this.savePlayerConfig(player, config);
 	}
 
 	public void incrementPlayerTotalDeaths(Player player) {
-		this.setPlayerTotalKills(player, this.getPlayerTotalKills(player) + 1);
+		this.setPlayerTotalDeaths(player, this.getPlayerTotalDeaths(player) + 1);
+	}
+
+	public int getPlayerTotalWins(Player player) {
+		return this.getPlayerConfig(player).getInt("stats.solo.wins");
+	}
+
+	public void setPlayerTotalWins(Player player, int wins) {
+		final YamlConfiguration config = this.getPlayerConfig(player);
+		config.set("stats.solo.wins", wins);
+		this.savePlayerConfig(player, config);
+	}
+
+	public void incrementPlayerTotalWins(Player player) {
+		this.setPlayerTotalWins(player, this.getPlayerTotalWins(player) + 1);
 	}
 
 	public boolean loadConfig() {
 
-		this.sendMessage("Loading configuration...");
+		this.sendDebugMessage("Loading configuration...");
 
-		// config.yml
 		config = ConfigurationUtils.loadConfiguration("config.yml", "config.yml");
 
-		// scoreboard.yml
 		scoreboardConfig = ConfigurationUtils.loadConfiguration("scoreboard.yml", "scoreboard.yml");
 
-		// lang.yml
-		langConfig = ConfigurationUtils.loadConfiguration("lang.yml", "lang.yml");
+		final String lang = Skywars.get().getConfig().getString("locale");
+		langConfig = ConfigurationUtils.loadConfiguration("lang/" + lang + ".yml", "lang/" + lang + ".yml",
+				"lang/en.yml");
 
-		// lobby.yml
+		this.sendDebugMessage("Loaded locale: " + lang + " - " + langConfig.getString("language_name"));
+
 		lobbyConfig = ConfigurationUtils.loadConfiguration("lobby.yml", "lobby.yml");
 
 		if (config == null || scoreboardConfig == null || langConfig == null || lobbyConfig == null)
@@ -779,7 +825,7 @@ public class Skywars extends JavaPlugin {
 		// load lobby
 		this.setLobbyFromConfig();
 
-		this.sendMessage("Finished loading configuration.");
+		this.sendDebugMessage("Finished loading configuration.");
 		return true;
 	}
 
@@ -801,5 +847,9 @@ public class Skywars extends JavaPlugin {
 
 	public void sendMessageWithPrefix(String prefix, String text, Object... format) {
 		Bukkit.getConsoleSender().sendMessage(Messager.color(prefix) + " " + Messager.colorFormat(text, format));
+	}
+
+	public HologramController getHologramController() {
+		return this.hologramController;
 	}
 }

@@ -1,10 +1,9 @@
 status:
-   waiting: Waiting for players...
-   starting: Starting in &a%seconds%s
-   playing: '&a%players% &rplayers remaining'
-   ending: Ending in &a%seconds%s
-   ended: '&aGame ended!'
-   restarting: Restarting...
+  waiting: Waiting for players...
+  starting: Starting in &a%seconds%s
+  playing: '&a%players% &rplayers remaining'
+  ended: '&aGame ended!'
+  restarting: Ending in &a%seconds%s
 
 events:
   format: "&a%name% %time%"
@@ -25,6 +24,12 @@ items:
     description:
     - "&7Right-click to change the game options"
     
+  START_GAME:
+    name: "&6&lStart game"
+  
+  STOP_GAME:
+    name: "&c&lStop game"
+  
   SPECTATOR_OPTIONS:
     name: '&b&lSpectator options'
     description:
@@ -61,6 +66,11 @@ died:
    subtitle: "&7You are now a spectator!"
    message: ""
 
+won:
+  title: "&6&lYOU WON"
+  subtitle: "&7Congratulations!"
+  message: ""
+
 actionbar:
   waiting: '&eCurrent kit: &a%kit%'
 
@@ -79,6 +89,10 @@ JOIN: "&7{0} &ehas joined (&b{1}&e/&b{2}&e)!"
 
 LEAVE: "&7{0} &eleaved (&b{1}&e/&b{2}&e)"
 LEAVE_SELF: "&eYou leaved arena &b%arena%"
+
+already_started: "&cThe game is already started!"
+started_countdown: "&aStarted the countdown!"
+started_game: "&aStarted the game!"
 
 FORCED_START: "&b&l{0} &e&lforced the game to start!"
 
@@ -107,6 +121,21 @@ startLines:
   - "&a&l---------------------------------------------"
 
 where: "&eYou are in &a{0}"
+the_console: "the console"
+
+time:
+  DAY: "&aDay"
+  NIGHT: "&bNight"
+
+weather:
+  CLEAR: "&bClear weather"
+  RAIN: "&bRainy weather"
+
+chests:
+  NORMAL: "&aNormal chests"
+  OVERPOWERED: "&cOverpowered chests"
+
+vote: "&7{0} &evoted for &7{1}"
 
 countdown:
 - title: "&e%count% seconds"

@@ -6,7 +6,9 @@ lobby:
 - '&7%date%'
 - ''
 - 'Coins: &6%coins%'
-- 'Kills: &c%totalkills%'
+- 'Wins: &a%totalwins%'
+- 'Kills: &6%totalkills%'
+- 'Deaths: &c%totaldeaths%'
 - ''
 - '%url%'
 

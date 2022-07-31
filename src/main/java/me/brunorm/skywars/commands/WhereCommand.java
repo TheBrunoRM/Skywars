@@ -15,7 +15,7 @@ public class WhereCommand implements CommandExecutor {
 			final Player player = (Player) sender;
 			sender.sendMessage(Messager.getMessage("where", player.getWorld().getName()));
 		} else {
-			sender.sendMessage(Messager.getMessage("where", "the console"));
+			sender.sendMessage(Messager.getMessage("where", Messager.getMessage("the_console")));
 		}
 		return true;
 	}

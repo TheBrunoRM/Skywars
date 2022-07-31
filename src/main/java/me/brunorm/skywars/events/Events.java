@@ -40,12 +40,12 @@ public class Events implements Listener {
 		final SkywarsUser swp = arena.getUser(player);
 		if (arena.isInBoundaries(player))
 			return;
+
 		if (player.getWorld() != arena.getWorld())
 			arena.leavePlayer(swp);
 		else if (!arena.started()) {
-		}
-		// arena.leavePlayer(player);
-		else if (!swp.isSpectator())
+			// arena.leavePlayer(player);
+		} else if (!swp.isSpectator())
 			arena.makeSpectator(swp);
 		else if (arena.isInBoundaries(arena.getLocation()))
 			arena.goBackToCenter(player);
@@ -185,17 +185,17 @@ public class Events implements Listener {
 		final SkywarsUser swp = arena.getUser(player);
 		if (swp == null)
 			return;
-		if (swp.isSpectator())
+		if (swp.isSpectator()) {
 			event.setCancelled(true);
-		else {
-			final Block block = event.getBlock();
-			if (!(block.getState() instanceof Chest))
-				return;
-			final Chest chest = (Chest) block.getState();
-			if (!arena.getChests().contains(chest))
-				return;
-			arena.removeChest(chest);
+			return;
 		}
+		final Block block = event.getBlock();
+		if (!(block.getState() instanceof Chest))
+			return;
+		final Chest chest = (Chest) block.getState();
+		if (!arena.getChests().contains(chest))
+			return;
+		arena.removeChest(chest);
 	}
 
 	// prevent spectators from interacting
@@ -208,19 +208,20 @@ public class Events implements Listener {
 		final SkywarsUser swp = arena.getUser(player);
 		if (swp == null)
 			return;
-		if (swp.isSpectator())
+		if (swp.isSpectator()) {
 			event.setCancelled(true);
-		else {
-			final Block block = event.getClickedBlock();
-			if (block == null)
-				return;
-			if (!(block.getState() instanceof Chest))
-				return;
-			final Chest chest = (Chest) block.getState();
-			if (!arena.getChests().contains(chest))
-				return;
-			arena.addChestHologram(chest);
+			return;
 		}
+
+		final Block block = event.getClickedBlock();
+		if (block == null)
+			return;
+		if (!(block.getState() instanceof Chest))
+			return;
+		final Chest chest = (Chest) block.getState();
+		if (!arena.getChests().contains(chest))
+			return;
+		arena.addChestHologram(chest);
 	}
 
 	// prevent spectators from picking up items
@@ -280,8 +281,8 @@ public class Events implements Listener {
 		final SkywarsUser swp = arena.getUser(player);
 		if (swp == null)
 			return;
-		if (!swp.isSpectator()) {
-		}
+		if (!swp.isSpectator())
+			return;
 
 		// TODO: do something since this cant be cancelled
 		// event.setCancelled(true);

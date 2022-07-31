@@ -2,7 +2,6 @@ package me.brunorm.skywars.events;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
-import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,6 +14,7 @@ import com.cryptomorin.xseries.XMaterial;
 import me.brunorm.skywars.ArenaStatus;
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
+import me.brunorm.skywars.commands.CommandsUtils;
 import me.brunorm.skywars.menus.GameOptionsMenu;
 import me.brunorm.skywars.menus.KitsMenu;
 import me.brunorm.skywars.menus.MapMenu;
@@ -32,29 +32,44 @@ public class InteractEvent implements Listener {
 			final SkywarsUser swp = arena.getUser(player);
 			ItemStack item;
 			item = player.getItemInHand();
-			final String kitSelectorTypeName = Skywars.get().getConfig().getString("item_types.KIT_SELECTOR");
-			final Material kitSelectorType = XMaterial.matchXMaterial(kitSelectorTypeName).get().parseMaterial();
-			if (item.getType() == kitSelectorType) {
+			if (item.getType() == XMaterial
+					.matchXMaterial(Skywars.get().getConfig().getString("item_types.KIT_SELECTOR")).get()
+					.parseMaterial()) {
 				if (!arena.started()) {
 					KitsMenu.open(player);
 					event.setCancelled(true);
 				}
 			}
-			final String leaveTypeName = Skywars.get().getConfig().getString("item_types.LEAVE");
-			final Material leaveType = XMaterial.matchXMaterial(leaveTypeName).get().parseMaterial();
-			if (item.getType() == leaveType) {
+			if (item.getType() == XMaterial.matchXMaterial(Skywars.get().getConfig().getString("item_types.LEAVE"))
+					.get().parseMaterial()) {
 				if (arena.getStatus() != ArenaStatus.PLAYING || swp.isSpectator()) {
 					arena.leavePlayer(swp);
 					event.setCancelled(true);
 				}
 			}
-			final String gameOptionsTypeName = Skywars.get().getConfig().getString("item_types.GAME_OPTIONS");
-			final Material gameOptionsType = XMaterial.matchXMaterial(gameOptionsTypeName).get().parseMaterial();
-			if (item.getType() == gameOptionsType) {
+			if (item.getType() == XMaterial
+					.matchXMaterial(Skywars.get().getConfig().getString("item_types.GAME_OPTIONS")).get()
+					.parseMaterial()) {
 				if (!arena.started()) {
 					GameOptionsMenu.open(player);
 					event.setCancelled(true);
 				}
+			}
+			if (item.getType() == XMaterial.matchXMaterial(Skywars.get().getConfig().getString("item_types.START_GAME"))
+					.get().parseMaterial()) {
+				if (!arena.started()) {
+					if (!CommandsUtils.permissionCheckWithMessage(player, "skywars.start"))
+						return;
+					arena.softStart(player);
+				}
+			}
+			if (item.getType() == XMaterial.matchXMaterial(Skywars.get().getConfig().getString("item_types.STOP_GAME"))
+					.get().parseMaterial()) {
+				if (!arena.started())
+					return;
+				if (!CommandsUtils.permissionCheckWithMessage(player, "skywars.stop"))
+					return;
+				arena.clear();
 			}
 		} else if (Skywars.get().getConfig().getBoolean("signsEnabled") && event.getClickedBlock() != null) {
 			if (event.getClickedBlock().getType() == XMaterial.OAK_SIGN.parseMaterial()

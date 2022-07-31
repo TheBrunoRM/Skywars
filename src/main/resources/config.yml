@@ -1,5 +1,8 @@
 # Skywars configuration file
 
+# the language used for the messages
+locale: en
+
 # the url for displaying the %url% placeholder (scoreboard)
 url: "&ewww.example.com"
 
@@ -89,10 +92,12 @@ items:
   waiting:
     0: KIT_SELECTOR
     1: GAME_OPTIONS
+    4: START_GAME
     8: LEAVE
   spectator:
     0: TELEPORTER
     1: SPECTATOR_OPTIONS
+    4: STOP_GAME
     8: LEAVE
   # if for some reason you want to give items when the game starts
   # you can do so here
@@ -106,6 +111,8 @@ items:
 item_types:
   KIT_SELECTOR: BOW
   GAME_OPTIONS: PAPER
+  START_GAME: BLAZE_POWDER
+  STOP_GAME: BARRIER
   LEAVE: BED # RED_BED if 1.13+
   SPECTATOR_OPTIONS: REDSTONE_COMPARATOR # COMPARATOR if 1.13+
   TELEPORTER: COMPASS

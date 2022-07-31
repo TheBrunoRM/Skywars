@@ -23,7 +23,6 @@ public class KitsMenu implements Listener {
 
 	public static void open(Player player) {
 		final Inventory inventory = Bukkit.createInventory(null, 9 * 3, Messager.color("&aKits"));
-		PlayerInventoryManager.setMenu(player, MenuType.KIT_SELECTION);
 
 		final double playerMoney = Skywars.get().getEconomy().getBalance(player);
 
@@ -73,7 +72,7 @@ public class KitsMenu implements Listener {
 			index++;
 		}
 		player.openInventory(inventory);
-
+		PlayerInventoryManager.setMenu(player, MenuType.KIT_SELECTION);
 	}
 
 	@EventHandler

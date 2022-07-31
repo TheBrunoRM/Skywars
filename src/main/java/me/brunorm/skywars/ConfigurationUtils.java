@@ -31,6 +31,12 @@ public class ConfigurationUtils {
 
 	}
 
+	public static YamlConfiguration loadConfiguration(String name, String defaultFileName, String altDefaultFileName) {
+		if (Skywars.get().getResource(defaultFileName) == null)
+			return loadConfiguration(name, altDefaultFileName);
+		return createMissingKeys(loadConfiguration(name, defaultFileName), getDefaultConfig(altDefaultFileName));
+	}
+
 	public static YamlConfiguration loadConfiguration(String name, String defaultFileName) {
 		final File file = new File(Skywars.get().getDataFolder(), name);
 		if (!file.exists()) {

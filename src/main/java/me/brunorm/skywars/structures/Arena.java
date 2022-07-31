@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -24,12 +25,12 @@ import org.bukkit.util.Vector;
 import com.cryptomorin.xseries.XMaterial;
 
 import eu.decentsoftware.holograms.api.DHAPI;
-import eu.decentsoftware.holograms.api.holograms.Hologram;
 import me.brunorm.skywars.ArenaStatus;
 import me.brunorm.skywars.ChestManager;
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.SkywarsUtils;
+import me.brunorm.skywars.commands.CommandsUtils;
 import me.brunorm.skywars.schematics.Schematic;
 import me.brunorm.skywars.schematics.SchematicHandler;
 import mrblobman.sounds.Sounds;
@@ -47,7 +48,7 @@ public class Arena {
 	private Player forcedStartPlayer;
 	private SkywarsUser winner;
 
-	private final ArenaGameSettings gameSettings = new ArenaGameSettings();
+	private final ArenaGameSettings gameSettings = new ArenaGameSettings(this);
 
 	private final SkywarsMap map;
 
@@ -79,7 +80,7 @@ public class Arena {
 	}
 
 	public String getNextEventText() {
-		if (this.status == ArenaStatus.ENDING)
+		if (this.status == ArenaStatus.RESTARTING)
 			return Skywars.langConfig.getString("status.ended");
 		final SkywarsEvent event = this.getNextEvent();
 		if (event != null) {
@@ -176,8 +177,8 @@ public class Arena {
 					killer.sendMessage(Messager.colorFormat("&6+$%s", SkywarsUtils.formatDouble(killMoney)));
 				}
 			}
-			Skywars.get().incrementPlayerTotalDeaths(player);
 		}
+		Skywars.get().incrementPlayerTotalDeaths(player);
 
 		// only drop items if the player is inside the arena
 		// if the player dies in the void, it will not drop items
@@ -260,7 +261,7 @@ public class Arena {
 			this.joinable = true;
 		this.users.remove(player);
 		this.removePlayer(player);
-		if (this.getStatus() != ArenaStatus.ENDING && !player.isSpectator()) {
+		if (this.getStatus() != ArenaStatus.RESTARTING && !player.isSpectator()) {
 			for (final SkywarsUser players : this.getUsers()) {
 				players.getPlayer().sendMessage(Messager.getFormattedMessage("LEAVE", player.getPlayer(), this, player,
 						player.getPlayer().getName(), this.getUsers().size(), this.map.getMaxPlayers()));
@@ -304,6 +305,7 @@ public class Arena {
 	void removePlayer(SkywarsUser player) {
 		if (this.getStatus() != ArenaStatus.PLAYING)
 			return;
+
 		if (this.getAlivePlayers().size() <= 1) {
 			this.endGame();
 			return;
@@ -315,7 +317,11 @@ public class Arena {
 		}
 	}
 
-	void endGame() {
+	public boolean endGame() {
+		if (this.getStatus() == ArenaStatus.RESTARTING)
+			return false;
+
+		// TODO make a proper winner list
 		final List<SkywarsUser> winners = new ArrayList<>(this.getAlivePlayers());
 		if (winners.size() > 0) {
 			this.setWinner(winners.get(0));
@@ -323,11 +329,18 @@ public class Arena {
 
 		final double winMoney = Skywars.get().getConfig().getDouble("economy.win");
 
-		if (this.getWinner() != null && winMoney > 0 && Skywars.get().getEconomy() != null)
-			Skywars.get().getEconomy().depositPlayer(this.getWinner().getPlayer(), winMoney);
+		if (this.getWinner() != null) {
+			Skywars.get().incrementPlayerTotalWins(this.getWinner().getPlayer());
+			if (winMoney > 0 && Skywars.get().getEconomy() != null) {
+				Skywars.get().getEconomy().depositPlayer(this.getWinner().getPlayer(), winMoney);
+				this.getWinner().getPlayer()
+						.sendMessage(Messager.colorFormat("&6+$%s", SkywarsUtils.formatDouble(winMoney)));
+			}
+		}
 		for (final SkywarsUser p : this.getUsers()) {
 			if (p == this.getWinner()) {
-				Skywars.get().NMS().sendTitle(p.getPlayer(), "&6&lYOU WON", "&7Congratulations!", 0, 80, 0);
+				Skywars.get().NMS().sendTitle(p.getPlayer(), Messager.getMessage("won.title"),
+						Messager.getMessage("won.subtitle"), 0, 80, 0);
 			} else {
 				Skywars.get().NMS().sendTitle(p.getPlayer(), "&c&lGAME ENDED", "&7You didn't win this time.", 0, 80, 0);
 			}
@@ -338,7 +351,7 @@ public class Arena {
 			}
 		}
 		this.removeHolograms();
-		this.startTimer(ArenaStatus.ENDING);
+		return this.startTimer(ArenaStatus.RESTARTING);
 	}
 
 	BukkitTask task;
@@ -354,7 +367,14 @@ public class Arena {
 		this.task = null;
 	}
 
-	public void startTimer(ArenaStatus status) {
+	public boolean startTimer(ArenaStatus status) {
+		if (this.getStatus() == status)
+			return false;
+		if (this.started())
+			if (status == ArenaStatus.STARTING || status == ArenaStatus.PLAYING)
+				return false;
+		if (!this.started() && status == ArenaStatus.RESTARTING)
+			return false;
 		this.cancelTimer();
 		this.setStatus(status);
 		Skywars.get().sendDebugMessage(String.format("starting %s timer", status));
@@ -446,7 +466,7 @@ public class Arena {
 					}
 				}
 			}, 0L, 20L);
-		} else if (this.status == ArenaStatus.ENDING) {
+		} else if (this.status == ArenaStatus.RESTARTING) {
 			this.task = Bukkit.getScheduler().runTaskTimer(Skywars.get(), new Runnable() {
 				int time = Skywars.get().getConfig().getInt("time.ending") + 1;
 				int fireworks = 0;
@@ -471,12 +491,22 @@ public class Arena {
 				}
 			}, 0L, 20L);
 		}
-
+		return true;
 	}
 
-	public void startGame() {
-		if (this.getStatus() == ArenaStatus.PLAYING)
-			return;
+	public boolean startGame() {
+		return this.startGame(null);
+	}
+
+	public boolean startGame(Player playerStarted) {
+		if (playerStarted != null) {
+			if (!CommandsUtils.permissionCheckWithMessage(playerStarted, "skywars.forcestart"))
+				return false;
+			if (!CommandsUtils.arenaCheckWithMessage(playerStarted))
+				return false;
+		}
+		if (this.started())
+			return false;
 		this.cancelTimer();
 		this.setStatus(ArenaStatus.PLAYING);
 		this.startTimer(this.getStatus());
@@ -505,7 +535,7 @@ public class Arena {
 			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
 				@Override
 				public void run() {
-					if (player.getArena().getUser(player.getPlayer()) == null)
+					if (!Arena.this.started() || Arena.this.getUser(player.getPlayer()) == null || player.isSpectator())
 						return;
 					for (final String l : Skywars.langConfig.getStringList("startLines")) {
 						player.getPlayer().sendMessage(Messager.color(l));
@@ -516,11 +546,14 @@ public class Arena {
 			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
 				@Override
 				public void run() {
-					if (player.getArena().getUser(player.getPlayer()) == null)
+					if (!Arena.this.started() || Arena.this.getUser(player.getPlayer()) == null || player.isSpectator())
 						return;
 					final double playMoney = Skywars.get().getConfig().getDouble("economy.play");
-					if (Skywars.get().getEconomy() != null && playMoney > 0)
+					if (Skywars.get().getEconomy() != null && playMoney > 0) {
 						Skywars.get().getEconomy().depositPlayer(player.getPlayer(), playMoney);
+						player.getPlayer()
+								.sendMessage(Messager.colorFormat("&6+$%s", SkywarsUtils.formatDouble(playMoney)));
+					}
 				}
 			}, 20 * 10);
 		}
@@ -533,14 +566,43 @@ public class Arena {
 			}
 
 		}, 40);
+		return true;
 	}
 
 	private void applyGameSettings() {
-		// TODO apply chest type
+
+		final TimeType time = SkywarsUtils.mostFrequentElement(this.timeVotes.values());
+		if (time != null)
+			switch (time) {
+			case DAY:
+				this.gameSettings.time = 0;
+				break;
+			case NIGHT:
+				this.gameSettings.time = 14000;
+				break;
+			default:
+				this.gameSettings.time = 0;
+			}
+
+		final WeatherType weather = SkywarsUtils.mostFrequentElement(this.weatherVotes.values());
+		if (weather != null)
+			switch (weather) {
+			case CLEAR:
+				this.gameSettings.weather = org.bukkit.WeatherType.CLEAR;
+				break;
+			case RAIN:
+				this.gameSettings.weather = org.bukkit.WeatherType.DOWNFALL;
+				break;
+			default:
+				this.gameSettings.weather = org.bukkit.WeatherType.CLEAR;
+			}
+
 		for (final SkywarsUser user : this.getUsers()) {
-			user.getPlayer().setPlayerWeather(this.gameSettings.weather);
 			user.getPlayer().setPlayerTime(this.gameSettings.time, false);
+			user.getPlayer().setPlayerWeather(this.gameSettings.weather);
 		}
+
+		// TODO apply chest type
 	}
 
 	public void clear() {
@@ -571,7 +633,7 @@ public class Arena {
 
 	void removeHolograms() {
 		for (final String holoName : this.chestHolograms.values()) {
-			DHAPI.removeHologram(holoName);
+			Skywars.get().getHologramController().removeHologram(holoName);
 		}
 		this.chestHolograms.clear();
 	}
@@ -734,8 +796,8 @@ public class Arena {
 					final int index = y * width * length + z * width + x;
 					final Location loc = new Location(world, x, y, z).add(offset).add(this.location);
 					final Block block = loc.getBlock();
-					if (block.getState() instanceof Chest || block.getType() == XMaterial.CHEST.parseMaterial()
-							|| blocks[index] == 54 /* chest id */) {
+					if (block.getState() instanceof Chest && block.getType() == XMaterial.CHEST.parseMaterial()
+							&& blocks[index] == 54 /* chest id */) {
 						final Chest chest = (Chest) block.getState();
 						if (this.chests.contains(chest))
 							continue;
@@ -816,14 +878,24 @@ public class Arena {
 		 * }}Skywars.get().sendDebugMessage("filled %s chests",filled);
 		 */}
 
-	public void softStart(Player player) {
+	public boolean softStart(Player player) {
+		if (!CommandsUtils.permissionCheckWithMessage(player, "skywars.start"))
+			return false;
+		if (!CommandsUtils.arenaCheckWithMessage(player))
+			return false;
 		if (this.getStatus() == ArenaStatus.WAITING && this.getTask() == null) {
 			this.forcedStart = true;
 			this.forcedStartPlayer = player;
 			this.startTimer(ArenaStatus.STARTING);
-		} else {
-			this.startGame();
+			player.sendMessage(Messager.get("started_countdown"));
+			return true;
 		}
+		final boolean started = this.startGame();
+		if (started)
+			player.sendMessage(Messager.get("started_game"));
+		else
+			player.sendMessage(Messager.get("already_started"));
+		return started;
 	}
 
 	public void broadcastRefillMessage() {
@@ -903,12 +975,11 @@ public class Arena {
 		if (this.chestHolograms.containsKey(chest))
 			return false;
 		final Block block = chest.getBlock();
-		final Hologram holo = DHAPI.createHologram(
+		final String name = Skywars.get().getHologramController().createHologram(
 				"Skywars-chest-" + block.getLocation().getX() + "-" + block.getLocation().getY() + "-"
 						+ block.getLocation().getZ() + "-" + Instant.now().toString(),
-				block.getLocation().add(new Vector(0.5, 2, 0.5)));
-		DHAPI.addHologramLine(holo, "");
-		this.chestHolograms.put(chest, holo.getName());
+				block.getLocation().add(new Vector(0.5, 2, 0.5)), "");
+		this.chestHolograms.put(chest, name);
 		return true;
 	}
 
@@ -916,8 +987,7 @@ public class Arena {
 		if (!Skywars.holograms)
 			return;
 		for (final String holoName : this.chestHolograms.values()) {
-			final Hologram holo = DHAPI.getHologram(holoName);
-			DHAPI.setHologramLine(holo, 0, text);
+			Skywars.get().getHologramController().changeHologram(holoName, text);
 		}
 	}
 
@@ -925,14 +995,40 @@ public class Arena {
 		return this.gameSettings;
 	}
 
+	@Deprecated
 	public void changeGameSettings(Object obj) {
 		this.gameSettings.change(obj);
 		this.broadcastMessage("Changed game settings: " + obj.toString());
 	}
 
-	private void broadcastMessage(String string) {
+	public void broadcastMessage(String string) {
 		for (final SkywarsUser user : this.getUsers())
 			user.getPlayer().sendMessage(string);
+	}
+
+	HashMap<UUID, TimeType> timeVotes = new HashMap<UUID, TimeType>();
+	HashMap<UUID, WeatherType> weatherVotes = new HashMap<UUID, WeatherType>();
+	HashMap<UUID, ChestType> chestVotes = new HashMap<UUID, ChestType>();
+
+	public void voteTime(Player player, TimeType time) {
+		if (this.timeVotes.get(player.getUniqueId()) == time)
+			return;
+		this.timeVotes.put(player.getUniqueId(), time);
+		this.broadcastMessage(Messager.get("vote", player.getName(), Messager.get("time." + time)));
+	}
+
+	public void voteWeather(Player player, WeatherType weather) {
+		if (this.weatherVotes.get(player.getUniqueId()) == weather)
+			return;
+		this.weatherVotes.put(player.getUniqueId(), weather);
+		this.broadcastMessage(Messager.get("vote", player.getName(), Messager.get("weather." + weather)));
+	}
+
+	public void voteChests(Player player, ChestType chests) {
+		if (this.chestVotes.get(player.getUniqueId()) == chests)
+			return;
+		this.chestVotes.put(player.getUniqueId(), chests);
+		this.broadcastMessage(Messager.get("vote", player.getName(), Messager.get("chests." + chests)));
 	}
 
 }

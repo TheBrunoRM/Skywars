@@ -26,6 +26,7 @@ commands:
 
 permissions:
   skywars.*:
+    default: op
     description: Gives access to all Skywars commands.
     children:
       skywars.admin: true
@@ -35,12 +36,13 @@ permissions:
       skywars.start: true
   skywars.admin:
     description: Gives access to admin Skywars commands.
-    default: op
   skywars.config:
     description: Gives access to config subcommand.
   skywars.setmainlobby:
     description: Allows setting the main lobby.
   skywars.forcestart:
-    description: Allows using the forcestart subcommand to immediately start a Skywars game.
+    description: Allows immediately starting a Skywars game.
   skywars.start:
-    description: Allows using the start subcommand to start a Skywars game's countdown.
+    description: Allows starting a Skywars game's countdown.
+  skywars.stop:
+    description: Allows stopping a game.

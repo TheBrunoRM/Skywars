@@ -1,5 +1,6 @@
 # Skywars
 
+A Minecraft plugin that adds the Skywars minigame.
 Compatible with Bukkit and Spigot, from versions 1.8 upwards.
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/786de08d9dfa4332bc1e15e8f4373bd6)](https://www.codacy.com/gh/TheBrunoRM/Skywars/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=TheBrunoRM/Skywars&amp;utm_campaign=Badge_Grade)
@@ -21,7 +22,7 @@ Compatible with Bukkit and Spigot, from versions 1.8 upwards.
 
 To install the plugin, drag the .jar file to your server's **plugins** folder.\
 The plugin does not need any other dependencies as it should work by itself.\
-You can start the server after installing the plugin.
+You can start or reload the server after installing the plugin.
 
 ## How to use
 

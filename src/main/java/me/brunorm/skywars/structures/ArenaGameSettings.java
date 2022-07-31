@@ -4,16 +4,19 @@ import org.bukkit.WeatherType;
 
 public class ArenaGameSettings {
 
-	WeatherType weather;
+	Arena arena;
 	long time;
+	WeatherType weather;
 	ChestType chestType;
 
-	ArenaGameSettings() {
-		this.weather = WeatherType.CLEAR;
+	ArenaGameSettings(Arena arena) {
+		this.arena = arena;
 		this.time = 12000;
+		this.weather = WeatherType.CLEAR;
 		this.chestType = ChestType.NORMAL;
 	}
 
+	@Deprecated
 	public void change(Object obj) {
 		if (obj instanceof WeatherType)
 			this.weather = (WeatherType) obj;

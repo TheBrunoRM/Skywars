@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.WeatherType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,19 +16,22 @@ import com.cryptomorin.xseries.XMaterial;
 import me.brunorm.skywars.InventoryUtils;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.structures.Arena;
+import me.brunorm.skywars.structures.ChestType;
+import me.brunorm.skywars.structures.TimeType;
+import me.brunorm.skywars.structures.WeatherType;
 
 public class GameOptionsMenu implements Listener {
 
-	static HashMap<Player, Inventory> inventories = new HashMap<Player, Inventory>();
-	static HashMap<UUID, OptionMenu> currentMenus = new HashMap<UUID, OptionMenu>();
+	static HashMap<UUID, GameOptionType> currentMenus = new HashMap<UUID, GameOptionType>();
 
 	public static void open(Player player) {
-		open(player, OptionMenu.MAIN);
+		open(player, GameOptionType.MAIN);
 	}
 
-	public static void open(Player player, OptionMenu menu) {
+	public static void open(Player player, GameOptionType menu) {
 		Inventory inventory = null;
 		currentMenus.put(player.getUniqueId(), menu);
+		System.out.println("open game options menu: " + menu);
 		switch (menu) {
 		case MAIN:
 			inventory = Bukkit.createInventory(null, 9 * 3, "Game settings");
@@ -63,62 +65,71 @@ public class GameOptionsMenu implements Listener {
 		default:
 			break;
 		}
-		inventories.put(player, inventory);
 		player.openInventory(inventory);
+		PlayerInventoryManager.setMenu(player, MenuType.GAME_OPTIONS);
 	}
 
 	@EventHandler
 	void onClick(InventoryClickEvent event) {
 		final Player player = (Player) event.getWhoClicked();
-		final Inventory inventory = inventories.get(player);
-		if (!event.getInventory().equals(inventory))
+		if (PlayerInventoryManager.getCurrentMenu(player) != MenuType.GAME_OPTIONS)
+			return;
+		final GameOptionType currentMenu = currentMenus.get(player.getUniqueId());
+		if (currentMenu == null)
 			return;
 		event.setCancelled(true);
 		final ItemStack clicked = event.getCurrentItem();
 		if (clicked == null || clicked.getItemMeta() == null)
 			return;
-		final OptionMenu currentMenu = currentMenus.get(player.getUniqueId());
-		if (currentMenu == null)
-			return;
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;
+		System.out.println("current menu: " + currentMenu);
 		switch (currentMenu) {
 		case MAIN:
 			switch (event.getSlot()) {
 			case 10:
-				open(player, OptionMenu.WEATHER);
+				open(player, GameOptionType.WEATHER);
 				break;
 			case 13:
-				open(player, OptionMenu.TIME);
+				open(player, GameOptionType.TIME);
 				break;
 			case 16:
-				open(player, OptionMenu.CHESTS);
+				open(player, GameOptionType.CHESTS);
 				break;
 			default:
-				open(player, OptionMenu.MAIN);
+				open(player, GameOptionType.MAIN);
 			}
 			return;
 		case TIME:
 			switch (event.getSlot()) {
 			case 11: // day
-				arena.changeGameSettings(0);
+				arena.voteTime(player, TimeType.DAY);
 				break;
 			case 15: // night
-				arena.changeGameSettings(14000);
+				arena.voteTime(player, TimeType.NIGHT);
 				break;
 			}
 			break;
 		case WEATHER:
 			switch (event.getSlot()) {
 			case 11:
-				arena.changeGameSettings(WeatherType.CLEAR);
+				arena.voteWeather(player, WeatherType.CLEAR);
 				break;
 			case 15:
-				arena.changeGameSettings(WeatherType.DOWNFALL);
+				arena.voteWeather(player, WeatherType.RAIN);
 				break;
 			}
+			break;
 		case CHESTS:
+			switch (event.getSlot()) {
+			case 11:
+				arena.voteChests(player, ChestType.NORMAL);
+				break;
+			case 15:
+				arena.voteChests(player, ChestType.OVERPOWERED);
+				break;
+			}
 			break;
 		default:
 			break;

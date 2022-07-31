@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.bukkit.Effect;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -27,18 +26,17 @@ public class ProjectileTrails implements Listener {
 	public void onProjectileLaunch(ProjectileLaunchEvent e) {
 		final Projectile entity = e.getEntity();
 		final EntityType type = entity.getType();
-		if (e.getEntity().getShooter() instanceof Player) {
-			if (type == EntityType.ARROW) {
-				this.tasks.put(e.getEntity(), new BukkitRunnable() {
-					@Override
-					public void run() {
-						final World w = entity.getWorld();
-						final Location l = entity.getLocation();
-						w.playEffect(l, Effect.SMOKE, 2);
-					}
-				}.runTaskTimer(Skywars.get(), 0L, 1L));
+		if (!(e.getEntity().getShooter() instanceof Player))
+			return;
+		if (type != EntityType.ARROW)
+			return;
+		this.tasks.put(e.getEntity(), new BukkitRunnable() {
+			@Override
+			public void run() {
+				final Location l = entity.getLocation();
+				Skywars.get().NMS().sendParticles(l, "COLOURED_DUST", 2);
 			}
-		}
+		}.runTaskTimer(Skywars.get(), 0L, 1L));
 	}
 
 	@EventHandler

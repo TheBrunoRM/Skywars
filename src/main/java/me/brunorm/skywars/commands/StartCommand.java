@@ -15,12 +15,8 @@ public class StartCommand implements CommandExecutor {
 		if (!CommandsUtils.consoleCheckWithMessage(sender))
 			return true;
 		final Player player = (Player) sender;
-		if (!CommandsUtils.permissionCheckWithMessage(player, "skywars.start"))
-			return true;
-		if (!CommandsUtils.arenaCheckWithMessage(player))
-			return true;
-		final Arena playerArena = Skywars.get().getPlayerArena(player);
-		playerArena.softStart(player);
+		final Arena arena = Skywars.get().getPlayerArena(player);
+		arena.softStart(player);
 		return true;
 	}
 

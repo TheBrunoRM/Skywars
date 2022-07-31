@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import me.brunorm.skywars.Messager;
@@ -126,6 +127,27 @@ public class ReflectionNMS implements NMS {
 	}
 
 	// methods
+
+	public void sendParticles(Location loc, String particle, int amount) {
+		// TODO instead of a try-catch, check version
+		final World world = loc.getWorld();
+		try {
+			// 1.13
+			final Class<?> particleClass = Class.forName("org.bukkit.Particle");
+			final Method spawnParticleMethod = world.getClass().getMethod("spawnParticle", particleClass, int.class);
+			spawnParticleMethod.invoke(particleClass.getMethod("valueOf", String.class).invoke(particleClass, particle),
+					loc, amount);
+		} catch (final Exception e) {
+			try {
+				// 1.8
+				final Method playEffectMethod = world.getClass().getMethod("playEffect", Location.class, Effect.class,
+						int.class);
+				playEffectMethod.invoke(loc.getWorld(), loc, Effect.valueOf(particle), amount);
+			} catch (final Exception e2) {
+				Skywars.get().sendDebugMessage("Could not spawn particles.");
+			}
+		}
+	}
 
 	public void sendParticles(Player player, String particle, int amount) {
 		this.sendParticles(player, player.getLocation(), particle, amount);

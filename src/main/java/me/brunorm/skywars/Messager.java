@@ -21,6 +21,10 @@ public class Messager {
 		return Messager.color(String.format(text, format));
 	}
 
+	public static String get(String name, Object... format) {
+		return getMessage(name, format);
+	}
+
 	public static String getMessage(String name, Object... format) {
 		String msg = Skywars.langConfig.getString(name);
 		if (msg == null)

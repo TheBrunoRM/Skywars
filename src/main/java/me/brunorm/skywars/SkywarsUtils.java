@@ -4,7 +4,9 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -29,6 +31,7 @@ import org.bukkit.util.Vector;
 
 import com.cryptomorin.xseries.XMaterial;
 
+import me.brunorm.skywars.holograms.HologramController;
 import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.SkywarsUser;
 import mrblobman.sounds.Sounds;
@@ -44,6 +47,8 @@ public class SkywarsUtils {
 	}
 
 	public static String format(String text, Player player, Arena arena, SkywarsUser swp, boolean status) {
+		if (text == null)
+			return "";
 		final Date date = new Date();
 		final String format = Skywars.get().getConfig().getString("dateFormat");
 		if (format == null)
@@ -54,16 +59,16 @@ public class SkywarsUtils {
 
 		if (player != null) {
 
-			String balance = null;
-
-			if (Skywars.get().getEconomy() != null) {
-				balance = SkywarsUtils.formatDouble(Skywars.get().getEconomy().getBalance(player));
-			} else {
-				balance = "Vaultn't";
-			}
+			final String balance = Skywars.get().getEconomy() != null
+					? SkywarsUtils.formatDouble(Skywars.get().getEconomy().getBalance(player))
+					: "Vaultn't";
 			text = text.replaceAll(getVariableCode("coins"), balance)
+					.replaceAll(getVariableCode("totalwins"),
+							Integer.toString(Skywars.get().getPlayerTotalWins(player)))
 					.replaceAll(getVariableCode("totalkills"),
 							Integer.toString(Skywars.get().getPlayerTotalKills(player)))
+					.replaceAll(getVariableCode("totaldeaths"),
+							Integer.toString(Skywars.get().getPlayerTotalDeaths(player)))
 					.replaceAll(getVariableCode("kit"), Skywars.get().getPlayerKit(player).getDisplayName());
 		}
 
@@ -98,8 +103,7 @@ public class SkywarsUtils {
 		final String url = config.getString("url");
 		if (url != null)
 			return url;
-		else
-			return "www.skywars.com";
+		return "www.skywars.com";
 	}
 
 	public static String parseItemName(String text) {
@@ -124,8 +128,8 @@ public class SkywarsUtils {
 			return config.getString("status.starting");
 		case PLAYING:
 			return config.getString("status.playing");
-		case ENDING:
-			return config.getString("status.ending");
+		case RESTARTING:
+			return config.getString("status.restarting");
 		default:
 			return "";
 		}
@@ -217,7 +221,7 @@ public class SkywarsUtils {
 				player.sendMessage("arena is disabled");
 			return false;
 		}
-		if (arena.getStatus() == ArenaStatus.ENDING) {
+		if (arena.getStatus() == ArenaStatus.RESTARTING) {
 			if (player != null)
 				player.sendMessage("arena is ending");
 			return false;
@@ -319,9 +323,19 @@ public class SkywarsUtils {
 		final ConfigurationSection itemTypes = Skywars.get().getConfig().getConfigurationSection("item_types");
 
 		for (final String slotName : itemsSection.getKeys(false)) {
-			final Object itemName = itemsSection.get(slotName);
+			final String itemName = itemsSection.getString(slotName);
+
+			switch (itemName) {
+			case "START_GAME":
+				if (!player.hasPermission("skywars.start"))
+					continue;
+			case "STOP_GAME":
+				if (!player.hasPermission("skywars.stop"))
+					continue;
+			}
+
 			final int slot = Integer.parseInt(slotName);
-			final String itemType = itemTypes.getString((String) itemName);
+			final String itemType = itemTypes.getString(itemName);
 			final Material material = XMaterial.matchXMaterial(itemType).get().parseMaterial();
 			if (material == null) {
 				Skywars.get().sendMessage("material is null for inventory item: %s", itemType);
@@ -364,5 +378,40 @@ public class SkywarsUtils {
 		else if (singleSound != null) {
 			playSound(player, singleSound);
 		}
+	}
+
+	public static boolean checkClass(String name) {
+		try {
+			Class.forName(name);
+			return true;
+		} catch (final ClassNotFoundException e) {
+			return false;
+		}
+	}
+
+	public static String getHologramsAPIName(HologramController hologramController) {
+		if (hologramController == null)
+			return "None";
+		final String name = hologramController.getClass().getName();
+		if (name == null)
+			return "None";
+		final String[] bits = name.split(".");
+		return bits[bits.length - 1];
+	}
+
+	public static <E> E mostFrequentElement(Iterable<E> iterable) {
+		final Map<E, Integer> freqMap = new HashMap<>();
+		E mostFreq = null;
+		int mostFreqCount = -1;
+		for (final E e : iterable) {
+			Integer count = freqMap.get(e);
+			freqMap.put(e, count = (count == null ? 1 : count + 1));
+			// maintain the most frequent in a single pass.
+			if (count > mostFreqCount) {
+				mostFreq = e;
+				mostFreqCount = count;
+			}
+		}
+		return mostFreq;
 	}
 }

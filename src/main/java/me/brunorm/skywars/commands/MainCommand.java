@@ -21,9 +21,6 @@ import org.bukkit.util.Vector;
 
 import com.cryptomorin.xseries.XMaterial;
 
-import eu.decentsoftware.holograms.api.DHAPI;
-import eu.decentsoftware.holograms.api.holograms.Hologram;
-import me.brunorm.skywars.ArenaStatus;
 import me.brunorm.skywars.ChestManager;
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
@@ -137,17 +134,9 @@ public class MainCommand implements CommandExecutor {
 				} else if (args[0].equalsIgnoreCase("forcestart")) {
 					if (!CommandsUtils.consoleCheckWithMessage(sender))
 						return true;
-					if (!CommandsUtils.permissionCheckWithMessage(player, "skywars.forcestart"))
-						return true;
-					if (!CommandsUtils.arenaCheckWithMessage(player))
-						return true;
-					playerArena.startGame();
+					playerArena.startGame(player);
 				} else if (args[0].equalsIgnoreCase("start")) {
 					if (!CommandsUtils.consoleCheckWithMessage(sender))
-						return true;
-					if (!CommandsUtils.permissionCheckWithMessage(player, "skywars.start"))
-						return true;
-					if (!CommandsUtils.arenaCheckWithMessage(player))
 						return true;
 					playerArena.softStart(player);
 				} else if (args[0].equalsIgnoreCase("join")) {
@@ -188,25 +177,34 @@ public class MainCommand implements CommandExecutor {
 				// TEST COMMANDS
 
 				else if (args[0].equalsIgnoreCase("configstring")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
 					Skywars.get().getPlayerConfig(player);
 				} else if (args[0].equalsIgnoreCase("xmat")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
 					player.getInventory().addItem(XMaterial.matchXMaterial(args[1]).get().parseItem());
-				} else if (args[0].equalsIgnoreCase("hd")) {
+				} else if (args[0].equalsIgnoreCase("encoding")) {
+					player.sendMessage(Skywars.langConfig.getString("died.title"));
+				} else if (args[0].equalsIgnoreCase("class")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
-					// final Hologram holo = HologramsAPI.createHologram(Skywars.get(),
-					// player.getLocation());
-					// holo.appendTextLine("hola que tal bro");
-					// holo.appendTextLine("&6aver ese colorsito");
-					// holo.appendTextLine(Messager.color("&6la prueba con el messager"));
-					// holo.appendItemLine(XMaterial.IRON_SWORD.parseItem());
-					final Hologram holo = DHAPI.createHologram("test", player.getLocation().add(new Vector(0, 2, 0)));
-					DHAPI.addHologramLine(holo, "hola bro");
-					DHAPI.addHologramLine(holo, "&6aver ese colorsito");
-					DHAPI.addHologramLine(holo, Messager.color("&e&lla prueba del color"));
-					DHAPI.addHologramLine(holo, XMaterial.IRON_SWORD.parseItem());
+					Boolean bool = false;
+					try {
+						Class.forName(args[1]);
+						bool = true;
+					} catch (final ClassNotFoundException e) {
+						e.printStackTrace();
+					}
+					player.sendMessage("xd: " + bool);
+				} else if (args[0].equalsIgnoreCase("changehologram")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					Skywars.get().getHologramController().changeHologram(args[1], args[2]);
+				} else if (args[0].equalsIgnoreCase("createhologram")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					Skywars.get().getHologramController().createHologram(args[1], player.getLocation(), args[2]);
 				} else if (args[0].equalsIgnoreCase("tinylittletest")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
@@ -294,7 +292,7 @@ public class MainCommand implements CommandExecutor {
 						sender.sendMessage("file not found: " + args[1]);
 						return true;
 					}
-					final Schematic loaded = SchematicHandler.loadSchematic(file);
+					SchematicHandler.loadSchematic(file);
 					sender.sendMessage("Loaded schematic " + file.getName());
 				} else if (args[0].equalsIgnoreCase("nms")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
@@ -402,29 +400,29 @@ public class MainCommand implements CommandExecutor {
 								sender.sendMessage(String.format("%s", swp.getPlayer().getName()));
 						}
 					}
-				} else if (args[0].equalsIgnoreCase("restart")) {
-					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
-						return true;
-					arena.clear();
 				} else if (args[0].equalsIgnoreCase("stop")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
 					if (playerArena != null) {
-						playerArena.startTimer(ArenaStatus.ENDING);
+						playerArena.clear();
+					}
+				} else if (args[0].equalsIgnoreCase("end")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					if (playerArena != null) {
+						if (!playerArena.endGame())
+							sender.sendMessage("could not end");
 					}
 				} else if (args[0].equalsIgnoreCase("forcestop")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
-					if (arena != null) {
-						arena.clear();
+					if (playerArena != null) {
+						playerArena.clear();
 					}
 				} else if (args[0].equalsIgnoreCase("calculatespawns")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
 					map.calculateSpawns();
-				} else if (args[0].equalsIgnoreCase("save")) {
-					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin")) {
-					}
 				} else if (args[0].equalsIgnoreCase("joined")) {
 					sender.sendMessage(Skywars.get().getPlayerArena(player) != null ? "joined" : "not joined");
 				} else if (args[0].equalsIgnoreCase("case")) {
