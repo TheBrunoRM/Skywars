@@ -58,6 +58,21 @@ To create a sign, make it like this:
 
 ![Sign image](https://cdn.discordapp.com/attachments/835594221456064544/876946375110189146/unknown.png)
 
+## Plugin hooks
+The plugin will hook to other plugins to add extra functionality.
+### Economy
+#### Current economy features:
+  * Coins
+#### Currently implemented economy plugin APIS ([Skywars.java](https://github.com/TheBrunoRM/Skywars/blob/master/src/main/java/me/brunorm/skywars/Skywars.java)):
+  * Vault
+### Holograms
+#### Current hologram features:
+  * Holograms above chests to indicate refill time.
+
+#### Currently implemented hologram plugins APIs ([HologramController.java](https://github.com/TheBrunoRM/Skywars/blob/master/src/main/java/me/brunorm/skywars/holograms/HologramController.java)):
+  * HolographicDisplays
+  * DecentHolograms
+
 ## Current features
   * Maps
   * Kits
