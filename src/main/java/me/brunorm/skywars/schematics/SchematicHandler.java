@@ -393,12 +393,14 @@ public class SchematicHandler {
 							continue;
 						}
 						block.setType(mat);
-						// Skywars.get().sendDebugMessage("setting block at " + block.getLocation() + " to " + mat);
+						// Skywars.get().sendDebugMessage("setting block at " + block.getLocation() + "
+						// to " + mat);
 						for (final String m : metadata) {
 							// final String key = m.split("=")[0];
 							final String value = m.split("=")[1];
 							block.setData(getHorizontalIndex(value, (byte) 2));
-							// Skywars.get().sendDebugMessage("setting metadata of " + mat + " to: " + String.join(", ",
+							// Skywars.get().sendDebugMessage("setting metadata of " + mat + " to: " +
+							// String.join(", ",
 							// metadata));
 							// block.setMetadata(, new FixedMetadataValue(Skywars.get(), m.split("=")[1]));
 						}
@@ -413,9 +415,6 @@ public class SchematicHandler {
 				}
 			}
 		}
-
-		Skywars.get().sendDebugMessage("Skipped " + skipped.size() + " materials: "
-				+ String.join(", ", skipped.stream().map(a -> a.toString()).toList()));
 
 		for (final CompoundTag values : blockEntities) {
 			switch (values.getString("id").toLowerCase()) {
