@@ -396,6 +396,8 @@ public class SkywarsUtils {
 		if (name == null)
 			return "None";
 		final String[] bits = name.split(".");
+		if (bits.length < 1)
+			return "None";
 		return bits[bits.length - 1];
 	}
 
