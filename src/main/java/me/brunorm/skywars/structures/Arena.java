@@ -170,11 +170,8 @@ public class Arena {
 		p.setSpectator(true);
 		final Player player = p.getPlayer();
 
-		System.out.println("testingggggg 1");
-
 		if (killer != null) {
 			final SkywarsUser killerPlayer = this.getUser(killer);
-			System.out.println("testingggggg 2");
 			if (killerPlayer != null) {
 				Skywars.get().incrementPlayerTotalKills(killer);
 				final double killMoney = Skywars.get().getConfig().getDouble("economy.kill");
@@ -182,7 +179,6 @@ public class Arena {
 					Skywars.get().getEconomy().depositPlayer(killer, killMoney);
 					killer.sendMessage(Messager.colorFormat("&6+$%s", SkywarsUtils.formatDouble(killMoney)));
 				}
-				System.out.println("testingggggg 3");
 				Skywars.get().incrementPlayerSouls(killer);
 				killer.sendMessage(Messager.colorFormat("&b+%s Soul", 1));
 			}
