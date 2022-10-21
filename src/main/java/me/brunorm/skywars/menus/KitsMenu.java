@@ -7,11 +7,13 @@ import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -44,9 +46,13 @@ public class KitsMenu implements Listener {
 			final boolean selected = Skywars.get().getPlayerKit(player) == kit;
 			final boolean premium = kit.getPrice() > 0;
 			final boolean selectable = true;
-			if (selected)
+			if (selected) {
 				lore.add(Messager.color("&6Selected kit"));
-			else if (premium) {
+
+				// TODO: make it work
+				item.addUnsafeEnchantment(Enchantment.LUCK, 1);
+				meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+			} else if (premium) {
 				if (owned)
 					lore.add(Messager.color("&aYou own this kit!"));
 				else if (!owned) {

@@ -2,6 +2,7 @@
 
 kit: default
 ownedKits:
+souls: 0
 
 stats:
   solo:

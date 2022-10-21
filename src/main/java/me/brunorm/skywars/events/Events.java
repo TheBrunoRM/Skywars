@@ -87,7 +87,7 @@ public class Events implements Listener {
 			// we set the damage to 0 so the damage sound sounds
 			// and it doesnt feel like the player just disappears when we hit
 			event.setDamage(0);
-			arena.makeSpectator(swPlayer);
+			arena.makeSpectator(swPlayer, swPlayer.getLastHit(), event.getCause());
 		}
 	}
 
@@ -101,6 +101,7 @@ public class Events implements Listener {
 		if (damager == null || !(damager instanceof Player))
 			return;
 		final Player attacker = (Player) damager;
+
 		final Arena attackerArena = Skywars.get().getPlayerArena(attacker);
 		if (attackerArena != null) {
 			final SkywarsUser swAttacker = attackerArena.getUser(attacker);
@@ -115,6 +116,7 @@ public class Events implements Listener {
 		if (victimArena == null)
 			return;
 		final SkywarsUser swVictim = victimArena.getUser(victim);
+		swVictim.setLastHit(attacker);
 		if (livingEntity.getHealth() - event.getDamage() <= 0) {
 			// event.setCancelled(true);
 			// instead of cancelling the event,
@@ -123,7 +125,6 @@ public class Events implements Listener {
 			event.setDamage(0);
 			victimArena.makeSpectator(swVictim, attacker);
 		}
-		swVictim.setLastHit(attacker);
 	}
 
 	// prevent spectators from being targeted by mobs
@@ -301,7 +302,7 @@ public class Events implements Listener {
 		final SkywarsUser swp = arena.getUser(player);
 		if (swp == null)
 			return;
-		if (!swp.isSpectator())
+		if (!swp.isSpectator() && arena.started())
 			return;
 
 		event.setCancelled(true);

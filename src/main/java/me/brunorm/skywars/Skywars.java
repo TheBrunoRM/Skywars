@@ -738,6 +738,8 @@ public class Skywars extends JavaPlugin {
 		}
 	}
 
+	// kits
+
 	public Kit getKit(String name) {
 		for (int i = 0; i < this.kits.size(); i++) {
 			if (this.kits.get(i).getName().equalsIgnoreCase(name)
@@ -761,6 +763,8 @@ public class Skywars extends JavaPlugin {
 		return this.getKit(kitName);
 	}
 
+	// kills
+
 	public Integer getPlayerTotalKills(Player player) {
 		return this.getPlayerConfig(player).getInt("stats.solo.kills");
 	}
@@ -774,6 +778,24 @@ public class Skywars extends JavaPlugin {
 	public void incrementPlayerTotalKills(Player player) {
 		this.setPlayerTotalKills(player, this.getPlayerTotalKills(player) + 1);
 	}
+
+	// souls
+
+	public Integer getPlayerSouls(Player player) {
+		return this.getPlayerConfig(player).getInt("souls");
+	}
+
+	public void setPlayerSouls(Player player, int kills) {
+		final YamlConfiguration config = this.getPlayerConfig(player);
+		config.set("souls", kills);
+		this.savePlayerConfig(player, config);
+	}
+
+	public void incrementPlayerSouls(Player player) {
+		this.setPlayerSouls(player, this.getPlayerSouls(player) + 1);
+	}
+
+	// deaths
 
 	public Integer getPlayerTotalDeaths(Player player) {
 		return this.getPlayerConfig(player).getInt("stats.solo.deaths");
@@ -789,7 +811,9 @@ public class Skywars extends JavaPlugin {
 		this.setPlayerTotalDeaths(player, this.getPlayerTotalDeaths(player) + 1);
 	}
 
-	public int getPlayerTotalWins(Player player) {
+	// wins
+
+	public Integer getPlayerTotalWins(Player player) {
 		return this.getPlayerConfig(player).getInt("stats.solo.wins");
 	}
 
@@ -802,6 +826,8 @@ public class Skywars extends JavaPlugin {
 	public void incrementPlayerTotalWins(Player player) {
 		this.setPlayerTotalWins(player, this.getPlayerTotalWins(player) + 1);
 	}
+
+	//
 
 	public boolean loadConfig() {
 

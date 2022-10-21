@@ -63,12 +63,10 @@ public class SkywarsUtils {
 					? SkywarsUtils.formatDouble(Skywars.get().getEconomy().getBalance(player))
 					: "Vaultn't";
 			text = text.replaceAll(getVariableCode("coins"), balance)
-					.replaceAll(getVariableCode("totalwins"),
-							Integer.toString(Skywars.get().getPlayerTotalWins(player)))
-					.replaceAll(getVariableCode("totalkills"),
-							Integer.toString(Skywars.get().getPlayerTotalKills(player)))
-					.replaceAll(getVariableCode("totaldeaths"),
-							Integer.toString(Skywars.get().getPlayerTotalDeaths(player)))
+					.replaceAll(getVariableCode("souls"), Skywars.get().getPlayerSouls(player).toString())
+					.replaceAll(getVariableCode("totalwins"), Skywars.get().getPlayerTotalWins(player).toString())
+					.replaceAll(getVariableCode("totalkills"), Skywars.get().getPlayerTotalKills(player).toString())
+					.replaceAll(getVariableCode("totaldeaths"), Skywars.get().getPlayerTotalDeaths(player).toString())
 					.replaceAll(getVariableCode("kit"), Skywars.get().getPlayerKit(player).getDisplayName());
 		}
 

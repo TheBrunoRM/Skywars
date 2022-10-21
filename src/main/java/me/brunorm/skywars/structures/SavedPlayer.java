@@ -60,7 +60,8 @@ public class SavedPlayer {
 		this.player.setFoodLevel(this.hunger);
 		this.player.setHealth(this.health);
 		this.player.setMaxHealth(this.maxHealth);
-		this.player.setFlying(this.flying);
+		if (this.player.getAllowFlight())
+			this.player.setFlying(this.flying);
 		this.player.setAllowFlight(this.allowFlight);
 		this.player.setFireTicks(this.fireTicks);
 		this.player.getInventory().setHeldItemSlot(this.heldItemSlot);

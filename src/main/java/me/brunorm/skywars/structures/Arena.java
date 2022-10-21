@@ -161,14 +161,20 @@ public class Arena {
 	}
 
 	public void makeSpectator(SkywarsUser p, Player killer, DamageCause cause) {
+		if (!this.started())
+			return;
+
 		if (p.isSpectator())
 			return;
 
 		p.setSpectator(true);
 		final Player player = p.getPlayer();
 
+		System.out.println("testingggggg 1");
+
 		if (killer != null) {
 			final SkywarsUser killerPlayer = this.getUser(killer);
+			System.out.println("testingggggg 2");
 			if (killerPlayer != null) {
 				Skywars.get().incrementPlayerTotalKills(killer);
 				final double killMoney = Skywars.get().getConfig().getDouble("economy.kill");
@@ -176,6 +182,9 @@ public class Arena {
 					Skywars.get().getEconomy().depositPlayer(killer, killMoney);
 					killer.sendMessage(Messager.colorFormat("&6+$%s", SkywarsUtils.formatDouble(killMoney)));
 				}
+				System.out.println("testingggggg 3");
+				Skywars.get().incrementPlayerSouls(killer);
+				killer.sendMessage(Messager.colorFormat("&b+%s Soul", 1));
 			}
 		}
 		Skywars.get().incrementPlayerTotalDeaths(player);
@@ -820,6 +829,8 @@ public class Arena {
 			if (id.equalsIgnoreCase("chest")) {
 				final Vector v = SchematicHandler.getVector(tag);
 				final Location loc = new Location(world, v.getX(), v.getY(), v.getZ()).add(offset).add(this.location);
+				if (!(loc.getBlock() instanceof Chest))
+					continue;
 				final Chest chest = (Chest) loc.getBlock().getState();
 				if (this.chests.contains(chest))
 					continue;

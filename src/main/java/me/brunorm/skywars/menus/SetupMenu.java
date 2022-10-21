@@ -52,7 +52,6 @@ public class SetupMenu implements Listener {
 	static void OpenSchematicsMenu(Player player) {
 		final File folder = new File(Skywars.get().getDataFolder() + "/schematics");
 		final Inventory inventory = Bukkit.createInventory(null, 9 * 6, Messager.color("&aSchematic files"));
-		PlayerInventoryManager.setMenu(player, MenuType.MAP_SCHEMATIC);
 
 		int index = 10;
 		for (final File schematicFile : folder.listFiles()) {
@@ -89,6 +88,7 @@ public class SetupMenu implements Listener {
 		}
 
 		player.openInventory(inventory);
+		PlayerInventoryManager.setMenu(player, MenuType.MAP_SCHEMATIC);
 	}
 
 	static void UpdateInventory(Player player) {
@@ -226,8 +226,8 @@ public class SetupMenu implements Listener {
 	public static void OpenConfigurationMenu(Player player, SkywarsMap map) {
 		currentArenas.put(player, Skywars.get().getArenaAndCreateIfNotFound(map));
 		final Inventory inventory = Bukkit.createInventory(null, 9 * 3, Messager.color("&a&l" + map.getName()));
-		PlayerInventoryManager.setMenu(player, MenuType.MAP_CONFIGURATION);
 		player.openInventory(inventory);
+		PlayerInventoryManager.setMenu(player, MenuType.MAP_CONFIGURATION);
 		UpdateInventory(player);
 	}
 
@@ -243,7 +243,8 @@ public class SetupMenu implements Listener {
 	void onClick(InventoryClickEvent event) {
 		final Player player = (Player) event.getWhoClicked();
 		final MenuType currentMenu = PlayerInventoryManager.getCurrentMenu(player);
-		if (currentMenu != MenuType.MAP_CONFIGURATION)
+		System.out.println("current menu: " + currentMenu);
+		if (currentMenu != MenuType.MAP_CONFIGURATION && currentMenu != MenuType.MAP_SCHEMATIC)
 			return;
 		event.setCancelled(true);
 		final ItemStack clicked = event.getCurrentItem();
@@ -376,13 +377,15 @@ public class SetupMenu implements Listener {
 				player.closeInventory();
 				player.sendMessage("&c&lThere are no schematic files!");
 				player.sendMessage("&e&lYou need to put &bschematics files &ein the &bschematics folder");
-				return;
 			} else
 				OpenSchematicsMenu(player);
+			return;
 		}
 
+		boolean pasted = false;
 		final String schematicName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
 		for (final File schematicFile : this.schematicsFolder.listFiles()) {
+			System.out.println("current file: " + schematicFile.getName());
 			if (schematicFile.getName().equals(schematicName)) {
 				currentArena.clearBlocks();
 				currentMap.setSchematic(schematicName);
@@ -390,8 +393,12 @@ public class SetupMenu implements Listener {
 				currentArena.pasteSchematic();
 				player.sendMessage(Messager.colorFormat("&eSchematic set to &b%s", currentMap.getSchematicFilename()));
 				player.sendMessage(Messager.color("&eSchematic pasted."));
+				pasted = true;
+				break;
 			}
 		}
+		if (pasted)
+			return;
 
 		currentMap.saveParametersInConfig();
 		currentMap.saveConfig();
