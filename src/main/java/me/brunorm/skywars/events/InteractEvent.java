@@ -8,12 +8,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import com.cryptomorin.xseries.XMaterial;
 
 import me.brunorm.skywars.ArenaStatus;
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
+import me.brunorm.skywars.SkywarsUtils;
 import me.brunorm.skywars.commands.CommandsUtils;
 import me.brunorm.skywars.menus.GameOptionsMenu;
 import me.brunorm.skywars.menus.KitsMenu;
@@ -32,6 +34,12 @@ public class InteractEvent implements Listener {
 			final SkywarsUser swp = arena.getUser(player);
 			ItemStack item;
 			item = player.getItemInHand();
+			final ItemMeta meta = item.getItemMeta();
+			if (meta == null)
+				return;
+			final String displayName = meta.getDisplayName();
+			if (displayName == null)
+				return;
 			if (item.getType() == XMaterial
 					.matchXMaterial(Skywars.get().getConfig().getString("item_types.KIT_SELECTOR")).get()
 					.parseMaterial()) {
@@ -40,15 +48,16 @@ public class InteractEvent implements Listener {
 					event.setCancelled(true);
 				}
 			}
-			if (item.getType() == XMaterial.matchXMaterial(Skywars.get().getConfig().getString("item_types.LEAVE"))
-					.get().parseMaterial()) {
+			if (displayName.equals(SkywarsUtils.getItemNameFromConfig("LEAVE")) && item.getType() == XMaterial
+					.matchXMaterial(Skywars.get().getConfig().getString("item_types.LEAVE")).get().parseMaterial()) {
 				if (arena.getStatus() != ArenaStatus.PLAYING || swp.isSpectator()) {
 					arena.leavePlayer(swp);
 					event.setCancelled(true);
 				}
 			}
-			if (item.getType() == XMaterial.matchXMaterial(Skywars.get().getConfig().getString("item_types.PLAY_AGAIN"))
-					.get().parseMaterial()) {
+			if (displayName.equals(SkywarsUtils.getItemNameFromConfig("PLAY_AGAIN")) && item.getType() == XMaterial
+					.matchXMaterial(Skywars.get().getConfig().getString("item_types.PLAY_AGAIN")).get()
+					.parseMaterial()) {
 				if (!swp.isSpectator())
 					return;
 				player.sendMessage(Messager.color("&aSending you to another game..."));

@@ -316,6 +316,17 @@ public class SkywarsUtils {
 		return new DecimalFormat(Skywars.get().getConfig().getString("decimalFormat")).format(d);
 	}
 
+	public static String getItemNameFromConfig(String itemName) {
+		String configName = Skywars.langConfig.getString("items." + itemName + ".name");
+		if (Skywars.langConfig.getBoolean("items.show_context") == true) {
+			final String context = Skywars.langConfig.getString("items.context");
+			if (context != null) {
+				configName = configName + " " + Messager.color(context);
+			}
+		}
+		return Messager.color(configName);
+	}
+
 	public static void setPlayerInventory(Player player, String category) {
 		final ConfigurationSection itemsSection = Skywars.get().getConfig()
 				.getConfigurationSection("items." + category);
@@ -343,13 +354,7 @@ public class SkywarsUtils {
 			}
 			final ItemStack item = new ItemStack(material);
 			final ItemMeta itemMeta = item.getItemMeta();
-			String configName = Skywars.langConfig.getString("items." + itemName + ".name");
-			if (Skywars.langConfig.getBoolean("items.show_context") == true) {
-				final String context = Skywars.langConfig.getString("items.context");
-				if (context != null) {
-					configName = configName + " " + Messager.color(context);
-				}
-			}
+			final String configName = getItemNameFromConfig(itemName);
 			itemMeta.setDisplayName(Messager.color(configName));
 			final List<String> itemLore = new ArrayList<String>();
 			for (final String loreLine : Skywars.langConfig.getStringList("items." + itemName + ".description")) {
