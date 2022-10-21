@@ -98,6 +98,7 @@ items:
     0: TELEPORTER
     1: SPECTATOR_OPTIONS
     4: STOP_GAME
+    7: PLAY_AGAIN
     8: LEAVE
   # if for some reason you want to give items when the game starts
   # you can do so here
@@ -113,6 +114,7 @@ item_types:
   GAME_OPTIONS: PAPER
   START_GAME: BLAZE_POWDER
   STOP_GAME: BARRIER
+  PLAY_AGAIN: PAPER
   LEAVE: BED # RED_BED if 1.13+
   SPECTATOR_OPTIONS: REDSTONE_COMPARATOR # COMPARATOR if 1.13+
   TELEPORTER: COMPASS

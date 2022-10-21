@@ -287,6 +287,7 @@ public class Arena {
 		}
 		if (this.status != ArenaStatus.WAITING && this.getAlivePlayerCount() <= 0)
 			this.clear();
+
 	}
 
 	public void exitPlayer(Player player) {
@@ -302,7 +303,7 @@ public class Arena {
 			SkywarsUtils.teleportPlayerBack(player.getPlayer());
 	}
 
-	void removePlayer(SkywarsUser player) {
+	public void removePlayer(SkywarsUser player) {
 		if (this.getStatus() != ArenaStatus.PLAYING)
 			return;
 
@@ -766,7 +767,12 @@ public class Arena {
 		if (this.location == null || this.map.getSchematic() == null)
 			return;
 		Skywars.get().sendDebugMessage("pasting schematic at " + this.location.toString());
-		SchematicHandler.pasteSchematic(this.location, this.map.getSchematic());
+		try {
+			SchematicHandler.pasteSchematic(this.location, this.map.getSchematic());
+		} catch (final Exception e) {
+			Skywars.get().sendDebugMessage("could not paste schematic");
+			e.printStackTrace();
+		}
 	}
 
 	public void clearBlocks() {

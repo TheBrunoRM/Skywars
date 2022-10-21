@@ -47,21 +47,33 @@ public class InteractEvent implements Listener {
 					event.setCancelled(true);
 				}
 			}
+			if (item.getType() == XMaterial.matchXMaterial(Skywars.get().getConfig().getString("item_types.PLAY_AGAIN"))
+					.get().parseMaterial()) {
+				if (!swp.isSpectator())
+					return;
+				player.sendMessage(Messager.color("&aSending you to another game..."));
+				arena.leavePlayer(swp);
+				Skywars.get().joinRandomMap(player);
+				event.setCancelled(true);
+			}
 			if (item.getType() == XMaterial
 					.matchXMaterial(Skywars.get().getConfig().getString("item_types.GAME_OPTIONS")).get()
 					.parseMaterial()) {
-				if (!arena.started()) {
-					GameOptionsMenu.open(player);
-					event.setCancelled(true);
-				}
+				if (swp.isSpectator())
+					return;
+				if (arena.started())
+					return;
+				GameOptionsMenu.open(player);
+				event.setCancelled(true);
 			}
 			if (item.getType() == XMaterial.matchXMaterial(Skywars.get().getConfig().getString("item_types.START_GAME"))
 					.get().parseMaterial()) {
-				if (!arena.started()) {
-					if (!CommandsUtils.permissionCheckWithMessage(player, "skywars.start"))
-						return;
-					arena.softStart(player);
-				}
+				if (arena.started())
+					return;
+				if (!CommandsUtils.permissionCheckWithMessage(player, "skywars.start"))
+					return;
+				arena.softStart(player);
+				event.setCancelled(true);
 			}
 			if (item.getType() == XMaterial.matchXMaterial(Skywars.get().getConfig().getString("item_types.STOP_GAME"))
 					.get().parseMaterial()) {
@@ -70,6 +82,7 @@ public class InteractEvent implements Listener {
 				if (!CommandsUtils.permissionCheckWithMessage(player, "skywars.stop"))
 					return;
 				arena.clear();
+				event.setCancelled(true);
 			}
 		} else if (Skywars.get().getConfig().getBoolean("signsEnabled") && event.getClickedBlock() != null) {
 			if (event.getClickedBlock().getType() == XMaterial.OAK_SIGN.parseMaterial()
