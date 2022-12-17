@@ -61,19 +61,19 @@ public class SkywarsUpdater {
 			Skywars.get().sendDebugMessage("File URL: " + FILE_URL);
 
 			final InputStream in = new URL(FILE_URL).openStream();
-			final Path path = Skywars.get().file().toPath();
+			final Path path = Skywars.get().file().getAbsoluteFile().toPath();
 			Skywars.get().sendDebugMessage("Download path: " + path.toString());
 
 			Files.write(path, in.readAllBytes(), StandardOpenOption.WRITE);
 
 			Skywars.get().sendMessage("&aThe plugin has been updated! &e(%sms)", Instant.now().toEpochMilli() - start);
 			Skywars.get().sendMessage("&6The update will be applied after reloading the server.");
+			return true;
 		} catch (final Exception e) {
 			e.printStackTrace();
 			Skywars.get().sendMessage("&cCould not check for updates! &6(%sms)", Instant.now().toEpochMilli() - start);
 			return false;
 		}
-		return true;
 	}
 
 	private static String readUrl(String urlString) throws Exception {

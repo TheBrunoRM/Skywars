@@ -134,6 +134,8 @@ public class Skywars extends JavaPlugin {
 		}
 	}
 
+	boolean updated = false;
+
 	@Override
 	public void onEnable() {
 
@@ -154,7 +156,11 @@ public class Skywars extends JavaPlugin {
 			return;
 		}
 
-		SkywarsUpdater.update();
+		if (SkywarsUpdater.update()) {
+			this.updated = true;
+			this.setEnabled(false);
+			return;
+		}
 
 		this.loadCommands();
 		this.loadEvents();
@@ -221,6 +227,10 @@ public class Skywars extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
+		if (this.updated) {
+			this.sendMessage("&6The plugin has been updated and disabled.");
+			return;
+		}
 
 		for (final Player player : Bukkit.getOnlinePlayers()) {
 			final Arena arena = this.getPlayerArena(player);
