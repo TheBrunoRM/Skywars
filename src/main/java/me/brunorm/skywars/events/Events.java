@@ -171,7 +171,7 @@ public class Events implements Listener {
 		final SkywarsUser swp = arena.getUser(player);
 		if (swp == null)
 			return;
-		if (!swp.isSpectator())
+		if (!swp.isSpectator() && arena.started())
 			return;
 
 		event.setCancelled(true);

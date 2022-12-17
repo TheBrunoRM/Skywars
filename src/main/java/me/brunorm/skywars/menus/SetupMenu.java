@@ -243,7 +243,6 @@ public class SetupMenu implements Listener {
 	void onClick(InventoryClickEvent event) {
 		final Player player = (Player) event.getWhoClicked();
 		final MenuType currentMenu = PlayerInventoryManager.getCurrentMenu(player);
-		System.out.println("current menu: " + currentMenu);
 		if (currentMenu != MenuType.MAP_CONFIGURATION && currentMenu != MenuType.MAP_SCHEMATIC)
 			return;
 		event.setCancelled(true);

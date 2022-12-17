@@ -84,7 +84,6 @@ public class GameOptionsMenu implements Listener {
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;
-		System.out.println("current menu: " + currentMenu);
 		switch (currentMenu) {
 		case MAIN:
 			switch (event.getSlot()) {

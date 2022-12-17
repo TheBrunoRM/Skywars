@@ -17,6 +17,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -58,9 +59,10 @@ import net.milkbowl.vault.economy.Economy;
 public class Skywars extends JavaPlugin {
 
 	// get plugin data
-	public String name = this.getDescription().getName();
-	public String version = this.getDescription().getVersion();
-	public List<String> authors = this.getDescription().getAuthors();
+	PluginDescriptionFile pdf = this.getDescription();
+	public String name = this.pdf.getName();
+	public String version = this.pdf.getVersion();
+	public List<String> authors = this.pdf.getAuthors();
 	private final String prefix = Messager.colorFormat("&6[&e%s&6]&e", this.name);
 	private final String debugPrefix = Messager.colorFormat("&7[&c%s&7]&e", this.name);
 	public static String kitsPath;
@@ -93,6 +95,10 @@ public class Skywars extends JavaPlugin {
 
 	public static Skywars get() {
 		return plugin;
+	}
+
+	public File file() {
+		return this.getFile();
 	}
 
 	private Location lobby;
@@ -147,6 +153,9 @@ public class Skywars extends JavaPlugin {
 			this.setEnabled(false);
 			return;
 		}
+
+		SkywarsUpdater.update();
+
 		this.loadCommands();
 		this.loadEvents();
 		this.loadMaps();

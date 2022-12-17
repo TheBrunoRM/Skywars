@@ -20,13 +20,17 @@ import org.bukkit.inventory.meta.ItemMeta;
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.structures.Kit;
+import net.milkbowl.vault.economy.Economy;
 
 public class KitsMenu implements Listener {
 
 	public static void open(Player player) {
 		final Inventory inventory = Bukkit.createInventory(null, 9 * 3, Messager.color("&aKits"));
 
-		final double playerMoney = Skywars.get().getEconomy().getBalance(player);
+		final Economy eco = Skywars.get().getEconomy();
+		double playerMoney = 0;
+		if (eco != null)
+			playerMoney = eco.getBalance(player);
 
 		int index = 0;
 		for (final Kit kit : Skywars.get().getKits()) {
@@ -58,19 +62,20 @@ public class KitsMenu implements Listener {
 				else if (!owned) {
 					if (playerMoney >= kit.getPrice()) {
 						lore.add(Messager.color("&aPrice: " + kit.getPrice()));
-						lore.add(Messager.color("&6Your money: " + playerMoney));
+						lore.add(Messager.color("&6Your money: &a" + playerMoney));
 						lore.add(Messager.color("&aClick to purchase this kit!"));
 					} else {
 						lore.add(Messager.color("&cPrice: " + kit.getPrice()));
-						lore.add(Messager.color("&6Your money: " + playerMoney));
+						lore.add(Messager.color("&6Your money: &c" + playerMoney));
 						lore.add(Messager.color("&cYou don't have this kit!"));
 					}
 				}
 			} else if (!premium)
 				lore.add(Messager.color("&aThis kit is free!"));
-			if (!selected && selectable) {
+
+			if (!selected && selectable)
 				lore.add(Messager.color("&eClick to select!"));
-			}
+
 			meta.setLore(lore);
 			item.setItemMeta(meta);
 			inventory.setItem(index, item);
