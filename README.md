@@ -63,7 +63,7 @@ The plugin will hook to other plugins to add extra functionality.
 ### Economy
 #### Current economy features:
   * Coins
-#### Currently implemented economy plugin APIS ([Skywars.java](https://github.com/TheBrunoRM/Skywars/blob/master/src/main/java/me/brunorm/skywars/Skywars.java)):
+#### Currently implemented economy plugin APIS ([Skywars.java](https://github.com/TheBrunoRM/Skywars/blob/master/src/main/java/me/brunorm/skywars/Skywars.java#L250)):
   * Vault
 ### Holograms
 #### Current hologram features:
