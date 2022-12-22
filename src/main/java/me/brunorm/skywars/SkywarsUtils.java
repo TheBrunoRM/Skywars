@@ -80,7 +80,7 @@ public class SkywarsUtils {
 					.replaceAll(getVariableCode("arena"), arena.getMap().getName())
 					.replaceAll(getVariableCode("event"), arena.getNextEventText())
 					.replaceAll(getVariableCode("players"), Integer.toString(arena.getAlivePlayerCount()))
-					.replaceAll(getVariableCode("maxplayers"), Integer.toString(arena.getMap().getMaxPlayers()))
+					.replaceAll(getVariableCode("maxplayers"), Integer.toString(arena.getMap().getSpawns().size()))
 					.replaceAll(getVariableCode("seconds"), Integer.toString(arena.getCountdown()))
 					.replaceAll(getVariableCode("count"), Integer.toString(arena.getCountdown()));
 		}
@@ -133,24 +133,20 @@ public class SkywarsUtils {
 		}
 	}
 
-	public static void teleportPlayerBack(Player player) {
+	public static void teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(Player player) {
 		final Location lobby = Skywars.get().getLobby();
-		final Location lastLocation = Skywars.get().playerLocations.get(player);
-		if (lobby != null)
+		if (lobby != null) {
 			player.getPlayer().teleport(lobby);
-		else if (lastLocation != null) {
-			player.getPlayer().teleport(lastLocation);
-			Skywars.get().playerLocations.remove(player);
+			return;
 		}
-	}
 
-	@Deprecated
-	public static void giveBedItem(Player player) {
-		final ItemStack bed = new ItemStack(XMaterial.RED_BED.parseMaterial());
-		final ItemMeta meta = bed.getItemMeta();
-		meta.setDisplayName(SkywarsUtils.parseItemName("leave"));
-		bed.setItemMeta(meta);
-		player.getInventory().setItem(8, bed);
+		final Location lastLocation = Skywars.get().playerLocations.get(player);
+		if (lastLocation == null) {
+			player.sendMessage("Could not send you back!");
+			return;
+		}
+		player.getPlayer().teleport(lastLocation);
+		Skywars.get().playerLocations.remove(player);
 	}
 
 	public static void resetPlayerServer(Player player) {
@@ -229,19 +225,16 @@ public class SkywarsUtils {
 				player.sendMessage("arena is playing");
 			return false;
 		}
-		if (arena.getMap().getMaxPlayers() <= 0) {
-			if (player != null)
-				player.sendMessage("max players not set");
-			return false;
-		}
-		if (arena.getWorld() == null) {
+		if (arena.getWorldAndLoadIfItIsNotLoaded() == null) {
 			if (player != null)
 				player.sendMessage("world not set");
 			return false;
 		}
-		if (arena.getUsers().size() >= arena.getMap().getMaxPlayers()) {
+		final int spawns = arena.getMap().getSpawns().size();
+		if (arena.getAlivePlayerCount() >= spawns) {
 			if (player != null)
-				player.sendMessage("too much players");
+				player.sendMessage(Messager.colorFormat("this arena is full! (%s/%s players)",
+						arena.getAlivePlayerCount(), spawns));
 			return false;
 		}
 		return true;
@@ -338,16 +331,18 @@ public class SkywarsUtils {
 			case "START_GAME":
 				if (!player.hasPermission("skywars.start"))
 					continue;
+				break;
 			case "STOP_GAME":
 				if (!player.hasPermission("skywars.stop"))
 					continue;
+				break;
 			}
 
 			final int slot = Integer.parseInt(slotName);
 			final String itemType = itemTypes.getString(itemName);
 			final Material material = XMaterial.matchXMaterial(itemType).get().parseMaterial();
 			if (material == null) {
-				Skywars.get().sendMessage("material is null for inventory item: %s", itemType);
+				Skywars.get().sendDebugMessage("material is null for inventory item: %s", itemType);
 				continue;
 			}
 			final ItemStack item = new ItemStack(material);

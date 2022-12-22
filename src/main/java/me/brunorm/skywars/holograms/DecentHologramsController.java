@@ -15,8 +15,8 @@ public class DecentHologramsController implements HologramController {
 	}
 
 	@Override
-	public boolean changeHologram(Object id, String text) {
-		return DHAPI.getHologram((String) id).getPage(0).setLine(0, text);
+	public boolean changeHologram(Object id, String text, int line) {
+		return DHAPI.getHologram((String) id).getPage(0).setLine(line, text);
 	}
 
 	@Override

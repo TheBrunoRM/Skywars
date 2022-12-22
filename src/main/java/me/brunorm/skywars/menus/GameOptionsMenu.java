@@ -31,35 +31,35 @@ public class GameOptionsMenu implements Listener {
 	public static void open(Player player, GameOptionType menu) {
 		Inventory inventory = null;
 		currentMenus.put(player.getUniqueId(), menu);
-		System.out.println("open game options menu: " + menu);
+		Skywars.get().sendDebugMessage("player %s open game options menu: " + menu, player.getName());
 		switch (menu) {
 		case MAIN:
 			inventory = Bukkit.createInventory(null, 9 * 3, "Game settings");
 
-			InventoryUtils.addItem(inventory, "&aWeather", 10, XMaterial.NETHER_STAR.parseItem());
-			InventoryUtils.addItem(inventory, "&aTime", 13, XMaterial.CLOCK.parseItem());
-			InventoryUtils.addItem(inventory, "&aChests", 16, XMaterial.CHEST.parseItem());
+			InventoryUtils.addItem(inventory, XMaterial.NETHER_STAR.parseItem(), 10, "&aWeather");
+			InventoryUtils.addItem(inventory, XMaterial.CLOCK.parseItem(), 13, "&aTime");
+			InventoryUtils.addItem(inventory, XMaterial.CHEST.parseItem(), 16, "&aChests");
 
 			break;
 		case WEATHER:
 			inventory = Bukkit.createInventory(null, 9 * 3, "Weather settings");
 
-			InventoryUtils.addItem(inventory, "&aSunny", 11, XMaterial.SUNFLOWER.parseItem());
-			InventoryUtils.addItem(inventory, "&aRainy", 15, XMaterial.ENDER_PEARL.parseItem());
+			InventoryUtils.addItem(inventory, XMaterial.SUNFLOWER.parseItem(), 11, "&aSunny");
+			InventoryUtils.addItem(inventory, XMaterial.ENDER_PEARL.parseItem(), 15, "&aRainy");
 
 			break;
 		case CHESTS:
 			inventory = Bukkit.createInventory(null, 9 * 3, "Chest settings");
 
-			InventoryUtils.addItem(inventory, "&aNormal", 11, XMaterial.CHEST.parseItem());
-			InventoryUtils.addItem(inventory, "&cOverpowered", 15, XMaterial.ENDER_CHEST.parseItem());
+			InventoryUtils.addItem(inventory, XMaterial.CHEST.parseItem(), 11, "&aNormal");
+			InventoryUtils.addItem(inventory, XMaterial.ENDER_CHEST.parseItem(), 15, "&cOverpowered");
 
 			break;
 		case TIME:
 			inventory = Bukkit.createInventory(null, 9 * 3, "Time settings");
 
-			InventoryUtils.addItem(inventory, "&aDay", 11, XMaterial.SUNFLOWER.parseItem());
-			InventoryUtils.addItem(inventory, "&aNight", 15, XMaterial.ENDER_PEARL.parseItem());
+			InventoryUtils.addItem(inventory, XMaterial.SUNFLOWER.parseItem(), 11, "&aDay");
+			InventoryUtils.addItem(inventory, XMaterial.ENDER_PEARL.parseItem(), 15, "&aNight");
 
 			break;
 		default:

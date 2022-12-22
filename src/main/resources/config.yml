@@ -27,6 +27,9 @@ sounds: # sound name; volume; pitch
 # this is the reset cooldown for last hits (in seconds)
 lastHitResetCooldown: 15
 
+# this is the max map size (in blocks)
+maxMapSize: 200
+
 # this is the arena location method
 # possible options are SINGLE_ARENA or MULTI_ARENA
 # --
@@ -120,6 +123,9 @@ item_types:
   TELEPORTER: COMPASS
 
 debug:
-  enabled: false
+  enabled: false # enable this to see debug messages
   bigCases: false
   projectileTests: false
+
+disableUpdates: true
+autoUpdate: false

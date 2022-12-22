@@ -18,6 +18,7 @@ import com.cryptomorin.xseries.XMaterial;
 
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
+import me.brunorm.skywars.managers.ArenaManager;
 import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.SkywarsMap;
 
@@ -42,10 +43,10 @@ public class MapMenu implements Listener {
 			// lore.add(Messager.color("&7Veces Unidas: &a0"));
 			// lore.add(Messager.color("&7Selecciones de Mapa: &a1"));
 
-			final ArrayList<Arena> arenas = Skywars.get().getArenasByMap(map);
+			final ArrayList<Arena> arenas = ArenaManager.getArenasByMap(map);
 			final int players = arenas.stream().map(arena -> arena.getAlivePlayerCount()).reduce(0, (a, b) -> a + b);
 
-			lore.add(Messager.colorFormat("&eCurrent arenas: &a%s", Skywars.get().getArenasByMap(map).size()));
+			lore.add(Messager.colorFormat("&eCurrent arenas: &a%s", ArenaManager.getArenasByMap(map).size()));
 			lore.add(Messager.colorFormat("&eCurrent players: &a%s", players));
 			lore.add(Messager.color("&eClick to play!"));
 			// lore.add(Messager.color("&eClick derecho para alternarlo como favorito!"));
@@ -76,7 +77,8 @@ public class MapMenu implements Listener {
 			return;
 		final String name = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
 		final SkywarsMap map = Skywars.get().getMap(name);
-		Skywars.get().joinMap(map, player);
+		if (!ArenaManager.joinMap(map, player))
+			player.sendMessage(Messager.get("CANT_JOIN_MAP"));
 	}
 
 }

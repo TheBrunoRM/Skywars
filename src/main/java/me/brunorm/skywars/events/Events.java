@@ -41,7 +41,7 @@ public class Events implements Listener {
 		if (arena.isInBoundaries(player))
 			return;
 
-		if (player.getWorld() != arena.getWorld())
+		if (player.getWorld() != arena.getWorldAndLoadIfItIsNotLoaded())
 			arena.leavePlayer(swp);
 		else if (!arena.started()) {
 			// arena.leavePlayer(player);
@@ -222,6 +222,7 @@ public class Events implements Listener {
 		final Chest chest = (Chest) block.getState();
 		if (!arena.getChests().contains(chest))
 			return;
+
 		arena.addChestHologram(chest);
 	}
 

@@ -10,6 +10,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.bukkit.plugin.PluginDescriptionFile;
 
 import com.google.gson.Gson;
@@ -27,7 +28,7 @@ public class SkywarsUpdater {
 
 	public static final PluginDescriptionFile pdf = Skywars.get().getDescription();
 
-	public static boolean update() {
+	public static boolean update(boolean applyUpdate) {
 
 		final String JSON_URL = "https://api.github.com/repos/TheBrunoRM/Skywars/releases/latest";
 
@@ -52,19 +53,26 @@ public class SkywarsUpdater {
 				return false;
 			}
 
-			Skywars.get().sendMessage("&bThere is an update available! &6Updating the plugin... &e(%sms)",
-					Instant.now().toEpochMilli() - start);
-
-			start = Instant.now().toEpochMilli();
+			Skywars.get().sendMessage("&bThere is an update available! &e(%sms)", Instant.now().toEpochMilli() - start);
 
 			final String FILE_URL = release.assets.get(0).browser_download_url;
 			Skywars.get().sendDebugMessage("File URL: " + FILE_URL);
+
+			if (!applyUpdate) {
+				Skywars.get().sendMessage("&eYou can download the update here:");
+				Skywars.get().sendMessage("&b" + FILE_URL);
+				return true;
+			}
+
+			Skywars.get().sendMessage("&6Updating the plugin...");
+
+			start = Instant.now().toEpochMilli();
 
 			final InputStream in = new URL(FILE_URL).openStream();
 			final Path path = Skywars.get().file().getAbsoluteFile().toPath();
 			Skywars.get().sendDebugMessage("Download path: " + path.toString());
 
-			Files.write(path, in.readAllBytes(), StandardOpenOption.WRITE);
+			Files.write(path, IOUtils.toByteArray(in), StandardOpenOption.WRITE);
 
 			Skywars.get().sendMessage("&aThe plugin has been updated! &e(%sms)", Instant.now().toEpochMilli() - start);
 			Skywars.get().sendMessage("&6The update will be applied after reloading the server.");

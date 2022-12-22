@@ -5,6 +5,8 @@ status:
   ended: '&aGame ended!'
   restarting: Ending in &a%seconds%s
 
+language_name: English
+
 events:
   format: "&a%name% %time%"
   refill: "Refill"

@@ -17,10 +17,12 @@ public class SkywarsUser {
 	SavedPlayer savedPlayer;
 	Player lastHit;
 	long lastHitTimestamp;
+	SkywarsTeam team;
 
-	SkywarsUser(Player player, Arena arena, int number) {
+	SkywarsUser(Player player, SkywarsTeam team, int number) {
 		this.player = player;
-		this.arena = arena;
+		this.team = team;
+		this.arena = team.getArena();
 		this.teamNumber = number;
 	}
 
@@ -78,6 +80,18 @@ public class SkywarsUser {
 
 	Arena getArena() {
 		return this.arena;
+	}
+
+	SkywarsTeam getTeam() {
+		return this.team;
+	}
+
+	public boolean leaveTeam() {
+		if (this.getTeam() == null)
+			return false;
+		this.team.removeUser(this);
+		this.team = null;
+		return true;
 	}
 
 }

@@ -5,7 +5,7 @@ status:
   ended: '&aEl juego terminó!'
   restarting: Reiniciando en &a%seconds%s
 
-language_name: "Argentino"
+language_name: Argentino
 
 events:
   format: "&a%name% %time%"

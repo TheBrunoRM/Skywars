@@ -1,18 +1,25 @@
 package me.brunorm.skywars.structures;
 
+import java.io.File;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -24,13 +31,14 @@ import org.bukkit.util.Vector;
 
 import com.cryptomorin.xseries.XMaterial;
 
-import eu.decentsoftware.holograms.api.DHAPI;
 import me.brunorm.skywars.ArenaStatus;
 import me.brunorm.skywars.ChestManager;
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.SkywarsUtils;
 import me.brunorm.skywars.commands.CommandsUtils;
+import me.brunorm.skywars.holograms.HologramController;
+import me.brunorm.skywars.managers.ArenaManager;
 import me.brunorm.skywars.schematics.Schematic;
 import me.brunorm.skywars.schematics.SchematicHandler;
 import mrblobman.sounds.Sounds;
@@ -39,6 +47,7 @@ import net.querz.nbt.tag.ListTag;
 
 public class Arena {
 
+	private World world;
 	private Location location;
 	private ArenaStatus status;
 	private int countdown;
@@ -47,6 +56,7 @@ public class Arena {
 	private boolean forcedStart;
 	private Player forcedStartPlayer;
 	private SkywarsUser winner;
+	private int minimumY = -1;
 
 	private final ArenaGameSettings gameSettings = new ArenaGameSettings(this);
 
@@ -60,10 +70,18 @@ public class Arena {
 		return this.map;
 	}
 
+	private final ArrayList<SkywarsTeam> teams = new ArrayList<SkywarsTeam>();
 	private final ArrayList<SkywarsUser> users = new ArrayList<SkywarsUser>();
 	private final ArrayList<SkywarsEvent> events = new ArrayList<SkywarsEvent>();
+
+	// TODO move the chests field into SkywarsMap
+	// and store chest locations and types (normal or center chests)
 	private final ArrayList<Chest> chests = new ArrayList<Chest>();
 	private final HashMap<Chest, String> chestHolograms = new HashMap<Chest, String>();
+
+	public ArrayList<SkywarsTeam> getTeams() {
+		return this.teams;
+	}
 
 	public Arena(SkywarsMap map) {
 		this.map = map;
@@ -83,17 +101,25 @@ public class Arena {
 		if (this.status == ArenaStatus.RESTARTING)
 			return Skywars.langConfig.getString("status.ended");
 		final SkywarsEvent event = this.getNextEvent();
-		if (event != null) {
-			final int time = event.getTime();
-			final int minutes = time / 60;
-			final int seconds = time % 60;
-			final String timeString = String.format("%d:%02d", minutes, seconds);
-			return Messager.color(Skywars.langConfig.getString("events.format")
-					.replaceAll("%name%",
-							Skywars.langConfig.getString("events." + event.getType().name().toLowerCase()))
-					.replaceAll("%time%", timeString));
-		} else
+		if (event == null)
 			return Messager.getMessage("events.noevent");
+		final int time = event.getTime();
+		final int minutes = time / 60;
+		final int seconds = time % 60;
+		final String timeString = String.format("%d:%02d", minutes, seconds);
+		return Messager.color(Skywars.langConfig.getString("events.format")
+				.replaceAll("%name%", Skywars.langConfig.getString("events." + event.getType().name().toLowerCase()))
+				.replaceAll("%time%", timeString));
+
+	}
+
+	SkywarsTeam getNextFreeTeamOrCreateIfItDoesntExist() {
+		for (final SkywarsTeam team : this.teams)
+			if (team.getUsers().size() < this.getMap().teamSize)
+				return team;
+		final SkywarsTeam team = new SkywarsTeam(this);
+		this.teams.add(team);
+		return team;
 	}
 
 	public boolean joinPlayer(Player player) {
@@ -101,21 +127,23 @@ public class Arena {
 			return false;
 		if (!this.checkProblems()) {
 			for (final String problem : this.getProblems()) {
-				player.sendMessage(problem);
+				player.sendMessage("problem when joining map: " + problem);
 			}
 			return false;
 		}
 		if (this.hasPlayer(player))
 			return false;
-		this.joinable = this.getAlivePlayerCount() < this.map.maxPlayers;
+		this.joinable = this.getAlivePlayerCount() < this.map.getMaxPlayers();
 		final int index = this.getNextAvailablePlayerSlot();
 		final Location spawn = this.getVectorInArena(this.getSpawn(index));
 		if (spawn == null) {
 			player.sendMessage(String.format("spawn %s of arena %s not set", index, this.map.getName()));
 			return false;
 		}
-		final SkywarsUser swPlayer = new SkywarsUser(player, this, index);
+		final SkywarsTeam team = this.getNextFreeTeamOrCreateIfItDoesntExist();
+		final SkywarsUser swPlayer = new SkywarsUser(player, team, index);
 		this.users.add(swPlayer);
+		player.sendMessage("[DEBUG] You joined team " + team.getNumber());
 		for (final SkywarsUser players : this.getUsers()) {
 			players.getPlayer().sendMessage(Messager.getMessage("JOIN", player.getName(), this.getAlivePlayerCount(),
 					this.map.getMaxPlayers()));
@@ -125,11 +153,11 @@ public class Arena {
 		if (this.getTask() != null && this.getStatus() == ArenaStatus.STARTING)
 			player.sendMessage(Messager.getMessage("GAME_STARTING", this.getCountdown()));
 
-		Skywars.createCase(spawn, XMaterial.LIME_STAINED_GLASS);
+		Skywars.createCase(spawn, Skywars.get().getPlayerCaseXMaterial(player));
 
 		Skywars.get().playerLocations.put(player, player.getLocation());
-		player.teleport(SkywarsUtils.getCenteredLocation(spawn));
 		swPlayer.setSavedPlayer(new SavedPlayer(player));
+		player.teleport(SkywarsUtils.getCenteredLocation(spawn));
 		SkywarsUtils.clearPlayer(player, true);
 
 		SkywarsUtils.setPlayerInventory(player, "waiting");
@@ -137,8 +165,8 @@ public class Arena {
 		Skywars.get().NMS().sendTitle(player, Skywars.langConfig.getString("arena_join.title"),
 				Skywars.langConfig.getString("arena_join.subtitle"));
 
-		if (this.getStatus() != ArenaStatus.STARTING && this.getUsers().size() >= this.map.getMinPlayers()) {
-			this.startTimer(ArenaStatus.STARTING);
+		if (this.getStatus() != ArenaStatus.STARTING && this.getUsers().size() >= Skywars.config.getInt("minPlayers")) {
+			this.startTimerAndSetStatus(ArenaStatus.STARTING);
 		}
 
 		return true;
@@ -202,8 +230,29 @@ public class Arena {
 				}
 			}
 		}
-		player.getInventory().setArmorContents(null);
 
+		if (this.getStatus() == ArenaStatus.PLAYING)
+			// send death message to players
+			for (final SkywarsUser players : this.getUsers()) {
+				// TODO: add more death messages
+				players.getPlayer().sendMessage(this.getDeathMessage(p, killer, cause));
+			}
+
+		this.spectator(player, this.getVectorInArena(this.getSpawn(p.teamNumber)));
+
+		this.removePlayer(p);
+
+		if (this.getWinner() != p)
+			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
+				@Override
+				public void run() {
+					Skywars.get().NMS().sendTitle(player, Messager.getMessage("died.title"),
+							Messager.getMessage("died.subtitle"), 0, 80, 0);
+				}
+			}, 20);
+	}
+
+	private void spectator(Player player, Location location) {
 		// TODO: make customizable spectator mode
 
 		SkywarsUtils.clearPlayer(player);
@@ -218,26 +267,8 @@ public class Arena {
 		// give spectator items (player tracker, spectator settings, leave item)
 		SkywarsUtils.setPlayerInventory(player, "spectator");
 
-		if (this.getStatus() == ArenaStatus.PLAYING)
-			// send death message to players
-			for (final SkywarsUser players : this.getUsers()) {
-				// TODO: add more death messages
-				players.getPlayer().sendMessage(this.getDeathMessage(p, killer, cause));
-			}
-
-		this.removePlayer(p);
-
-		p.getPlayer().teleport(SkywarsUtils.getCenteredLocation(this.getVectorInArena(this.getSpawn(p.teamNumber))));
-		p.getPlayer().setVelocity(new Vector(0, 1f, 0));
-
-		if (this.getWinner() != p)
-			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
-				@Override
-				public void run() {
-					Skywars.get().NMS().sendTitle(player, Messager.getMessage("died.title"),
-							Messager.getMessage("died.subtitle"), 0, 80, 0);
-				}
-			}, 20);
+		player.teleport(SkywarsUtils.getCenteredLocation(location));
+		player.setVelocity(new Vector(0, 1f, 0));
 	}
 
 	private String getDeathMessage(SkywarsUser p, Player killer, DamageCause cause) {
@@ -264,6 +295,8 @@ public class Arena {
 				Messager.getFormattedMessage("LEAVE_SELF", player.getPlayer(), this, player, this.map.getName()));
 		if (!this.started())
 			this.joinable = true;
+		if (player.getTeam().getUsers().size() <= 1)
+			player.getTeam().disband();
 		this.users.remove(player);
 		this.removePlayer(player);
 		if (this.getStatus() != ArenaStatus.RESTARTING && !player.isSpectator()) {
@@ -281,8 +314,9 @@ public class Arena {
 		// restore player
 		this.exitPlayer(player);
 
+		final int minPlayers = Skywars.config.getInt("minPlayers");
 		if (this.getStatus() == ArenaStatus.STARTING && !this.forcedStart
-				&& (this.map.getMinPlayers() <= 0 || this.getAlivePlayerCount() < this.map.getMinPlayers())) {
+				&& (minPlayers <= 0 || this.getAlivePlayerCount() < minPlayers)) {
 			// Skywars.get().sendDebugMessage("stopping start cooldown");
 			this.setStatus(ArenaStatus.WAITING);
 			for (final SkywarsUser players : this.getUsers()) {
@@ -302,10 +336,12 @@ public class Arena {
 	public void exitPlayer(SkywarsUser player) {
 		if (player == null)
 			return;
+
+		if (this.isInBoundaries(player.getPlayer()))
+			SkywarsUtils.teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(player.getPlayer());
+
 		SkywarsUtils.clearPlayer(player.getPlayer());
 		player.getSavedPlayer().Restore();
-		if (this.isInBoundaries(player.getPlayer()))
-			SkywarsUtils.teleportPlayerBack(player.getPlayer());
 	}
 
 	public void removePlayer(SkywarsUser player) {
@@ -357,7 +393,7 @@ public class Arena {
 			}
 		}
 		this.removeHolograms();
-		return this.startTimer(ArenaStatus.RESTARTING);
+		return this.startTimerAndSetStatus(ArenaStatus.RESTARTING);
 	}
 
 	BukkitTask task;
@@ -373,17 +409,17 @@ public class Arena {
 		this.task = null;
 	}
 
-	public boolean startTimer(ArenaStatus status) {
+	public boolean startTimerAndSetStatus(ArenaStatus status) {
+		Skywars.get().sendDebugMessage("startTimer for %s: %s", this.getMap().getName(), status);
 		if (this.getStatus() == status)
 			return false;
-		if (this.started())
-			if (status == ArenaStatus.STARTING || status == ArenaStatus.PLAYING)
-				return false;
+		if (this.started() && status == ArenaStatus.STARTING)
+			return false;
 		if (!this.started() && status == ArenaStatus.RESTARTING)
 			return false;
 		this.cancelTimer();
 		this.setStatus(status);
-		Skywars.get().sendDebugMessage(String.format("starting %s timer", status));
+		Skywars.get().sendDebugMessage("starting %s timer", status);
 		if (status == ArenaStatus.STARTING) {
 			if (this.forcedStart && this.forcedStartPlayer != null) {
 				for (final SkywarsUser player : this.getUsers()) {
@@ -457,7 +493,6 @@ public class Arena {
 			}, 0L, 20L);
 		} else if (status == ArenaStatus.PLAYING) {
 			this.task = Bukkit.getScheduler().runTaskTimer(Skywars.get(), new Runnable() {
-
 				@Override
 				public void run() {
 
@@ -492,12 +527,12 @@ public class Arena {
 
 					if (this.time == 0) {
 						Arena.this.clear();
-						Arena.this.cancelTimer();
 					}
 				}
 			}, 0L, 20L);
 		}
 		return true;
+
 	}
 
 	public boolean startGame() {
@@ -514,10 +549,8 @@ public class Arena {
 		if (this.started())
 			return false;
 		this.cancelTimer();
-		this.setStatus(ArenaStatus.PLAYING);
-		this.startTimer(this.getStatus());
-		this.calculateChests();
-		this.fillChests();
+		this.startTimerAndSetStatus(ArenaStatus.PLAYING);
+		this.calculateAndFillChests();
 		this.applyGameSettings();
 		for (final Vector spawn : this.map.getSpawns().values()) {
 			Skywars.createCase(this.getVectorInArena(spawn), XMaterial.AIR);
@@ -580,9 +613,6 @@ public class Arena {
 		final TimeType time = SkywarsUtils.mostFrequentElement(this.timeVotes.values());
 		if (time != null)
 			switch (time) {
-			case DAY:
-				this.gameSettings.time = 0;
-				break;
 			case NIGHT:
 				this.gameSettings.time = 14000;
 				break;
@@ -593,9 +623,6 @@ public class Arena {
 		final WeatherType weather = SkywarsUtils.mostFrequentElement(this.weatherVotes.values());
 		if (weather != null)
 			switch (weather) {
-			case CLEAR:
-				this.gameSettings.weather = org.bukkit.WeatherType.CLEAR;
-				break;
 			case RAIN:
 				this.gameSettings.weather = org.bukkit.WeatherType.DOWNFALL;
 				break;
@@ -604,7 +631,7 @@ public class Arena {
 			}
 
 		for (final SkywarsUser user : this.getUsers()) {
-			user.getPlayer().setPlayerTime(this.gameSettings.time, false);
+			user.getPlayer().setPlayerTime(this.gameSettings.time, true);
 			user.getPlayer().setPlayerWeather(this.gameSettings.weather);
 		}
 
@@ -621,20 +648,53 @@ public class Arena {
 		for (final SkywarsUser player : this.getUsers()) {
 			this.exitPlayer(player);
 		}
-		this.forcedStart = false;
-		this.forcedStartPlayer = null;
-		this.setStatus(ArenaStatus.WAITING);
-		this.countdown = -1;
 		this.users.clear();
-		if (this.getWorld() != null) {
-			for (final Entity i : this.getWorld().getEntities()) {
+
+		final World world = this.getWorldAndLoadIfItIsNotLoaded();
+		if (this.getMap().schematicFilename != null) {
+			// remove entities only (and paste schematic later)
+			for (final Entity i : world.getEntities()) {
 				if (i instanceof Item && this.isInBoundaries(i.getLocation())) {
 					i.remove();
 				}
 			}
+		} else {
+			// restart the whole world
+			this.unloadWorld(world);
 		}
+
+		this.forcedStart = false;
+		this.forcedStartPlayer = null;
+		this.setStatus(ArenaStatus.WAITING);
+		this.countdown = -1;
+
 		if (remove)
-			Skywars.get().clearArena(this);
+			ArenaManager.removeArenaFromListAndDeleteArena(this);
+	}
+
+	private boolean unloadWorld(World world) {
+		Skywars.get().sendDebugMessage("Restarting world '%s' for map '%s'", world.getName(), this.getMap().getName());
+		boolean unloaded = false;
+		int tries = 0;
+		while (!unloaded) {
+			if (tries >= 5) {
+				break;
+			}
+			Skywars.get().sendDebugMessage("Trying to restart world: %s (tries: %s)", world.getName(), tries);
+			for (final Player p : world.getPlayers()) {
+				Skywars.get().sendDebugMessage("Teleporting player %s to another world", p.getName());
+				p.teleport(Bukkit.getWorlds().stream().filter(w -> w.getName() != world.getName()).findFirst().get()
+						.getSpawnLocation());
+			}
+			unloaded = Bukkit.unloadWorld(world, false);
+			tries++;
+		}
+		if (!unloaded) {
+			Skywars.get().sendMessage("Could not unload world: " + world.getName());
+		} else {
+			Skywars.get().sendMessage("Successfully unloaded world: " + world.getName());
+		}
+		return unloaded;
 	}
 
 	void removeHolograms() {
@@ -652,16 +712,18 @@ public class Arena {
 
 	public ArrayList<String> getProblems() {
 		final ArrayList<String> problems = new ArrayList<String>();
-		if (this.getWorld() == null)
-			problems.add("World not set");
+		if (this.getWorldAndLoadIfItIsNotLoaded() == null)
+			problems.add("World not found");
 		if (this.getSpawn(this.getAlivePlayerCount()) == null)
 			problems.add(String.format("Spawn %s not set", this.getAlivePlayerCount()));
-		if (this.map.maxPlayers <= 0)
+		if (this.map.getMaxPlayers() <= 0)
 			problems.add("Max players not set");
-		if (this.map.schematicFilename == null)
-			problems.add("Schematic not set");
-		if (this.location == null)
-			problems.add("No location set");
+		if (this.map.getWorldName() == null) {
+			if (this.map.schematicFilename == null)
+				problems.add("Schematic not set");
+			if (this.location == null)
+				problems.add("No location set");
+		}
 		if (!this.isJoinable())
 			problems.add("Arena is not joinable");
 		return problems;
@@ -672,7 +734,10 @@ public class Arena {
 	}
 
 	public Location getVectorInArena(Vector vector) {
-		return new Location(this.getWorld(), vector.getBlockX() + this.location.getBlockX(),
+		final World world = this.getWorldAndLoadIfItIsNotLoaded();
+		if (this.location == null)
+			this.location = new Location(world, 0, 0, 0);
+		return new Location(world, vector.getBlockX() + this.location.getBlockX(),
 				vector.getBlockY() + this.location.getBlockY(), vector.getBlockZ() + this.location.getBlockZ());
 	}
 
@@ -697,16 +762,56 @@ public class Arena {
 
 	public boolean isInBoundaries(Location loc) {
 		final Schematic schematic = this.map.getSchematic();
-		if (this.getLocation() == null || schematic == null)
-			return true;
-		if (loc.getWorld() != this.getWorld())
+		if (loc.getWorld() != this.getWorldAndLoadIfItIsNotLoaded())
 			return false;
+		if (schematic == null || this.getLocation() == null)
+			return loc.getY() > this.getMinimumY();
 		return loc.getX() > this.getLocation().getX() - schematic.getWidth() / 2
 				&& loc.getX() < this.getLocation().getX() + schematic.getWidth() / 2
 				&& loc.getY() > this.getLocation().getY() - schematic.getHeight() / 2
 				&& loc.getY() < this.getLocation().getY() + schematic.getHeight() / 2
 				&& loc.getZ() > this.getLocation().getZ() - schematic.getLength() / 2
 				&& loc.getZ() < this.getLocation().getZ() + schematic.getLength() / 2;
+	}
+
+	private int getMinimumY() {
+		if (this.minimumY >= 0)
+			return this.minimumY;
+
+		final long start = Instant.now().toEpochMilli();
+
+		// TODO calculate from the bottom,
+		// so if there's an empty layer it doesnt skip it
+
+		int min = 256;
+		boolean foundTop = false;
+		for (final Chunk chunk : this.getAllChunksInMap()) {
+			for (int y = min; y >= 0; y--) {
+				boolean emptyLayer = true;
+				for (int x = 0; x < 16; x++) {
+					for (int z = 0; z < 16; z++) {
+						if (chunk.getBlock(x, y, z).getType() != Material.AIR) {
+							foundTop = true;
+							emptyLayer = false;
+							continue;
+						}
+					}
+					if (!emptyLayer) {
+						foundTop = true;
+						continue;
+					}
+				}
+				if (foundTop && emptyLayer) {
+					min = y;
+					break;
+				}
+			}
+		}
+
+		Skywars.get().sendDebugMessage("Calculated minimum Y for " + this.map.getName() + " in %sms",
+				Instant.now().toEpochMilli() - start);
+		this.minimumY = min;
+		return this.minimumY;
 	}
 
 	private int getNextAvailablePlayerSlot() {
@@ -785,54 +890,126 @@ public class Arena {
 	}
 
 	public void calculateChests() {
-		final Schematic schematic = this.map.getSchematic();
-		if (schematic == null)
-			return;
-		final World world = this.location.getWorld();
-		final Vector offset = schematic.getOffset();
-		final ListTag<CompoundTag> tileEntities = schematic.getBlockEntities();
-		// Skywars.get().sendDebugMessage("tile entities: " +
-		// tileEntities.getValue().size());
-
-		final byte[] blocks = schematic.getBlocks();
-		final int length = schematic.getLength();
-		final int width = schematic.getWidth();
-		final int height = schematic.getHeight();
-
+		Skywars.get().sendDebugMessage("calculating chests for arena: " + this.getMap().getName());
 		this.chests.clear();
 
-		for (int x = 0; x < width; ++x) {
-			for (int y = 0; y < height; ++y) {
-				for (int z = 0; z < length; ++z) {
-					final int index = y * width * length + z * width + x;
-					final Location loc = new Location(world, x, y, z).add(offset).add(this.location);
-					final Block block = loc.getBlock();
-					if (block.getState() instanceof Chest && block.getType() == XMaterial.CHEST.parseMaterial()
-							&& blocks[index] == 54 /* chest id */) {
-						final Chest chest = (Chest) block.getState();
-						if (this.chests.contains(chest))
-							continue;
-						this.chests.add(chest);
+		if (this.getMap().getSchematicFilename() != null) {
+			// calculate chests from schematic
+
+			final Schematic schematic = this.map.getSchematic();
+			if (schematic == null)
+				return;
+			final World world = this.location.getWorld();
+			final Vector offset = schematic.getOffset();
+			final ListTag<CompoundTag> tileEntities = schematic.getBlockEntities();
+			// Skywars.get().sendDebugMessage("tile entities: " +
+			// tileEntities.getValue().size());
+
+			final byte[] blocks = schematic.getBlocks();
+			final int length = schematic.getLength();
+			final int width = schematic.getWidth();
+			final int height = schematic.getHeight();
+
+			for (int x = 0; x < width; ++x) {
+				for (int y = 0; y < height; ++y) {
+					for (int z = 0; z < length; ++z) {
+						final int index = y * width * length + z * width + x;
+						final Location loc = new Location(world, x, y, z).add(offset).add(this.location);
+						final Block block = loc.getBlock();
+						if (block.getState() instanceof Chest && block.getType() == XMaterial.CHEST.parseMaterial()
+								&& blocks[index] == 54 /* chest id */) {
+							final Chest chest = (Chest) block.getState();
+							if (this.chests.contains(chest))
+								continue;
+							this.chests.add(chest);
+						}
 					}
+				}
+			}
+
+			for (final CompoundTag tag : tileEntities) {
+				String id = tag.getString("id");
+				if (id == null)
+					id = tag.getString("Id");
+				if (id.equalsIgnoreCase("chest")) {
+					final Vector v = SchematicHandler.getVector(tag);
+					final Location loc = new Location(world, v.getX(), v.getY(), v.getZ()).add(offset)
+							.add(this.location);
+					if (!(loc.getBlock() instanceof Chest))
+						continue;
+					final Chest chest = (Chest) loc.getBlock().getState();
+					if (this.chests.contains(chest))
+						continue;
+					this.chests.add(chest);
+				}
+			}
+		} else {
+			// calculate chests from world
+
+			for (final BlockState state : this.getAllBlockStatesInMap(Material.CHEST)) {
+				this.chests.add((Chest) state);
+				Skywars.get().sendDebugMessage("Added chest for map %s at location: %s", this.getMap().getName(),
+						state.getLocation());
+			}
+		}
+
+		Skywars.get().sendDebugMessage("Calculated %s chests!", this.chests.size());
+	}
+
+	public ArrayList<Chunk> getAllChunksInMap() {
+		final ArrayList<Chunk> list = new ArrayList<Chunk>();
+
+		final World world = this.getWorldAndLoadIfItIsNotLoaded();
+		if (world == null) {
+			Skywars.get().sendMessage("Could not get world for map: ", this.getMap().getName());
+			return list;
+		}
+
+		final int maxMapSizeInBlocks = Skywars.config.getInt("maxMapSize");
+		final int minBlock = -maxMapSizeInBlocks / 2;
+		final int maxBlock = maxMapSizeInBlocks / 2;
+
+		final Chunk minChunk = world.getChunkAt(new Location(world, minBlock, 0, minBlock));
+		final Chunk maxChunk = world.getChunkAt(new Location(world, maxBlock, 0, maxBlock));
+
+		for (int x = minChunk.getX(); x < maxChunk.getX(); x++) {
+			for (int z = minChunk.getZ(); z < maxChunk.getZ(); z++) {
+				final Chunk chunk = world.getChunkAt(x, z);
+				list.add(chunk);
+			}
+		}
+
+		return list;
+	}
+
+	public ArrayList<BlockState> getAllBlockStatesInMap(Material mat) {
+		final ArrayList<BlockState> list = new ArrayList<BlockState>();
+
+		final World world = this.getWorldAndLoadIfItIsNotLoaded();
+		if (world == null) {
+			Skywars.get().sendMessage("Could not get world for map: ", this.getMap().getName());
+			return list;
+		}
+
+		final int maxMapSizeInBlocks = Skywars.config.getInt("maxMapSize");
+		final int minBlock = -maxMapSizeInBlocks / 2;
+		final int maxBlock = maxMapSizeInBlocks / 2;
+
+		final Chunk minChunk = world.getChunkAt(new Location(world, minBlock, 0, minBlock));
+		final Chunk maxChunk = world.getChunkAt(new Location(world, maxBlock, 0, maxBlock));
+
+		for (int x = minChunk.getX(); x < maxChunk.getX(); x++) {
+			for (int z = minChunk.getZ(); z < maxChunk.getZ(); z++) {
+				final Chunk chunk = world.getChunkAt(x, z);
+				for (final BlockState state : chunk.getTileEntities()) {
+					if (state.getType() != mat)
+						continue;
+					list.add(state);
 				}
 			}
 		}
 
-		for (final CompoundTag tag : tileEntities) {
-			String id = tag.getString("id");
-			if (id == null)
-				id = tag.getString("Id");
-			if (id.equalsIgnoreCase("chest")) {
-				final Vector v = SchematicHandler.getVector(tag);
-				final Location loc = new Location(world, v.getX(), v.getY(), v.getZ()).add(offset).add(this.location);
-				if (!(loc.getBlock() instanceof Chest))
-					continue;
-				final Chest chest = (Chest) loc.getBlock().getState();
-				if (this.chests.contains(chest))
-					continue;
-				this.chests.add(chest);
-			}
-		}
+		return list;
 	}
 
 	public void fillChests() {
@@ -849,47 +1026,7 @@ public class Arena {
 	public void calculateAndFillChests() {
 		this.calculateChests();
 		this.fillChests();
-		/*
-		 * final Schematic schematic = this.map.getSchematic(); final World world =
-		 * this.location.getWorld(); final Vector offset = schematic.getOffset(); final
-		 * ListTag tileEntities = schematic.getTileEntities(); //
-		 * Skywars.get().sendDebugMessage("tile entities: " + //
-		 * tileEntities.getValue().size());
-		 *
-		 * final byte[] blocks = schematic.getBlocks(); final short length =
-		 * schematic.getLength(); final short width = schematic.getWidth(); final short
-		 * height = schematic.getHeight();
-		 *
-		 * int filled = 0;
-		 *
-		 * for (int x = 0; x < width; ++x) { for (int y = 0; y < height; ++y) { for (int
-		 * z = 0; z < length; ++z) { final int index = y * width * length + z * width +
-		 * x; final Location loc = new Location(world, x, y,
-		 * z).add(offset).add(this.location); final Block block = loc.getBlock(); if
-		 * (block.getType() == XMaterial.CHEST.parseMaterial() || blocks[index] == 54 /*
-		 * chest id * /) { this.chests.add((Chest) block.getState());
-		 * ChestManager.fillChest(this.loc,
-		 * SkywarsUtils.distance(this.getLocation().toVector(), this.loc.toVector()) <
-		 * this.map.getCenterRadius()); //
-		 * Skywars.get().sendDebugMessage("filling chest at loc " + this.loc); filled++;
-		 * } }*}}**for(
-		 *
-		 * final Tag tag:tileEntities.getValue()){**
-		 *
-		 * @SuppressWarnings("unchecked") final Map<String, Tag> values = (Map<String,
-		 * Tag>) tag.getValue(); if (values.get("id").getValue().equals("Chest")) {
-		 *
-		 * final Vector v = SchematicHandler.getVector(this.values); final Location loc
-		 * = new Location(world, v.getX(), v.getY(),
-		 * v.getZ()).add(offset).add(this.location);
-		 *
-		 * final Chest chest = (Chest) this.loc.getBlock()
-		 * .getState();if*(this.chests.contains(chest))continue;ChestManager.fillChest(
-		 * loc,*SkywarsUtils.distance(this.getLocation().toVector(),loc.toVector())<*
-		 * this.map.getCenterRadius()); //
-		 * Skywars.get().sendDebugMessage("filling chest entity at loc "+loc);*filled++;
-		 * }}Skywars.get().sendDebugMessage("filled %s chests",filled);
-		 */}
+	}
 
 	public boolean softStart(Player player) {
 		if (!CommandsUtils.permissionCheckWithMessage(player, "skywars.start"))
@@ -899,7 +1036,7 @@ public class Arena {
 		if (this.getStatus() == ArenaStatus.WAITING && this.getTask() == null) {
 			this.forcedStart = true;
 			this.forcedStartPlayer = player;
-			this.startTimer(ArenaStatus.STARTING);
+			this.startTimerAndSetStatus(ArenaStatus.STARTING);
 			player.sendMessage(Messager.get("started_countdown"));
 			return true;
 		}
@@ -935,11 +1072,60 @@ public class Arena {
 		this.status = status;
 	}
 
-	public World getWorld() {
-		final Location loc = this.getLocation();
-		if (this.location == null)
+	public World getWorldAndLoadIfItIsNotLoaded() {
+		if (this.world != null)
+			return this.world;
+
+		final String worldName = this.getMap().getWorldName();
+		if (worldName == null) {
+			Skywars.get().sendDebugMessage("worldname is null: " + this.getMap().getName());
+			final Location loc = this.getLocation();
+			if (this.location == null)
+				return null;
+			return loc.getWorld();
+		}
+
+		final World w = Bukkit.getWorld(worldName);
+		if (w != null) {
+			this.world = w;
+			return w;
+		}
+
+		Skywars.get().sendDebugMessage("world is not loaded");
+		Skywars.get().sendDebugMessage("loading world by copying it from the worlds folder");
+
+		final File worldFolder = new File(Skywars.worldsPath, worldName);
+		if (!worldFolder.isDirectory()) {
+			Skywars.get().sendDebugMessage("could not find the world in the worlds folder");
 			return null;
-		return loc.getWorld();
+		}
+
+		Skywars.get().sendDebugMessage("Loading world for map: " + this.getMap().getName());
+		final File bukkitWorldFolder = new File(Bukkit.getWorldContainer(), worldName);
+		try {
+			if (bukkitWorldFolder.isDirectory()) {
+				Skywars.get().sendDebugMessage("deleting old world folder: %s", bukkitWorldFolder.getAbsolutePath());
+				bukkitWorldFolder.delete();
+			}
+			if (!bukkitWorldFolder.canWrite()) {
+				Skywars.get().sendDebugMessage("cant write to world folder: %s", bukkitWorldFolder.getAbsolutePath());
+			}
+			bukkitWorldFolder.mkdirs();
+			Skywars.get().sendDebugMessage("copying: %s", worldFolder.getAbsolutePath());
+			Skywars.get().sendDebugMessage("to location: %s", bukkitWorldFolder.getAbsolutePath());
+			FileUtils.copyDirectory(worldFolder, bukkitWorldFolder);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			Skywars.get().sendMessage("Could not create world for map: ", this.map.getName());
+			return null;
+		}
+		if (!bukkitWorldFolder.isDirectory()) {
+			Skywars.get().sendMessage("Could not load world for map: ", this.map.getName());
+			return null;
+		}
+		final World world = Bukkit.createWorld(new WorldCreator(worldName));
+		Skywars.get().setupWorld(world);
+		return world;
 	}
 
 	public Location getLocation() {
@@ -978,7 +1164,7 @@ public class Arena {
 		if (!Skywars.holograms)
 			return true;
 		if (this.chestHolograms.containsKey(chest))
-			DHAPI.removeHologram(this.chestHolograms.remove(chest));
+			Skywars.get().getHologramController().removeHologram(this.chestHolograms.remove(chest));
 		return this.chests.remove(chest);
 	}
 
@@ -999,9 +1185,17 @@ public class Arena {
 	public void displayChestHolograms(String text) {
 		if (!Skywars.holograms)
 			return;
-		for (final String holoName : this.chestHolograms.values()) {
-			Skywars.get().getHologramController().changeHologram(holoName, text);
+
+		for (final Entry<Chest, String> h : this.chestHolograms.entrySet()) {
+			final Chest chest = h.getKey();
+			final int contents = Arrays.asList(chest.getInventory().getContents()).stream()
+					.filter(i -> i != null && i.getType() != XMaterial.AIR.parseMaterial()).collect(Collectors.toList())
+					.size();
+			final HologramController controller = Skywars.get().getHologramController();
+			controller.changeHologram(h.getValue(), Messager.color(text), 0);
+			controller.changeHologram(h.getValue(), contents <= 0 ? Messager.color("&cEmpty") : null, 1);
 		}
+
 	}
 
 	public ArenaGameSettings getGameSettings() {

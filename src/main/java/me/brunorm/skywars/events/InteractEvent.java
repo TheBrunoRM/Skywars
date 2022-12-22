@@ -17,6 +17,7 @@ import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.SkywarsUtils;
 import me.brunorm.skywars.commands.CommandsUtils;
+import me.brunorm.skywars.managers.ArenaManager;
 import me.brunorm.skywars.menus.GameOptionsMenu;
 import me.brunorm.skywars.menus.KitsMenu;
 import me.brunorm.skywars.menus.MapMenu;
@@ -62,7 +63,7 @@ public class InteractEvent implements Listener {
 					return;
 				player.sendMessage(Messager.color("&aSending you to another game..."));
 				arena.leavePlayer(swp);
-				Skywars.get().joinRandomMap(player);
+				ArenaManager.joinRandomMap(player);
 				event.setCancelled(true);
 			}
 			if (item.getType() == XMaterial
@@ -104,7 +105,7 @@ public class InteractEvent implements Listener {
 					if (mapName != null) {
 						final SkywarsMap map = Skywars.get().getMap(ChatColor.stripColor(mapName));
 						if (map != null) {
-							Skywars.get().joinMap(map, player);
+							ArenaManager.joinMap(map, player);
 						} else
 							player.sendMessage(String.format("map %s not found", mapName));
 					}
@@ -112,7 +113,7 @@ public class InteractEvent implements Listener {
 				if (sign.getLine(1).equals("random")) {
 					if (sign.getLine(2).equals("skywars")) {
 						event.setCancelled(true);
-						Skywars.get().joinRandomMap(player);
+						ArenaManager.joinRandomMap(player);
 					}
 				}
 				if (sign.getLine(1).equals("play")) {

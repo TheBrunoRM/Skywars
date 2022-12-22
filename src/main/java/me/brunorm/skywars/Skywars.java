@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Difficulty;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -41,12 +42,12 @@ import me.brunorm.skywars.holograms.DecentHologramsController;
 import me.brunorm.skywars.holograms.HologramController;
 import me.brunorm.skywars.holograms.HolographicDisplaysNewController;
 import me.brunorm.skywars.holograms.HolographicDisplaysOldController;
+import me.brunorm.skywars.menus.ConfigMenu;
 import me.brunorm.skywars.menus.GameOptionsMenu;
 import me.brunorm.skywars.menus.GamesMenu;
 import me.brunorm.skywars.menus.KitsMenu;
 import me.brunorm.skywars.menus.MapMenu;
 import me.brunorm.skywars.menus.PlayerInventoryManager;
-import me.brunorm.skywars.menus.SetupMenu;
 import me.brunorm.skywars.nms.ReflectionNMS;
 import me.brunorm.skywars.schematics.SchematicHandler;
 import me.brunorm.skywars.structures.Arena;
@@ -66,6 +67,7 @@ public class Skywars extends JavaPlugin {
 	private final String prefix = Messager.colorFormat("&6[&e%s&6]&e", this.name);
 	private final String debugPrefix = Messager.colorFormat("&7[&c%s&7]&e", this.name);
 	public static String kitsPath;
+	public static String worldsPath;
 	public static String mapsPath;
 	public static String schematicsPath;
 	public static String playersPath;
@@ -141,6 +143,7 @@ public class Skywars extends JavaPlugin {
 
 		// set stuff
 		plugin = this;
+		worldsPath = this.getDataFolder() + "/worlds";
 		mapsPath = this.getDataFolder() + "/maps";
 		kitsPath = this.getDataFolder() + "/kits";
 		schematicsPath = this.getDataFolder() + "/schematics";
@@ -156,7 +159,7 @@ public class Skywars extends JavaPlugin {
 			return;
 		}
 
-		if (SkywarsUpdater.update()) {
+		if (!config.getBoolean("disableUpdates") && SkywarsUpdater.update(config.getBoolean("autoUpdate"))) {
 			this.updated = true;
 			this.setEnabled(false);
 			return;
@@ -165,22 +168,27 @@ public class Skywars extends JavaPlugin {
 		this.loadCommands();
 		this.loadEvents();
 		this.loadMaps();
+		this.loadWorlds();
 		this.loadKits();
 
 		this.nmsHandler = new ReflectionNMS();
 		SchematicHandler.initializeReflection();
 
 		if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
+			this.sendDebugMessage("Found DecentHolograms");
 			this.hologramController = new DecentHologramsController();
 		} else if (Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays")) {
+			this.sendDebugMessage("Found HolographicDisplays");
 			if (SkywarsUtils.checkClass("com.gmail.filoghost.holographicdisplays.api.HologramsAPI"))
 				this.hologramController = new HolographicDisplaysOldController();
 			else if (SkywarsUtils.checkClass("me.filoghost.holographicdisplays.api.HolographicDisplaysAPI"))
 				this.hologramController = new HolographicDisplaysNewController();
 			else
 				this.sendDebugMessage("Unknown version of HolographicDisplays");
+		} else {
+			this.sendDebugMessage("Did not found any holograms plugin.");
 		}
-		this.sendDebugMessage("Holograms API: " + SkywarsUtils.getHologramsAPIName(this.hologramController));
+		this.sendDebugMessage("Holograms API: " + this.hologramController.getClass().getName());
 		if (this.hologramController == null)
 			this.hologramController = new HologramController() {
 				@Override
@@ -193,10 +201,12 @@ public class Skywars extends JavaPlugin {
 				}
 
 				@Override
-				public boolean changeHologram(Object id, String text) {
+				public boolean changeHologram(Object id, String text, int line) {
 					return false;
 				}
 			};
+		else
+			holograms = true;
 
 		economyEnabled = Skywars.get().getConfig().getBoolean("economy.enabled");
 		if (economyEnabled)
@@ -238,13 +248,15 @@ public class Skywars extends JavaPlugin {
 				arena.exitPlayer(player);
 			}
 		}
+
 		final ItemStack item = SetupEvents.item;
-		SetupMenu.currentArenas.forEach((player, arena) -> {
+		ConfigMenu.currentArenas.forEach((player, arena) -> {
 			if (item == null)
 				return;
 			player.getInventory().removeItem(item);
-			SkywarsUtils.teleportPlayerBack(player);
+			SkywarsUtils.teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(player);
 		});
+
 		this.sendDebugMessage("Stopping arenas...");
 		for (final Arena arena : this.arenas) {
 			arena.clear(false);
@@ -299,7 +311,7 @@ public class Skywars extends JavaPlugin {
 			pluginManager.registerEvents(new ProjectileTrails(), this);
 		}
 		final Listener[] listeners = { new InteractEvent(), new Events(), new GamesMenu(), new MapMenu(),
-				new KitsMenu(), new SetupEvents(), new ChestManager(), new SetupMenu(), new GameOptionsMenu(),
+				new KitsMenu(), new SetupEvents(), new ChestManager(), new ConfigMenu(), new GameOptionsMenu(),
 				new PlayerInventoryManager(), };
 		for (final Listener listener : listeners) {
 			pluginManager.registerEvents(listener, this);
@@ -342,120 +354,6 @@ public class Skywars extends JavaPlugin {
 		return this.maps;
 	}
 
-	public Arena getJoinableArenaByMap(SkywarsMap map) {
-		if (map == null)
-			return null;
-		for (final Arena arena : this.arenas) {
-			if (arena.started())
-				continue;
-			if (!arena.isJoinable())
-				continue;
-			if (arena.getMap() != map)
-				continue;
-			return arena;
-		}
-		return null;
-	}
-
-	public Arena getArenaByMap(SkywarsMap map) {
-		for (final Arena arena : this.arenas) {
-			if (arena.getMap() == map)
-				return arena;
-		}
-		return null;
-	}
-
-	public ArrayList<Arena> getArenasByMap(SkywarsMap map) {
-		return this.getArenas().stream().filter(arena -> arena.getMap() == map)
-				.collect(Collectors.toCollection(ArrayList::new));
-	}
-
-	public Arena getArenaAndCreateIfNotFound(SkywarsMap map) {
-		if (map == null)
-			return null;
-		Arena arena = this.getJoinableArenaByMap(map);
-		if (arena == null) {
-			switch (config.getString("arenasMethod")) {
-			case "MULTI_ARENA":
-				arena = this.createNewArena(map);
-				break;
-			case "SINGLE_ARENA":
-				if (this.getArenaByMap(map) == null)
-					arena = this.createNewArena(map);
-				break;
-			}
-		}
-		return arena;
-	}
-
-	public boolean joinMap(SkywarsMap map, Player player) {
-		final Arena arena = this.getArenaAndCreateIfNotFound(map);
-		if (arena != null) {
-			Skywars.get().sendDebugMessage("joining player to map");
-			arena.joinPlayer(player);
-			return true;
-		}
-		Skywars.get().sendDebugMessage("no arena found");
-		return false;
-	}
-
-	public void joinRandomMap(Player player) {
-		final SkywarsMap map = this.getRandomMap();
-		this.joinMap(map, player);
-	}
-
-	public Arena createNewArena(SkywarsMap map) {
-		if (config.getString("arenasMethod").equalsIgnoreCase("MULTI_ARENA")) {
-			Skywars.get().sendDebugMessage("creating new arena for map " + map.getName());
-			final Arena arena = new Arena(map);
-			arena.setLocation(this.getNextFreeLocation());
-			arena.pasteSchematic();
-			arena.resetCases();
-			this.arenas.add(arena);
-			return arena;
-		} else if (config.getString("arenasMethod").equalsIgnoreCase("SINGLE_ARENA")) {
-			Arena arena = this.getJoinableArenaByMap(map);
-			if (arena == null) {
-				if (this.getArenaByMap(map) != null)
-					return null;
-				arena = new Arena(map);
-				arena.setLocation(map.getLocation());
-				Skywars.get().sendDebugMessage("location: " + map.getLocation());
-				arena.pasteSchematic();
-				this.arenas.add(arena);
-				Skywars.get().sendDebugMessage("creating single arena for map " + map.getName());
-			}
-			return arena;
-		}
-		return null;
-	}
-
-	public void clearArena(Arena arena) {
-		Skywars.get().sendDebugMessage("removing arena " + arena.getMap().getName());
-		this.arenas.remove(arena);
-		arena = null;
-	}
-
-	public Location getNextFreeLocation() {
-		if (!config.getString("arenasMethod").equalsIgnoreCase("MULTI_ARENA")) {
-			Skywars.get().sendDebugMessage("warning: getNextFreeLocation called though MULTI_ARENA is disabled!");
-			return null;
-		}
-
-		int x = 0;
-		int z = 0;
-
-		for (int i = 0; i < this.arenas.size(); i++) {
-			if (i % 2 == 0) {
-				z += 1;
-			} else {
-				x += 1;
-			}
-		}
-		return new Location(Bukkit.getWorld(config.getString("arenas.world")), x * config.getInt("arenas.separation"),
-				config.getInt("arenas.Y"), z * config.getInt("arenas.separation"));
-	}
-
 	public boolean createMap(String name) {
 		if (this.getMap(name) != null)
 			return false;
@@ -466,7 +364,7 @@ public class Skywars extends JavaPlugin {
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
-		map.setFile(file);
+		map.setConfigFile(file);
 		map.saveParametersInConfig();
 		map.saveConfig();
 		this.maps.add(map);
@@ -482,12 +380,99 @@ public class Skywars extends JavaPlugin {
 		return true;
 	}
 
+	public void loadWorlds() {
+		final File folder = new File(worldsPath);
+		if (!folder.exists())
+			folder.mkdirs();
+		final File[] worlds = folder.listFiles();
+		this.sendDebugMessage("Loading %s worlds", worlds.length);
+
+		final HashMap<String, SkywarsMap> worldNames = new HashMap<String, SkywarsMap>();
+		final List<SkywarsMap> filtered = this.getMaps().stream().filter(map -> map.getWorldName() != null)
+				.collect(Collectors.toList());
+		for (final SkywarsMap map : filtered)
+			worldNames.put(map.getWorldName(), map);
+
+		for (final File world : worlds) {
+			if (!world.isDirectory()) {
+				if (world.isFile() && world.getName().endsWith(".yml")) {
+					// it may be a map configuration file
+					world.renameTo(new File(mapsPath, world.getName()));
+				} else {
+					this.sendMessage("&6Unknown world file found: &b%s", world.getName());
+				}
+			}
+
+			if (worldNames.get(world.getName()) == null) {
+				// no map has this world as worldname
+				// create map config file for this world
+				final File mapFile = new File(mapsPath, world.getName() + ".yml");
+				final YamlConfiguration mapConfig = YamlConfiguration.loadConfiguration(mapFile);
+				mapConfig.set("world", world.getName());
+				mapConfig.set("teamSize", 1);
+				try {
+					mapConfig.save(mapFile);
+				} catch (final IOException e) {
+					e.printStackTrace();
+					this.sendMessage("Could not save map configuration file for world: %s", world.getName());
+				}
+				this.sendDebugMessage("Saved map configuration file '%s' for world: %s", mapFile.getName(),
+						world.getName());
+				this.loadMapFromFile(mapFile);
+			}
+		}
+	}
+
+	public void loadMapFromFile(File file) {
+		this.sendDebugMessage("&eLoading map file: &a%s", file.getName());
+		final String name = file.getName().replaceFirst("[.][^.]+$", "");
+		final YamlConfiguration mapConfig = YamlConfiguration.loadConfiguration(file);
+
+		// create map and set values from config
+		final SkywarsMap map = new SkywarsMap(name, mapConfig.getInt("teamSize"));
+
+		map.setConfig(mapConfig);
+		map.setConfigFile(file);
+
+		if (config.getString("arenasMethod").equalsIgnoreCase("SINGLE_ARENA")) {
+			final String worldName = mapConfig.getString("world");
+			this.sendDebugMessage("worldname for %s: %s", map.getName(), worldName);
+			if (worldName != null)
+				map.setWorldName(worldName);
+			else
+				map.setLocation(
+						ConfigurationUtils.getLocationConfig(mapConfig.getConfigurationSection("location"), mapConfig));
+		} else {
+			Skywars.get().sendDebugMessage("[debug] arenas method is not single arena");
+		}
+
+		if (mapConfig.get("spawn") == null) {
+			this.sendDebugMessage("Found no spawns when loading map, calculating spawns...");
+			map.calculateSpawns();
+		} else {
+			Skywars.get().sendDebugMessage("Loading spawns for map: %s", map.getName());
+			for (final String spawn : mapConfig.getConfigurationSection("spawn").getKeys(false)) {
+				final int i = Integer.parseInt(spawn);
+				if (mapConfig.get(String.format("spawn.%s", i)) == null)
+					continue;
+				final double x = mapConfig.getDouble(String.format("spawn.%s.x", i));
+				final double y = mapConfig.getDouble(String.format("spawn.%s.y", i));
+				final double z = mapConfig.getDouble(String.format("spawn.%s.z", i));
+				final Vector vector = new Vector(x, y, z);
+				map.getSpawns().put(i, vector);
+			}
+		}
+
+		this.maps.add(map);
+		this.sendDebugMessage("&eLoaded map: &a%s", map.getName());
+	}
+
 	public void loadMaps() {
 		final String arenasMethod = config.getString("arenasMethod");
 		this.sendDebugMessage("&eLoading maps (&b%s&e)", arenasMethod.toUpperCase());
 		if (arenasMethod.equalsIgnoreCase("MULTI_ARENA")) {
-			final String worldName = config.getString("arenas.world");
 			boolean aborted = false;
+			final String worldName = config.getString("arenas.world");
 			if (worldName == null) {
 				this.sendMessage("World for arenas in config (&barenas.world&e) is not set!");
 				aborted = true;
@@ -502,6 +487,9 @@ public class Skywars extends JavaPlugin {
 		}
 
 		this.maps.clear();
+
+		// TODO replace with world map instead of schematic file
+
 		final File folder = new File(mapsPath);
 		if (!folder.exists()) {
 			folder.mkdirs();
@@ -510,50 +498,46 @@ public class Skywars extends JavaPlugin {
 			this.sendDebugMessage(Messager.color("&eSetting up default map."));
 			ConfigurationUtils.copyDefaultContentsToFile("maps/MiniTrees.yml", new File(mapsPath, "MiniTrees.yml"));
 		}
+
 		final File schematics = new File(schematicsPath);
 		if (!schematics.exists())
-			schematics.mkdir();
+			schematics.mkdirs();
 		if (schematics.listFiles().length <= 0) {
 			this.sendDebugMessage(Messager.color("&eSetting up default schematic."));
 			ConfigurationUtils.copyDefaultContentsToFile("schematics/mini_trees.schematic",
 					new File(schematicsPath, "mini_trees.schematic"));
 		}
+
 		for (final File file : folder.listFiles()) {
-			final String name = file.getName().replaceFirst("[.][^.]+$", "");
-			final YamlConfiguration mapConfig = YamlConfiguration.loadConfiguration(file);
-			// ConfigurationUtils.createMissingKeys(config,
-			// ConfigurationUtils.getDefaultConfig("maps/MiniTrees.yml"));
-
-			// create map and set values from config
-			final SkywarsMap map = new SkywarsMap(name, mapConfig.getString("schematic"),
-					mapConfig.getInt("minPlayers"), mapConfig.getInt("maxPlayers"), mapConfig.getInt("teamSize"));
-
-			map.setConfig(mapConfig);
-			map.setFile(file);
-
-			if (arenasMethod.equalsIgnoreCase("SINGLE_ARENA")) {
-				// Skywars.get().sendDebugMessage("setting worldname and location for map " +
-				// map.getName());
-				map.setLocation(
-						ConfigurationUtils.getLocationConfig(mapConfig.getConfigurationSection("location"), mapConfig));
+			if (file.isDirectory()) {
+				Skywars.get().sendDebugMessage("Loading world in maps folder: %s", file.getName());
+				file.renameTo(new File(worldsPath, file.getName()));
+				continue;
 			}
-
-			if (mapConfig.get("spawn") != null)
-				for (final String spawn : mapConfig.getConfigurationSection("spawn").getKeys(false)) {
-					final int i = Integer.parseInt(spawn);
-					if (mapConfig.get(String.format("spawn.%s", i)) == null)
-						continue;
-					final double x = mapConfig.getDouble(String.format("spawn.%s.x", i));
-					final double y = mapConfig.getDouble(String.format("spawn.%s.y", i));
-					final double z = mapConfig.getDouble(String.format("spawn.%s.z", i));
-					final Vector vector = new Vector(x, y, z);
-					map.getSpawns().put(i, vector);
-				}
-
-			this.maps.add(map);
-			this.sendDebugMessage("&eLoaded map: &a%s", map.getName());
+			this.loadMapFromFile(file);
 		}
 		this.sendDebugMessage("&eFinished loading maps.");
+	}
+
+	public void setupWorld(World world) {
+		world.setDifficulty(Difficulty.NORMAL);
+		world.setSpawnFlags(true, true);
+		world.setPVP(true);
+		world.setStorm(false);
+		world.setThundering(false);
+		world.setWeatherDuration(Integer.MAX_VALUE);
+		world.setKeepSpawnInMemory(false);
+		world.setTicksPerAnimalSpawns(1);
+		world.setTicksPerMonsterSpawns(1);
+		world.setAutoSave(false);
+
+		world.setGameRuleValue("doMobSpawning", "false");
+		world.setGameRuleValue("mobGriefing", "false");
+		world.setGameRuleValue("doFireTick", "false");
+		world.setGameRuleValue("showDeathMessages", "false");
+		world.setGameRuleValue("announceAdvancements", "false");
+
+		Skywars.get().sendDebugMessage("Successfully set up world settings: &b%s", world.getName());
 	}
 
 	// kits
@@ -723,15 +707,10 @@ public class Skywars extends JavaPlugin {
 
 	public File getSchematicFile(String schematicName) {
 		final File schematic = new File(schematicsPath, schematicName);
-		if (!schematic.exists())
-			try {
-				schematic.createNewFile();
-			} catch (final IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		return schematic;
 	}
+
+	// player config
 
 	public File getPlayerConfigFile(Player player) {
 		return new File(playersPath, player.getUniqueId() + ".yml");
@@ -780,6 +759,24 @@ public class Skywars extends JavaPlugin {
 		if (kitName == null)
 			return null;
 		return this.getKit(kitName);
+	}
+
+	// cases
+
+	public void setPlayerCaseMaterial(Player player, String name) {
+		final YamlConfiguration conf = this.getPlayerConfig(player);
+		conf.set("case", name);
+		this.savePlayerConfig(player, conf);
+	}
+
+	public XMaterial getPlayerCaseXMaterial(Player player) {
+		final String glass = this.getPlayerConfig(player).getString("case");
+		if (glass == null)
+			return XMaterial.GLASS;
+		final XMaterial mat = XMaterial.valueOf(glass);
+		if (mat == null)
+			return XMaterial.GLASS;
+		return mat;
 	}
 
 	// kills

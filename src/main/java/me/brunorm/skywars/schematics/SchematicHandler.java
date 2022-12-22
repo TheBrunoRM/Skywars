@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -297,7 +298,7 @@ public class SchematicHandler {
 		}
 
 		Skywars.get().sendDebugMessage("Skipped " + skipped.size() + " blocks: "
-				+ String.join(", ", skipped.stream().map(a -> a.toString()).toList()));
+				+ String.join(", ", skipped.stream().map(a -> a.toString()).collect(Collectors.toList())));
 
 		for (final CompoundTag values : tileEntities) {
 			if (values.getString("id").equals("Sign")) {

@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.command.Command;
@@ -26,9 +28,10 @@ import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.SkywarsScoreboard;
 import me.brunorm.skywars.SkywarsUtils;
+import me.brunorm.skywars.managers.ArenaManager;
+import me.brunorm.skywars.menus.ConfigMenu;
 import me.brunorm.skywars.menus.GamesMenu;
 import me.brunorm.skywars.menus.MapMenu;
-import me.brunorm.skywars.menus.SetupMenu;
 import me.brunorm.skywars.schematics.Schematic;
 import me.brunorm.skywars.schematics.SchematicHandler;
 import me.brunorm.skywars.structures.Arena;
@@ -88,7 +91,7 @@ public class MainCommand implements CommandExecutor {
 				}
 				final Arena playerArena = Skywars.get().getPlayerArena(player);
 				final SkywarsMap map = Skywars.get().getMap(name);
-				final Arena arena = Skywars.get().getArenaAndCreateIfNotFound(map);
+				final Arena arena = ArenaManager.getArenaAndCreateIfNotFound(map);
 				if (args[0].equalsIgnoreCase("setmainlobby")) {
 					if (!CommandsUtils.consoleCheckWithMessage(sender))
 						return true;
@@ -119,7 +122,7 @@ public class MainCommand implements CommandExecutor {
 						player.sendMessage(Messager.getMessage("NO_MAP"));
 						return true;
 					}
-					SetupMenu.OpenConfigurationMenu(player, map);
+					ConfigMenu.OpenConfigurationMenu(player, map);
 				} else if (args[0].equalsIgnoreCase("help")) {
 					for (final String line : this.helpLines) {
 						sender.sendMessage(Messager.color(line));
@@ -143,7 +146,7 @@ public class MainCommand implements CommandExecutor {
 					if (!CommandsUtils.consoleCheckWithMessage(sender))
 						return true;
 					// if(!SkywarsUtils.JoinableCheck(arena, player)) return true;
-					Skywars.get().joinMap(map, player);
+					ArenaManager.joinMap(map, player);
 				} else if (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("about")
 						|| args[0].equalsIgnoreCase("ver") || args[0].equalsIgnoreCase("version")) {
 					sender.sendMessage(Messager.colorFormat("&b%s &eversion &a%s &emade by &b%s", Skywars.get().name,
@@ -176,7 +179,86 @@ public class MainCommand implements CommandExecutor {
 				// return true;
 				// TEST COMMANDS
 
-				else if (args[0].equalsIgnoreCase("configstring")) {
+				else if (args[0].equalsIgnoreCase("saveworld")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					final World world = player.getWorld();
+					world.save();
+					player.sendMessage("Saved the current world.");
+					player.sendMessage("Current world: " + world.getName());
+					player.sendMessage("Current world autosaves: " + world.isAutoSave());
+					/*
+					 * SkywarsMap map_ = null; for (final SkywarsMap m : Skywars.get().getMaps()) if
+					 * (m.getWorldName().equalsIgnoreCase(player.getWorld().getName())) { map_ = m;
+					 * break; } if(map_ == null) {
+					 * player.sendMessage("Could not find a map that matches your current world.");
+					 * return true; }
+					 */
+				} else if (args[0].equalsIgnoreCase("worldexists")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					final String worldName = args[1];
+					final boolean bol = Bukkit.getServer().getWorld(worldName) != null;
+					sender.sendMessage("World exists: " + bol);
+				} else if (args[0].equalsIgnoreCase("tpworld")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					final String worldName = args[1];
+					if (player == null) {
+						sender.sendMessage("You need to be a player!");
+						return true;
+					}
+					final Location loc = new Location(Bukkit.getServer().getWorld(worldName), 0, 100, 0);
+					if (player.teleport(loc))
+						sender.sendMessage("Teleported to world: " + worldName);
+					else
+						sender.sendMessage("Could not teleport to world: " + worldName);
+				} else if (args[0].equalsIgnoreCase("checksetup")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					final World world = player.getWorld();
+					player.sendMessage("current world setup: " + world.getName());
+					player.sendMessage("auto save: " + world.isAutoSave());
+				} else if (args[0].equalsIgnoreCase("setupworld")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					Skywars.get().setupWorld(player.getWorld());
+					player.sendMessage("Set up world: " + player.getWorld().getName());
+				} else if (args[0].equalsIgnoreCase("loadworld")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					final String worldName = args[1];
+					if (!(new File(Bukkit.getServer().getWorldContainer(), worldName).exists())) {
+						sender.sendMessage("World folder does not exist!");
+						return true;
+					}
+					final World world = Bukkit.getServer().createWorld(new WorldCreator(worldName));
+					if (world != null) {
+						world.setGameRuleValue("doMobSpawning", "false");
+						world.setAutoSave(false);
+						sender.sendMessage("Loaded world: " + world.getName());
+						if (player != null) {
+							player.teleport(world.getSpawnLocation());
+							sender.sendMessage("Teleported to world: " + world.getName());
+						}
+					} else
+						sender.sendMessage("Could not load world: " + worldName);
+				} else if (args[0].equalsIgnoreCase("unloadworld")) {
+					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+						return true;
+					final String worldName = args[1];
+					final List<Player> players = Bukkit.getWorld(worldName).getPlayers();
+					if (players.size() > 0) {
+						final Location spawnLoc = Bukkit.getServer().getWorlds().stream()
+								.filter(world -> world.getName() != worldName).collect(Collectors.toList()).get(0)
+								.getSpawnLocation();
+						players.forEach(p -> p.teleport(spawnLoc));
+					}
+					if (Bukkit.getServer().unloadWorld(worldName, false))
+						sender.sendMessage("Unloaded world: " + worldName);
+					else
+						sender.sendMessage("Could not unload world: " + worldName);
+				} else if (args[0].equalsIgnoreCase("configstring")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
 					Skywars.get().getPlayerConfig(player);
@@ -200,7 +282,7 @@ public class MainCommand implements CommandExecutor {
 				} else if (args[0].equalsIgnoreCase("changehologram")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
-					Skywars.get().getHologramController().changeHologram(args[1], args[2]);
+					Skywars.get().getHologramController().changeHologram(args[1], args[2], Integer.parseInt(args[3]));
 				} else if (args[0].equalsIgnoreCase("createhologram")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
@@ -331,7 +413,7 @@ public class MainCommand implements CommandExecutor {
 				} else if (args[0].equalsIgnoreCase("worlds")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
-					player.sendMessage(String.join(", ", Bukkit.getServer().getWorlds().stream()
+					sender.sendMessage("Worlds: " + String.join(", ", Bukkit.getServer().getWorlds().stream()
 							.map(world -> world.getName()).collect(Collectors.toList())));
 				} else if (args[0].equalsIgnoreCase("where")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
@@ -487,18 +569,19 @@ public class MainCommand implements CommandExecutor {
 				} else if (args[0].equalsIgnoreCase("create")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;
-					if (name != null) {
-						if (Skywars.get().getMap(name) == null) {
-							if (Skywars.get().createMap(name))
-								sender.sendMessage("Map successfully created");
-							else
-								sender.sendMessage("Could not create map");
-						} else {
-							sender.sendMessage("Map already exists");
-						}
-					} else {
+					if (name == null) {
 						sender.sendMessage("No name");
+						return true;
 					}
+					if (Skywars.get().getMap(name) != null) {
+						sender.sendMessage("Map already exists: " + name);
+						return true;
+					}
+					if (Skywars.get().createMap(name)) {
+						sender.sendMessage("Map successfully created: " + name);
+						sender.sendMessage("Use /sw config " + name + " to configure this map.");
+					} else
+						sender.sendMessage("Could not create map");
 				} else if (args[0].equalsIgnoreCase("delete")) {
 					if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 						return true;

@@ -55,7 +55,7 @@ public class ConfigurationUtils {
 
 			for (final String key : section.getKeys(true)) {
 				if (conf.get(key) == null) {
-					Skywars.get().sendMessage("&cWarning: key &b%s &cis not set.", key);
+					Skywars.get().sendMessage("&cWarning: key &b%s &cis missing in file &b%s", key, conf.getName());
 					modified = true;
 
 					// setting the key in the configuration
@@ -65,14 +65,12 @@ public class ConfigurationUtils {
 				}
 			}
 			if (modified) {
-				Skywars.get().sendMessage("&cYou should not delete keys in the configuration files.");
-				Skywars.get().sendMessage("&6The plugin will use the default values for the deleted keys.");
+				Skywars.get().sendMessage("&6The plugin will use the default values for the missing keys.");
 			}
-			return conf;
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
-		return null;
+		return conf;
 	}
 
 	static YamlConfiguration getDefaultConfig(String defaultFileName) {

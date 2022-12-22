@@ -19,9 +19,8 @@ public class ForceStartCommand implements CommandExecutor {
 			return true;
 		if (!CommandsUtils.arenaCheckWithMessage(player))
 			return true;
-		final Arena playerArena = Skywars.get().getPlayerArena(player);
-		playerArena.startGame();
+		final Arena arena = Skywars.get().getPlayerArena(player);
+		arena.startGame(player);
 		return true;
 	}
-
 }

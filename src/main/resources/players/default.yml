@@ -1,6 +1,8 @@
 # PLAYER CONFIGURATION FILE
 
 kit: default
+case: GLASS
+ownedCases:
 ownedKits:
 souls: 0
 

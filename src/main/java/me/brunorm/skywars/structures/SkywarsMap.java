@@ -5,13 +5,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.commons.io.FileUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.BlockState;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.util.Vector;
 
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.SkywarsUtils;
+import me.brunorm.skywars.managers.ArenaManager;
 import me.brunorm.skywars.schematics.Schematic;
 import me.brunorm.skywars.schematics.SchematicHandler;
 import net.querz.nbt.tag.CompoundTag;
@@ -20,18 +25,20 @@ import net.querz.nbt.tag.ListTag;
 public class SkywarsMap {
 
 	String name;
-	int minPlayers;
-	int maxPlayers;
 	int centerRadius = 15;
 	int teamSize = 1;
-	String schematicFilename;
-	Schematic schematic;
-	boolean schematicError = false;
+
 	YamlConfiguration config;
 	File file;
 
+	// this is in case the map uses an schematic file to get the map
+	String schematicFilename;
+	Schematic schematic;
+	boolean schematicError = false;
+
 	// this is in case the arenas method is set to SINGLE_ARENA
 	Location location;
+	String worldName;
 
 	public void setLocation(Location location) {
 		this.location = location;
@@ -42,6 +49,8 @@ public class SkywarsMap {
 	}
 
 	public String getWorldName() {
+		if (this.worldName != null)
+			return this.worldName;
 		final Location loc = this.getLocation();
 		if (loc == null)
 			return null;
@@ -53,11 +62,8 @@ public class SkywarsMap {
 
 	HashMap<Integer, Vector> spawns = new HashMap<Integer, Vector>();
 
-	public SkywarsMap(String name, String schematicFile, int minPlayers, int maxPlayers, int teamSize) {
+	public SkywarsMap(String name, int teamSize) {
 		this.name = name;
-		this.schematicFilename = schematicFile;
-		this.minPlayers = minPlayers;
-		this.maxPlayers = maxPlayers;
 		this.teamSize = teamSize;
 	}
 
@@ -89,23 +95,31 @@ public class SkywarsMap {
 		if (this.config == null)
 			this.config = YamlConfiguration.loadConfiguration(this.getFile());
 		// Skywars.get().sendDebugMessage("saving parameters in config");
-		this.config.set("minPlayers", this.getMinPlayers());
-		this.config.set("maxPlayers", this.getMaxPlayers());
+		this.config.set("teamSize", this.getTeamSize());
 		this.config.set("schematic", this.getSchematicFilename());
 		this.config.set("centerRadius", this.getCenterRadius());
-		this.config.set("location.world", this.getWorldName());
-		if (this.getLocation() != null)
-			this.setVectorConfig("location", this.getLocation().toVector());
-		if (this.getSpawns() != null) {
-			// Skywars.get().sendDebugMessage("setting spawns");
-			this.config.set("spawn", null); // clear all the previous set spawns
-			for (int i = 0; i < this.getSpawns().size(); i++) {
-				// Skywars.get().sendDebugMessage("setting spawn " + i);
-				final Vector spawn = this.spawns.get(i);
-				this.setVectorConfig("spawn." + i, spawn);
-			}
+		if (this.getLocation() == null) {
+			this.config.set("location", null);
+
+			// saves only the world for reloading the whole world
+			this.config.set("world", this.getWorldName());
 		} else {
+			this.config.set("world", null);
+
+			// saves location coordinates for schematic pasting
+			this.config.set("location.world", this.getWorldName());
+			this.setVectorConfig("location", this.getLocation().toVector());
+		}
+		if (this.getSpawns() == null) {
 			Skywars.get().sendDebugMessage("warning: spawns is null");
+			return;
+		}
+		// Skywars.get().sendDebugMessage("setting spawns");
+		this.config.set("spawn", null); // clear all the previous set spawns
+		for (int i = 0; i < this.getSpawns().size(); i++) {
+			// Skywars.get().sendDebugMessage("setting spawn " + i);
+			final Vector spawn = this.spawns.get(i);
+			this.setVectorConfig("spawn." + i, spawn);
 		}
 	}
 
@@ -116,9 +130,10 @@ public class SkywarsMap {
 				try {
 					mapFile.createNewFile();
 				} catch (final IOException e) {
+					Skywars.get().sendMessage("Could not create map file: " + mapFile.getPath());
 				}
 			}
-			this.setFile(mapFile);
+			this.setConfigFile(mapFile);
 		}
 		try {
 			this.getConfig().save(this.file);
@@ -129,25 +144,35 @@ public class SkywarsMap {
 
 	public void calculateSpawns() {
 
-		if (this.getSchematic() == null)
-			return;
 		Skywars.get().sendDebugMessage("Calculating spawns for map " + this.name);
 
-		// get schematic data and beacon locations
-		final Vector offset = this.schematic.getOffset();
-		final ListTag<CompoundTag> blockEntities = this.schematic.getBlockEntities().asCompoundTagList();
 		final ArrayList<Vector> beaconLocations = new ArrayList<Vector>();
 
-		for (final CompoundTag tag : blockEntities) {
-			String type = tag.getString("id");
-			if (type == null)
-				type = tag.getString("Id");
-			if (type.equalsIgnoreCase("beacon")) {
-				final int[] posArray = tag.getIntArray("Pos");
-				final Vector pos = posArray.length > 0 ? SchematicHandler.getVector(posArray)
-						: SchematicHandler.getVector(tag);
-				final Vector vector = pos.add(offset).add(new Vector(0, 1, 0));
-				beaconLocations.add(vector);
+		if (this.getSchematicFilename() != null) {
+			// get beacon locations from schematic data
+			final Vector offset = this.schematic.getOffset();
+			final ListTag<CompoundTag> blockEntities = this.schematic.getBlockEntities().asCompoundTagList();
+
+			for (final CompoundTag tag : blockEntities) {
+				String type = tag.getString("id");
+				if (type == null)
+					type = tag.getString("Id");
+				if (type.equalsIgnoreCase("beacon")) {
+					final int[] posArray = tag.getIntArray("Pos");
+					final Vector pos = posArray.length > 0 ? SchematicHandler.getVector(posArray)
+							: SchematicHandler.getVector(tag);
+					final Vector vector = pos.add(offset).add(new Vector(0, 1, 0));
+					beaconLocations.add(vector);
+				}
+			}
+		} else {
+			// get beacon locations from world
+
+			final Arena arena = ArenaManager.getArenaAndCreateIfNotFound(this);
+			Skywars.get().sendDebugMessage("[debug, skywarsmap-calculateSpawns] arena: " + arena);
+			for (final BlockState state : arena.getAllBlockStatesInMap(Material.BEACON)) {
+				beaconLocations.add(state.getLocation().toVector());
+				Skywars.get().sendDebugMessage("added beacon location from world: " + state.getLocation().toVector());
 			}
 		}
 
@@ -156,7 +181,7 @@ public class SkywarsMap {
 
 		// check if there are beacons before resetting spawns
 		if (totalBeacons <= 0) {
-			Skywars.get().sendDebugMessage("no beacons");
+			Skywars.get().sendDebugMessage("warning: no beacons to set the spawns to");
 			return;
 		}
 
@@ -185,7 +210,7 @@ public class SkywarsMap {
 
 		this.saveParametersInConfig();
 		this.saveConfig();
-		Skywars.get().sendDebugMessage("spawns calculated");
+		Skywars.get().sendDebugMessage("spawns calculated and saved in config");
 	}
 
 	public HashMap<Integer, Vector> getSpawns() {
@@ -212,27 +237,19 @@ public class SkywarsMap {
 		return this.name;
 	}
 
-	public int getMinPlayers() {
-		return this.minPlayers;
-	}
-
-	public void setMinPlayers(int minPlayers) {
-		this.minPlayers = minPlayers;
-	}
-
 	public int getMaxPlayers() {
-		return this.maxPlayers;
+		return this.getSpawns().size();
 	}
 
-	public void setMaxPlayers(int maxPlayers) {
-		this.maxPlayers = maxPlayers;
+	public int getTeamSize() {
+		return this.teamSize;
 	}
 
 	public File getFile() {
 		return this.file;
 	}
 
-	public void setFile(File file) {
+	public void setConfigFile(File file) {
 		this.file = file;
 	}
 
@@ -248,7 +265,7 @@ public class SkywarsMap {
 		return this.schematicFilename;
 	}
 
-	public void setSchematic(String schematic) {
+	public void setSchematicFilename(String schematic) {
 		this.schematicFilename = schematic;
 	}
 
@@ -274,5 +291,33 @@ public class SkywarsMap {
 		if (this.schematic == null)
 			this.loadSchematic();
 		return this.schematic;
+	}
+
+	public void setWorldName(String name) {
+		Skywars.get()
+				.sendDebugMessage("[debug] setting world name for map: " + this.getName() + " world name: " + name);
+		this.worldName = name;
+		final File baseWorld = new File(Bukkit.getWorldContainer(), name);
+		if (!baseWorld.isDirectory())
+			return;
+		Skywars.get().sendDebugMessage("making backup of world '%s' for map: %s", name, this.getName());
+		try {
+			final File worldFile = new File(Skywars.worldsPath, name);
+			if (!worldFile.canWrite()) {
+				Skywars.get().sendDebugMessage("can not write to location: %s", baseWorld.getAbsolutePath());
+				return;
+			}
+			worldFile.mkdirs();
+			Skywars.get().sendDebugMessage("copying: %s", baseWorld.getAbsolutePath());
+			Skywars.get().sendDebugMessage("to location: %s", worldFile.getAbsolutePath());
+			FileUtils.copyDirectory(baseWorld, worldFile);
+		} catch (final IOException e) {
+			e.printStackTrace();
+			Skywars.get().sendMessage("Could not make backup of world '%s' for map: %s", name, this.getName());
+		}
+	}
+
+	public void setTeamSize(int n) {
+		this.teamSize = n;
 	}
 }
