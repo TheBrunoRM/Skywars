@@ -2,6 +2,7 @@ package me.brunorm.skywars;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -41,38 +42,46 @@ public class SkywarsScoreboard {
 				}
 			}
 		} else {
-			stringList = config.getStringList("lobby");
+			final List<String> worldNames = config.getStringList("scoreboardWorlds").stream().map(w -> w.toLowerCase())
+					.collect(Collectors.toList());
+			if (worldNames.size() <= 0 || worldNames.contains(player.getWorld().getName().toLowerCase())) {
+				stringList = config.getStringList("lobby");
+			}
 		}
 
-		if (stringList != null) {
-			final ScoreboardManager manager = Bukkit.getScoreboardManager();
-			final Scoreboard board = manager.getNewScoreboard();
-			final Objective objective = board.registerNewObjective("skywars", "");
+		if (stringList == null)
+			return;
 
-			objective.setDisplayName(Messager.color(config.getString("title")));
-			objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-			for (int i = 0; i < stringList.size(); i++) {
-				final String text = SkywarsUtils.format(stringList.get(i), player, arena, swp);
-				texts.add(i, Messager.color(text));
-			}
+		// TODO make it less intensive and use cache
 
-			int textIndex = 0;
-			for (int i = texts.size(); i > 0; i--) {
-				String text = texts.get(textIndex);
-				if (text == null)
-					continue;
-				if (text.equals(""))
-					text = Messager.color("&" + SkywarsUtils.COLOR_SYMBOLS[textIndex]);
-				final Score score = objective.getScore(text);
-				score.setScore(i);
-				textIndex++;
-			}
+		final ScoreboardManager manager = Bukkit.getScoreboardManager();
+		final Scoreboard board = manager.getNewScoreboard();
+		final Objective objective = board.registerNewObjective("skywars", "");
 
-			try {
-				// just in case
-				player.setScoreboard(board);
-			} catch (final Exception e) {
-			}
+		objective.setDisplayName(Messager.color(config.getString("title")));
+		objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+
+		for (int i = 0; i < stringList.size(); i++) {
+			final String text = SkywarsUtils.format(stringList.get(i), player, arena, swp);
+			texts.add(i, Messager.color(text));
+		}
+
+		int textIndex = 0;
+		for (int i = texts.size(); i > 0; i--) {
+			String text = texts.get(textIndex);
+			if (text == null)
+				continue;
+			if (text.equals(""))
+				text = Messager.color("&" + SkywarsUtils.COLOR_SYMBOLS[textIndex]);
+			final Score score = objective.getScore(text);
+			score.setScore(i);
+			textIndex++;
+		}
+
+		try {
+			// just in case
+			player.setScoreboard(board);
+		} catch (final Exception e) {
 		}
 
 	}

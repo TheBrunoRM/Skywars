@@ -22,6 +22,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.java.JavaPluginLoader;
 import org.bukkit.util.Vector;
 
 import com.cryptomorin.xseries.XMaterial;
@@ -97,6 +98,14 @@ public class Skywars extends JavaPlugin {
 
 	public static Skywars get() {
 		return plugin;
+	}
+
+	public Skywars() {
+		super();
+	}
+
+	protected Skywars(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
+		super(loader, description, dataFolder, file);
 	}
 
 	public File file() {
@@ -188,7 +197,6 @@ public class Skywars extends JavaPlugin {
 		} else {
 			this.sendDebugMessage("Did not found any holograms plugin.");
 		}
-		this.sendDebugMessage("Holograms API: " + this.hologramController.getClass().getName());
 		if (this.hologramController == null)
 			this.hologramController = new HologramController() {
 				@Override
@@ -205,8 +213,10 @@ public class Skywars extends JavaPlugin {
 					return false;
 				}
 			};
-		else
+		else {
 			holograms = true;
+			this.sendDebugMessage("Holograms API: " + this.hologramController.getClass().getName());
+		}
 
 		economyEnabled = Skywars.get().getConfig().getBoolean("economy.enabled");
 		if (economyEnabled)

@@ -50,6 +50,12 @@ arenas:
   Y: 150 # altitude of the schematics
   separation: 200 # blocks per arena
 
+# the worlds where the lobby scoreboard shows
+# leave empty to show in all worlds
+scoreboardWorlds:
+- world
+- lobby
+
 # update task for actionbar and scoreboard
 taskUpdate:
   disabled: false

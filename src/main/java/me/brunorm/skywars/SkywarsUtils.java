@@ -194,50 +194,50 @@ public class SkywarsUtils {
 		player.resetPlayerTime();
 	}
 
-	public static boolean joinableCheck(Arena arena) {
-		return joinableCheck(arena, null);
+	public static JoinProblem joinableCheck(Arena arena) {
+		return getJoinProblems(arena, null);
 	}
 
-	public static boolean joinableCheck(Arena arena, Player player) {
+	public static JoinProblem getJoinProblems(Arena arena, Player player) {
 		// TODO add messages
 		if (player != null)
 			if (Skywars.get().getPlayerArena(player) != null) {
 				player.sendMessage("already joined");
-				return false;
+				return JoinProblem.ALREADY_JOINED;
 			}
 		if (arena == null) {
 			if (player != null)
 				player.sendMessage("arena doesnt exist");
-			return false;
+			return JoinProblem.ARENA_DOES_NOT_EXIST;
 		}
 		if (arena.getStatus() == ArenaStatus.DISABLED) {
 			if (player != null)
 				player.sendMessage("arena is disabled");
-			return false;
+			return JoinProblem.ARENA_IS_DISABLED;
 		}
 		if (arena.getStatus() == ArenaStatus.RESTARTING) {
 			if (player != null)
 				player.sendMessage("arena is ending");
-			return false;
+			return JoinProblem.ARENA_IS_ENDING;
 		}
 		if (arena.getStatus() == ArenaStatus.PLAYING) {
 			if (player != null)
 				player.sendMessage("arena is playing");
-			return false;
+			return JoinProblem.ARENA_IS_PLAYING;
 		}
 		if (arena.getWorldAndLoadIfItIsNotLoaded() == null) {
 			if (player != null)
 				player.sendMessage("world not set");
-			return false;
+			return JoinProblem.WORLD_NOT_SET;
 		}
 		final int spawns = arena.getMap().getSpawns().size();
 		if (arena.getAlivePlayerCount() >= spawns) {
 			if (player != null)
 				player.sendMessage(Messager.colorFormat("this arena is full! (%s/%s players)",
 						arena.getAlivePlayerCount(), spawns));
-			return false;
+			return JoinProblem.ARENA_IS_FULL;
 		}
-		return true;
+		return null;
 	}
 
 	public static Location getCenteredLocation(Location loc) {

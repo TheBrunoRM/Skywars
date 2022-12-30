@@ -123,7 +123,7 @@ public class Arena {
 	}
 
 	public boolean joinPlayer(Player player) {
-		if (!SkywarsUtils.joinableCheck(this, player))
+		if (SkywarsUtils.getJoinProblems(this, player) != null)
 			return false;
 		if (!this.checkProblems()) {
 			for (final String problem : this.getProblems()) {
@@ -693,6 +693,12 @@ public class Arena {
 			Skywars.get().sendMessage("Could not unload world: " + world.getName());
 		} else {
 			Skywars.get().sendMessage("Successfully unloaded world: " + world.getName());
+			try {
+				FileUtils.deleteDirectory(world.getWorldFolder());
+			} catch (final Exception e) {
+				e.printStackTrace();
+				Skywars.get().sendMessage("Could not delete world: ", world.getName());
+			}
 		}
 		return unloaded;
 	}
@@ -780,30 +786,16 @@ public class Arena {
 
 		final long start = Instant.now().toEpochMilli();
 
-		// TODO calculate from the bottom,
-		// so if there's an empty layer it doesnt skip it
-
-		int min = 256;
-		boolean foundTop = false;
+		int min = 0;
 		for (final Chunk chunk : this.getAllChunksInMap()) {
-			for (int y = min; y >= 0; y--) {
-				boolean emptyLayer = true;
+			for (int y = min; y < 256; y++) {
 				for (int x = 0; x < 16; x++) {
 					for (int z = 0; z < 16; z++) {
 						if (chunk.getBlock(x, y, z).getType() != Material.AIR) {
-							foundTop = true;
-							emptyLayer = false;
-							continue;
+							min = y - 1;
+							break;
 						}
 					}
-					if (!emptyLayer) {
-						foundTop = true;
-						continue;
-					}
-				}
-				if (foundTop && emptyLayer) {
-					min = y;
-					break;
 				}
 			}
 		}
@@ -1040,7 +1032,7 @@ public class Arena {
 			player.sendMessage(Messager.get("started_countdown"));
 			return true;
 		}
-		final boolean started = this.startGame();
+		final boolean started = this.startGame(player);
 		if (started)
 			player.sendMessage(Messager.get("started_game"));
 		else
@@ -1175,8 +1167,8 @@ public class Arena {
 			return false;
 		final Block block = chest.getBlock();
 		final String name = Skywars.get().getHologramController().createHologram(
-				"Skywars-chest-" + block.getLocation().getX() + "-" + block.getLocation().getY() + "-"
-						+ block.getLocation().getZ() + "-" + Instant.now().toString(),
+				"Skywars_chest_" + block.getLocation().getX() + "_" + block.getLocation().getY() + "_"
+						+ block.getLocation().getZ() + "_" + Instant.now().toEpochMilli(),
 				block.getLocation().add(new Vector(0.5, 2, 0.5)), "");
 		this.chestHolograms.put(chest, name);
 		return true;
@@ -1186,12 +1178,12 @@ public class Arena {
 		if (!Skywars.holograms)
 			return;
 
+		final HologramController controller = Skywars.get().getHologramController();
 		for (final Entry<Chest, String> h : this.chestHolograms.entrySet()) {
 			final Chest chest = h.getKey();
 			final int contents = Arrays.asList(chest.getInventory().getContents()).stream()
 					.filter(i -> i != null && i.getType() != XMaterial.AIR.parseMaterial()).collect(Collectors.toList())
 					.size();
-			final HologramController controller = Skywars.get().getHologramController();
 			controller.changeHologram(h.getValue(), Messager.color(text), 0);
 			controller.changeHologram(h.getValue(), contents <= 0 ? Messager.color("&cEmpty") : null, 1);
 		}

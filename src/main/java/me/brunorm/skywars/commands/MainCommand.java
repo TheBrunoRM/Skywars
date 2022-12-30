@@ -59,9 +59,11 @@ public class MainCommand implements CommandExecutor {
 	 * "&b* You can use the shorthand version of the command: &e&l/sw" };
 	 */
 
-	String[] helpLines = { "&a&lSkywars commands", "&b/skywars setmainlobby &e- sets the main lobby",
-			"&b/skywars lobby &e- teleports you to the main lobby", "&b/skywars create <arena> &e- creates an arena",
-			"&b/skywars delete <arena> &e- deletes an arena",
+	String[] helpLines = {
+			Messager.colorFormat("&a&lCommand list - &b%s &a%s &eby &b%s", Skywars.get().name, Skywars.get().version,
+					String.join(", ", Skywars.get().authors)),
+			"&b/skywars setmainlobby &e- sets the main lobby", "&b/skywars lobby &e- teleports you to the main lobby",
+			"&b/skywars create <arena> &e- creates an arena", "&b/skywars delete <arena> &e- deletes an arena",
 			"&b/skywars config <arena> &e- opens the configuration menu", "&b/skywars play &e- open the arenas menu",
 			"&b/skywars start &e- starts a game", "&b/skywars forcestart &e- starts a game immediately" };
 
