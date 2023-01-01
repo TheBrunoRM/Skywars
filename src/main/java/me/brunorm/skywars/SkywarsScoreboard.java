@@ -19,6 +19,7 @@ import me.brunorm.skywars.structures.SkywarsUser;
 public class SkywarsScoreboard {
 
 	public static YamlConfiguration config = Skywars.scoreboardConfig;
+	final static ScoreboardManager manager = Bukkit.getScoreboardManager();
 
 	public static void update(Player player) {
 
@@ -42,19 +43,22 @@ public class SkywarsScoreboard {
 				}
 			}
 		} else {
-			final List<String> worldNames = config.getStringList("scoreboardWorlds").stream().map(w -> w.toLowerCase())
-					.collect(Collectors.toList());
+			final List<String> worldNames = Skywars.get().getConfig().getStringList("scoreboardWorlds").stream()
+					.map(w -> w.toLowerCase()).collect(Collectors.toList());
 			if (worldNames.size() <= 0 || worldNames.contains(player.getWorld().getName().toLowerCase())) {
 				stringList = config.getStringList("lobby");
 			}
 		}
 
-		if (stringList == null)
+		if (stringList == null) {
+			final Objective current = player.getScoreboard().getObjective(DisplaySlot.SIDEBAR);
+			if (current != null && current.getName() == "skywars")
+				player.setScoreboard(manager.getNewScoreboard());
 			return;
+		}
 
 		// TODO make it less intensive and use cache
 
-		final ScoreboardManager manager = Bukkit.getScoreboardManager();
 		final Scoreboard board = manager.getNewScoreboard();
 		final Objective objective = board.registerNewObjective("skywars", "");
 
