@@ -26,7 +26,7 @@ Add any other context about the problem here.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Versions (please complete the following information):**
+**Versions (do NOT type "latest"):**
  - Plugin version: (e.g. 0.1.1)
  - Server version: (e.g. 1.8.8)
  - Server software: (e.g. Bukkit)
