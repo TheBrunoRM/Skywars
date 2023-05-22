@@ -651,7 +651,7 @@ public class Arena {
 		this.users.clear();
 
 		final World world = this.getWorldAndLoadIfItIsNotLoaded();
-		if (this.getMap().schematicFilename != null) {
+		if (this.getMap().getSchematic() != null || this.getMap().schematicFilename != null) {
 			// remove entities only (and paste schematic later)
 			for (final Entity i : world.getEntities()) {
 				if (i instanceof Item && this.isInBoundaries(i.getLocation())) {
@@ -690,14 +690,19 @@ public class Arena {
 			tries++;
 		}
 		if (!unloaded) {
-			Skywars.get().sendMessage("Could not unload world: " + world.getName());
+			Skywars.get().sendMessage("Could not unload world '%s' for map '%s'", world.getName(),
+					this.getMap().getName());
 		} else {
-			Skywars.get().sendMessage("Successfully unloaded world: " + world.getName());
+			Skywars.get().sendDebugMessage("Successfully unloaded world '%s' for map '%s'", world.getName(),
+					this.getMap().getName());
 			try {
 				FileUtils.deleteDirectory(world.getWorldFolder());
+				Skywars.get().sendDebugMessage("Sucessfully deleted world '%s' for map '%s'", world.getName(),
+						this.getMap().getName());
 			} catch (final Exception e) {
 				e.printStackTrace();
-				Skywars.get().sendMessage("Could not delete world: ", world.getName());
+				Skywars.get().sendMessage("Could not delete world '%s' for map '%s'", world.getName(),
+						this.getMap().getName());
 			}
 		}
 		return unloaded;
