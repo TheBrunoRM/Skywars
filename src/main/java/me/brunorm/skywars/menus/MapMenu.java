@@ -29,7 +29,7 @@ public class MapMenu implements Listener {
 		PlayerInventoryManager.setMenu(player, MenuType.MAP_SELECTION);
 
 		int index = 10;
-		for (final SkywarsMap map : Skywars.get().getMaps()) {
+		for (final SkywarsMap map : Skywars.get().getMapManager().getMaps()) {
 			// Skywars.get().sendDebugMessage("current index: " + index);
 			if ((index + 1) % 9 == 0)
 				index += 2;
@@ -76,7 +76,7 @@ public class MapMenu implements Listener {
 		if (clicked == null || clicked.getItemMeta() == null)
 			return;
 		final String name = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
-		final SkywarsMap map = Skywars.get().getMap(name);
+		final SkywarsMap map = Skywars.get().getMapManager().getMap(name);
 		if (!ArenaManager.joinMap(map, player))
 			player.sendMessage(Messager.get("CANT_JOIN_MAP"));
 	}

@@ -38,17 +38,18 @@ public class Events implements Listener {
 		if (arena == null)
 			return;
 		final SkywarsUser swp = arena.getUser(player);
+
+		if (player.getWorld() != arena.getWorld())
+			arena.leavePlayer(swp);
+
 		if (arena.isInBoundaries(player))
 			return;
 
-		if (player.getWorld() != arena.getWorldAndLoadIfItIsNotLoaded())
-			arena.leavePlayer(swp);
-		else if (!arena.started()) {
-			// arena.leavePlayer(player);
-		} else if (!swp.isSpectator())
+		if (!arena.started())
+			return;
+
+		if (!swp.isSpectator())
 			arena.makeSpectator(swp);
-		else if (arena.isInBoundaries(arena.getLocation()))
-			arena.goBackToCenter(player);
 	}
 
 	@EventHandler

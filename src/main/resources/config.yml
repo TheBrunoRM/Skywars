@@ -9,6 +9,9 @@ url: "&ewww.example.com"
 # the format for displaying the %date% placeholder (scoreboard)
 dateFormat: "dd/MM/yyyy"
 
+# minimum players to start the game automatically
+minPlayers: 2
+
 # you may want to disable these
 signsEnabled: true
 messageSounds:
@@ -27,28 +30,8 @@ sounds: # sound name; volume; pitch
 # this is the reset cooldown for last hits (in seconds)
 lastHitResetCooldown: 15
 
-# this is the max map size (in blocks)
+# map size used for boundary calculation; in blocks
 maxMapSize: 200
-
-# this is the arena location method
-# possible options are SINGLE_ARENA or MULTI_ARENA
-# --
-# if the option is SINGLE_ARENA then every arena
-# has its own position in an specified world
-# and cannot be played more than once at the same time
-# --
-# if the option is MULTI_ARENA then every arena
-# does NOT have any position nor world assigned, and instead
-# you can set a default world for all the arenas
-# and then have the plugin place the arenas in the world.
-# this allows for a single map being playable in multiple arenas at the same time
-arenasMethod: SINGLE_ARENA
-
-# this is in case you set the arenas method to MULTI_ARENA
-arenas:
-  world: SkywarsMaps
-  Y: 150 # altitude of the schematics
-  separation: 200 # blocks per arena
 
 # the worlds where the lobby scoreboard shows
 # leave empty to show in all worlds
@@ -114,8 +97,6 @@ items:
   # (not yet implemented)
   playing: {}
 
-# this is self explanatory
-# its the item types
 # you can make custom items by adding them here
 # you can add the details (name, description) in the lang file
 item_types:
@@ -129,9 +110,12 @@ item_types:
   TELEPORTER: COMPASS
 
 debug:
-  enabled: false # enable this to see debug messages
+  # enable this to see debug messages
+  enabled: false
   bigCases: false
   projectileTests: false
 
+# this didn't work as expected
+# it is very buggy
 disableUpdates: true
 autoUpdate: false

@@ -21,7 +21,7 @@ public class SignEvents implements Listener {
 			player.sendMessage("You need to specify the map name in the line below!");
 			return;
 		}
-		final SkywarsMap map = Skywars.get().getMap(mapName);
+		final SkywarsMap map = Skywars.get().getMapManager().getMap(mapName);
 		if (map == null) {
 			player.sendMessage("Could not find a map with the name: " + mapName);
 			return;

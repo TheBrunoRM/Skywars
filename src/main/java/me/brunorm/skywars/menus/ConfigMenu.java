@@ -9,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -23,6 +22,7 @@ import org.bukkit.util.Vector;
 
 import com.cryptomorin.xseries.XMaterial;
 
+import me.brunorm.skywars.ConfigurationUtils;
 import me.brunorm.skywars.InventoryUtils;
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
@@ -38,7 +38,7 @@ public class ConfigMenu implements Listener {
 	static String worldName = "&e&lWorld: &a&l%s";
 	static String positionName = "&e&lPosition: &a&l%s";
 	static String spawnName = "&e&lSpawn Setup";
-	static String schematicName = "&e&lSchematic: &a&l%s";
+	static String worldFolderName = "&e&lWorld: &a&l%s";
 	static String statusName = "&e&lStatus: %s";
 	static String calculateSpawnsName = "&6&lCalculate spawns";
 	static String regenerateCasesName = "&6&lRegenerate cases";
@@ -49,40 +49,38 @@ public class ConfigMenu implements Listener {
 
 	public static HashMap<Player, Location> playerLocations = new HashMap<Player, Location>();
 	public static HashMap<Player, Arena> currentArenas = new HashMap<Player, Arena>();
-	File schematicsFolder = new File(Skywars.schematicsPath);
+	File worldsFolder = new File(Skywars.worldsPath);
 
-	static void OpenSchematicsMenu(Player player) {
-		final File folder = new File(Skywars.get().getDataFolder() + "/schematics");
-		final Inventory inventory = Bukkit.createInventory(null, 9 * 6, Messager.color("&aSchematic files"));
+	static void OpenWorldsMenu(Player player) {
+		final File folder = new File(Skywars.get().getDataFolder() + "/worlds");
+		final Inventory inventory = Bukkit.createInventory(null, 9 * 6, Messager.color("&aWorld folders"));
 
 		int index = 10;
-		for (final File schematicFile : folder.listFiles()) {
+		for (final File worldFolder : folder.listFiles()) {
 			final List<String> lore = new ArrayList<String>();
 			lore.clear();
 
 			boolean alreadyUsing = false;
-			for (final SkywarsMap map : Skywars.get().getMaps()) {
-				final String mapSchematic = map.getSchematicFilename();
-				if (mapSchematic != null && mapSchematic.equals(schematicFile.getName())) {
+			for (final SkywarsMap map : Skywars.get().getMapManager().getMaps()) {
+				final String worldName = map.getWorldName();
+				if (worldName != null && worldName.equals(worldFolder.getName())) {
 					if (map == currentArenas.get(player).getMap()) {
-						lore.add(Messager.colorFormat("&6Current schematic file", map.getName()));
+						lore.add(Messager.colorFormat("&6Current world folder", map.getName()));
 					} else {
-						lore.add(Messager.colorFormat("&cWarning! %s already uses this file", map.getName()));
+						lore.add(Messager.colorFormat("&cWarning! %s already uses this world folder", map.getName()));
 					}
 					alreadyUsing = true;
 					break;
 				}
 			}
 
-			if (schematicFile.getName().endsWith(".schem"))
-				lore.add(Messager.color("&cThe plugin does not support .schem files yet"));
-			else if (!alreadyUsing)
+			if (!alreadyUsing)
 				lore.add(Messager.color("&eClick to select this file"));
 
 			final ItemStack item = new ItemStack(XMaterial.PAPER.parseItem());
 			final ItemMeta meta = item.getItemMeta();
 
-			meta.setDisplayName(Messager.colorFormat("&a%s", schematicFile.getName()));
+			meta.setDisplayName(Messager.colorFormat("&a%s", worldFolder.getName()));
 			meta.setLore(lore);
 			item.setItemMeta(meta);
 			inventory.setItem(index, item);
@@ -129,16 +127,12 @@ public class ConfigMenu implements Listener {
 				Messager.colorFormat(worldName, currentWorldName), "&eLeft-click to set", "&eto your current world", "",
 				"&eRight-click to unset");
 
-		InventoryUtils.addItem(inventory, XMaterial.SADDLE.parseMaterial(), 13,
-				locationName(currentArena.getLocation()), "&eLeft-click to set", "&eto your current position", "",
-				"&eRight-click to unset");
-
-		String currentSchematic = currentMap.getSchematicFilename();
-		if (currentSchematic == null)
-			currentSchematic = "none";
+		String currentWorldFile = currentMap.getWorldName();
+		if (currentWorldFile == null)
+			currentWorldFile = "none";
 
 		InventoryUtils.addItem(inventory, XMaterial.PAPER.parseMaterial(), 14,
-				Messager.colorFormat(schematicName, currentSchematic));
+				Messager.colorFormat(worldFolderName, currentWorldFile));
 
 		InventoryUtils.addItem(inventory, XMaterial.GLASS.parseMaterial(), 15,
 				Messager.colorFormat(statusName, "&6&lYES"));
@@ -172,7 +166,7 @@ public class ConfigMenu implements Listener {
 	}
 
 	public static void OpenConfigurationMenu(Player player, SkywarsMap map) {
-		currentArenas.put(player, ArenaManager.getArenaAndCreateIfNotFound(map));
+		currentArenas.put(player, ArenaManager.getArenaByMap(map, true));
 		final Inventory inventory = Bukkit.createInventory(null, 9 * 3, Messager.color("&a&l" + map.getName()));
 		player.openInventory(inventory);
 		PlayerInventoryManager.setMenu(player, MenuType.MAP_CONFIGURATION);
@@ -225,29 +219,7 @@ public class ConfigMenu implements Listener {
 			}
 		}
 
-		if (name.equals(locationName(currentArena.getLocation()))) {
-			if (event.getClick() == ClickType.RIGHT) {
-				currentArena.setLocation(null);
-				currentMap.setLocation(null);
-				player.sendMessage("location unset! (left click to set)");
-			} else {
-				final double x = player.getLocation().getBlockX();
-				final double y = player.getLocation().getBlockY();
-				final double z = player.getLocation().getBlockZ();
-				final World world = player.getWorld();
-				final Location location = new Location(world, x, y, z);
-				currentArena.setLocation(location);
-				currentMap.setLocation(location);
-				player.sendMessage(String.format("set location of %s to %s %s %s in world %s", currentMap.getName(),
-						location.getX(), location.getY(), location.getZ(), location.getWorld().getName()));
-			}
-		}
-
 		if (name.equals(Messager.color(spawnName))) {
-			if (currentMap.getLocation() == null) {
-				player.sendMessage("Location not set");
-				return;
-			}
 			final Arena arena = currentArenas.get(player);
 			final ItemStack item = new ItemStack(XMaterial.BLAZE_ROD.parseItem());
 			final ItemMeta meta = item.getItemMeta();
@@ -265,7 +237,7 @@ public class ConfigMenu implements Listener {
 			player.closeInventory();
 
 			playerLocations.put(player, player.getLocation());
-			player.teleport(arena.getLocation().clone().add(new Vector(0, 5, 0)));
+			player.teleport(arena.getCenterBlock().toLocation(arena.getWorld()).clone().add(new Vector(0, 5, 0)));
 			player.setVelocity(new Vector(0, 1f, 0));
 
 			player.setAllowFlight(true);
@@ -295,12 +267,6 @@ public class ConfigMenu implements Listener {
 				player.sendMessage(Messager.color("&cWarning: &7did you place beacons on the map?"));
 		}
 
-		if (name.equals(Messager.color(pasteSchematicName))) {
-			currentArena.pasteSchematic();
-			player.sendMessage("Pasted schematic.");
-			return;
-		}
-
 		if (name.equals(Messager.color(regenerateCasesName))) {
 			currentArena.resetCases();
 			if (currentMap.getSpawns().size() <= 0)
@@ -310,16 +276,10 @@ public class ConfigMenu implements Listener {
 		}
 
 		if (name.equals(Messager.color(teleportName))) {
-			Location loc = currentArena.getLocation();
-			if (loc == null) {
-				if (currentMap.getWorldName() == null) {
-					player.sendMessage("World not set");
-					return;
-				}
-				final World world = currentArena.getWorldAndLoadIfItIsNotLoaded();
-				if (world != null)
-					loc = world.getSpawnLocation();
-			}
+			Location loc = ConfigurationUtils.getLocationConfig(currentArena.getWorld(),
+					currentArena.getMap().getConfig().getConfigurationSection("center"));
+			if (loc == null)
+				loc = currentArena.getWorld().getSpawnLocation();
 			if (loc == null)
 				player.sendMessage("Location not set");
 			else {
@@ -336,43 +296,32 @@ public class ConfigMenu implements Listener {
 		}
 
 		if (name.equals(Messager.color(clearName))) {
-			ArenaManager.removeArenaFromListAndDeleteArena(currentArena);
+			ArenaManager.removeArena(currentArena);
 			currentArenas.remove(player);
 			currentArena = null;
 			player.sendMessage("Cleared");
 			player.closeInventory();
 		}
 
-		String currentSchematic = currentMap.getSchematicFilename();
-		if (currentSchematic == null)
-			currentSchematic = "none";
-		if (name.equals(Messager.colorFormat(schematicName, currentSchematic))) {
-			if (this.schematicsFolder.listFiles() == null) {
+		if (name.equals(Messager.colorFormat(worldFolderName, currentWorldName))) {
+			if (this.worldsFolder.listFiles() == null) {
 				player.closeInventory();
-				player.sendMessage("&c&lThere are no schematic files!");
+				player.sendMessage("&c&lThere are no world folders!");
 				player.sendMessage("&e&lYou need to put &bschematics files &ein the &bschematics folder");
 			} else
-				OpenSchematicsMenu(player);
+				OpenWorldsMenu(player);
 			return;
 		}
 
-		boolean pasted = false;
-		final String schematicName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
-		for (final File schematicFile : this.schematicsFolder.listFiles()) {
-			Skywars.get().sendDebugMessage("current file: " + schematicFile.getName());
-			if (schematicFile.getName().equals(schematicName)) {
-				currentArena.clearBlocks();
-				currentMap.setSchematicFilename(schematicName);
-				currentMap.loadSchematic();
-				currentArena.pasteSchematic();
-				player.sendMessage(Messager.colorFormat("&eSchematic set to &b%s", currentMap.getSchematicFilename()));
-				player.sendMessage(Messager.color("&eSchematic pasted."));
-				pasted = true;
+		final String worldFolderName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
+		for (final File worldFolder : this.worldsFolder.listFiles()) {
+			Skywars.get().sendDebugMessage("current file: " + worldFolder.getName());
+			if (worldFolder.getName().equals(worldFolderName)) {
+				currentMap.setWorldName(worldFolderName);
+				player.sendMessage(Messager.colorFormat("&World set to &b%s", currentMap.getWorldName()));
 				break;
 			}
 		}
-		if (pasted)
-			return;
 
 		currentMap.saveParametersInConfig();
 		currentMap.saveConfig();

@@ -7,9 +7,6 @@ import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.ServerMock;
 import be.seeseemelk.mockbukkit.entity.PlayerMock;
 import me.brunorm.skywars.Skywars;
-import me.brunorm.skywars.managers.ArenaManager;
-import me.brunorm.skywars.structures.Arena;
-import me.brunorm.skywars.structures.SkywarsMap;
 
 @SuppressWarnings("unused")
 public class SkywarsTest {
@@ -26,8 +23,6 @@ public class SkywarsTest {
 	@Test
 	public void test() {
 		final PlayerMock player = MockBukkit.getOrCreateMock().addPlayer();
-		final SkywarsMap map = Skywars.get().getRandomMap();
-		final Arena arena = ArenaManager.getArenaAndCreateIfNotFound(map);
 	}
 
 }

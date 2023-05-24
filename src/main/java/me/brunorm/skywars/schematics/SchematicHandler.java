@@ -351,6 +351,11 @@ public class SchematicHandler {
 
 	@SuppressWarnings("deprecation")
 	public static void pasteSchematic(Location loc, Schematic schematic) {
+		if (XMaterial.isNewVersion()) {
+			Skywars.get().sendMessage("Can't paste schematic: schematic files are not supported in 1.13+");
+			return;
+		}
+
 		final World world = loc.getWorld();
 		final byte[] blocks = schematic.getBlocks();
 		final byte[] blockData = schematic.getData();

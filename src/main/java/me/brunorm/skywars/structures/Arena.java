@@ -21,8 +21,7 @@ import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
@@ -39,16 +38,12 @@ import me.brunorm.skywars.SkywarsUtils;
 import me.brunorm.skywars.commands.CommandsUtils;
 import me.brunorm.skywars.holograms.HologramController;
 import me.brunorm.skywars.managers.ArenaManager;
-import me.brunorm.skywars.schematics.Schematic;
-import me.brunorm.skywars.schematics.SchematicHandler;
+import me.brunorm.skywars.managers.MapManager;
 import mrblobman.sounds.Sounds;
-import net.querz.nbt.tag.CompoundTag;
-import net.querz.nbt.tag.ListTag;
 
 public class Arena {
 
 	private World world;
-	private Location location;
 	private ArenaStatus status;
 	private int countdown;
 	private boolean joinable = true;
@@ -61,6 +56,15 @@ public class Arena {
 	private final ArenaGameSettings gameSettings = new ArenaGameSettings(this);
 
 	private final SkywarsMap map;
+	String worldName;
+
+	public String getWorldName() {
+		return this.worldName;
+	}
+
+	public void setWorldName(String worldName) {
+		this.worldName = worldName;
+	}
 
 	public Arena get() {
 		return this;
@@ -74,8 +78,7 @@ public class Arena {
 	private final ArrayList<SkywarsUser> users = new ArrayList<SkywarsUser>();
 	private final ArrayList<SkywarsEvent> events = new ArrayList<SkywarsEvent>();
 
-	// TODO move the chests field into SkywarsMap
-	// and store chest locations and types (normal or center chests)
+	// TODO store chest locations and types (normal or center chests)
 	private final ArrayList<Chest> chests = new ArrayList<Chest>();
 	private final HashMap<Chest, String> chestHolograms = new HashMap<Chest, String>();
 
@@ -143,7 +146,8 @@ public class Arena {
 		final SkywarsTeam team = this.getNextFreeTeamOrCreateIfItDoesntExist();
 		final SkywarsUser swPlayer = new SkywarsUser(player, team, index);
 		this.users.add(swPlayer);
-		player.sendMessage("[DEBUG] You joined team " + team.getNumber());
+		if (Skywars.config.getBoolean("debug.enabled"))
+			player.sendMessage("[DEBUG] You joined team " + team.getNumber());
 		for (final SkywarsUser players : this.getUsers()) {
 			players.getPlayer().sendMessage(Messager.getMessage("JOIN", player.getName(), this.getAlivePlayerCount(),
 					this.map.getMaxPlayers()));
@@ -419,7 +423,7 @@ public class Arena {
 			return false;
 		this.cancelTimer();
 		this.setStatus(status);
-		Skywars.get().sendDebugMessage("starting %s timer", status);
+		Skywars.get().sendDebugMessage("starting timer: %s", status);
 		if (status == ArenaStatus.STARTING) {
 			if (this.forcedStart && this.forcedStartPlayer != null) {
 				for (final SkywarsUser player : this.getUsers()) {
@@ -550,7 +554,7 @@ public class Arena {
 			return false;
 		this.cancelTimer();
 		this.startTimerAndSetStatus(ArenaStatus.PLAYING);
-		this.calculateAndFillChests();
+		this.fillChests();
 		this.applyGameSettings();
 		for (final Vector spawn : this.map.getSpawns().values()) {
 			Skywars.createCase(this.getVectorInArena(spawn), XMaterial.AIR);
@@ -650,18 +654,10 @@ public class Arena {
 		}
 		this.users.clear();
 
-		final World world = this.getWorldAndLoadIfItIsNotLoaded();
-		if (this.getMap().getSchematic() != null || this.getMap().schematicFilename != null) {
-			// remove entities only (and paste schematic later)
-			for (final Entity i : world.getEntities()) {
-				if (i instanceof Item && this.isInBoundaries(i.getLocation())) {
-					i.remove();
-				}
-			}
-		} else {
-			// restart the whole world
-			this.unloadWorld(world);
-		}
+		final World world = this.getWorld();
+		// unload the world
+		// it would be loaded again next time
+		ArenaManager.unloadWorld(world, this.getMap());
 
 		this.forcedStart = false;
 		this.forcedStartPlayer = null;
@@ -669,43 +665,7 @@ public class Arena {
 		this.countdown = -1;
 
 		if (remove)
-			ArenaManager.removeArenaFromListAndDeleteArena(this);
-	}
-
-	private boolean unloadWorld(World world) {
-		Skywars.get().sendDebugMessage("Restarting world '%s' for map '%s'", world.getName(), this.getMap().getName());
-		boolean unloaded = false;
-		int tries = 0;
-		while (!unloaded) {
-			if (tries >= 5) {
-				break;
-			}
-			Skywars.get().sendDebugMessage("Trying to restart world: %s (tries: %s)", world.getName(), tries);
-			for (final Player p : world.getPlayers()) {
-				Skywars.get().sendDebugMessage("Teleporting player %s to another world", p.getName());
-				p.teleport(Bukkit.getWorlds().stream().filter(w -> w.getName() != world.getName()).findFirst().get()
-						.getSpawnLocation());
-			}
-			unloaded = Bukkit.unloadWorld(world, false);
-			tries++;
-		}
-		if (!unloaded) {
-			Skywars.get().sendMessage("Could not unload world '%s' for map '%s'", world.getName(),
-					this.getMap().getName());
-		} else {
-			Skywars.get().sendDebugMessage("Successfully unloaded world '%s' for map '%s'", world.getName(),
-					this.getMap().getName());
-			try {
-				FileUtils.deleteDirectory(world.getWorldFolder());
-				Skywars.get().sendDebugMessage("Sucessfully deleted world '%s' for map '%s'", world.getName(),
-						this.getMap().getName());
-			} catch (final Exception e) {
-				e.printStackTrace();
-				Skywars.get().sendMessage("Could not delete world '%s' for map '%s'", world.getName(),
-						this.getMap().getName());
-			}
-		}
-		return unloaded;
+			ArenaManager.removeArena(this);
 	}
 
 	void removeHolograms() {
@@ -723,17 +683,14 @@ public class Arena {
 
 	public ArrayList<String> getProblems() {
 		final ArrayList<String> problems = new ArrayList<String>();
-		if (this.getWorldAndLoadIfItIsNotLoaded() == null)
+		if (this.getWorld() == null)
 			problems.add("World not found");
 		if (this.getSpawn(this.getAlivePlayerCount()) == null)
 			problems.add(String.format("Spawn %s not set", this.getAlivePlayerCount()));
 		if (this.map.getMaxPlayers() <= 0)
 			problems.add("Max players not set");
-		if (this.map.getWorldName() == null) {
-			if (this.map.schematicFilename == null)
-				problems.add("Schematic not set");
-			if (this.location == null)
-				problems.add("No location set");
+		if (this.getWorldName() == null) {
+			problems.add("No world set");
 		}
 		if (!this.isJoinable())
 			problems.add("Arena is not joinable");
@@ -745,16 +702,16 @@ public class Arena {
 	}
 
 	public Location getVectorInArena(Vector vector) {
-		final World world = this.getWorldAndLoadIfItIsNotLoaded();
-		if (this.location == null)
-			this.location = new Location(world, 0, 0, 0);
-		return new Location(world, vector.getBlockX() + this.location.getBlockX(),
-				vector.getBlockY() + this.location.getBlockY(), vector.getBlockZ() + this.location.getBlockZ());
+		final World world = this.getWorld();
+		final Location loc = new Location(world, 0, 0, 0);
+		return new Location(world, vector.getBlockX() + loc.getBlockX(), vector.getBlockY() + loc.getBlockY(),
+				vector.getBlockZ() + loc.getBlockZ());
 	}
 
 	public Location getLocationInArena(Location loc) {
-		return new Location(loc.getWorld(), loc.getBlockX() + this.location.getBlockX(),
-				loc.getBlockY() + this.location.getBlockY(), loc.getBlockZ() + this.location.getBlockZ());
+		return new Location(loc.getWorld(), loc.getBlockX() + this.getCenterBlock().getBlockX(),
+				loc.getBlockY() + this.getCenterBlock().getBlockY(),
+				loc.getBlockZ() + this.getCenterBlock().getBlockZ());
 	}
 
 	public void goBackToCenter(Player player) {
@@ -763,7 +720,7 @@ public class Arena {
 		player.setAllowFlight(true);
 		player.setFlying(true);
 		player.setVelocity(new Vector(0, 0, 0));
-		player.teleport(this.getLocation());
+		player.teleport(this.getCenterBlock().toLocation(this.getWorld()));
 		player.setVelocity(new Vector(0, 5f, 0));
 	}
 
@@ -772,31 +729,36 @@ public class Arena {
 	}
 
 	public boolean isInBoundaries(Location loc) {
-		final Schematic schematic = this.map.getSchematic();
-		if (loc.getWorld() != this.getWorldAndLoadIfItIsNotLoaded())
-			return false;
-		if (schematic == null || this.getLocation() == null)
-			return loc.getY() > this.getMinimumY();
-		return loc.getX() > this.getLocation().getX() - schematic.getWidth() / 2
-				&& loc.getX() < this.getLocation().getX() + schematic.getWidth() / 2
-				&& loc.getY() > this.getLocation().getY() - schematic.getHeight() / 2
-				&& loc.getY() < this.getLocation().getY() + schematic.getHeight() / 2
-				&& loc.getZ() > this.getLocation().getZ() - schematic.getLength() / 2
-				&& loc.getZ() < this.getLocation().getZ() + schematic.getLength() / 2;
+		return loc.getY() > this.getMinimumY();
 	}
 
 	private int getMinimumY() {
 		if (this.minimumY >= 0)
 			return this.minimumY;
 
+		if (this.getMap().getConfig().get("minimumY") != null) {
+			this.minimumY = this.getMap().getConfig().getInt("minimumY");
+			Skywars.get().sendDebugMessage("%s: Got minimum Y from config.", this.getMap().getName());
+			return this.minimumY;
+		}
+
+		Skywars.get().sendDebugMessage("%s: Calculating minimum Y...", this.getMap().getName());
 		final long start = Instant.now().toEpochMilli();
 
-		int min = 0;
+		int min = -1;
 		for (final Chunk chunk : this.getAllChunksInMap()) {
-			for (int y = min; y < 256; y++) {
+			for (int y = 0; y < 256; y++) {
+				if (min >= 0)
+					break;
 				for (int x = 0; x < 16; x++) {
+					if (min >= 0)
+						break;
 					for (int z = 0; z < 16; z++) {
+						if (min >= 0)
+							break;
 						if (chunk.getBlock(x, y, z).getType() != Material.AIR) {
+							Skywars.get().sendDebugMessage("&b&lTHE BLOCK: %s",
+									chunk.getBlock(x, y, z).getLocation().toVector());
 							min = y - 1;
 							break;
 						}
@@ -805,9 +767,11 @@ public class Arena {
 			}
 		}
 
-		Skywars.get().sendDebugMessage("Calculated minimum Y for " + this.map.getName() + " in %sms",
-				Instant.now().toEpochMilli() - start);
 		this.minimumY = min;
+		this.getMap().getConfig().set("minimumY", this.minimumY);
+		this.getMap().saveConfig();
+		Skywars.get().sendDebugMessage("&bCalculated minimum Y for %s in %sms: %s", this.map.getName(),
+				Instant.now().toEpochMilli() - start, this.minimumY);
 		return this.minimumY;
 	}
 
@@ -870,93 +834,36 @@ public class Arena {
 		return null;
 	}
 
-	public void pasteSchematic() {
-		if (this.location == null || this.map.getSchematic() == null)
-			return;
-		Skywars.get().sendDebugMessage("pasting schematic at " + this.location.toString());
-		try {
-			SchematicHandler.pasteSchematic(this.location, this.map.getSchematic());
-		} catch (final Exception e) {
-			Skywars.get().sendDebugMessage("could not paste schematic");
-			e.printStackTrace();
-		}
-	}
-
-	public void clearBlocks() {
-		SchematicHandler.clear(this.location, this.map.getSchematic());
-	}
-
 	public void calculateChests() {
 		Skywars.get().sendDebugMessage("calculating chests for arena: " + this.getMap().getName());
 		this.chests.clear();
 
-		if (this.getMap().getSchematicFilename() != null) {
-			// calculate chests from schematic
-
-			final Schematic schematic = this.map.getSchematic();
-			if (schematic == null)
-				return;
-			final World world = this.location.getWorld();
-			final Vector offset = schematic.getOffset();
-			final ListTag<CompoundTag> tileEntities = schematic.getBlockEntities();
-			// Skywars.get().sendDebugMessage("tile entities: " +
-			// tileEntities.getValue().size());
-
-			final byte[] blocks = schematic.getBlocks();
-			final int length = schematic.getLength();
-			final int width = schematic.getWidth();
-			final int height = schematic.getHeight();
-
-			for (int x = 0; x < width; ++x) {
-				for (int y = 0; y < height; ++y) {
-					for (int z = 0; z < length; ++z) {
-						final int index = y * width * length + z * width + x;
-						final Location loc = new Location(world, x, y, z).add(offset).add(this.location);
-						final Block block = loc.getBlock();
-						if (block.getState() instanceof Chest && block.getType() == XMaterial.CHEST.parseMaterial()
-								&& blocks[index] == 54 /* chest id */) {
-							final Chest chest = (Chest) block.getState();
-							if (this.chests.contains(chest))
-								continue;
-							this.chests.add(chest);
-						}
-					}
-				}
-			}
-
-			for (final CompoundTag tag : tileEntities) {
-				String id = tag.getString("id");
-				if (id == null)
-					id = tag.getString("Id");
-				if (id.equalsIgnoreCase("chest")) {
-					final Vector v = SchematicHandler.getVector(tag);
-					final Location loc = new Location(world, v.getX(), v.getY(), v.getZ()).add(offset)
-							.add(this.location);
-					if (!(loc.getBlock() instanceof Chest))
-						continue;
-					final Chest chest = (Chest) loc.getBlock().getState();
-					if (this.chests.contains(chest))
-						continue;
-					this.chests.add(chest);
-				}
-			}
-		} else {
-			// calculate chests from world
-
-			for (final BlockState state : this.getAllBlockStatesInMap(Material.CHEST)) {
-				this.chests.add((Chest) state);
-				Skywars.get().sendDebugMessage("Added chest for map %s at location: %s", this.getMap().getName(),
-						state.getLocation());
-			}
+		for (final BlockState state : this.getAllBlockStatesInMap(Material.CHEST)) {
+			this.chests.add((Chest) state);
+			Skywars.get().sendDebugMessage("Added chest for map %s at location: %s", this.getMap().getName(),
+					state.getLocation());
 		}
 
 		Skywars.get().sendDebugMessage("Calculated %s chests!", this.chests.size());
+
+		final YamlConfiguration config = this.getMap().getConfig();
+		int i = 0;
+		for (final Chest chest : this.chests) {
+			final Block block = chest.getBlock();
+			config.set("chest." + i + ".x", block.getX());
+			config.set("chest." + i + ".y", block.getY());
+			config.set("chest." + i + ".z", block.getZ());
+			i++;
+		}
+
+		this.map.saveConfig();
+		Skywars.get().sendDebugMessage("Saved chests in config: " + this.getMap().getName());
 	}
 
 	public ArrayList<Chunk> getAllChunksInMap() {
 		final ArrayList<Chunk> list = new ArrayList<Chunk>();
 
-		final World world = this.getWorldAndLoadIfItIsNotLoaded();
+		final World world = this.getWorld();
 		if (world == null) {
 			Skywars.get().sendMessage("Could not get world for map: ", this.getMap().getName());
 			return list;
@@ -982,26 +889,42 @@ public class Arena {
 	public ArrayList<BlockState> getAllBlockStatesInMap(Material mat) {
 		final ArrayList<BlockState> list = new ArrayList<BlockState>();
 
-		final World world = this.getWorldAndLoadIfItIsNotLoaded();
+		final World world = this.getWorld();
 		if (world == null) {
 			Skywars.get().sendMessage("Could not get world for map: ", this.getMap().getName());
 			return list;
 		}
 
-		final int maxMapSizeInBlocks = Skywars.config.getInt("maxMapSize");
-		final int minBlock = -maxMapSizeInBlocks / 2;
-		final int maxBlock = maxMapSizeInBlocks / 2;
+		for (final Chunk chunk : this.getAllChunksInMap()) {
+			for (final BlockState state : chunk.getTileEntities()) {
+				if (state.getType() != mat)
+					continue;
+				list.add(state);
+			}
+		}
 
-		final Chunk minChunk = world.getChunkAt(new Location(world, minBlock, 0, minBlock));
-		final Chunk maxChunk = world.getChunkAt(new Location(world, maxBlock, 0, maxBlock));
+		return list;
+	}
 
-		for (int x = minChunk.getX(); x < maxChunk.getX(); x++) {
-			for (int z = minChunk.getZ(); z < maxChunk.getZ(); z++) {
-				final Chunk chunk = world.getChunkAt(x, z);
-				for (final BlockState state : chunk.getTileEntities()) {
-					if (state.getType() != mat)
-						continue;
-					list.add(state);
+	public ArrayList<Block> getAllBlocksInMap(Material mat) {
+		final ArrayList<Block> list = new ArrayList<Block>();
+
+		final World world = this.getWorld();
+		if (world == null) {
+			Skywars.get().sendMessage("&cCould not get world for map: ", this.getMap().getName());
+			return list;
+		}
+
+		Skywars.get().sendDebugMessage("chunks gotten: " + this.getAllChunksInMap().size());
+
+		for (final Chunk chunk : this.getAllChunksInMap()) {
+			for (int x = 0; x < 15; x++) {
+				for (int z = 0; z < 15; z++) {
+					for (int y = 0; y < 256; y++) {
+						final Block block = chunk.getBlock(x, y, z);
+						if (block.getType() == mat)
+							list.add(block);
+					}
 				}
 			}
 		}
@@ -1010,14 +933,34 @@ public class Arena {
 	}
 
 	public void fillChests() {
+		if (this.chests.size() <= 0) {
+			this.chests.clear();
+			for (final Vector chestPos : this.getMap().getChests().values()) {
+				final Block block = this.getWorld().getBlockAt(chestPos.toLocation(this.getWorld()));
+				if (block.getState().getType() != XMaterial.CHEST.parseMaterial())
+					continue;
+				this.chests.add((Chest) block.getState());
+			}
+		}
+
+		if (this.chests.size() <= 0) {
+			Skywars.get().sendDebugMessage("&cCould not retrieve chest information from config: %s",
+					this.getMap().getName());
+			this.calculateChests();
+		}
+
 		for (final Chest chest : this.chests) {
 			final Block block = chest.getBlock();
 			if (!(block.getState() instanceof Chest))
 				continue;
 			final Location loc = block.getLocation();
 			ChestManager.fillChest(loc,
-					SkywarsUtils.distance(this.getLocation().toVector(), loc.toVector()) < this.map.getCenterRadius());
+					SkywarsUtils.distance(this.getCenterBlock(), loc.toVector()) < this.map.getCenterRadius());
 		}
+	}
+
+	public Vector getCenterBlock() {
+		return new Vector(0, 0, 0);
 	}
 
 	public void calculateAndFillChests() {
@@ -1069,18 +1012,13 @@ public class Arena {
 		this.status = status;
 	}
 
-	public World getWorldAndLoadIfItIsNotLoaded() {
+	public World getWorld() {
 		if (this.world != null)
 			return this.world;
 
-		final String worldName = this.getMap().getWorldName();
-		if (worldName == null) {
-			Skywars.get().sendDebugMessage("worldname is null: " + this.getMap().getName());
-			final Location loc = this.getLocation();
-			if (this.location == null)
-				return null;
-			return loc.getWorld();
-		}
+		String worldName = this.getWorldName();
+		if (worldName == null)
+			worldName = this.getMap().getWorldName() + System.currentTimeMillis();
 
 		final World w = Bukkit.getWorld(worldName);
 		if (w != null) {
@@ -1091,7 +1029,7 @@ public class Arena {
 		Skywars.get().sendDebugMessage("world is not loaded");
 		Skywars.get().sendDebugMessage("loading world by copying it from the worlds folder");
 
-		final File worldFolder = new File(Skywars.worldsPath, worldName);
+		final File worldFolder = new File(Skywars.worldsPath, this.getMap().getWorldName());
 		if (!worldFolder.isDirectory()) {
 			Skywars.get().sendDebugMessage("could not find the world in the worlds folder");
 			return null;
@@ -1111,6 +1049,15 @@ public class Arena {
 			Skywars.get().sendDebugMessage("copying: %s", worldFolder.getAbsolutePath());
 			Skywars.get().sendDebugMessage("to location: %s", bukkitWorldFolder.getAbsolutePath());
 			FileUtils.copyDirectory(worldFolder, bukkitWorldFolder);
+			this.setWorldName(worldName);
+			final File newParent = new File(Bukkit.getWorldContainer(), worldName);
+			bukkitWorldFolder.renameTo(newParent);
+			final File uid = new File(newParent, "uid.dat");
+			if (uid != null && uid.exists())
+				if (uid.delete())
+					Skywars.get().sendDebugMessage("Deleted uid.dat from %s", newParent.getName());
+				else
+					Skywars.get().sendDebugMessage("&cCould not delete uid.dat from %s", newParent.getName());
 		} catch (final Exception e) {
 			e.printStackTrace();
 			Skywars.get().sendMessage("Could not create world for map: ", this.map.getName());
@@ -1121,16 +1068,8 @@ public class Arena {
 			return null;
 		}
 		final World world = Bukkit.createWorld(new WorldCreator(worldName));
-		Skywars.get().setupWorld(world);
+		MapManager.setupWorld(world);
 		return world;
-	}
-
-	public Location getLocation() {
-		return this.location;
-	}
-
-	public void setLocation(Location location) {
-		this.location = location;
 	}
 
 	public boolean isJoinable() {
@@ -1197,12 +1136,6 @@ public class Arena {
 
 	public ArenaGameSettings getGameSettings() {
 		return this.gameSettings;
-	}
-
-	@Deprecated
-	public void changeGameSettings(Object obj) {
-		this.gameSettings.change(obj);
-		this.broadcastMessage("Changed game settings: " + obj.toString());
 	}
 
 	public void broadcastMessage(String string) {

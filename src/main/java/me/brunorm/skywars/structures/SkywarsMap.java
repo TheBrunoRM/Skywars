@@ -9,18 +9,16 @@ import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.util.Vector;
 
+import com.cryptomorin.xseries.XMaterial;
+
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.SkywarsUtils;
 import me.brunorm.skywars.managers.ArenaManager;
-import me.brunorm.skywars.schematics.Schematic;
-import me.brunorm.skywars.schematics.SchematicHandler;
-import net.querz.nbt.tag.CompoundTag;
-import net.querz.nbt.tag.ListTag;
 
 public class SkywarsMap {
 
@@ -31,36 +29,14 @@ public class SkywarsMap {
 	YamlConfiguration config;
 	File file;
 
-	// this is in case the map uses an schematic file to get the map
-	String schematicFilename;
-	Schematic schematic;
-	boolean schematicError = false;
-
-	// this is in case the arenas method is set to SINGLE_ARENA
-	Location location;
 	String worldName;
 
-	public void setLocation(Location location) {
-		this.location = location;
-	}
-
-	public Location getLocation() {
-		return this.location;
-	}
-
 	public String getWorldName() {
-		if (this.worldName != null)
-			return this.worldName;
-		final Location loc = this.getLocation();
-		if (loc == null)
-			return null;
-		final World world = loc.getWorld();
-		if (world == null)
-			return null;
-		return world.getName();
+		return this.worldName;
 	}
 
 	HashMap<Integer, Vector> spawns = new HashMap<Integer, Vector>();
+	HashMap<Integer, Vector> chests = new HashMap<Integer, Vector>();
 
 	public SkywarsMap(String name, int teamSize) {
 		this.name = name;
@@ -96,20 +72,8 @@ public class SkywarsMap {
 			this.config = YamlConfiguration.loadConfiguration(this.getFile());
 		// Skywars.get().sendDebugMessage("saving parameters in config");
 		this.config.set("teamSize", this.getTeamSize());
-		this.config.set("schematic", this.getSchematicFilename());
 		this.config.set("centerRadius", this.getCenterRadius());
-		if (this.getLocation() == null) {
-			this.config.set("location", null);
-
-			// saves only the world for reloading the whole world
-			this.config.set("world", this.getWorldName());
-		} else {
-			this.config.set("world", null);
-
-			// saves location coordinates for schematic pasting
-			this.config.set("location.world", this.getWorldName());
-			this.setVectorConfig("location", this.getLocation().toVector());
-		}
+		this.config.set("world", this.getWorldName());
 		if (this.getSpawns() == null) {
 			Skywars.get().sendDebugMessage("warning: spawns is null");
 			return;
@@ -144,66 +108,65 @@ public class SkywarsMap {
 
 	public void calculateSpawns() {
 
-		Skywars.get().sendDebugMessage("Calculating spawns for map " + this.name);
+		Skywars.get().sendDebugMessage("&bCalculating spawns for map &6" + this.name);
 
-		final ArrayList<Vector> beaconLocations = new ArrayList<Vector>();
+		final ArrayList<Vector> spawnLocations = new ArrayList<Vector>();
 
-		if (this.getSchematicFilename() != null) {
-			// get beacon locations from schematic data
-			final Vector offset = this.schematic.getOffset();
-			final ListTag<CompoundTag> blockEntities = this.schematic.getBlockEntities().asCompoundTagList();
+		// get beacon locations from world
 
-			for (final CompoundTag tag : blockEntities) {
-				String type = tag.getString("id");
-				if (type == null)
-					type = tag.getString("Id");
-				if (type.equalsIgnoreCase("beacon")) {
-					final int[] posArray = tag.getIntArray("Pos");
-					final Vector pos = posArray.length > 0 ? SchematicHandler.getVector(posArray)
-							: SchematicHandler.getVector(tag);
-					final Vector vector = pos.add(offset).add(new Vector(0, 1, 0));
-					beaconLocations.add(vector);
-				}
-			}
-		} else {
-			// get beacon locations from world
-
-			final Arena arena = ArenaManager.getArenaAndCreateIfNotFound(this);
-			Skywars.get().sendDebugMessage("[debug, skywarsmap-calculateSpawns] arena: " + arena);
-			for (final BlockState state : arena.getAllBlockStatesInMap(Material.BEACON)) {
-				beaconLocations.add(state.getLocation().toVector());
-				Skywars.get().sendDebugMessage("added beacon location from world: " + state.getLocation().toVector());
-			}
+		final Arena arena = ArenaManager.getArenaByMap(this, true);
+		Skywars.get().sendDebugMessage("[debug, skywarsmap-calculateSpawns] arena: " + arena);
+		for (final BlockState state : arena.getAllBlockStatesInMap(XMaterial.BEACON.parseMaterial())) {
+			spawnLocations.add(state.getLocation().toVector());
+			Skywars.get().sendDebugMessage("added beacon location from world: " + state.getLocation().toVector());
 		}
 
-		// saving the number of beacons
-		final int totalBeacons = beaconLocations.size();
+		// get spawns from cages
 
-		// check if there are beacons before resetting spawns
-		if (totalBeacons <= 0) {
-			Skywars.get().sendDebugMessage("warning: no beacons to set the spawns to");
-			return;
+		final Material glass = XMaterial.GLASS.parseMaterial();
+		for (final Block block : arena.getAllBlocksInMap(glass)) {
+			if (block.getLocation().add(1, 1, 0).getBlock().getState().getType() == glass
+					&& block.getLocation().add(-1, 1, 0).getBlock().getState().getType() == glass
+					&& block.getLocation().add(0, 1, 1).getBlock().getState().getType() == glass
+					&& block.getLocation().add(0, 1, -1).getBlock().getState().getType() == glass
+					&& block.getLocation().add(1, 2, 0).getBlock().getState().getType() == glass
+					&& block.getLocation().add(-1, 2, 0).getBlock().getState().getType() == glass
+					&& block.getLocation().add(0, 2, 1).getBlock().getState().getType() == glass
+					&& block.getLocation().add(0, 2, -1).getBlock().getState().getType() == glass) {
+				spawnLocations.add(block.getLocation().toVector().add(new Vector(0, 1, 0)));
+				Skywars.get()
+						.sendDebugMessage("added spawn location from glass cage: " + block.getLocation().toVector());
+			}
 		}
 
 		// clear spawns
 		this.spawns.clear();
 		this.config.set("spawn", null);
 
-		// set the first spawn
-		this.spawns.put(0, beaconLocations.get(0));
-		beaconLocations.remove(0);
+		// saving the number of spawn locations
+		// before modifying the list
+		final int totalSpawnLocations = spawnLocations.size();
+		Skywars.get().sendDebugMessage("got %s spawns", totalSpawnLocations);
 
-		for (int i = 1; i < totalBeacons; i++) {
+		if (totalSpawnLocations <= 0)
+			return;
+
+		// set the first spawn
+		this.spawns.put(0, spawnLocations.get(0));
+		spawnLocations.remove(0);
+
+		// make the spawns be in circular order
+		for (int i = 1; i < totalSpawnLocations; i++) {
 			final Vector previousSpawn = this.spawns.get(i - 1);
-			Vector closest = beaconLocations.get(0);
-			if (beaconLocations.size() > 1) {
-				for (final Vector currentSpawn : beaconLocations) {
+			Vector closest = spawnLocations.get(0);
+			if (spawnLocations.size() > 1) {
+				for (final Vector currentSpawn : spawnLocations) {
 					if (SkywarsUtils.distance(previousSpawn, currentSpawn) < SkywarsUtils.distance(previousSpawn,
 							closest)) {
 						closest = currentSpawn;
 					}
 				}
-				beaconLocations.remove(closest);
+				spawnLocations.remove(closest);
 			}
 			this.spawns.put(i, closest);
 		}
@@ -211,6 +174,10 @@ public class SkywarsMap {
 		this.saveParametersInConfig();
 		this.saveConfig();
 		Skywars.get().sendDebugMessage("spawns calculated and saved in config");
+	}
+
+	public HashMap<Integer, Vector> getChests() {
+		return this.chests;
 	}
 
 	public HashMap<Integer, Vector> getSpawns() {
@@ -261,39 +228,9 @@ public class SkywarsMap {
 		this.centerRadius = centerRadius;
 	}
 
-	public String getSchematicFilename() {
-		return this.schematicFilename;
-	}
-
-	public void setSchematicFilename(String schematic) {
-		this.schematicFilename = schematic;
-	}
-
-	public void loadSchematic() {
-		if (this.schematicError)
-			return;
-		if (this.schematicFilename == null)
-			return;
-		final File schematicFile = Skywars.get().getSchematicFile(this.schematicFilename);
-		if (schematicFile == null) {
-			Skywars.get().sendDebugMessage(
-					"Could not get schematic file for map " + this.getName() + "! (Maybe it doesnt exist?)");
-		}
-		try {
-			this.schematic = SchematicHandler.loadSchematic(schematicFile);
-		} catch (final IOException e) {
-			Skywars.get().sendMessage("&cCould not load schematic for map &b" + this.getName());
-			this.schematicError = true;
-		}
-	}
-
-	public Schematic getSchematic() {
-		if (this.schematic == null)
-			this.loadSchematic();
-		return this.schematic;
-	}
-
 	public void setWorldName(String name) {
+		if (name == null)
+			return;
 		Skywars.get()
 				.sendDebugMessage("[debug] setting world name for map: " + this.getName() + " world name: " + name);
 		this.worldName = name;

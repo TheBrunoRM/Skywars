@@ -225,7 +225,7 @@ public class SkywarsUtils {
 				player.sendMessage("arena is playing");
 			return JoinProblem.ARENA_IS_PLAYING;
 		}
-		if (arena.getWorldAndLoadIfItIsNotLoaded() == null) {
+		if (arena.getWorld() == null) {
 			if (player != null)
 				player.sendMessage("world not set");
 			return JoinProblem.WORLD_NOT_SET;

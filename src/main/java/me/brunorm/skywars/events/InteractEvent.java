@@ -103,7 +103,7 @@ public class InteractEvent implements Listener {
 				if (sign.getLine(1).equals(Messager.color("&e[&bSkyWars&e]"))) {
 					final String mapName = sign.getLine(2);
 					if (mapName != null) {
-						final SkywarsMap map = Skywars.get().getMap(ChatColor.stripColor(mapName));
+						final SkywarsMap map = Skywars.get().getMapManager().getMap(ChatColor.stripColor(mapName));
 						if (map != null) {
 							ArenaManager.joinMap(map, player);
 						} else

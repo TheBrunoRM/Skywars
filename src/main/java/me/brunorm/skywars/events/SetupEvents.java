@@ -85,7 +85,7 @@ public class SetupEvents implements Listener {
 			if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
 				final Location loc = block.getLocation();
 				loc.add(new Vector(0.5, 1, 0.5));
-				final Vector vector = loc.subtract(arena.getLocation()).toVector();
+				final Vector vector = loc.subtract(arena.getCenterBlock()).toVector();
 				Skywars.get().sendDebugMessage("spawn set to vector " + vector);
 				map.setSpawn(n, vector);
 				Skywars.get().NMS().sendTitle(player, "", String.format("&eSpawn %s set!", n + 1));
