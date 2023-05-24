@@ -153,7 +153,7 @@ public class ConfigMenu implements Listener {
 		}
 
 		InventoryUtils.addItem(inventory, XMaterial.BLAZE_ROD.parseMaterial(), 16, spawnName,
-				(String[]) spawnLore.toArray());
+				spawnLore.toArray(new String[0]));
 
 		InventoryUtils.addItem(inventory, XMaterial.BEACON.parseMaterial(), 19, calculateSpawnsName,
 				"&cThis will override current spawns.");
