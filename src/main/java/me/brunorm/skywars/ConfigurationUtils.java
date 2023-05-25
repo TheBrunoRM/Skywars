@@ -135,6 +135,8 @@ public class ConfigurationUtils {
 	}
 
 	public static Location getLocationConfig(World world, ConfigurationSection section) {
+		if (section == null)
+			return null;
 		final Location loc = new Location(world, section.getInt("x"), section.getInt("y"), section.getInt("z"));
 		return loc;
 	}

@@ -133,20 +133,27 @@ public class SkywarsUtils {
 		}
 	}
 
-	public static void teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(Player player) {
+	public static void teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(Player player,
+			boolean force) {
+		if (force && !teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(player))
+			player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+	}
+
+	public static boolean teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(Player player) {
 		final Location lobby = Skywars.get().getLobby();
 		if (lobby != null) {
 			player.getPlayer().teleport(lobby);
-			return;
+			return true;
 		}
 
 		final Location lastLocation = Skywars.get().playerLocations.get(player);
 		if (lastLocation == null) {
 			player.sendMessage("Could not send you back!");
-			return;
+			return false;
 		}
 		player.getPlayer().teleport(lastLocation);
 		Skywars.get().playerLocations.remove(player);
+		return true;
 	}
 
 	public static void resetPlayerServer(Player player) {

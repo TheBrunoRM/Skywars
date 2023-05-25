@@ -315,6 +315,7 @@ public class Arena {
 						splitted.length > 2 ? Float.parseFloat(splitted[2]) : 1);
 			}
 		}
+
 		// restore player
 		this.exitPlayer(player);
 
@@ -383,6 +384,7 @@ public class Arena {
 						.sendMessage(Messager.colorFormat("&6+$%s", SkywarsUtils.formatDouble(winMoney)));
 			}
 		}
+
 		for (final SkywarsUser p : this.getUsers()) {
 			if (p == this.getWinner()) {
 				Skywars.get().NMS().sendTitle(p.getPlayer(), Messager.getMessage("won.title"),
@@ -396,6 +398,7 @@ public class Arena {
 				p.getPlayer().sendMessage(Messager.colorFormat("&c%s &ewon!", this.winner.getPlayer().getName()));
 			}
 		}
+
 		this.removeHolograms();
 		return this.startTimerAndSetStatus(ArenaStatus.RESTARTING);
 	}
@@ -653,12 +656,6 @@ public class Arena {
 			this.exitPlayer(player);
 		}
 		this.users.clear();
-
-		final World world = this.getWorld();
-		// unload the world
-		// it would be loaded again next time
-		ArenaManager.unloadWorld(world, this.getMap());
-
 		this.forcedStart = false;
 		this.forcedStartPlayer = null;
 		this.setStatus(ArenaStatus.WAITING);
@@ -1015,6 +1012,11 @@ public class Arena {
 	public World getWorld() {
 		if (this.world != null)
 			return this.world;
+
+		if (this.getMap().getWorldName() == null) {
+			Skywars.get().sendDebugMessage("map world name is null, could not get world: " + this.getMap().getName());
+			return null;
+		}
 
 		String worldName = this.getWorldName();
 		if (worldName == null)

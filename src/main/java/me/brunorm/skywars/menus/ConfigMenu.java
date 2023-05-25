@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -35,7 +36,6 @@ import mrblobman.sounds.Sounds;
 public class ConfigMenu implements Listener {
 
 	static String teamSizeName = "&e&lTeam Size: &a&l%s";
-	static String worldName = "&e&lWorld: &a&l%s";
 	static String positionName = "&e&lPosition: &a&l%s";
 	static String spawnName = "&e&lSpawn Setup";
 	static String worldFolderName = "&e&lWorld: &a&l%s";
@@ -123,10 +123,6 @@ public class ConfigMenu implements Listener {
 		if (currentWorldName == null)
 			currentWorldName = "none";
 
-		InventoryUtils.addItem(inventory, XMaterial.SADDLE.parseMaterial(), 12,
-				Messager.colorFormat(worldName, currentWorldName), "&eLeft-click to set", "&eto your current world", "",
-				"&eRight-click to unset");
-
 		String currentWorldFile = currentMap.getWorldName();
 		if (currentWorldFile == null)
 			currentWorldFile = "none";
@@ -209,16 +205,6 @@ public class ConfigMenu implements Listener {
 		if (currentWorldName == null)
 			currentWorldName = "none";
 
-		if (name.equals(Messager.colorFormat(worldName, currentWorldName))) {
-			if (event.getClick() == ClickType.RIGHT) {
-				currentMap.setWorldName(null);
-				player.sendMessage("world unset! (left click to set)");
-			} else {
-				currentMap.setWorldName(player.getWorld().getName());
-				player.sendMessage("world set to " + currentMap.getWorldName());
-			}
-		}
-
 		if (name.equals(Messager.color(spawnName))) {
 			final Arena arena = currentArenas.get(player);
 			final ItemStack item = new ItemStack(XMaterial.BLAZE_ROD.parseItem());
@@ -275,8 +261,14 @@ public class ConfigMenu implements Listener {
 			return;
 		}
 
+		final World arenaWorld = currentArena.getWorld();
+
 		if (name.equals(Messager.color(teleportName))) {
-			Location loc = ConfigurationUtils.getLocationConfig(currentArena.getWorld(),
+			if (arenaWorld == null) {
+				player.sendMessage("world not set");
+				return;
+			}
+			Location loc = ConfigurationUtils.getLocationConfig(arenaWorld,
 					currentArena.getMap().getConfig().getConfigurationSection("center"));
 			if (loc == null)
 				loc = currentArena.getWorld().getSpawnLocation();
@@ -290,7 +282,7 @@ public class ConfigMenu implements Listener {
 		}
 
 		if (name.equals(Messager.color(chestsName))) {
-			currentArena.calculateAndFillChests();
+			currentArena.fillChests();
 			player.sendMessage("Chests filled");
 			return;
 		}
@@ -318,7 +310,7 @@ public class ConfigMenu implements Listener {
 			Skywars.get().sendDebugMessage("current file: " + worldFolder.getName());
 			if (worldFolder.getName().equals(worldFolderName)) {
 				currentMap.setWorldName(worldFolderName);
-				player.sendMessage(Messager.colorFormat("&World set to &b%s", currentMap.getWorldName()));
+				player.sendMessage(Messager.colorFormat("&eWorld set to &b%s", currentMap.getWorldName()));
 				break;
 			}
 		}

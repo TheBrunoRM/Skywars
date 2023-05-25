@@ -190,7 +190,34 @@ public class MainCommand implements CommandExecutor {
 			// return true;
 			// TEST COMMANDS
 
-			else if (args[0].equalsIgnoreCase("saveworld")) {
+			else if (args[0].equalsIgnoreCase("importworld")) {
+				if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+					return true;
+				final World world = player.getWorld();
+
+				player.sendMessage("Teleporting any players inside the world outside of it...");
+				for (final Player p : world.getPlayers())
+					SkywarsUtils.teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(p, true);
+
+				if (!Bukkit.unloadWorld(world, true)) {
+					player.sendMessage("Could not save and unload world :(");
+					return true;
+				}
+				player.sendMessage("Saved and unloaded the world: " + world.getName());
+
+				final File worldFolder = new File(Bukkit.getWorldContainer(), world.getName());
+				if (!worldFolder.exists()) {
+					player.sendMessage("Could not find world folder: " + worldFolder.getAbsolutePath());
+					return true;
+				}
+
+				final File newFolder = new File(Skywars.worldsPath, world.getName());
+				if (!worldFolder.renameTo(newFolder)) {
+					player.sendMessage("Could not move world to: " + newFolder.getAbsolutePath());
+				}
+				player.sendMessage("Moved world to the 'worlds' folder inside the plugin folder.");
+				player.sendMessage("You should be able to see the world when selecting world when using /sw config");
+			} else if (args[0].equalsIgnoreCase("saveworld")) {
 				if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 					return true;
 				final World world = player.getWorld();

@@ -1,6 +1,7 @@
 package me.brunorm.skywars.managers;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
@@ -8,6 +9,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import me.brunorm.skywars.Skywars;
+import me.brunorm.skywars.SkywarsUtils;
 import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.SkywarsMap;
 
@@ -85,18 +87,34 @@ public class ArenaManager {
 	public static void removeArena(Arena arena) {
 		Skywars.get().sendDebugMessage("removing arena " + arena.getMap().getName());
 		Skywars.get().getArenas().remove(arena);
-		unloadWorld(arena.getWorld(), arena.getMap());
+		unloadAndDeleteWorldForMap(arena.getWorld(), arena.getMap());
 		arena = null;
 	}
 
-	public static boolean unloadWorld(World world, SkywarsMap map) {
+	public static boolean unloadAndDeleteWorldForMap(World world, SkywarsMap map) {
+		if (Bukkit.getWorld(world.getName()) == null) {
+			Skywars.get().sendDebugMessage("Can't unload world, it does not exist: %s", world.getName());
+			return false;
+		}
+
+		// teleport all players outside of the world
+		// before unloading it
+		final List<Player> players = world.getPlayers();
+		if (players.size() > 0) {
+			Skywars.get().sendDebugMessage("There are %s players in the world,"
+					+ " teleporting them back to the lobby or to their last location...", players.size());
+			for (final Player p : players)
+				SkywarsUtils.teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(p);
+		}
+
 		Skywars.get().sendDebugMessage("Unloading world '%s' for map '%s'", world.getName(), map.getName());
 		boolean unloaded = false;
 		int tries = 0;
 		while (!unloaded) {
-			if (tries >= 5) {
+			if (unloaded || tries >= 5) {
 				break;
 			}
+			tries++;
 			Skywars.get().sendDebugMessage("Trying to unload world: %s (tries: %s)", world.getName(), tries);
 			for (final Player p : world.getPlayers()) {
 				Skywars.get().sendDebugMessage("Teleporting player %s to another world", p.getName());
@@ -104,22 +122,24 @@ public class ArenaManager {
 						.getSpawnLocation());
 			}
 			unloaded = Bukkit.unloadWorld(world, false);
-			tries++;
-		}
-		if (!unloaded) {
-			Skywars.get().sendMessage("Could not unload world '%s' for map '%s'", world.getName(), map.getName());
-		} else {
-			Skywars.get().sendDebugMessage("Successfully unloaded world '%s' for map '%s'", world.getName(),
-					map.getName());
-			try {
-				FileUtils.deleteDirectory(world.getWorldFolder());
-				Skywars.get().sendDebugMessage("Sucessfully deleted world '%s' for map '%s'", world.getName(),
+			if (unloaded) {
+				Skywars.get().sendDebugMessage("Successfully unloaded world '%s' for map '%s'", world.getName(),
 						map.getName());
-			} catch (final Exception e) {
-				e.printStackTrace();
-				Skywars.get().sendMessage("Could not delete world '%s' for map '%s'", world.getName(), map.getName());
 			}
 		}
+
+		if (!unloaded)
+			Skywars.get().sendMessage("Could not unload world '%s' for map '%s'", world.getName(), map.getName());
+
+		try {
+			FileUtils.deleteDirectory(world.getWorldFolder());
+			Skywars.get().sendDebugMessage("Sucessfully deleted world '%s' for map '%s'", world.getName(),
+					map.getName());
+		} catch (final Exception e) {
+			e.printStackTrace();
+			Skywars.get().sendMessage("Could not delete world '%s' for map '%s'", world.getName(), map.getName());
+		}
+
 		return unloaded;
 	}
 }

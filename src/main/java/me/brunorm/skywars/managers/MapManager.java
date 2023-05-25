@@ -76,34 +76,39 @@ public class MapManager {
 		for (final SkywarsMap map : filtered)
 			worldNames.put(map.getWorldName(), map);
 
-		for (final File world : worlds) {
-			if (!world.isDirectory()) {
-				if (world.isFile() && world.getName().endsWith(".yml")) {
+		for (final File worldFolder : worlds) {
+			if (!worldFolder.isDirectory()) {
+				if (worldFolder.isFile() && worldFolder.getName().endsWith(".yml")) {
 					// it may be a map configuration file
-					world.renameTo(new File(Skywars.mapsPath, world.getName()));
+					worldFolder.renameTo(new File(Skywars.mapsPath, worldFolder.getName()));
 				} else {
-					Skywars.get().sendMessage("&6Unknown world file found: &b%s", world.getName());
+					Skywars.get().sendMessage("&6Unknown world file found: &b%s", worldFolder.getName());
 				}
 			}
 
-			if (worldNames.get(world.getName()) == null) {
+			if (worldNames.get(worldFolder.getName()) == null) {
 				// no map has this world as worldname
 				// create map config file for this world
-				final File mapFile = new File(Skywars.mapsPath, world.getName() + ".yml");
-				final YamlConfiguration mapConfig = YamlConfiguration.loadConfiguration(mapFile);
-				mapConfig.set("world", world.getName());
-				mapConfig.set("teamSize", 1);
-				try {
-					mapConfig.save(mapFile);
-				} catch (final IOException e) {
-					e.printStackTrace();
-					Skywars.get().sendMessage("Could not save map configuration file for world: %s", world.getName());
-				}
-				Skywars.get().sendDebugMessage("Saved map configuration file '%s' for world: %s", mapFile.getName(),
-						world.getName());
+				final File mapFile = this.createMapFileFromWorldFolder(worldFolder);
 				this.loadMapFromFile(mapFile);
 			}
 		}
+	}
+
+	public File createMapFileFromWorldFolder(File worldFolder) {
+		final File mapFile = new File(Skywars.mapsPath, worldFolder.getName() + ".yml");
+		final YamlConfiguration mapConfig = YamlConfiguration.loadConfiguration(mapFile);
+		mapConfig.set("world", worldFolder.getName());
+		mapConfig.set("teamSize", 1);
+		try {
+			mapConfig.save(mapFile);
+		} catch (final IOException e) {
+			e.printStackTrace();
+			Skywars.get().sendMessage("Could not save map configuration file for world: %s", worldFolder.getName());
+		}
+		Skywars.get().sendDebugMessage("Saved map configuration file '%s' for world: %s", mapFile.getName(),
+				worldFolder.getName());
+		return mapFile;
 	}
 
 	public void loadMapFromFile(File file) {
