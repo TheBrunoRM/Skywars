@@ -1,5 +1,7 @@
 package me.brunorm.skywars.structures;
 
+import me.brunorm.skywars.Messager;
+
 public class SkywarsEvent {
 
 	Arena arena;
@@ -43,7 +45,7 @@ public class SkywarsEvent {
 		case REFILL:
 			this.arena.broadcastRefillMessage();
 			this.arena.fillChests();
-			this.arena.displayChestHolograms("&eRefilled!");
+			this.arena.displayChestHolograms(Messager.get("chest_holograms.refilled"));
 			break;
 		}
 	}

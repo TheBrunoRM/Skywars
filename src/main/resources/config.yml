@@ -51,6 +51,13 @@ time: # seconds
 # the amount of fireworks throwed at the end of a game
 endFireworks: 3
 
+# invencibility at the start of the game
+# (to prevent fall damage after dropping from the cages)
+invencibility:
+  enabled: true
+  # the amount of ticks the players are invincible for
+  ticks: 40
+
 economy:
   enabled: true
   play: 10

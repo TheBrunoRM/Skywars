@@ -190,7 +190,10 @@ public class MainCommand implements CommandExecutor {
 			// return true;
 			// TEST COMMANDS
 
-			else if (args[0].equalsIgnoreCase("importworld")) {
+			else if (args[0].equalsIgnoreCase("testconfig")) {
+				if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
+					return true;
+			} else if (args[0].equalsIgnoreCase("importworld")) {
 				if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
 					return true;
 				final World world = player.getWorld();

@@ -7,13 +7,17 @@ name: Default kit
 # This is the display icon of the kit, used in the kits menu
 icon: WOODEN_PICKAXE
 
-# This is the items list that will be given to the player when the game starts
+# These are the items that will be given to the player when the game starts
 items:
-- WOODEN_SWORD
+- type: WOODEN_SWORD
+  name: "&bBeginner's Sword"
+  lore:
+  - "&eA very nice sword that"
+  - "&ecan do anything."
+  amount: 1
 - WOODEN_PICKAXE
 - WOODEN_AXE
-- WOODEN_SHOVEL
-- WOODEN_HOE
+- STEAK 3
 
 # This is the price that will be used when players buy the kit
 price: 0

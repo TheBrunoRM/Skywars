@@ -1,16 +1,24 @@
 package me.brunorm.skywars;
 
+import java.io.File;
+import java.util.HashMap;
+
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.event.Listener;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.cryptomorin.xseries.XMaterial;
 
-public class ChestManager implements Listener {
+public class ChestManager {
+
+	HashMap<String, YamlConfiguration> chestConfigurations = new HashMap<String, YamlConfiguration>();
+
+	public HashMap<String, YamlConfiguration> getChestConfigurations() {
+		return this.chestConfigurations;
+	}
 
 	public static void fillChest(Location location, boolean overpowered) {
 		final Block block = location.getBlock();
@@ -20,93 +28,29 @@ public class ChestManager implements Listener {
 		final Inventory inventory = chest.getBlockInventory();
 		inventory.clear();
 
-		if (overpowered) {
-
-			// swords
-
-			final ItemStack sword = new ItemStack(XMaterial.DIAMOND_SWORD.parseItem());
-			sword.addEnchantment(Enchantment.DAMAGE_ALL, 5);
-
-			for (int i = 0; i < Math.floor(Math.random() * 2) - 1; i++) {
-				inventory.setItem(SkywarsUtils.getRandomSlot(inventory), sword);
-			}
-
-			// bow and arrow
-
-			final ItemStack arrows = new ItemStack(XMaterial.ARROW.parseMaterial(), Math.random() > 0.5 ? 32 : 16);
-
-			final ItemStack bow = new ItemStack(XMaterial.BOW.parseItem());
-			bow.addEnchantment(Enchantment.ARROW_DAMAGE, 5);
-
-			if (Math.random() > 0.5) {
-				inventory.setItem(SkywarsUtils.getRandomSlot(inventory), bow);
-				inventory.setItem(SkywarsUtils.getRandomSlot(inventory), arrows);
-			}
-
-			// misc
-
-			final ItemStack snowballs = new ItemStack(XMaterial.SNOWBALL.parseItem());
-			snowballs.setAmount(Math.random() > 0.5 ? 16 : 8);
-
-			final ItemStack eggs = new ItemStack(XMaterial.EGG.parseItem());
-			eggs.setAmount(Math.random() > 0.5 ? 16 : 8);
-
-			inventory.setItem(SkywarsUtils.getRandomSlot(inventory), snowballs);
-			inventory.setItem(SkywarsUtils.getRandomSlot(inventory), eggs);
-
-			final ItemStack lava = new ItemStack(XMaterial.LAVA_BUCKET.parseItem());
-			inventory.setItem(SkywarsUtils.getRandomSlot(inventory), lava);
-
-			final ItemStack water = new ItemStack(XMaterial.WATER_BUCKET.parseItem());
-			inventory.setItem(SkywarsUtils.getRandomSlot(inventory), water);
-		} else {
-
-			// swords
-
-			final ItemStack[] swords = { new ItemStack(XMaterial.IRON_SWORD.parseItem()),
-					new ItemStack(XMaterial.STONE_SWORD.parseItem()), new ItemStack(XMaterial.WOODEN_SWORD.parseItem()),
-					new ItemStack(XMaterial.GOLDEN_SWORD.parseItem()), };
-
-			for (int i = 0; i < Math.floor(Math.random() * 2) - 1; i++) {
-				inventory.setItem(SkywarsUtils.getRandomSlot(inventory),
-						swords[(int) (Math.floor(Math.random() * swords.length + 1) - 1)]);
-			}
-
-			// bow and arrow
-
-			final ItemStack arrows = new ItemStack(XMaterial.ARROW.parseMaterial(), Math.random() > 0.5 ? 32 : 16);
-
-			if (Math.random() > 0.5) {
-				inventory.setItem(SkywarsUtils.getRandomSlot(inventory), new ItemStack(XMaterial.BOW.parseItem()));
-				inventory.setItem(SkywarsUtils.getRandomSlot(inventory), arrows);
-			}
-
-			// misc
-
-			final ItemStack snowballs = new ItemStack(XMaterial.SNOWBALL.parseItem());
-			snowballs.setAmount(Math.random() > 0.5 ? 32 : 16);
-
-			final ItemStack eggs = new ItemStack(XMaterial.EGG.parseItem());
-			eggs.setAmount(Math.random() > 0.5 ? 32 : 16);
-
-			inventory.setItem(SkywarsUtils.getRandomSlot(inventory), snowballs);
-			inventory.setItem(SkywarsUtils.getRandomSlot(inventory), eggs);
-
-			final ItemStack lava = new ItemStack(XMaterial.LAVA_BUCKET.parseItem());
-			inventory.setItem(SkywarsUtils.getRandomSlot(inventory), lava);
-
-			final ItemStack water = new ItemStack(XMaterial.WATER_BUCKET.parseItem());
-			inventory.setItem(SkywarsUtils.getRandomSlot(inventory), water);
+		final YamlConfiguration config = Skywars.get().getChestManager().getChestConfigurations().get("normal");
+		for (final Object a : config.getList("items")) {
+			final ItemStack item = ConfigurationUtils.parseItemFromConfig(a);
+			if (item == null)
+				continue;
+			inventory.setItem(SkywarsUtils.getRandomSlot(inventory), item);
 		}
+	}
 
-		// blocks
-
-		final ItemStack wood = new ItemStack(XMaterial.OAK_WOOD.parseMaterial(), 16);
-
-		final ItemStack stone = new ItemStack(XMaterial.COBBLESTONE.parseMaterial(), 16);
-
-		for (int i = 0; i < Math.ceil(Math.random() * 3); i++) {
-			inventory.setItem(SkywarsUtils.getRandomSlot(inventory), Math.random() > 0.5 ? stone : wood);
+	public void loadChests() {
+		Skywars.get().sendDebugMessage("&eLoading chest configurations...");
+		this.chestConfigurations.clear();
+		final File folder = new File(Skywars.chestsPath);
+		if (!folder.exists())
+			folder.mkdirs();
+		if (folder.listFiles().length <= 0) {
+			Skywars.get().sendDebugMessage("&eSetting up default chest configuration.");
+			ConfigurationUtils.copyDefaultContentsToFile("chests/normal.yml",
+					new File(Skywars.chestsPath, "normal.yml"));
+		}
+		for (final File file : folder.listFiles()) {
+			final YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+			this.chestConfigurations.put(file.getName().split("\\.(\\w+)$")[0], config);
 		}
 	}
 

@@ -24,10 +24,10 @@ public class HolographicDisplaysOldController implements HologramController {
 	@Override
 	public boolean changeHologram(Object id, String text, int line) {
 		final Hologram hologram = this.list.get(id);
-		if (line < hologram.size() && hologram.getLine(line) != null)
+		if (text == null || text.isBlank() || text.isEmpty()) {
 			hologram.removeLine(line);
-		if (text == null)
-			return true;
+			return hologram.getLine(line) == null;
+		}
 		return hologram.insertTextLine(line, text) != null;
 	}
 

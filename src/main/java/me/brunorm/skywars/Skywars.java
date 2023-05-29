@@ -69,6 +69,8 @@ public class Skywars extends JavaPlugin {
 	public static String mapsPath;
 	public static String schematicsPath;
 	public static String playersPath;
+	public static String chestsPath;
+	public static SkywarsConfiguration configuration;
 
 	public static boolean holograms = false;
 	HologramController hologramController;
@@ -144,6 +146,13 @@ public class Skywars extends JavaPlugin {
 
 	boolean updated = false;
 
+	public void Reload() {
+		this.loadConfig();
+		this.mapManager.loadMaps();
+		this.chestManager.loadChests();
+		this.loadKits();
+	}
+
 	@Override
 	public void onEnable() {
 
@@ -154,6 +163,7 @@ public class Skywars extends JavaPlugin {
 		kitsPath = this.getDataFolder() + "/kits";
 		schematicsPath = this.getDataFolder() + "/schematics";
 		playersPath = this.getDataFolder() + "/players";
+		chestsPath = this.getDataFolder() + "/chests";
 
 		this.packageName = this.getServer().getClass().getPackage().getName();
 		this.serverPackageVersion = this.packageName.substring(this.packageName.lastIndexOf('.') + 1);
@@ -173,8 +183,10 @@ public class Skywars extends JavaPlugin {
 
 		this.loadCommands();
 		this.loadEvents();
+
 		this.mapManager.loadMaps();
 		this.mapManager.loadWorlds();
+		this.chestManager.loadChests();
 		this.loadKits();
 
 		this.nmsHandler = new ReflectionNMS();
@@ -279,12 +291,6 @@ public class Skywars extends JavaPlugin {
 		return this.serverPackageVersion;
 	}
 
-	public void Reload() {
-		this.loadConfig();
-		this.mapManager.loadMaps();
-		this.loadKits();
-	}
-
 	private boolean setupEconomy() {
 		if (!economyEnabled)
 			return false;
@@ -318,7 +324,7 @@ public class Skywars extends JavaPlugin {
 			pluginManager.registerEvents(new ProjectileTrails(), this);
 		}
 		final Listener[] listeners = { new InteractEvent(), new Events(), new GamesMenu(), new MapMenu(),
-				new KitsMenu(), new SetupEvents(), new ChestManager(), new ConfigMenu(), new GameOptionsMenu(),
+				new KitsMenu(), new SetupEvents(), new ConfigMenu(), new GameOptionsMenu(),
 				new PlayerInventoryManager(), };
 		for (final Listener listener : listeners) {
 			pluginManager.registerEvents(listener, this);
@@ -339,6 +345,12 @@ public class Skywars extends JavaPlugin {
 			} else
 				this.sendDebugMessage("&7Skipping command &c%s&e...", cmd);
 		}
+	}
+
+	ChestManager chestManager = new ChestManager();
+
+	public ChestManager getChestManager() {
+		return this.chestManager;
 	}
 
 	MapManager mapManager = new MapManager();
@@ -368,7 +380,8 @@ public class Skywars extends JavaPlugin {
 		for (final File file : folder.listFiles()) {
 			final String name = file.getName().replaceFirst("[.][^.]+$", "");
 			final YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-			ConfigurationUtils.createMissingKeys(config, ConfigurationUtils.getDefaultConfig("kits/default.yml"));
+			ConfigurationUtils.createMissingKeys(config, ConfigurationUtils.getDefaultConfig("kits/default.yml"),
+					file.getPath());
 
 			// create kit and set values from config
 			final Kit kit = new Kit(name);
@@ -377,25 +390,21 @@ public class Skywars extends JavaPlugin {
 			kit.setDisplayName(config.getString("name"));
 
 			// load items
-			final List<String> configItems = config.getStringList("items");
-			final ItemStack[] items = new ItemStack[configItems.size()];
-			for (int i = 0; i < configItems.size(); i++) {
-				final String string = configItems.get(i);
-				if (string.split(";").length > 1) {
-					final String item = string.split(";")[0];
-					final int amount = Integer.parseInt(string.split(";")[1]);
-					items[i] = new ItemStack(XMaterial.valueOf(item).parseMaterial(), amount);
-				} else {
-					items[i] = XMaterial.valueOf(string).parseItem();
-				}
+			final List<ItemStack> items = new ArrayList<ItemStack>();
+
+			for (final Object a : config.getList("items")) {
+				final ItemStack item = ConfigurationUtils.parseItemFromConfig(a);
+				if (item == null)
+					continue;
+				items.add(item);
 			}
 
-			kit.setItems(items);
+			kit.setItems(items.toArray(new ItemStack[0]));
 			String iconItem = config.getString("icon");
 			if (iconItem == null)
 				iconItem = "BEDROCK";
 			kit.setIcon(XMaterial.valueOf(iconItem).parseItem());
-			kit.setPrice(config.getDouble("price"));
+			kit.setPrice(config.getDouble("price", 0));
 
 			// add kit to the arena list
 			this.kits.add(kit);
@@ -537,7 +546,8 @@ public class Skywars extends JavaPlugin {
 		try {
 			final File file = this.getPlayerConfigFile(player);
 			config.save(file);
-			ConfigurationUtils.createMissingKeys(config, ConfigurationUtils.getDefaultConfig("players/default.yml"));
+			ConfigurationUtils.createMissingKeys(config, ConfigurationUtils.getDefaultConfig("players/default.yml"),
+					file.getPath());
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
@@ -579,10 +589,10 @@ public class Skywars extends JavaPlugin {
 	public XMaterial getPlayerCaseXMaterial(Player player) {
 		final String glass = this.getPlayerConfig(player).getString("case");
 		if (glass == null)
-			return XMaterial.GLASS;
+			return configuration.defaultCaseMaterial;
 		final XMaterial mat = XMaterial.valueOf(glass);
 		if (mat == null)
-			return XMaterial.GLASS;
+			return configuration.defaultCaseMaterial;
 		return mat;
 	}
 
@@ -657,6 +667,9 @@ public class Skywars extends JavaPlugin {
 		this.sendDebugMessage("Loading configuration...");
 
 		config = ConfigurationUtils.loadConfiguration("config.yml", "config.yml");
+
+		configuration = new SkywarsConfiguration();
+		configuration.load(config);
 
 		scoreboardConfig = ConfigurationUtils.loadConfiguration("scoreboard.yml", "scoreboard.yml");
 

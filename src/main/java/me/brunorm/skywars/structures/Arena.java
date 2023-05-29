@@ -576,8 +576,6 @@ public class Arena {
 					Messager.getMessage("arena_start.subtitle"));
 			SkywarsUtils.playSoundsFromConfig(player.getPlayer(), "sounds.start");
 
-			this.setInvencibility(true);
-
 			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
 				@Override
 				public void run() {
@@ -604,14 +602,18 @@ public class Arena {
 			}, 20 * 10);
 		}
 
-		Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
+		if (Skywars.configuration.invencibilityEnabled) {
+			this.setInvencibility(true);
+			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
 
-			@Override
-			public void run() {
-				Arena.this.setInvencibility(false);
-			}
+				@Override
+				public void run() {
+					Arena.this.setInvencibility(false);
+				}
 
-		}, 40);
+			}, Skywars.configuration.invencibilityTicks);
+		}
+
 		return true;
 	}
 
@@ -1113,8 +1115,8 @@ public class Arena {
 			return false;
 		final Block block = chest.getBlock();
 		final String name = Skywars.get().getHologramController().createHologram(
-				"Skywars_chest_" + block.getLocation().getX() + "_" + block.getLocation().getY() + "_"
-						+ block.getLocation().getZ() + "_" + Instant.now().toEpochMilli(),
+				"Skywars_chest_" + block.getLocation().getBlockX() + "_" + block.getLocation().getBlockY() + "_"
+						+ block.getLocation().getBlockZ() + "_" + Instant.now().toEpochMilli(),
 				block.getLocation().add(new Vector(0.5, 2, 0.5)), "");
 		this.chestHolograms.put(chest, name);
 		return true;
@@ -1131,7 +1133,7 @@ public class Arena {
 					.filter(i -> i != null && i.getType() != XMaterial.AIR.parseMaterial()).collect(Collectors.toList())
 					.size();
 			controller.changeHologram(h.getValue(), Messager.color(text), 0);
-			controller.changeHologram(h.getValue(), contents <= 0 ? Messager.color("&cEmpty") : null, 1);
+			controller.changeHologram(h.getValue(), contents <= 0 ? Messager.get("chest_holograms.empty") : "", 1);
 		}
 
 	}

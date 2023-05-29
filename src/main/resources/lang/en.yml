@@ -139,6 +139,10 @@ chests:
 
 vote: "&7{0} &evoted for &7{1}"
 
+chest_holograms:
+  empty: "&cEmpty"
+  refilled: "&eRefilled!"
+
 countdown:
 - title: "&e%count% seconds"
   subtitle: "&eRight-click the bow to select a kit!"

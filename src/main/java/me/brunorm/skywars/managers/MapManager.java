@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -164,38 +163,21 @@ public class MapManager {
 	}
 
 	public void loadMaps() {
-		final String arenasMethod = Skywars.config.getString("arenasMethod");
-		Skywars.get().sendDebugMessage("&eLoading maps (&b%s&e)", arenasMethod.toUpperCase());
-		if (arenasMethod.equalsIgnoreCase("MULTI_ARENA")) {
-			boolean aborted = false;
-			final String worldName = Skywars.config.getString("arenas.world");
-			if (worldName == null) {
-				Skywars.get().sendMessage("World for arenas in config (&barenas.world&e) is not set!");
-				aborted = true;
-			} else if (Bukkit.getWorld(worldName) == null) {
-				Skywars.get().sendMessage("World for arenas in config (&barenas.world&e) does not exist!");
-				aborted = true;
-			}
-			if (aborted) {
-				Skywars.get().sendMessage("&cCancelled map loading. &eUse &b/skywars reload &eto reload the plugin!");
-				return;
-			}
-		}
-
+		Skywars.get().sendDebugMessage("&eLoading maps...");
 		this.maps.clear();
-
-		// TODO replace with world map instead of schematic file
 
 		final File folder = new File(Skywars.mapsPath);
 		if (!folder.exists()) {
 			folder.mkdirs();
 		}
+
 		if (folder.listFiles().length <= 0) {
 			Skywars.get().sendDebugMessage(Messager.color("&eSetting up default map."));
 			ConfigurationUtils.copyDefaultContentsToFile("maps/MiniTrees.yml",
 					new File(Skywars.mapsPath, "MiniTrees.yml"));
 		}
 
+		// TODO replace with world map instead of schematic file
 		final File schematics = new File(Skywars.schematicsPath);
 		if (!schematics.exists())
 			schematics.mkdirs();

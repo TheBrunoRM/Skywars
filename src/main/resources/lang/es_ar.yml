@@ -115,6 +115,10 @@ startLines:
 where: "&eEstás en &a{0}"
 the_console: "la consola"
 
+chest_holograms:
+  empty: "&cVacío"
+  refilled: "&e¡Rellenado!"
+
 countdown:
 - title: "&e%count% segundos"
   subtitle: "&e¡Hacé click derecho con el arco para seleccionar tu equipo!"

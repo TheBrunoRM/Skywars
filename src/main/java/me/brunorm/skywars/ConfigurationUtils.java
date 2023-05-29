@@ -7,12 +7,22 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import com.cryptomorin.xseries.XMaterial;
 
 public class ConfigurationUtils {
 
@@ -31,22 +41,26 @@ public class ConfigurationUtils {
 
 	}
 
-	public static YamlConfiguration loadConfiguration(String name, String defaultFileName, String altDefaultFileName) {
+	public static YamlConfiguration loadConfiguration(String fileName, String defaultFileName,
+			String altDefaultFileName) {
 		if (Skywars.get().getResource(defaultFileName) == null)
-			return loadConfiguration(name, altDefaultFileName);
-		return createMissingKeys(loadConfiguration(name, defaultFileName), getDefaultConfig(altDefaultFileName));
+			return loadConfiguration(fileName, altDefaultFileName);
+		return createMissingKeys(loadConfiguration(fileName, defaultFileName), getDefaultConfig(altDefaultFileName),
+				fileName);
 	}
 
-	public static YamlConfiguration loadConfiguration(String name, String defaultFileName) {
-		final File file = new File(Skywars.get().getDataFolder(), name);
+	public static YamlConfiguration loadConfiguration(String fileName, String defaultFileName) {
+		final File file = new File(Skywars.get().getDataFolder(), fileName);
 		if (!file.exists()) {
-			Skywars.get().sendDebugMessage("creating file " + name);
+			Skywars.get().sendDebugMessage("creating file " + fileName);
 			copyDefaultContentsToFile(defaultFileName, file);
 		}
-		return createMissingKeys(YamlConfiguration.loadConfiguration(file), getDefaultConfig(defaultFileName));
+		return createMissingKeys(YamlConfiguration.loadConfiguration(file), getDefaultConfig(defaultFileName),
+				fileName);
 	}
 
-	public static YamlConfiguration createMissingKeys(YamlConfiguration conf, YamlConfiguration defaultConfig) {
+	public static YamlConfiguration createMissingKeys(YamlConfiguration conf, YamlConfiguration defaultConfig,
+			String fileName) {
 
 		try {
 			final ConfigurationSection section = defaultConfig.getConfigurationSection("");
@@ -55,7 +69,7 @@ public class ConfigurationUtils {
 
 			for (final String key : section.getKeys(true)) {
 				if (conf.get(key) == null) {
-					Skywars.get().sendMessage("&cWarning: key &b%s &cis missing in file &b%s", key, conf.getName());
+					Skywars.get().sendMessage("&cWarning: key &b%s &cis missing in file &b%s", key, fileName);
 					modified = true;
 
 					// setting the key in the configuration
@@ -139,5 +153,63 @@ public class ConfigurationUtils {
 			return null;
 		final Location loc = new Location(world, section.getInt("x"), section.getInt("y"), section.getInt("z"));
 		return loc;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static ItemStack parseItemFromConfig(Object a) {
+		if (a instanceof String) {
+			final String[] splitted = ((String) a).split("[\\s\\W]+");
+			final Optional<XMaterial> xmat = XMaterial.matchXMaterial(splitted[0]);
+			if (xmat.isEmpty())
+				return null;
+			final Material mat = xmat.get().parseMaterial();
+			final int amount = splitted.length > 1 ? Integer.parseInt(splitted[1]) : mat.getMaxStackSize();
+			return new ItemStack(mat, amount);
+		} else if (a instanceof HashMap) {
+			final HashMap<Object, Object> hash = (HashMap<Object, Object>) a;
+			if (hash.size() == 1) {
+				final Entry<Object, Object> b = hash.entrySet().iterator().next();
+				final Optional<XMaterial> xmat = XMaterial.matchXMaterial(b.getKey().toString());
+				if (xmat == null)
+					return null;
+				final Material mat = xmat.get().parseMaterial();
+				final int amount = Integer.parseInt(b.getValue().toString());
+				return new ItemStack(mat, amount);
+			} else {
+				final Optional<XMaterial> xmat = XMaterial.matchXMaterial(hash.get("type").toString());
+				if (xmat == null)
+					return null;
+				final Material mat = xmat.get().parseMaterial();
+				int amount = mat.getMaxStackSize();
+				if (hash.containsKey("amount"))
+					try {
+						amount = Integer.parseInt(hash.get("amount").toString());
+					} catch (final NumberFormatException e) {
+					}
+
+				final ItemStack item = new ItemStack(mat, amount);
+				final ItemMeta meta = item.getItemMeta();
+
+				if (hash.containsKey("name")) {
+					final String itemName = hash.get("name").toString();
+					meta.setDisplayName(Messager.color(itemName));
+				}
+
+				final Object lore = hash.get("lore");
+				if (lore != null) {
+					final List<String> loreLines = new ArrayList<String>();
+					if (lore instanceof String)
+						loreLines.add(Messager.color(lore.toString()));
+					else if (lore instanceof ArrayList)
+						for (final String loreLine : ((ArrayList<String>) lore))
+							loreLines.add(Messager.color(loreLine));
+					meta.setLore(loreLines);
+				}
+
+				item.setItemMeta(meta);
+				return item;
+			}
+		}
+		return null;
 	}
 }
