@@ -62,7 +62,8 @@ public class SkywarsUtils {
 			final String balance = Skywars.get().getEconomy() != null
 					? SkywarsUtils.formatDouble(Skywars.get().getEconomy().getBalance(player))
 					: "Vaultn't";
-			text = text.replaceAll(getVariableCode("coins"), balance)
+			text = text.replaceAll(getVariableCode("coins"), balance).replaceAll(getVariableCode("money"), balance)
+					.replaceAll(getVariableCode("balance"), balance).replaceAll(getVariableCode("economy"), balance)
 					.replaceAll(getVariableCode("souls"), Skywars.get().getPlayerSouls(player).toString())
 					.replaceAll(getVariableCode("totalwins"), Skywars.get().getPlayerTotalWins(player).toString())
 					.replaceAll(getVariableCode("totalkills"), Skywars.get().getPlayerTotalKills(player).toString())
@@ -121,21 +122,21 @@ public class SkywarsUtils {
 
 		switch (arena.getStatus()) {
 		case WAITING:
-			return config.getString("status.waiting");
+			return Messager.get("status.waiting");
 		case STARTING:
-			return config.getString("status.starting");
+			return Messager.get("status.starting");
 		case PLAYING:
-			return config.getString("status.playing");
+			return Messager.get("status.playing");
 		case RESTARTING:
-			return config.getString("status.restarting");
+			return Messager.get("status.restarting");
 		default:
-			return "";
+			return Messager.get("status.unknown");
 		}
 	}
 
 	public static void teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(Player player,
 			boolean force) {
-		if (force && !teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(player))
+		if (!teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(player) && force)
 			player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
 	}
 
@@ -157,6 +158,7 @@ public class SkywarsUtils {
 	}
 
 	public static void resetPlayerServer(Player player) {
+		// synchronizes the player's time and weather with the server time and weather
 		player.resetPlayerTime();
 		player.resetPlayerWeather();
 	}
@@ -196,9 +198,6 @@ public class SkywarsUtils {
 		for (final PotionEffect e : player.getActivePotionEffects()) {
 			player.removePotionEffect(e.getType());
 		}
-
-		// synchronizes the player's time with the server time
-		player.resetPlayerTime();
 	}
 
 	public static JoinProblem joinableCheck(Arena arena) {

@@ -1,7 +1,5 @@
 title: '&e&lSkyWars'
 
-# if you want to disable this just put it like this:
-# lobby: {}
 lobby:
 - '&7%date%'
 - ''

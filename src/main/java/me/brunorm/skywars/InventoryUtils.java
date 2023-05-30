@@ -28,10 +28,6 @@ public class InventoryUtils {
 		return inventory;
 	}
 
-	public static Inventory addItem(Inventory inventory, ItemStack item, int slot, String displayName) {
-		return addItem(inventory, item, slot, displayName);
-	}
-
 	public static Inventory addItem(Inventory inventory, Material material, int slot, String displayName,
 			String... loreLines) {
 		return addItem(inventory, new ItemStack(material), slot, displayName, loreLines);

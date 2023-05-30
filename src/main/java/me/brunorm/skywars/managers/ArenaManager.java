@@ -104,7 +104,7 @@ public class ArenaManager {
 			Skywars.get().sendDebugMessage("There are %s players in the world,"
 					+ " teleporting them back to the lobby or to their last location...", players.size());
 			for (final Player p : players)
-				SkywarsUtils.teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(p);
+				SkywarsUtils.teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(p, true);
 		}
 
 		Skywars.get().sendDebugMessage("Unloading world '%s' for map '%s'", world.getName(), map.getName());

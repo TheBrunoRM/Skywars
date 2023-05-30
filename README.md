@@ -55,8 +55,14 @@ You can set the arena's schematic through the configuration menu
 ### Creating signs
 
 To create a sign, make it like this:
+* 2nd line: [SkyWars]
+* 3rd line: the arena name.
+
+\* The signs are case insensitive, they get parsed and properly formatted after.
 
 ![Sign image](https://cdn.discordapp.com/attachments/835594221456064544/876946375110189146/unknown.png)
+
+To remove a sign, sneak (shift) while on creative mode and left click.
 
 ## Plugin hooks
 The plugin will hook to other plugins to add extra functionality.

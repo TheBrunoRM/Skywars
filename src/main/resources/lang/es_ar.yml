@@ -2,7 +2,7 @@ status:
   waiting: Esperando jugadores...
   starting: Empezando &a%seconds%s
   playing: '&a%players% &rjugadores restantes'
-  ended: '&aEl juego terminó!'
+  ended: '&aEl juego terminÃ³!'
   restarting: Reiniciando en &a%seconds%s
 
 language_name: Argentino
@@ -14,38 +14,43 @@ events:
 
 items:
   show_context: true
-  context: '&7(Click derecho)'
+  context: '&7(Clic derecho)'
   
   KIT_SELECTOR:
-    name: '&a&lSelector de equipo'
+    name: '&a&lSelector de kit'
     description:
-    - "&7Da click derecho para seleccionar tu equipo"
-    
+    - "&7Da clic derecho para seleccionar tu kit"
+  
+  START_GAME:
+    name: "&6&lEmpezar juego"
+  
+  STOP_GAME:
+    name: "&c&lDetener juego"
+  
   GAME_OPTIONS: 
     name: '&b&lOpciones del juego'
     description:
-    - "&7Right-click to change the game options"
+    - "&7Da clic derecho para cambiar los ajustes del juego"
     
   SPECTATOR_OPTIONS:
     name: '&b&lOpciones de espectador'
     description:
-    - "&7Right-click to change your spectator options"
+    - "&7Da clic derecho para cambiar tus opciones de espectador"
     
   LEAVE:
     name: '&c&lSalir'
     description:
-    - "&7Right-click to go back to the"
-    - "&7main lobby."
+    - "&7HacÃ© clic derecho para volver al lobby principal."
     
   PLAY_AGAIN:
     name: '&b&lJugar de vuelta'
     description:
-    - "&7Right-click to play again"
+    - "&7HacÃ© clic derecho para jugar de nuevo"
     
   TELEPORTER:
     name: '&b&lTeletransportador'
     description:
-    - "&7Right-click to teleport to players"
+    - "&7HacÃ© clic derecho para teletransportarte hacia otros jugadores"
 
 arena_join:
   title: "&eSkyWars"
@@ -55,47 +60,51 @@ arena_join:
 arena_start:
   title: "&c&lMODO INSANO"
   subtitle: ""
-  message: "&e¡Las jaulas se abrieron! &c¡PELEÁ!"
+  message: "&eÂ¡Las jaulas se abrieron! &cÂ¡A PELEAR!"
 
 died:
-   title: "&c&l¡MORISTE!"
-   subtitle: "&7¡Ahora sos un espectador!"
+   title: "&c&lÂ¡MORISTE!"
+   subtitle: "&7Â¡Ahora sos un espectador!"
    message: ""
 
 won:
   title: "&6&lGANASTE"
-  subtitle: "&7¡Felicitaciones!"
+  subtitle: "&7Â¡Felicitaciones!"
   message: ""
 
 actionbar:
   waiting: '&eKit actual: &a%kit%'
 
-RELOADED: "&aConfiguración de Skywars recargada."
+RELOADED: "&aConfiguraciÃ³n de Skywars recargada."
 NO_MAP: "&cNo hay mapa."
-NO_PERMISSION: "&cNo tenés permisos."
-NOT_JOINED: "&c¡No estás unido!"
-CANT_EXECUTE_COMMAND_IN_CONSOLE: "&c¡No podés ejecutar este comando en la consola!"
-NO_ARENA: "&cNo se encontró la arena &b{0}"
-MAIN_LOBBY_NOT_SET: "&cEl lobby principal no está establecido."
-TELEPORTED_TO_MAIN_LOBBY: "&e¡Te teletransportamos al lobby!"
-MAIN_LOBBY_SET: "&eEl lobby principal se estableció a tu posición actual."
-COUNTDOWN_STOPPED: "&eCuenta regresiva detenida, ¡no hay suficientes jugadores para empezar el juego!"
+NO_PERMISSION: "&cNo tenÃ©s permisos."
+NOT_JOINED: "&cÂ¡No estÃ¡s unido!"
+CANT_EXECUTE_COMMAND_IN_CONSOLE: "&cÂ¡No podÃ©s ejecutar este comando en la consola!"
+NO_ARENA: "&cNo se encontrÃ³ la arena &b{0}"
+MAIN_LOBBY_NOT_SET: "&cEl lobby principal no estÃ¡ establecido."
+TELEPORTED_TO_MAIN_LOBBY: "&eÂ¡Te teletransportamos al lobby!"
+MAIN_LOBBY_SET: "&eEl lobby principal se estableciÃ³ a tu posiciÃ³n actual."
+COUNTDOWN_STOPPED: "&eCuenta regresiva detenida, Â¡no hay suficientes jugadores para empezar el juego!"
 
-JOIN: "&e¡&7{0} &ese unió (&b{1}&e/&b{2}&e)!"
+JOIN: "&eÂ¡&7{0} &ese uniÃ³ (&b{1}&e/&b{2}&e)!"
 
-LEAVE: "&7{0} &ese salió (&b{1}&e/&b{2}&e)"
+LEAVE: "&7{0} &ese saliÃ³ (&b{1}&e/&b{2}&e)"
 LEAVE_SELF: "&eTe saliste de la arena &b%arena%"
 
-FORCED_START: "&e¡&b&l{0} &e&lforzó el juego a iniciar!"
+already_started: "&cÂ¡El juego ya empezÃ³!"
+started_countdown: "&aÂ¡Se ha empezado la cuenta regresiva!"
+started_game: "&aÂ¡Se ha iniciado el juego!"
+
+FORCED_START: "&eÂ¡&b&l{0} &e&lforzÃ³ el juego a iniciar!"
 
 refill:
   title: ""
-  subtitle: "&e¡Los cofres se rellenaron!"
-  message: "&e¡Los cofres se rellenaron!"
+  subtitle: "&eÂ¡Los cofres se rellenaron!"
+  message: "&eÂ¡Los cofres se rellenaron!"
 
-GAME_STARTING: "&e¡El juego está empezando en &6{0} &esegundos!"
-GAME_STARTING_SECOND: "&e¡El juego está empezando en %count% &esegundo!"
-GAME_STARTING_SECONDS: "&e¡El juego está empezando en %count% &esegundos!"
+GAME_STARTING: "&eÂ¡El juego estÃ¡ empezando en &6{0} &esegundos!"
+GAME_STARTING_SECOND: "&eÂ¡El juego estÃ¡ empezando en %count% &esegundo!"
+GAME_STARTING_SECONDS: "&eÂ¡El juego estÃ¡ empezando en %count% &esegundos!"
 
 PLAYERS_REMAINING: "&c{0} &ejugadores restantes"
 
@@ -105,28 +114,42 @@ startLines:
   - ""
   - "                                  &f&lSkyWars"
   - ""
-  - "    &e&lAgarrá recursos y equipamiento en tu isla"
+  - "    &e&lAgarrÃ¡ recursos y equipamiento en tu isla"
   - "      &e&lpara eliminar a todos los otros jugadores."
-  - "     &e&l¡Andá a la isla del centro para cofres especiales"
+  - "     &e&lÂ¡AndÃ¡ a la isla del centro para cofres especiales"
   - "                       &e&lcon objetos especiales!"
   - ""
   - "&a&l---------------------------------------------"
 
-where: "&eEstás en &a{0}"
+where: "&eEstÃ¡s en &a{0}"
 the_console: "la consola"
 
+time:
+  DAY: "&aDÃ­a"
+  NIGHT: "&bNoche"
+
+weather:
+  CLEAR: "&bClima despejado"
+  RAIN: "&bClima lluvioso"
+
+chests:
+  NORMAL: "&aCofres normales"
+  OVERPOWERED: "&cCofres re chetados"
+
+vote: "&7{0} &evotÃ³ para &7{1}"
+
 chest_holograms:
-  empty: "&cVacío"
-  refilled: "&e¡Rellenado!"
+  empty: "&cVacÃ­o"
+  refilled: "&eÂ¡Rellenado!"
 
 countdown:
 - title: "&e%count% segundos"
-  subtitle: "&e¡Hacé click derecho con el arco para seleccionar tu equipo!"
+  subtitle: "&eÂ¡HacÃ© clic derecho con el arco para seleccionar tu kit!"
   color: 6
   range: 10
   #message:
   #sound:
 - title: "&c%count%"
-  subtitle: "&e¡Preparate para pelear!"
+  subtitle: "&eÂ¡Preparate para pelear!"
   color: c
   range: 5-1

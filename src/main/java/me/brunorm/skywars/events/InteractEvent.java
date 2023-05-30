@@ -94,34 +94,39 @@ public class InteractEvent implements Listener {
 				arena.clear();
 				event.setCancelled(true);
 			}
-		} else if (Skywars.get().getConfig().getBoolean("signsEnabled") && event.getClickedBlock() != null) {
-			if (event.getClickedBlock().getType() == XMaterial.OAK_SIGN.parseMaterial()
-					|| event.getClickedBlock().getType() == XMaterial.OAK_WALL_SIGN.parseMaterial()) {
-				if (player.getGameMode() == GameMode.CREATIVE && player.isSneaking())
-					return;
-				final Sign sign = (Sign) event.getClickedBlock().getState();
-				if (sign.getLine(1).equals(Messager.color("&e[&bSkyWars&e]"))) {
-					final String mapName = sign.getLine(2);
-					if (mapName != null) {
-						final SkywarsMap map = Skywars.get().getMapManager().getMap(ChatColor.stripColor(mapName));
-						if (map != null) {
-							ArenaManager.joinMap(map, player);
-						} else
-							player.sendMessage(String.format("map %s not found", mapName));
-					}
-				}
-				if (sign.getLine(1).equals("random")) {
-					if (sign.getLine(2).equals("skywars")) {
-						event.setCancelled(true);
-						ArenaManager.joinRandomMap(player);
-					}
-				}
-				if (sign.getLine(1).equals("play")) {
-					if (sign.getLine(2).equals("skywars")) {
-						event.setCancelled(true);
-						MapMenu.open(player);
-					}
-				}
+			return;
+		}
+
+		if (!Skywars.get().getConfig().getBoolean("signsEnabled"))
+			return;
+		if (event.getClickedBlock() == null)
+			return;
+		if (!(event.getClickedBlock().getState() instanceof Sign))
+			return;
+		if (player.getGameMode() == GameMode.CREATIVE && player.isSneaking())
+			return;
+
+		final Sign sign = (Sign) event.getClickedBlock().getState();
+		if (sign.getLine(1).equals(Messager.color("&e[&bSkyWars&e]"))) {
+			final String mapName = sign.getLine(2);
+			if (mapName != null) {
+				final SkywarsMap map = Skywars.get().getMapManager().getMap(ChatColor.stripColor(mapName));
+				if (map != null) {
+					ArenaManager.joinMap(map, player);
+				} else
+					player.sendMessage(String.format("map %s not found", mapName));
+			}
+		}
+		if (sign.getLine(1).equals("random")) {
+			if (sign.getLine(2).equals("skywars")) {
+				event.setCancelled(true);
+				ArenaManager.joinRandomMap(player);
+			}
+		}
+		if (sign.getLine(1).equals("play")) {
+			if (sign.getLine(2).equals("skywars")) {
+				event.setCancelled(true);
+				MapMenu.open(player);
 			}
 		}
 	}

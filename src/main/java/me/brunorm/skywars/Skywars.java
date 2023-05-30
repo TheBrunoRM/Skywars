@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -40,6 +41,7 @@ import me.brunorm.skywars.holograms.DecentHologramsController;
 import me.brunorm.skywars.holograms.HologramController;
 import me.brunorm.skywars.holograms.HolographicDisplaysNewController;
 import me.brunorm.skywars.holograms.HolographicDisplaysOldController;
+import me.brunorm.skywars.managers.ArenaManager;
 import me.brunorm.skywars.managers.MapManager;
 import me.brunorm.skywars.menus.ConfigMenu;
 import me.brunorm.skywars.menus.GameOptionsMenu;
@@ -168,6 +170,32 @@ public class Skywars extends JavaPlugin {
 		this.packageName = this.getServer().getClass().getPackage().getName();
 		this.serverPackageVersion = this.packageName.substring(this.packageName.lastIndexOf('.') + 1);
 
+		final File worldsToDeleteFile = new File(this.getDataFolder(), "delete_worlds.yml");
+		if (worldsToDeleteFile.exists()) {
+			final YamlConfiguration deleteWorldsConfig = YamlConfiguration.loadConfiguration(worldsToDeleteFile);
+			final List<String> list = deleteWorldsConfig.getStringList("worlds");
+			for (final String worldName : list) {
+				final World world = Bukkit.getWorld(worldName);
+				if (world == null) {
+					this.sendDebugMessage("Could not find word for deletion: " + worldName);
+					list.remove(worldName);
+					continue;
+				}
+				if (ArenaManager.unloadAndDeleteWorldForMap(world, null))
+					list.remove(worldName);
+				else
+					this.sendDebugMessage("Could not delete world from deletion list: " + worldName);
+
+			}
+			deleteWorldsConfig.set("worlds", list);
+			try {
+				deleteWorldsConfig.save(worldsToDeleteFile);
+			} catch (final IOException e) {
+				e.printStackTrace();
+				this.sendMessage("Could not save the world deletion list to file: " + worldsToDeleteFile.getPath());
+			}
+		}
+
 		// load stuff
 		if (!this.loadConfig()) {
 			this.sendMessage("Could not load configuration files! Disabling plugin.");
@@ -277,8 +305,28 @@ public class Skywars extends JavaPlugin {
 		});
 
 		this.sendDebugMessage("Stopping arenas...");
+		// add world names to a file
+		// to try to delete those worlds
+		// the next time the plugin starts up
+		final List<String> worldNames = new ArrayList<String>(this.arenas.size());
 		for (final Arena arena : this.arenas) {
 			arena.clear(false);
+			worldNames.add(arena.getWorldName());
+		}
+		final File file = new File(this.getDataFolder(), "delete_worlds.yml");
+		try {
+			if (!file.exists()) {
+				file.createNewFile();
+				FileUtils.writeStringToFile(file, //
+						"# these are the worlds that the plugin will" + //
+								"try to delete the next time it starts up");
+			}
+			if (!FileUtils.readLines(file).stream().map(l -> l.split("#")[0]).anyMatch(l -> l.startsWith("worlds:")))
+				FileUtils.writeStringToFile(file, "worlds:");
+			FileUtils.writeLines(file, worldNames.stream().map(n -> "- " + n).toList());
+		} catch (final IOException e) {
+			e.printStackTrace();
+			this.sendMessage("Could not write world list to file.");
 		}
 		this.arenas.clear();
 	}
