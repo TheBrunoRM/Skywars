@@ -27,14 +27,14 @@ You can start or reload the server after installing the plugin.
 ## How to use
 
 Type **/sw help** to see the available commands.\
-The plugin comes with a default arena and kit,\
-so you should be able to play right after installing the plugin.
+Add maps into the "worlds" folder; the plugin will\
+load the worlds and create the configuration files for their maps.
 
 To disable the default lobby scoreboard,\
 set the value of **lobby** in the **scoreboard.yml** file to **false**.
 
 If the plugin doesn't have a **main lobby** set,\
-players will be teleported to the last location they were at.\
+players will be teleported to the **last location** they were at.\
 If it is set, then they will be teleported to it.
 
 ### How to play
@@ -103,9 +103,11 @@ The plugin will hook to other plugins to add extra functionality.
 
 ## Compatibility issues
   * **Schematic files**\
-    The plugin currently works with both .schematic and .schem file types,\
-    but there are some problems with some block types and metadata, like with chests.
-    If you find any way to improve it, you're welcome to help!
+    The plugin no longer works with schematic files.\
+    I've decided to drop support for these type of files\
+    for various reasons like compatibility.\
+    I may consider implementing a new system for this.\
+    For now, the plugin works with world files.
   * **Actionbar messages on Bukkit**\
     do not work because of Bukkit limitations on message sending.\
     If you find a way to send an actionbar message on Bukkit, please open an issue or a pull request.
