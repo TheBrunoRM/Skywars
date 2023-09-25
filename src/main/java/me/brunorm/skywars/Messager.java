@@ -1,5 +1,7 @@
 package me.brunorm.skywars;
 
+import java.util.List;
+
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -17,7 +19,7 @@ public class Messager {
 		return ChatColor.translateAlternateColorCodes(ALT_COLOR_CHAR, text);
 	}
 
-	public static String colorFormat(String text, Object... format) {
+	public static String color(String text, Object... format) {
 		return Messager.color(String.format(text, format));
 	}
 
@@ -26,7 +28,11 @@ public class Messager {
 	}
 
 	public static String getMessage(String name, Object... format) {
-		String msg = Skywars.langConfig.getString(name);
+		String msg = "";
+		if (Skywars.langConfig.get(name) instanceof List)
+			msg = String.join("\n", Skywars.langConfig.getStringList(name));
+		else
+			msg = Skywars.langConfig.getString(name);
 		if (msg == null)
 			return name;
 		for (int i = 0; i < format.length; i++) {

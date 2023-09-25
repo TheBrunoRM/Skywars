@@ -7,6 +7,8 @@ status:
 
 language_name: Argentino
 
+none: "&rninguno"
+
 events:
   format: "&a%name% %time%"
   refill: "Rellenado"
@@ -83,6 +85,7 @@ CANT_EXECUTE_COMMAND_IN_CONSOLE: "&c¡No podés ejecutar este comando en la cons
 NO_ARENA: "&cNo se encontró la arena &b{0}"
 MAIN_LOBBY_NOT_SET: "&cEl lobby principal no está establecido."
 TELEPORTED_TO_MAIN_LOBBY: "&e¡Te teletransportamos al lobby!"
+COULD_NOT_SEND_BACK: "&c¡No te pudimos llevar a donde estabas antes!"
 MAIN_LOBBY_SET: "&eEl lobby principal se estableció a tu posición actual."
 COUNTDOWN_STOPPED: "&eCuenta regresiva detenida, ¡no hay suficientes jugadores para empezar el juego!"
 

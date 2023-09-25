@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandExecutor;
@@ -36,13 +37,16 @@ import me.brunorm.skywars.events.InteractEvent;
 import me.brunorm.skywars.events.MessageSound;
 import me.brunorm.skywars.events.ProjectileTrails;
 import me.brunorm.skywars.events.SetupEvents;
-import me.brunorm.skywars.events.SignEvents;
+import me.brunorm.skywars.handlers.SkywarsActionbar;
+import me.brunorm.skywars.handlers.SkywarsScoreboard;
+import me.brunorm.skywars.handlers.SkywarsTablist;
 import me.brunorm.skywars.holograms.DecentHologramsController;
 import me.brunorm.skywars.holograms.HologramController;
 import me.brunorm.skywars.holograms.HolographicDisplaysNewController;
 import me.brunorm.skywars.holograms.HolographicDisplaysOldController;
-import me.brunorm.skywars.managers.ArenaManager;
+import me.brunorm.skywars.managers.ChestManager;
 import me.brunorm.skywars.managers.MapManager;
+import me.brunorm.skywars.managers.SignManager;
 import me.brunorm.skywars.menus.ConfigMenu;
 import me.brunorm.skywars.menus.GameOptionsMenu;
 import me.brunorm.skywars.menus.GamesMenu;
@@ -64,8 +68,8 @@ public class Skywars extends JavaPlugin {
 	public String name = this.pdf.getName();
 	public String version = this.pdf.getVersion();
 	public List<String> authors = this.pdf.getAuthors();
-	private final String prefix = Messager.colorFormat("&6[&e%s&6]&e", this.name);
-	private final String debugPrefix = Messager.colorFormat("&7[&c%s&7]&e", this.name);
+	private final String prefix = Messager.color("&6[&e%s&6]&e", this.name);
+	private final String debugPrefix = Messager.color("&7[&c%s&7]&e", this.name);
 	public static String kitsPath;
 	public static String worldsPath;
 	public static String mapsPath;
@@ -75,17 +79,22 @@ public class Skywars extends JavaPlugin {
 	public static SkywarsConfiguration configuration;
 
 	public static boolean holograms = false;
+	public static boolean placeholders = false;
 	HologramController hologramController;
 	public static boolean economyEnabled;
 	Economy economy;
 	RegisteredServiceProvider<Economy> economyProvider;
+	SignManager signManager;
+
+	public SignManager getSignManager() {
+		return this.signManager;
+	}
 
 	public Economy getEconomy() {
 		return this.economy;
 	}
 
 	public static YamlConfiguration config;
-	public static YamlConfiguration scoreboardConfig;
 	public static YamlConfiguration langConfig;
 	public static YamlConfiguration lobbyConfig;
 
@@ -152,6 +161,7 @@ public class Skywars extends JavaPlugin {
 		this.loadConfig();
 		this.mapManager.loadMaps();
 		this.chestManager.loadChests();
+		this.signManager.loadSigns();
 		this.loadKits();
 	}
 
@@ -170,22 +180,28 @@ public class Skywars extends JavaPlugin {
 		this.packageName = this.getServer().getClass().getPackage().getName();
 		this.serverPackageVersion = this.packageName.substring(this.packageName.lastIndexOf('.') + 1);
 
+		this.sendDebugMessage("&bServer version: &e%s (&a%s&e)", this.packageName, this.serverPackageVersion);
+
 		final File worldsToDeleteFile = new File(this.getDataFolder(), "delete_worlds.yml");
 		if (worldsToDeleteFile.exists()) {
 			final YamlConfiguration deleteWorldsConfig = YamlConfiguration.loadConfiguration(worldsToDeleteFile);
 			final List<String> list = deleteWorldsConfig.getStringList("worlds");
-			for (final String worldName : list) {
+			for (final String worldName : new ArrayList<String>(list)) {
 				final World world = Bukkit.getWorld(worldName);
-				if (world == null) {
-					this.sendDebugMessage("Could not find word for deletion: " + worldName);
-					list.remove(worldName);
-					continue;
+				if (world != null) {
+					for (final Player p : world.getPlayers())
+						SkywarsUtils.teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(p, true);
+					Bukkit.unloadWorld(worldName, false);
 				}
-				if (ArenaManager.unloadAndDeleteWorldForMap(world, null))
-					list.remove(worldName);
-				else
-					this.sendDebugMessage("Could not delete world from deletion list: " + worldName);
-
+				final File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
+				if (worldFolder.exists() && worldFolder.isDirectory())
+					try {
+						FileUtils.deleteDirectory(worldFolder);
+					} catch (final IOException e) {
+						e.printStackTrace();
+						Skywars.get().sendMessage("&cCould not delete world folder: &b" + worldFolder.getPath());
+					}
+				list.remove(worldName);
 			}
 			deleteWorldsConfig.set("worlds", list);
 			try {
@@ -215,26 +231,22 @@ public class Skywars extends JavaPlugin {
 		this.mapManager.loadMaps();
 		this.mapManager.loadWorlds();
 		this.chestManager.loadChests();
+		this.signManager.loadSigns();
 		this.loadKits();
 
 		this.nmsHandler = new ReflectionNMS();
 		SchematicHandler.initializeReflection();
 
+		this.sendMessage("&b&l--- PLUGIN HOOKS ---");
 		if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
-			this.sendDebugMessage("Found DecentHolograms");
 			this.hologramController = new DecentHologramsController();
 		} else if (Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays")) {
-			this.sendDebugMessage("Found HolographicDisplays");
 			if (SkywarsUtils.checkClass("com.gmail.filoghost.holographicdisplays.api.HologramsAPI"))
 				this.hologramController = new HolographicDisplaysOldController();
 			else if (SkywarsUtils.checkClass("me.filoghost.holographicdisplays.api.HolographicDisplaysAPI"))
 				this.hologramController = new HolographicDisplaysNewController();
-			else
-				this.sendDebugMessage("Unknown version of HolographicDisplays");
-		} else {
-			this.sendDebugMessage("Did not found any holograms plugin.");
 		}
-		if (this.hologramController == null)
+		if (this.hologramController == null) {
 			this.hologramController = new HologramController() {
 				@Override
 				public void removeHologram(Object id) {
@@ -250,25 +262,36 @@ public class Skywars extends JavaPlugin {
 					return false;
 				}
 			};
-		else {
+			this.sendMessage("&eHolograms: &cno supported holograms plugin found!");
+		} else {
 			holograms = true;
-			this.sendDebugMessage("Holograms API: " + this.hologramController.getClass().getName());
+			this.sendMessage("&eHolograms: &a" + this.hologramController.getClass().getSimpleName());
 		}
 
 		economyEnabled = Skywars.get().getConfig().getBoolean("economy.enabled");
 		if (economyEnabled)
 			try {
 				if (this.setupEconomy()) {
-					this.sendMessage("&eHooked with Vault!");
-					this.sendMessage("&eEconomy service provider: &a%s", this.economyProvider.getPlugin().getName());
+					this.sendMessage("&eEconomy (Vault): &a" + this.economyProvider.getPlugin().getName());
 				}
 			} catch (final Exception e) {
-				this.sendMessage("&cCould not hook with Vault!");
+				this.sendMessage("&eEconomy (Vault): &ccould not hook.");
 				e.printStackTrace();
 			}
+		else
+			this.sendMessage("&eEconomy (Vault): &6disabled in config.");
+
+		// placeholder api
+		if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+			placeholders = true;
+		}
+		this.sendMessage("&ePlaceholderAPI: " + (placeholders ? "&ahooked." : "&cnot found."));
 
 		// done
 		this.sendMessage("&ahas been enabled: &bv%s", this.version);
+
+		if (placeholders)
+			new SkywarsPlaceholderExpansion().register();
 
 		if (!Skywars.get().getConfig().getBoolean("taskUpdate.disabled"))
 			Bukkit.getScheduler().runTaskTimer(Skywars.get(), new Runnable() {
@@ -277,6 +300,7 @@ public class Skywars extends JavaPlugin {
 					for (final Player player : Bukkit.getOnlinePlayers()) {
 						SkywarsScoreboard.update(player);
 						SkywarsActionbar.update(player);
+						SkywarsTablist.update(player);
 					}
 				}
 			}, 0L, Skywars.get().getConfig().getLong("taskUpdate.interval") * 20);
@@ -314,16 +338,13 @@ public class Skywars extends JavaPlugin {
 			worldNames.add(arena.getWorldName());
 		}
 		final File file = new File(this.getDataFolder(), "delete_worlds.yml");
+		final YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		worldNames.addAll(config.getStringList("worlds"));
+		config.set("worlds", worldNames);
 		try {
-			if (!file.exists()) {
+			if (!file.exists())
 				file.createNewFile();
-				FileUtils.writeStringToFile(file, //
-						"# these are the worlds that the plugin will" + //
-								"try to delete the next time it starts up");
-			}
-			if (!FileUtils.readLines(file).stream().map(l -> l.split("#")[0]).anyMatch(l -> l.startsWith("worlds:")))
-				FileUtils.writeStringToFile(file, "worlds:");
-			FileUtils.writeLines(file, worldNames.stream().map(n -> "- " + n).toList());
+			config.save(file);
 		} catch (final IOException e) {
 			e.printStackTrace();
 			this.sendMessage("Could not write world list to file.");
@@ -343,13 +364,13 @@ public class Skywars extends JavaPlugin {
 		if (!economyEnabled)
 			return false;
 		if (this.getServer().getPluginManager().getPlugin("Vault") == null) {
-			this.sendDebugMessage("No Vault plugin found!");
+			this.sendMessage("&eEconomy (Vault): &6plugin not found.");
 			return false;
 		}
 
 		this.economyProvider = this.getServer().getServicesManager().getRegistration(Economy.class);
 		if (this.economyProvider == null) {
-			this.sendDebugMessage("No registered service provider!");
+			this.sendMessage("&eEconomy (Vault): &6plugin found &cbut no registered service provider!");
 			return false;
 		}
 		this.economy = this.economyProvider.getProvider();
@@ -360,7 +381,8 @@ public class Skywars extends JavaPlugin {
 		final FileConfiguration config = this.getConfig();
 		final PluginManager pluginManager = this.getServer().getPluginManager();
 		if (config.getBoolean("signsEnabled")) {
-			pluginManager.registerEvents(new SignEvents(), this);
+			this.signManager = new SignManager();
+			pluginManager.registerEvents(this.signManager, this);
 		}
 		if (config.getBoolean("messageSounds.enabled")) {
 			pluginManager.registerEvents(new MessageSound(), this);
@@ -468,7 +490,7 @@ public class Skywars extends JavaPlugin {
 				{ 0, -1, 1 }, { 1, -1, 1 },
 
 				// top
-				{ -1, 3, 1 }, { 0, 3, -1 }, { 1, 3, -1 }, { -1, 3, 0 }, { 0, 3, 0 }, { 1, 3, 0 }, { -1, 3, 1 },
+				{ -1, 3, -1 }, { 0, 3, -1 }, { 1, 3, -1 }, { -1, 3, 0 }, { 0, 3, 0 }, { 1, 3, 0 }, { -1, 3, 1 },
 				{ 0, 3, 1 }, { 1, 3, 1 },
 
 				// left wall
@@ -502,7 +524,11 @@ public class Skywars extends JavaPlugin {
 			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
 			block.setType(material.parseMaterial());
 			if (!XMaterial.isNewVersion()) {
-				block.setData(material.getData());
+				try {
+					block.getClass().getMethod("setData", byte.class).invoke(block, material.getData());
+				} catch (final Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -534,7 +560,11 @@ public class Skywars extends JavaPlugin {
 			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
 			block.setType(material.parseMaterial());
 			if (!XMaterial.isNewVersion()) {
-				block.setData(material.getData());
+				try {
+					block.getClass().getMethod("setData", byte.class).invoke(block, material.getData());
+				} catch (final Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -552,6 +582,18 @@ public class Skywars extends JavaPlugin {
 			if (!arena.isJoinable())
 				continue;
 			return arena;
+		}
+		return null;
+	}
+
+	public SkywarsUser getSkywarsUser(Player player) {
+		for (int i = 0; i < this.arenas.size(); i++) {
+			final List<SkywarsUser> players = this.arenas.get(i).getUsers();
+			for (int j = 0; j < players.size(); j++) {
+				if (players.get(j).getPlayer().equals(player)) {
+					return players.get(j);
+				}
+			}
 		}
 		return null;
 	}
@@ -576,11 +618,11 @@ public class Skywars extends JavaPlugin {
 
 	// player config
 
-	public File getPlayerConfigFile(Player player) {
+	public File getPlayerConfigFile(OfflinePlayer player) {
 		return new File(playersPath, player.getUniqueId() + ".yml");
 	}
 
-	public YamlConfiguration getPlayerConfig(Player player) {
+	public YamlConfiguration getPlayerConfig(OfflinePlayer player) {
 		final File folder = new File(playersPath);
 		if (!folder.exists())
 			folder.mkdir();
@@ -590,7 +632,7 @@ public class Skywars extends JavaPlugin {
 		return YamlConfiguration.loadConfiguration(file);
 	}
 
-	public void savePlayerConfig(Player player, YamlConfiguration config) {
+	public void savePlayerConfig(OfflinePlayer player, YamlConfiguration config) {
 		try {
 			final File file = this.getPlayerConfigFile(player);
 			config.save(file);
@@ -613,13 +655,13 @@ public class Skywars extends JavaPlugin {
 		return null;
 	}
 
-	public void setPlayerKit(Player player, Kit kit) {
+	public void setPlayerKit(OfflinePlayer player, Kit kit) {
 		final YamlConfiguration conf = this.getPlayerConfig(player);
 		conf.set("kit", kit.getName());
 		this.savePlayerConfig(player, conf);
 	}
 
-	public Kit getPlayerKit(Player player) {
+	public Kit getPlayerKit(OfflinePlayer player) {
 		final String kitName = this.getPlayerConfig(player).getString("kit");
 		if (kitName == null)
 			return null;
@@ -646,65 +688,65 @@ public class Skywars extends JavaPlugin {
 
 	// kills
 
-	public Integer getPlayerTotalKills(Player player) {
+	public int getPlayerTotalKills(OfflinePlayer player) {
 		return this.getPlayerConfig(player).getInt("stats.solo.kills");
 	}
 
-	public void setPlayerTotalKills(Player player, int kills) {
+	public void setPlayerTotalKills(OfflinePlayer player, int kills) {
 		final YamlConfiguration config = this.getPlayerConfig(player);
 		config.set("stats.solo.kills", kills);
 		this.savePlayerConfig(player, config);
 	}
 
-	public void incrementPlayerTotalKills(Player player) {
+	public void incrementPlayerTotalKills(OfflinePlayer player) {
 		this.setPlayerTotalKills(player, this.getPlayerTotalKills(player) + 1);
 	}
 
 	// souls
 
-	public Integer getPlayerSouls(Player player) {
+	public int getPlayerSouls(OfflinePlayer player) {
 		return this.getPlayerConfig(player).getInt("souls");
 	}
 
-	public void setPlayerSouls(Player player, int kills) {
+	public void setPlayerSouls(OfflinePlayer player, int kills) {
 		final YamlConfiguration config = this.getPlayerConfig(player);
 		config.set("souls", kills);
 		this.savePlayerConfig(player, config);
 	}
 
-	public void incrementPlayerSouls(Player player) {
+	public void incrementPlayerSouls(OfflinePlayer player) {
 		this.setPlayerSouls(player, this.getPlayerSouls(player) + 1);
 	}
 
 	// deaths
 
-	public Integer getPlayerTotalDeaths(Player player) {
+	public int getPlayerTotalDeaths(OfflinePlayer player) {
 		return this.getPlayerConfig(player).getInt("stats.solo.deaths");
 	}
 
-	public void setPlayerTotalDeaths(Player player, int deaths) {
+	public void setPlayerTotalDeaths(OfflinePlayer player, int deaths) {
 		final YamlConfiguration config = this.getPlayerConfig(player);
 		config.set("stats.solo.deaths", deaths);
 		this.savePlayerConfig(player, config);
 	}
 
-	public void incrementPlayerTotalDeaths(Player player) {
+	public void incrementPlayerTotalDeaths(OfflinePlayer player) {
 		this.setPlayerTotalDeaths(player, this.getPlayerTotalDeaths(player) + 1);
 	}
 
 	// wins
 
-	public Integer getPlayerTotalWins(Player player) {
+	public int getPlayerTotalWins(OfflinePlayer player) {
 		return this.getPlayerConfig(player).getInt("stats.solo.wins");
 	}
 
-	public void setPlayerTotalWins(Player player, int wins) {
+	public void setPlayerTotalWins(OfflinePlayer player, int wins) {
 		final YamlConfiguration config = this.getPlayerConfig(player);
 		config.set("stats.solo.wins", wins);
 		this.savePlayerConfig(player, config);
 	}
 
-	public void incrementPlayerTotalWins(Player player) {
+	public void incrementPlayerTotalWins(OfflinePlayer player) {
 		this.setPlayerTotalWins(player, this.getPlayerTotalWins(player) + 1);
 	}
 
@@ -719,8 +761,6 @@ public class Skywars extends JavaPlugin {
 		configuration = new SkywarsConfiguration();
 		configuration.load(config);
 
-		scoreboardConfig = ConfigurationUtils.loadConfiguration("scoreboard.yml", "scoreboard.yml");
-
 		final String lang = Skywars.get().getConfig().getString("locale");
 		langConfig = ConfigurationUtils.loadConfiguration("lang/" + lang + ".yml", "lang/" + lang + ".yml",
 				"lang/en.yml");
@@ -729,7 +769,7 @@ public class Skywars extends JavaPlugin {
 
 		lobbyConfig = ConfigurationUtils.loadConfiguration("lobby.yml", "lobby.yml");
 
-		if (config == null || scoreboardConfig == null || langConfig == null || lobbyConfig == null)
+		if (config == null || langConfig == null || lobbyConfig == null)
 			return false;
 
 		// load lobby
@@ -752,11 +792,11 @@ public class Skywars extends JavaPlugin {
 	}
 
 	public void sendMessage(String text, Object... format) {
-		this.sendMessageWithPrefix(Messager.color(this.prefix), Messager.colorFormat(text, format));
+		this.sendMessageWithPrefix(Messager.color(this.prefix), Messager.color(text, format));
 	}
 
 	public void sendMessageWithPrefix(String prefix, String text, Object... format) {
-		Bukkit.getConsoleSender().sendMessage(Messager.color(prefix) + " " + Messager.colorFormat(text, format));
+		Bukkit.getConsoleSender().sendMessage(Messager.color(prefix) + " " + Messager.color(text, format));
 	}
 
 	public HologramController getHologramController() {

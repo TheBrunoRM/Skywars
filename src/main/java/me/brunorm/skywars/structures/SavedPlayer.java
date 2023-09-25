@@ -6,6 +6,7 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.util.Vector;
 
 import me.brunorm.skywars.SkywarsUtils;
 
@@ -25,6 +26,8 @@ public class SavedPlayer {
 	boolean allowFlight;
 	int fireTicks;
 	int heldItemSlot;
+	float fallDistance;
+	Vector velocity;
 
 	public SavedPlayer(Player player) {
 		this.player = player;
@@ -41,6 +44,8 @@ public class SavedPlayer {
 		this.allowFlight = player.getAllowFlight();
 		this.fireTicks = player.getFireTicks();
 		this.heldItemSlot = player.getInventory().getHeldItemSlot();
+		this.fallDistance = player.getFallDistance();
+		this.velocity = player.getVelocity();
 	}
 
 	public void Restore() {
@@ -65,6 +70,8 @@ public class SavedPlayer {
 		this.player.setAllowFlight(this.allowFlight);
 		this.player.setFireTicks(this.fireTicks);
 		this.player.getInventory().setHeldItemSlot(this.heldItemSlot);
+		this.player.setFallDistance(this.fallDistance);
+		this.player.setVelocity(this.velocity);
 
 		for (final PotionEffect effect : this.potionEffects) {
 			this.player.addPotionEffect(effect);

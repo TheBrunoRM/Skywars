@@ -20,92 +20,53 @@ public class ReflectionNMS implements NMS {
 	String version = Skywars.get().getServerPackageVersion();
 	String nms = "net.minecraft.server." + this.version;
 
-	Class<?> chatSerializer = this.getChatSerializer();
-	Class<?> iChatBaseComponent = this.getIChatBaseComponent();
-	Class<?> packetPlayOutTitle = this.getPacketPlayOutTitle();
-	Class<?> packetPlayOutChat = this.getPacketPlayOutChat();
-	Class<?> enumTitleAction = this.getEnumTitleAction();
-	Class<?> craftPlayerClass = this.getCraftPlayerClass();
-	Class<?> chatMessageTypeClass = this.getChatMessageTypeClass();
+	// classes
 
-	// getters
+	Class<?> chatSerializer = this.getNMSSafe("ChatSerializer", "IChatBaseComponent$ChatSerializer");
+	Class<?> iChatBaseComponent = this.getNMSSafe("IChatBaseComponent");
+	Class<?> packetPlayOutTitle = this.getNMSSafe("PacketPlayOutTitle");
+	Class<?> packetPlayOutChat = this.getNMSSafe("PacketPlayOutChat");
+	Class<?> enumTitleAction = this.getNMSSafe("EnumTitleAction", "PacketPlayOutTitle$EnumTitleAction");
+	Class<?> craftPlayerClass = this.getClassSafe("org.bukkit.craftbukkit." + this.version + ".entity.CraftPlayer");
+	Class<?> chatMessageTypeClass = this.getNMSSafe("ChatMessageType");
+	Class<?> packetPlayerListClass = this.getNMSSafe("PacketPlayOutPlayerListHeaderFooter");
+	Class<?> packetClass = this.getNMSSafe("Packet");
 
-	public Class<?> getChatSerializer() {
+	// methods
+
+	Method sendPacketMethod = this.getMethodSafe(this.getNMSSafe("PlayerConnection"), "sendPacket", this.packetClass);
+	Method chatSerializerA = this.getMethodSafe(this.chatSerializer, "a", String.class);
+	Method sendTitleMethod = this.getMethodSafe(Player.class, "sendTitle", String.class, String.class, int.class,
+			int.class, int.class);
+	Method getHandleMethod = this.getMethodSafe(this.craftPlayerClass, "getHandle");
+	Method setPlayerListMethod = this.getMethodSafe(Player.class, "setPlayerListHeaderFooter", String.class,
+			String.class);
+
+	public Method getMethodSafe(Class<?> c, String name, Class<?>... params) {
 		try {
-			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&6Loading &cold &bChatSerializer");
-			return this.getNMS("ChatSerializer");
+			return c.getMethod(name, params);
 		} catch (final Exception e) {
-			try {
-				Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&6Loading &anew &bChatSerializer");
-				return this.getNMS("IChatBaseComponent$ChatSerializer");
-			} catch (final Exception e2) {
-				Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&cCould not load &bChatSerializer");
-				return null;
-			}
-		}
-	}
-
-	public Class<?> getIChatBaseComponent() {
-		try {
-			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&6Loading &bChatBaseComponent Interface");
-			return this.getNMS("IChatBaseComponent");
-		} catch (final Exception e) {
-			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&cCould not load &bChatBaseComponent Interface");
 			return null;
 		}
 	}
 
-	public Class<?> getPacketPlayOutTitle() {
+	public Class<?> getClassSafe(String name) {
 		try {
-			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&6Loading &bPacketPlayOutTitle");
-			return this.getNMS("PacketPlayOutTitle");
-		} catch (final Exception e) {
-			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&cCould not load &bPacketPlayOutTitle");
-			return null;
-		}
-	}
-
-	public Class<?> getPacketPlayOutChat() {
-		try {
-			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&6Loading &bPacketPlayOutChat");
-			return this.getNMS("PacketPlayOutChat");
-		} catch (final Exception e) {
-			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&cCould not load &bPacketPlayOutChat");
-			return null;
-		}
-	}
-
-	public Class<?> getEnumTitleAction() {
-		try {
-			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&6Loading &cold &bEnumTitleAction");
-			return this.getNMS("EnumTitleAction");
-		} catch (final Exception e) {
-			try {
-				Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&6Loading &anew &bEnumTitleAction");
-				return this.getNMS("PacketPlayOutTitle$EnumTitleAction");
-			} catch (final Exception e2) {
-				Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&cCould not load &bEnumTitleAction");
-				return null;
-			}
-		}
-	}
-
-	public Class<?> getCraftPlayerClass() {
-		try {
-			return Class.forName("org.bukkit.craftbukkit." + this.version + ".entity.CraftPlayer");
+			return Class.forName(name);
 		} catch (final ClassNotFoundException e) {
 			return null;
 		}
 	}
 
-	public Class<?> getChatMessageTypeClass() {
-		try {
-			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&6Loading &bChatMessageType");
-			return this.getNMS("ChatMessageType");
-		} catch (final Exception e) {
-			Skywars.get().sendDebugMessageWithPrefix(this.prefix, "&cCould not find &bChatMessageType");
-			return null;
+	public Class<?> getNMSSafe(String... names) {
+		for (final String name : names) {
+			try {
+				return this.getNMS(name);
+			} catch (final Exception e) {
+				continue;
+			}
 		}
+		return null;
 	}
 
 	public Class<?> getNMS(String name) throws Exception {
@@ -113,10 +74,9 @@ public class ReflectionNMS implements NMS {
 	}
 
 	private Object getConnection(Player player) throws Exception {
-		final Method getHandle = this.craftPlayerClass.getMethod("getHandle");
 		// CraftPlayer.getHandle();
 
-		final Object craftPlayerHandle = getHandle.invoke(player);
+		final Object craftPlayerHandle = this.getHandleMethod.invoke(player);
 		// (CraftPlayer) player.getHandle();
 
 		final Field playerConnectionField = craftPlayerHandle.getClass().getField("playerConnection");
@@ -249,9 +209,7 @@ public class ReflectionNMS implements NMS {
 		// TODO instead of a try-catch, check version
 		try {
 			// player.sendTitle();
-			final Method m = player.getClass().getMethod("sendTitle", String.class, String.class, int.class, int.class,
-					int.class);
-			m.invoke(player, Messager.color(title), Messager.color(subtitle), fadeIn, stay, fadeOut);
+			this.sendTitleMethod.invoke(player, Messager.color(title), Messager.color(subtitle), fadeIn, stay, fadeOut);
 		} catch (final Exception e) {
 			// 1.8
 			try {
@@ -284,6 +242,54 @@ public class ReflectionNMS implements NMS {
 			} catch (final Exception e2) {
 				// e2.printStackTrace();
 			}
+		}
+	}
+
+	public Object getSerializedChatComponent(Object o) {
+		try {
+			return this.chatSerializerA.invoke(this.chatSerializer, o);
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public void sendTablist(Player player, String header, String footer) {
+		if (this.packetPlayerListClass != null) {
+			try {
+				final Object playerListPacket = this.packetPlayerListClass.getConstructor().newInstance();
+
+				final Object headerComponent = this
+						.getSerializedChatComponent("{\"text\":\"" + Messager.color(header) + "\"}");
+				final Object footerComponent = this
+						.getSerializedChatComponent("{\"text\":\"" + Messager.color(footer) + "\"}");
+				final Field a = playerListPacket.getClass().getDeclaredField("a");
+				a.setAccessible(true);
+				a.set(playerListPacket, headerComponent);
+				final Field b = playerListPacket.getClass().getDeclaredField("b");
+				b.setAccessible(true);
+				b.set(playerListPacket, footerComponent);
+				this.sendPacket(player, playerListPacket);
+			} catch (final Exception e) {
+				e.printStackTrace();
+			}
+			return;
+		}
+		try {
+			this.setPlayerListMethod.invoke(player, header, footer);
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void sendPacket(Player player, Object packet) {
+		try {
+			final Object playerConnection = this.getConnection(player);
+			// final Method sendPacket = playerConnection.getClass().getMethod("sendPacket",
+			// this.getNMS("Packet"));
+			this.sendPacketMethod /* sendPacket */.invoke(playerConnection, packet);
+		} catch (final Exception e) {
+			e.printStackTrace();
 		}
 	}
 }

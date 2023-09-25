@@ -31,13 +31,13 @@ import org.bukkit.util.Vector;
 import com.cryptomorin.xseries.XMaterial;
 
 import me.brunorm.skywars.ArenaStatus;
-import me.brunorm.skywars.ChestManager;
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
 import me.brunorm.skywars.SkywarsUtils;
 import me.brunorm.skywars.commands.CommandsUtils;
 import me.brunorm.skywars.holograms.HologramController;
 import me.brunorm.skywars.managers.ArenaManager;
+import me.brunorm.skywars.managers.ChestManager;
 import me.brunorm.skywars.managers.MapManager;
 import mrblobman.sounds.Sounds;
 
@@ -173,6 +173,8 @@ public class Arena {
 			this.startTimerAndSetStatus(ArenaStatus.STARTING);
 		}
 
+		Skywars.get().getSignManager().updateSigns();
+
 		return true;
 	}
 
@@ -209,10 +211,10 @@ public class Arena {
 				final double killMoney = Skywars.get().getConfig().getDouble("economy.kill");
 				if (Skywars.get().getEconomy() != null && killMoney > 0) {
 					Skywars.get().getEconomy().depositPlayer(killer, killMoney);
-					killer.sendMessage(Messager.colorFormat("&6+$%s", SkywarsUtils.formatDouble(killMoney)));
+					killer.sendMessage(Messager.color("&6+$%s", SkywarsUtils.formatDouble(killMoney)));
 				}
 				Skywars.get().incrementPlayerSouls(killer);
-				killer.sendMessage(Messager.colorFormat("&b+%s Soul", 1));
+				killer.sendMessage(Messager.color("&b+%s Soul", 1));
 			}
 		}
 		Skywars.get().incrementPlayerTotalDeaths(player);
@@ -268,6 +270,11 @@ public class Arena {
 			players.hidePlayer(player);
 		}
 
+		for (final SkywarsUser users : this.getSpectators()) {
+			users.player.showPlayer(player);
+			player.showPlayer(users.player);
+		}
+
 		// give spectator items (player tracker, spectator settings, leave item)
 		SkywarsUtils.setPlayerInventory(player, "spectator");
 
@@ -278,14 +285,14 @@ public class Arena {
 	private String getDeathMessage(SkywarsUser p, Player killer, DamageCause cause) {
 		final Player player = p.getPlayer();
 		if (killer != null)
-			return Messager.colorFormat("&c%s &ekilled &c%s", killer.getName(), player.getName());
+			return Messager.color("&c%s &ekilled &c%s", killer.getName(), player.getName());
 		else if (p.getLastHit() != null)
-			return Messager.colorFormat("&c%s &edied while trying to escape &c%s", player.getName(),
+			return Messager.color("&c%s &edied while trying to escape &c%s", player.getName(),
 					p.getLastHit().getName());
 		else if (cause == DamageCause.VOID)
-			return Messager.colorFormat("&c%s &efell in the void.", player.getName());
+			return Messager.color("&c%s &efell in the void.", player.getName());
 		else
-			return Messager.colorFormat("&c%s &edied.", player.getName());
+			return Messager.color("&c%s &edied.", player.getName());
 	}
 
 	public void leavePlayer(Player player) {
@@ -332,6 +339,7 @@ public class Arena {
 		if (this.status != ArenaStatus.WAITING && this.getAlivePlayerCount() <= 0)
 			this.clear();
 
+		Skywars.get().getSignManager().updateSigns();
 	}
 
 	public void exitPlayer(Player player) {
@@ -345,7 +353,6 @@ public class Arena {
 		if (this.isInBoundaries(player.getPlayer()))
 			SkywarsUtils.teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(player.getPlayer());
 
-		SkywarsUtils.clearPlayer(player.getPlayer());
 		player.getSavedPlayer().Restore();
 	}
 
@@ -380,8 +387,7 @@ public class Arena {
 			Skywars.get().incrementPlayerTotalWins(this.getWinner().getPlayer());
 			if (winMoney > 0 && Skywars.get().getEconomy() != null) {
 				Skywars.get().getEconomy().depositPlayer(this.getWinner().getPlayer(), winMoney);
-				this.getWinner().getPlayer()
-						.sendMessage(Messager.colorFormat("&6+$%s", SkywarsUtils.formatDouble(winMoney)));
+				this.getWinner().getPlayer().sendMessage(Messager.color("&6+$%s", SkywarsUtils.formatDouble(winMoney)));
 			}
 		}
 
@@ -395,7 +401,7 @@ public class Arena {
 			if (this.winner == null) {
 				p.getPlayer().sendMessage(Messager.color("&cnobody &ewon"));
 			} else {
-				p.getPlayer().sendMessage(Messager.colorFormat("&c%s &ewon!", this.winner.getPlayer().getName()));
+				p.getPlayer().sendMessage(Messager.color("&c%s &ewon!", this.winner.getPlayer().getName()));
 			}
 		}
 
@@ -595,8 +601,7 @@ public class Arena {
 					final double playMoney = Skywars.get().getConfig().getDouble("economy.play");
 					if (Skywars.get().getEconomy() != null && playMoney > 0) {
 						Skywars.get().getEconomy().depositPlayer(player.getPlayer(), playMoney);
-						player.getPlayer()
-								.sendMessage(Messager.colorFormat("&6+$%s", SkywarsUtils.formatDouble(playMoney)));
+						player.getPlayer().sendMessage(Messager.color("&6+$%s", SkywarsUtils.formatDouble(playMoney)));
 					}
 				}
 			}, 20 * 10);
@@ -731,6 +736,20 @@ public class Arena {
 		return loc.getY() > this.getMinimumY();
 	}
 
+	private int findLowerBlockY() {
+		final Material air = XMaterial.AIR.parseMaterial();
+		for (int y = 0; y < 256; y++) {
+			for (int x = 0; x < 256; x++) {
+				for (int z = 0; z < 256; z++) {
+					if (this.getWorld().getBlockAt(x, y, z).getType() != air) {
+						return y;
+					}
+				}
+			}
+		}
+		return -1;
+	}
+
 	private int getMinimumY() {
 		if (this.minimumY >= 0)
 			return this.minimumY;
@@ -744,29 +763,7 @@ public class Arena {
 		Skywars.get().sendDebugMessage("%s: Calculating minimum Y...", this.getMap().getName());
 		final long start = Instant.now().toEpochMilli();
 
-		int min = -1;
-		for (final Chunk chunk : this.getAllChunksInMap()) {
-			for (int y = 0; y < 256; y++) {
-				if (min >= 0)
-					break;
-				for (int x = 0; x < 16; x++) {
-					if (min >= 0)
-						break;
-					for (int z = 0; z < 16; z++) {
-						if (min >= 0)
-							break;
-						if (chunk.getBlock(x, y, z).getType() != Material.AIR) {
-							Skywars.get().sendDebugMessage("&b&lTHE BLOCK: %s",
-									chunk.getBlock(x, y, z).getLocation().toVector());
-							min = y - 1;
-							break;
-						}
-					}
-				}
-			}
-		}
-
-		this.minimumY = min;
+		this.minimumY = this.findLowerBlockY();
 		this.getMap().getConfig().set("minimumY", this.minimumY);
 		this.getMap().saveConfig();
 		Skywars.get().sendDebugMessage("&bCalculated minimum Y for %s in %sms: %s", this.map.getName(),

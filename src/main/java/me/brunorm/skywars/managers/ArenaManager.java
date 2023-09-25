@@ -89,6 +89,7 @@ public class ArenaManager {
 		Skywars.get().getArenas().remove(arena);
 		unloadAndDeleteWorldForMap(arena.getWorld(), arena.getMap());
 		arena = null;
+		Skywars.get().getSignManager().updateSigns();
 	}
 
 	public static boolean unloadAndDeleteWorldForMap(World world, SkywarsMap map) {

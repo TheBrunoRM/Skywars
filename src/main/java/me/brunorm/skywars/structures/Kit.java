@@ -28,6 +28,8 @@ public class Kit {
 	}
 
 	public String getDisplayName() {
+		if (this.displayName == null || this.displayName.isEmpty() || this.displayName.isBlank())
+			return this.getName();
 		return this.displayName;
 	}
 

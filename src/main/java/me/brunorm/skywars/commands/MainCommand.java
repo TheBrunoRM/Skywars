@@ -24,12 +24,12 @@ import org.bukkit.util.Vector;
 
 import com.cryptomorin.xseries.XMaterial;
 
-import me.brunorm.skywars.ChestManager;
 import me.brunorm.skywars.Messager;
 import me.brunorm.skywars.Skywars;
-import me.brunorm.skywars.SkywarsScoreboard;
 import me.brunorm.skywars.SkywarsUtils;
+import me.brunorm.skywars.handlers.SkywarsScoreboard;
 import me.brunorm.skywars.managers.ArenaManager;
+import me.brunorm.skywars.managers.ChestManager;
 import me.brunorm.skywars.managers.MapManager;
 import me.brunorm.skywars.menus.ConfigMenu;
 import me.brunorm.skywars.menus.GamesMenu;
@@ -62,7 +62,7 @@ public class MainCommand implements CommandExecutor {
 	 */
 
 	String[] helpLines = {
-			Messager.colorFormat("&a&lCommand list - &b%s &a%s &eby &b%s", Skywars.get().name, Skywars.get().version,
+			Messager.color("&a&lCommand list - &b%s &a%s &eby &b%s", Skywars.get().name, Skywars.get().version,
 					String.join(", ", Skywars.get().authors)),
 			"&b/skywars setmainlobby &e- sets the main lobby", "&b/skywars lobby &e- teleports you to the main lobby",
 			"&b/skywars create <arena> &e- creates an arena", "&b/skywars delete <arena> &e- deletes an arena",
@@ -160,7 +160,7 @@ public class MainCommand implements CommandExecutor {
 				ArenaManager.joinMap(map, player);
 			} else if (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("about")
 					|| args[0].equalsIgnoreCase("ver") || args[0].equalsIgnoreCase("version")) {
-				sender.sendMessage(Messager.colorFormat("&b%s &eversion &a%s &emade by &b%s", Skywars.get().name,
+				sender.sendMessage(Messager.color("&b%s &eversion &a%s &emade by &b%s", Skywars.get().name,
 						Skywars.get().version, String.join(", ", Skywars.get().authors)));
 			} else if (args[0].equalsIgnoreCase("server")) {
 				if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))

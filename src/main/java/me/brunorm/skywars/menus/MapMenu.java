@@ -46,8 +46,8 @@ public class MapMenu implements Listener {
 			final ArrayList<Arena> arenas = ArenaManager.getArenasByMap(map);
 			final int players = arenas.stream().map(arena -> arena.getAlivePlayerCount()).reduce(0, (a, b) -> a + b);
 
-			lore.add(Messager.colorFormat("&eCurrent arenas: &a%s", ArenaManager.getArenasByMap(map).size()));
-			lore.add(Messager.colorFormat("&eCurrent players: &a%s", players));
+			lore.add(Messager.color("&eCurrent arenas: &a%s", ArenaManager.getArenasByMap(map).size()));
+			lore.add(Messager.color("&eCurrent players: &a%s", players));
 			lore.add(Messager.color("&eClick to play!"));
 			// lore.add(Messager.color("&eClick derecho para alternarlo como favorito!"));
 
@@ -55,7 +55,7 @@ public class MapMenu implements Listener {
 			final ItemMeta meta = item.getItemMeta();
 			meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 
-			meta.setDisplayName(Messager.colorFormat("&a%s", map.getName()));
+			meta.setDisplayName(Messager.color("&a%s", map.getName()));
 			meta.setLore(lore);
 			item.setItemMeta(meta);
 			inventory.setItem(index, item);

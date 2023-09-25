@@ -22,6 +22,7 @@ public class SkywarsUser {
 	SkywarsUser(Player player, SkywarsTeam team, int number) {
 		this.player = player;
 		this.team = team;
+		team.addUser(this);
 		this.arena = team.getArena();
 		this.teamNumber = number;
 	}

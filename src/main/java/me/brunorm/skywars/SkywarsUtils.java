@@ -34,6 +34,7 @@ import com.cryptomorin.xseries.XMaterial;
 import me.brunorm.skywars.holograms.HologramController;
 import me.brunorm.skywars.structures.Arena;
 import me.brunorm.skywars.structures.SkywarsUser;
+import me.clip.placeholderapi.PlaceholderAPI;
 import mrblobman.sounds.Sounds;
 
 public class SkywarsUtils {
@@ -55,6 +56,8 @@ public class SkywarsUtils {
 			return "";
 		final SimpleDateFormat formatter = new SimpleDateFormat(format);
 		final String strDate = formatter.format(date);
+		if (Skywars.placeholders)
+			text = PlaceholderAPI.setPlaceholders(player, text);
 		text = text.replaceAll(getVariableCode("date"), strDate).replaceAll(getVariableCode("url"), URL);
 
 		if (player != null) {
@@ -64,10 +67,12 @@ public class SkywarsUtils {
 					: "Vaultn't";
 			text = text.replaceAll(getVariableCode("coins"), balance).replaceAll(getVariableCode("money"), balance)
 					.replaceAll(getVariableCode("balance"), balance).replaceAll(getVariableCode("economy"), balance)
-					.replaceAll(getVariableCode("souls"), Skywars.get().getPlayerSouls(player).toString())
-					.replaceAll(getVariableCode("totalwins"), Skywars.get().getPlayerTotalWins(player).toString())
-					.replaceAll(getVariableCode("totalkills"), Skywars.get().getPlayerTotalKills(player).toString())
-					.replaceAll(getVariableCode("totaldeaths"), Skywars.get().getPlayerTotalDeaths(player).toString())
+					.replaceAll(getVariableCode("souls"), String.valueOf(Skywars.get().getPlayerSouls(player)))
+					.replaceAll(getVariableCode("totalwins"), String.valueOf(Skywars.get().getPlayerTotalWins(player)))
+					.replaceAll(getVariableCode("totalkills"),
+							String.valueOf(Skywars.get().getPlayerTotalKills(player)))
+					.replaceAll(getVariableCode("totaldeaths"),
+							String.valueOf(Skywars.get().getPlayerTotalDeaths(player)))
 					.replaceAll(getVariableCode("kit"), Skywars.get().getPlayerKit(player).getDisplayName());
 		}
 
@@ -102,7 +107,7 @@ public class SkywarsUtils {
 		final String url = config.getString("url");
 		if (url != null)
 			return url;
-		return "www.skywars.com";
+		return "www.example.com";
 	}
 
 	public static String parseItemName(String text) {
@@ -118,8 +123,6 @@ public class SkywarsUtils {
 	}
 
 	public static String getStatus(Arena arena) {
-		final YamlConfiguration config = Skywars.langConfig;
-
 		switch (arena.getStatus()) {
 		case WAITING:
 			return Messager.get("status.waiting");
@@ -134,13 +137,12 @@ public class SkywarsUtils {
 		}
 	}
 
-	public static void teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(Player player,
-			boolean force) {
-		if (!teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(player) && force)
-			player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+	public static void teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(Player player) {
+		teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(player, false);
 	}
 
-	public static boolean teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(Player player) {
+	public static boolean teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(Player player,
+			boolean force) {
 		final Location lobby = Skywars.get().getLobby();
 		if (lobby != null) {
 			player.getPlayer().teleport(lobby);
@@ -149,8 +151,13 @@ public class SkywarsUtils {
 
 		final Location lastLocation = Skywars.get().playerLocations.get(player);
 		if (lastLocation == null) {
-			player.sendMessage("Could not send you back!");
-			return false;
+			if (force) {
+				player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+				return true;
+			} else {
+				player.sendMessage(Messager.get("could_not_send_back"));
+				return false;
+			}
 		}
 		player.getPlayer().teleport(lastLocation);
 		Skywars.get().playerLocations.remove(player);
@@ -193,11 +200,17 @@ public class SkywarsUtils {
 		player.setAllowFlight(false);
 		if (player.getFireTicks() > 0)
 			player.setFireTicks(0);
+		player.setFallDistance(0);
+		player.setVelocity(new Vector(0, 0f, 0));
 
 		// clear potion effects
 		for (final PotionEffect e : player.getActivePotionEffects()) {
 			player.removePotionEffect(e.getType());
 		}
+
+		// clear screen
+		Skywars.get().NMS().sendTitle(player, "", "", 0, 0, 0);
+		Skywars.get().NMS().sendActionbar(player, "");
 	}
 
 	public static JoinProblem joinableCheck(Arena arena) {
@@ -239,8 +252,8 @@ public class SkywarsUtils {
 		final int spawns = arena.getMap().getSpawns().size();
 		if (arena.getAlivePlayerCount() >= spawns) {
 			if (player != null)
-				player.sendMessage(Messager.colorFormat("this arena is full! (%s/%s players)",
-						arena.getAlivePlayerCount(), spawns));
+				player.sendMessage(
+						Messager.color("this arena is full! (%s/%s players)", arena.getAlivePlayerCount(), spawns));
 			return JoinProblem.ARENA_IS_FULL;
 		}
 		return null;

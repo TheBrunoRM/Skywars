@@ -65,9 +65,9 @@ public class ConfigMenu implements Listener {
 				final String worldName = map.getWorldName();
 				if (worldName != null && worldName.equals(worldFolder.getName())) {
 					if (map == currentArenas.get(player).getMap()) {
-						lore.add(Messager.colorFormat("&6Current world folder", map.getName()));
+						lore.add(Messager.color("&6Current world folder", map.getName()));
 					} else {
-						lore.add(Messager.colorFormat("&cWarning! %s already uses this world folder", map.getName()));
+						lore.add(Messager.color("&cWarning! %s already uses this world folder", map.getName()));
 					}
 					alreadyUsing = true;
 					break;
@@ -80,7 +80,7 @@ public class ConfigMenu implements Listener {
 			final ItemStack item = new ItemStack(XMaterial.PAPER.parseItem());
 			final ItemMeta meta = item.getItemMeta();
 
-			meta.setDisplayName(Messager.colorFormat("&a%s", worldFolder.getName()));
+			meta.setDisplayName(Messager.color("&a%s", worldFolder.getName()));
 			meta.setLore(lore);
 			item.setItemMeta(meta);
 			inventory.setItem(index, item);
@@ -116,7 +116,7 @@ public class ConfigMenu implements Listener {
 		final SkywarsMap currentMap = currentArena.getMap();
 
 		InventoryUtils.addItem(inventory, XMaterial.SADDLE.parseMaterial(), 11,
-				Messager.colorFormat(teamSizeName, currentMap.getTeamSize()), "&eLeft-click to add",
+				Messager.color(teamSizeName, currentMap.getTeamSize()), "&eLeft-click to add",
 				"&eRight-click to remove");
 
 		String currentWorldName = currentMap.getWorldName();
@@ -128,10 +128,10 @@ public class ConfigMenu implements Listener {
 			currentWorldFile = "none";
 
 		InventoryUtils.addItem(inventory, XMaterial.PAPER.parseMaterial(), 14,
-				Messager.colorFormat(worldFolderName, currentWorldFile));
+				Messager.color(worldFolderName, currentWorldFile));
 
 		InventoryUtils.addItem(inventory, XMaterial.GLASS.parseMaterial(), 15,
-				Messager.colorFormat(statusName, "&6&lYES"));
+				Messager.color(statusName, "&6&lYES"));
 
 		final List<String> spawnLore = new ArrayList<String>();
 		spawnLore.add(Messager.color("&eWhen you enter &bSpawn Setup Mode&e,"));
@@ -171,10 +171,10 @@ public class ConfigMenu implements Listener {
 
 	static String locationName(Location location) {
 		if (location == null)
-			return Messager.colorFormat(positionName, "none");
+			return Messager.color(positionName, "none");
 		final String coords = String.format("%s, %s, %s", Math.floor(location.getBlockX()),
 				Math.floor(location.getBlockY()), Math.floor(location.getBlockZ()));
-		return Messager.colorFormat(positionName, coords);
+		return Messager.color(positionName, coords);
 	}
 
 	@EventHandler
@@ -195,7 +195,7 @@ public class ConfigMenu implements Listener {
 
 		final SkywarsMap currentMap = currentArena.getMap();
 
-		if (name.equals(Messager.colorFormat(teamSizeName, currentMap.getTeamSize()))) {
+		if (name.equals(Messager.color(teamSizeName, currentMap.getTeamSize()))) {
 			int n = currentMap.getTeamSize() + (event.getClick() == ClickType.LEFT ? 1 : -1);
 			n = Math.max(n, 0);
 			currentMap.setTeamSize(n);
@@ -247,7 +247,7 @@ public class ConfigMenu implements Listener {
 
 		if (name.equals(Messager.color(calculateSpawnsName))) {
 			currentMap.calculateSpawns();
-			player.sendMessage(Messager.colorFormat("&aSuccessfully &bcalculated &aand &bsaved &6%s spawns&a.",
+			player.sendMessage(Messager.color("&aSuccessfully &bcalculated &aand &bsaved &6%s spawns&a.",
 					currentMap.getSpawns().size()));
 			if (currentMap.getSpawns().size() <= 0)
 				player.sendMessage(Messager.color("&cWarning: &7did you place beacons on the map?"));
@@ -257,7 +257,7 @@ public class ConfigMenu implements Listener {
 			currentArena.resetCases();
 			if (currentMap.getSpawns().size() <= 0)
 				player.sendMessage(Messager.color("&cWarning: &7no spawns to create cases for."));
-			player.sendMessage(Messager.colorFormat("Regenerated cases for %s spawns", currentMap.getSpawns().size()));
+			player.sendMessage(Messager.color("Regenerated cases for %s spawns", currentMap.getSpawns().size()));
 			return;
 		}
 
@@ -295,7 +295,7 @@ public class ConfigMenu implements Listener {
 			player.closeInventory();
 		}
 
-		if (name.equals(Messager.colorFormat(worldFolderName, currentWorldName))) {
+		if (name.equals(Messager.color(worldFolderName, currentWorldName))) {
 			if (this.worldsFolder.listFiles() == null) {
 				player.closeInventory();
 				player.sendMessage("&c&lThere are no world folders!");
@@ -310,7 +310,7 @@ public class ConfigMenu implements Listener {
 			Skywars.get().sendDebugMessage("current file: " + worldFolder.getName());
 			if (worldFolder.getName().equals(worldFolderName)) {
 				currentMap.setWorldName(worldFolderName);
-				player.sendMessage(Messager.colorFormat("&eWorld set to &b%s", currentMap.getWorldName()));
+				player.sendMessage(Messager.color("&eWorld set to &b%s", currentMap.getWorldName()));
 				break;
 			}
 		}

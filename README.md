@@ -47,10 +47,11 @@ Type **/sw forcestart** to start the game immediately.
 
 To create an arena, type **/sw create <arena>**\
 After creating the arena, type **/sw config <arena>** to open the configuration menu\
-You can configurate most of the values of the arena on the configuration menu\
-Make sure to select an **schematic** file\
-To load an schematic file, put it inside the **schematics** folder inside the plugin folder\
-You can set the arena's schematic through the configuration menu
+You can configure most of the values of the arena on the configuration menu,\
+and for the ones you can't find, you can refer to the arena's configuration file.\
+Make sure to select a world folder.\
+To load an world folder, put it inside the **worlds** folder inside the plugin folder\
+You can set the arena's world through the configuration menu
 
 ### Creating signs
 
@@ -58,7 +59,7 @@ To create a sign, make it like this:
 * 2nd line: [SkyWars]
 * 3rd line: the arena name.
 
-\* The signs are case insensitive, they get parsed and properly formatted after.
+\* The casing of the signs is not relevant; there cannot be two arenas with the same name but different casing.
 
 ![Sign image](https://cdn.discordapp.com/attachments/835594221456064544/876946375110189146/unknown.png)
 

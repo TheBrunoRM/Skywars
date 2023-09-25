@@ -1,10 +1,10 @@
 # Skywars configuration file
 
-# the language used for the messages
+# the language used for the messages (lang folder)
 locale: en
 
 # the url for displaying the %url% placeholder (scoreboard)
-url: "&ewww.example.com"
+url: "www.example.com"
 
 # the format for displaying the %date% placeholder (scoreboard)
 dateFormat: "dd/MM/yyyy"
@@ -34,7 +34,8 @@ lastHitResetCooldown: 15
 maxMapSize: 200
 
 # the worlds where the lobby scoreboard shows
-# leave empty to show in all worlds
+# leave empty to show in all worlds:
+# scoreboardWorlds: []
 scoreboardWorlds:
 - world
 - lobby
@@ -78,15 +79,17 @@ decimalFormat: "0.#"
 disabledCommands: []
 
 # this is represented as
-# slot: item type
+# slot (from 0 to 8): item type
+
 # possible item types:
-# KIT_SELECTOR - clickable kit menu to select kit
-# GAME_OPTIONS - not yet implemented
+# KIT_SELECTOR - menu to select kit
+# GAME_OPTIONS - menu to change the game options
 # LEAVE - same as /sw leave or /leave
-# TELEPORTER - not yet implemented - menu for selecting someone to spectate
-# SPECTATOR_OPTIONS - not yet implemented - spectator options as speed, night vision, etc
-# ARENAS_MENU - clickable arena menu to join a game
-# JOIN_RANDOM_ARENA - not yet implemented - instantly join an arena
+# TELEPORTER - menu for selecting someone to spectate (not yet implemented)
+# SPECTATOR_OPTIONS - spectator options as speed, night vision, etc (not yet implemented)
+# ARENAS_MENU - arena menu to join a game
+# JOIN_RANDOM_ARENA - instantly join an arena (not yet implemented)
+
 items:
   waiting:
     0: KIT_SELECTOR
@@ -122,7 +125,7 @@ debug:
   bigCases: false
   projectileTests: false
 
-# this didn't work as expected
-# it is very buggy
+# do not enable updates nor autoUpdate
+# it breaks the plugin (for now)
 disableUpdates: true
 autoUpdate: false
