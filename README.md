@@ -113,4 +113,4 @@ The plugin will hook to other plugins to add extra functionality.
     do not work because of Bukkit limitations on message sending.\
     If you find a way to send an actionbar message on Bukkit, please open an issue or a pull request.
 
-Contact me in Discord: BrunoRM#7316
+Contact me in Discord: brunorm
