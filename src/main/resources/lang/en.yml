@@ -1,0 +1,242 @@
+status:
+  waiting: Waiting for players...
+  starting: Starting in &a%seconds%s
+  playing: '&a%players% &rplayers remaining'
+  ended: '&aGame ended!'
+  restarting: Ending in &a%seconds%s
+
+language_name: English
+
+none: "&rnone"
+
+events:
+  format: "&a%name% %time%"
+  refill: "Refill"
+  noevent: "&rNo event"
+
+items:
+  show_context: true
+  context: '&7(Right Click)'
+  
+  KIT_SELECTOR:
+    name: '&a&lKit selector'
+    description:
+    - "&7Right-click to select your kit"
+    
+  GAME_OPTIONS: 
+    name: '&b&lGame options'
+    description:
+    - "&7Right-click to change the game options"
+    
+  START_GAME:
+    name: "&6&lStart game"
+  
+  STOP_GAME:
+    name: "&c&lStop game"
+  
+  SPECTATOR_OPTIONS:
+    name: '&b&lSpectator options'
+    description:
+    - "&7Right-click to change your spectator options"
+    
+  LEAVE:
+    name: '&c&lLeave'
+    description:
+    - "&7Right-click to go back to the"
+    - "&7main lobby."
+    
+  PLAY_AGAIN:
+    name: '&b&lPlay again'
+    description:
+    - "&7Right-click to play again"
+    
+  TELEPORTER:
+    name: '&b&lTeleporter'
+    description:
+    - "&7Right-click to teleport to players"
+
+arena_join:
+  title: "&eSkyWars"
+  subtitle: "&cInsane Mode"
+  message: ""
+
+arena_start:
+  title: "&c&lINSANE MODE"
+  subtitle: ""
+  message: "&eCages opened! &cFIGHT!"
+
+died:
+   title: "&c&lYOU DIED!"
+   subtitle: "&7You are now a spectator!"
+   message: ""
+
+won:
+  title: "&6&lYOU WON"
+  subtitle: "&7Congratulations!"
+  message: ""
+
+actionbar:
+  waiting: '&eCurrent kit: &a%kit%'
+
+RELOADED: "&aSkywars configuration reloaded."
+NO_MAP: "&cNo map."
+NO_PERMISSION: "&cNo permission."
+NOT_JOINED: "&cNot joined."
+CANT_EXECUTE_COMMAND_IN_CONSOLE: "&cYou can't execute this command in the console!"
+NO_ARENA: "&cNo arena found by {0}"
+MAIN_LOBBY_NOT_SET: "&cMain lobby not set."
+TELEPORTED_TO_MAIN_LOBBY: "&eTeleported to the lobby!"
+COULD_NOT_SEND_BACK: "&cCould not send you back!"
+MAIN_LOBBY_SET: "&eThe main lobby has been set to your current position."
+COUNTDOWN_STOPPED: "&eCountdown stopped, not enough players to start the game!"
+
+JOIN: "&7{0} &ehas joined (&b{1}&e/&b{2}&e)!"
+
+LEAVE: "&7{0} &eleaved (&b{1}&e/&b{2}&e)"
+LEAVE_SELF: "&eYou leaved arena &b%arena%"
+
+already_started: "&cThe game is already started!"
+started_countdown: "&aStarted the countdown!"
+started_game: "&aStarted the game!"
+
+FORCED_START: "&b&l{0} &e&lforced the game to start!"
+
+refill:
+  title: ""
+  subtitle: "&eChests have been refilled!"
+  message: "&eChests have been refilled!"
+
+GAME_STARTING: "&eThe game is starting in &6{0} &eseconds!"
+GAME_STARTING_SECOND: "&eThe game starts in %count% &esecond!"
+GAME_STARTING_SECONDS: "&eThe game starts in %count% &eseconds!"
+
+PLAYERS_REMAINING: "&c{0} &eplayers remaining"
+
+# this is displayed when the game starts
+startLines:
+  - "&a&l---------------------------------------------"
+  - ""
+  - "                                  &f&lSkyWars"
+  - ""
+  - "    &e&lGather resources and equipment on your island"
+  - "      &e&lin order to eliminate every other player."
+  - "     &e&lGo to the center island for special chests"
+  - "                       &e&lwith special items!"
+  - ""
+  - "&a&l---------------------------------------------"
+
+where: "&eYou are in &a{0}"
+the_console: "the console"
+
+time:
+  DAY: "&aDay"
+  NIGHT: "&bNight"
+
+weather:
+  CLEAR: "&bClear weather"
+  RAIN: "&bRainy weather"
+
+chests:
+  NORMAL: "&aNormal chests"
+  OVERPOWERED: "&cOverpowered chests"
+
+vote: "&7{0} &evoted for &7{1}"
+
+chest_holograms:
+  empty: "&cEmpty"
+  refilled: "&eRefilled!"
+
+tablist:
+  lobby:
+    header:
+    - "&b&lSKYWARS"
+    footer:
+    - "&e%url%"
+  arena:
+    player:
+      header:
+      - "&a&lSkyWars"
+      - "&eCurrent kit: &b%kit%"
+      - "&eMap: &b%map%"
+      footer:
+      - "&c%players% &eplayers left"
+      - "&eNext event: &b%event%"
+    spectator:
+      header:
+      - "&a&lSkyWars"
+      - "&bYou're spectating"
+      - "&eMap: &b%map%"
+      footer:
+      - "&c%players% &eplayers left"
+      - "&eNext event: &b%event%"
+    intermission:
+      header:
+      - "&a&lSkywars"
+      - "&eMap: &b%map%"
+      footer:
+      - ""
+      - "%status%"
+
+scoreboard:
+  title: '&e&lSkyWars'
+  
+  lobby:
+  - '&7%date%'
+  - ''
+  - 'Coins: &6%coins%'
+  - 'Souls: &b%souls%'
+  - 'Wins: &a%totalwins%'
+  - 'Kills: &6%totalkills%'
+  - 'Deaths: &c%totaldeaths%'
+  - ''
+  - '&e%url%'
+  
+  arena:
+    player:
+    - '&7%date%'
+    - ''
+    - 'Next event:'
+    - '%event%'
+    - ''
+    - 'Players left: &a%players%'
+    - ''
+    - 'Kills: &a%kills%'
+    - ''
+    - 'Map: &a%map%'
+    - ''
+    - '&e%url%'
+    
+    spectator:
+    - '&7%date%'
+    - ''
+    - 'Next event:'
+    - '%event%'
+    - ''
+    - '%status%'
+    - ''
+    - 'Map: &a%map%'
+    - 'Players left: &a%players%'
+    - ''
+    - '&e%url%'
+    
+    intermission:
+    - '&7%date%'
+    - ''
+    - '%status%'
+    - ''
+    - 'Map: &a%map%'
+    - 'Players: &a%players%/%maxplayers%'
+    - ''
+    - '&e%url%'
+
+countdown:
+- title: "&e%count% seconds"
+  subtitle: "&eRight-click the bow to select a kit!"
+  color: 6
+  range: 10
+  #message:
+  #sound:
+- title: "&c%count%"
+  subtitle: "&ePrepare to fight!"
+  color: c
+  range: 5-1

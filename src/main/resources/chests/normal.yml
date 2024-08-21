@@ -1,0 +1,31 @@
+items:
+  # weapons
+  - STONE_SWORD
+  - IRON_SWORD
+  - BOW
+  - ARROW
+  # tools
+  - type: IRON_AXE
+    name: "&aLumberjack's Axe"
+    lore:
+    - "&eA very powerful axe"
+    - "&ethat can harvest any tree."
+  # blocks
+  - OAK_PLANKS 16
+  - COBBLESTONE 16
+  - OAK_PLANKS 32
+  - COBBLESTONE 32
+  # food
+  - GOLDEN_APPLE 2
+  - STEAK 16
+  # armor
+  - IRON_HELMET
+  - IRON_CHESTPLATE
+  - IRON_LEGGINGS
+  - IRON_BOOTS
+  # throwables
+  - EGG
+  - SNOW_BALL
+  # buckets
+  - LAVA_BUCKET
+  - WATER_BUCKET

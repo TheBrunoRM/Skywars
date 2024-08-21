@@ -1,0 +1,131 @@
+# Skywars configuration file
+
+# the language used for the messages (lang folder)
+locale: en
+
+# the url for displaying the %url% placeholder (scoreboard)
+url: "www.example.com"
+
+# the format for displaying the %date% placeholder (scoreboard)
+dateFormat: "dd/MM/yyyy"
+
+# minimum players to start the game automatically
+minPlayers: 2
+
+# you may want to disable these
+signsEnabled: true
+messageSounds:
+  enabled: true
+  sound: ITEM_PICKUP
+disableWeather: true
+
+sounds: # sound name; volume; pitch
+  join: HORSE_ARMOR; 5; 0.1
+  leave: ITEM_PICKUP; 5; 0.1
+  countdown: NOTE_STICKS; 5; 1
+  start:
+    - NOTE_PLING; 0.5; 1
+    - PORTAL_TRIGGER; 0.5; 5
+
+# this is the reset cooldown for last hits (in seconds)
+lastHitResetCooldown: 15
+
+# map size used for boundary calculation; in blocks
+maxMapSize: 200
+
+# the worlds where the lobby scoreboard shows
+# leave empty to show in all worlds:
+# scoreboardWorlds: []
+scoreboardWorlds:
+- world
+- lobby
+
+# update task for actionbar and scoreboard
+taskUpdate:
+  disabled: false
+  interval: 1 # seconds
+
+time: # seconds
+  starting: 10
+  ending: 10
+
+# the amount of fireworks throwed at the end of a game
+endFireworks: 3
+
+# invencibility at the start of the game
+# (to prevent fall damage after dropping from the cages)
+invencibility:
+  enabled: true
+  # the amount of ticks the players are invincible for
+  ticks: 40
+
+economy:
+  enabled: true
+  play: 10
+  kill: 25
+  win: 100
+
+# souls is the economy used for buying soul crates
+souls:
+  enabled: true
+  kill: 1
+
+# this is used to format money
+decimalFormat: "0.#"
+
+# you can disable the plugin commands here
+# possible options: start, forcestart, leave, where, skywars
+# you probably dont want to disable the last one lol
+disabledCommands: []
+
+# this is represented as
+# slot (from 0 to 8): item type
+
+# possible item types:
+# KIT_SELECTOR - menu to select kit
+# GAME_OPTIONS - menu to change the game options
+# LEAVE - same as /sw leave or /leave
+# TELEPORTER - menu for selecting someone to spectate (not yet implemented)
+# SPECTATOR_OPTIONS - spectator options as speed, night vision, etc (not yet implemented)
+# ARENAS_MENU - arena menu to join a game
+# JOIN_RANDOM_ARENA - instantly join an arena (not yet implemented)
+
+items:
+  waiting:
+    0: KIT_SELECTOR
+    1: GAME_OPTIONS
+    4: START_GAME
+    8: LEAVE
+  spectator:
+    0: TELEPORTER
+    1: SPECTATOR_OPTIONS
+    4: STOP_GAME
+    7: PLAY_AGAIN
+    8: LEAVE
+  # if for some reason you want to give items when the game starts
+  # you can do so here
+  # (not yet implemented)
+  playing: {}
+
+# you can make custom items by adding them here
+# you can add the details (name, description) in the lang file
+item_types:
+  KIT_SELECTOR: BOW
+  GAME_OPTIONS: PAPER
+  START_GAME: BLAZE_POWDER
+  STOP_GAME: BARRIER
+  PLAY_AGAIN: PAPER
+  LEAVE: BED # RED_BED if 1.13+
+  SPECTATOR_OPTIONS: REDSTONE_COMPARATOR # COMPARATOR if 1.13+
+  TELEPORTER: COMPASS
+
+debug:
+  # enable this to see debug messages
+  enabled: false
+  bigCases: false
+  projectileTests: false
+
+# do not enable updates nor autoUpdate
+# it breaks the plugin (for now)
+disableUpdates: true
+autoUpdate: false

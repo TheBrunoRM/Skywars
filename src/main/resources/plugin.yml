@@ -1,0 +1,48 @@
+main: me.brunorm.skywars.Skywars
+version: ${project.version}
+name: ${project.name}
+author: BrunoRM
+softdepend:
+  - Vault
+  - WorldEdit
+  - PlaceholderAPI
+  - HolographicDisplays
+  - DecentHolograms
+api-version: 1.13
+
+commands:
+  skywars:
+    description: Main Skywars command.
+    aliases: sw
+  start:
+    description: Starts a Skywars arena game.
+  forcestart:
+    description: Forces a Skywars arena game to start.
+  where:
+    aliases: whereami
+    description: Tells you where you are.
+  leave:
+    description: Leave a Skywars arena game.
+
+permissions:
+  skywars.*:
+    default: op
+    description: Gives access to all Skywars commands.
+    children:
+      skywars.admin: true
+      skywars.config: true
+      skywars.setmainlobby: true
+      skywars.forcestart: true
+      skywars.start: true
+  skywars.admin:
+    description: Gives access to admin Skywars commands.
+  skywars.config:
+    description: Gives access to config subcommand.
+  skywars.setmainlobby:
+    description: Allows setting the main lobby.
+  skywars.forcestart:
+    description: Allows immediately starting a Skywars game.
+  skywars.start:
+    description: Allows starting a Skywars game's countdown.
+  skywars.stop:
+    description: Allows stopping a game.

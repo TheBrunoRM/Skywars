@@ -1,0 +1,23 @@
+# KIT CONFIGURATION FILE
+# Note: use 1.13+ item IDs
+
+# This is the display name of the kit, used in the kits menu
+name: Default kit
+
+# This is the display icon of the kit, used in the kits menu
+icon: WOODEN_PICKAXE
+
+# These are the items that will be given to the player when the game starts
+items:
+- type: WOODEN_SWORD
+  name: "&bBeginner's Sword"
+  lore:
+  - "&eA very nice sword that"
+  - "&ecan do anything."
+  amount: 1
+- WOODEN_PICKAXE
+- WOODEN_AXE
+- STEAK 3
+
+# This is the price that will be used when players buy the kit
+price: 0
