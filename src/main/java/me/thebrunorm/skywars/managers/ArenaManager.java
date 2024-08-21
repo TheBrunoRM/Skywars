@@ -62,14 +62,18 @@ public class ArenaManager {
 	}
 
 	public static boolean joinMap(SkywarsMap map, Player player) {
-		final Arena arena = getArenaByMap(map, true);
-		if (arena != null) {
-			Skywars.get().sendDebugMessage("joining player to map");
-			arena.joinPlayer(player);
-			return true;
+		if(map == null) {
+			Skywars.get().sendDebugMessage("could not find or create arena for a null map");
+			return false;
 		}
-		Skywars.get().sendDebugMessage("could not find or create arena for map: " + map.getName());
-		return false;
+		final Arena arena = getArenaByMap(map, true);
+		if (arena == null) {
+			Skywars.get().sendDebugMessage("could not find or create arena for map: " + map.getName());
+			return false;
+		}
+		Skywars.get().sendDebugMessage("joining player to map");
+		arena.joinPlayer(player);
+		return true;
 	}
 
 	public static void joinRandomMap(Player player) {

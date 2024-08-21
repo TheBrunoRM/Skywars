@@ -1,4 +1,4 @@
-main: me.brunorm.skywars.Skywars
+main: me.thebrunorm.skywars.Skywars
 version: ${project.version}
 name: ${project.name}
 author: BrunoRM

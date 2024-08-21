@@ -261,7 +261,7 @@ public class Arena {
 	private void spectator(Player player, Location location) {
 		// TODO: make customizable spectator mode
 
-		SkywarsUtils.clearPlayer(player);
+		SkywarsUtils.clearPlayer(player, true);
 		player.setAllowFlight(true);
 		player.setFlying(true);
 		player.setGameMode(GameMode.ADVENTURE);

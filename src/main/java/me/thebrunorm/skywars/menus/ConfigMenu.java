@@ -145,13 +145,13 @@ public class ConfigMenu implements Listener {
 		InventoryUtils.addItem(inventory, XMaterial.BLAZE_ROD.parseMaterial(), 16, spawnName,
 				spawnLore.toArray(new String[0]));
 
+		InventoryUtils.addItem(inventory, XMaterial.GLASS.parseMaterial(), 18, regenerateCasesName);
+
 		InventoryUtils.addItem(inventory, XMaterial.BEACON.parseMaterial(), 19, calculateSpawnsName,
 				"&cThis will override current spawns.");
 
 		InventoryUtils.addItem(inventory, XMaterial.WOODEN_AXE.parseMaterial(), 20, pasteSchematicName,
 				"&cThis will regenerate the map.");
-
-		InventoryUtils.addItem(inventory, XMaterial.GLASS.parseMaterial(), 18, regenerateCasesName);
 
 		InventoryUtils.addItem(inventory, XMaterial.BARRIER.parseMaterial(), 21, clearName);
 
@@ -296,7 +296,7 @@ public class ConfigMenu implements Listener {
 		}
 
 		if (name.equals(Messager.color(worldFolderName, currentWorldName))) {
-			if (this.worldsFolder.listFiles() == null) {
+			if (this.worldsFolder.exists() && this.worldsFolder.listFiles().length <= 0) {
 				player.closeInventory();
 				player.sendMessage("&c&lThere are no world folders!");
 				player.sendMessage("&e&lYou need to put &bschematics files &ein the &bschematics folder");

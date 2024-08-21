@@ -172,8 +172,15 @@ public class SkywarsUtils {
 
 	public static void clearPlayer(Player player, boolean sync) {
 		clearPlayer(player);
-		if (sync)
+		if (sync) {
 			resetPlayerServer(player);
+			clearPlayerScreen(player);
+		}
+	}
+
+	public static void clearPlayerScreen(Player player) {
+		Skywars.get().NMS().sendTitle(player, "", "", 0, 0, 0);
+		Skywars.get().NMS().sendActionbar(player, "");
 	}
 
 	public static void clearPlayer(Player player) {
@@ -207,10 +214,6 @@ public class SkywarsUtils {
 		for (final PotionEffect e : player.getActivePotionEffects()) {
 			player.removePotionEffect(e.getType());
 		}
-
-		// clear screen
-		Skywars.get().NMS().sendTitle(player, "", "", 0, 0, 0);
-		Skywars.get().NMS().sendActionbar(player, "");
 	}
 
 	public static JoinProblem joinableCheck(Arena arena) {
