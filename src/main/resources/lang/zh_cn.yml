@@ -254,6 +254,7 @@ SETUP_DONE_TITLE: "&a&L完成"
 SETUP_SPAWNS_SAVED_SUBTITLE: "&e已保存出生点"
 SETUP_EXIT_SPAWN_EDIT_MODE: "&e&l您已退出 &b&l出生点编辑模式"
 SETUP_PLEASE_TITLE: "&6请"
+SETUP_WARNING_TITLE: "&c警告!"
 SETUP_DROP_TO_EXIT_EDIT_MODE: "&e丢弃烈焰棒以退出编辑模式。"
 SETUP_DROP_TO_EXIT_EDIT_MODE_EXCLAMATION: "&e丢弃烈焰棒以退出编辑模式！"
 SETUP_SPAWN_SET: "&e出生点 %s 已设置！"
@@ -269,6 +270,7 @@ CONFIG_COULD_NOT_GET_RESOURCE_2: "无法获取资源： %s"
 # MapManager相关key
 MAPMANAGER_UNKNOWN_WORLD_FILE: "&6发现未知世界文件： &b%s"
 MAPMANAGER_COULD_NOT_SAVE_CONFIG: "无法为世界保存地图配置文件： %s"
+CONFIG_NO_WORLD_ERROR: "&c错误：地图世界不存在，无法传送！"
 
 INVALID_ARGUMENTS: "&c参数无效！ &e使用 &b/sw help"
 

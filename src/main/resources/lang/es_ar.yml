@@ -173,6 +173,7 @@ SETUP_DONE_TITLE: "&a&LHECHO"
 SETUP_SPAWNS_SAVED_SUBTITLE: "&e¡Spawns guardados!"
 SETUP_EXIT_SPAWN_EDIT_MODE: "&e&l¡Saliste del &b&lmodo edición de spawns!"
 SETUP_PLEASE_TITLE: "&6Por favor"
+SETUP_WARNING_TITLE: "&c¡Advertencia!"
 SETUP_DROP_TO_EXIT_EDIT_MODE: "&eSoltá la vara de blaze para salir del modo edición."
 SETUP_DROP_TO_EXIT_EDIT_MODE_EXCLAMATION: "&e¡Soltá la vara de blaze para salir del modo edición!"
 SETUP_SPAWN_SET: "&e¡Spawn %s establecido!"
@@ -188,6 +189,7 @@ CONFIG_COULD_NOT_GET_RESOURCE_2: "No se pudo obtener el recurso: %s"
 # MapManager related keys
 MAPMANAGER_UNKNOWN_WORLD_FILE: "&6Archivo de mundo desconocido encontrado: &b%s"
 MAPMANAGER_COULD_NOT_SAVE_CONFIG: "No se pudo guardar el archivo de configuración del mapa para el mundo: %s"
+CONFIG_NO_WORLD_ERROR: "&cError: El mundo del mapa no existe, ¡no se puede teletransportar!"
 
 INVALID_ARGUMENTS: "&c¡Argumentos inválidos! &eUsá &b/sw help"
 

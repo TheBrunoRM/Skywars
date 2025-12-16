@@ -54,7 +54,7 @@ public class SetupEvents implements Listener {
 		if (SetupEvents.item == null)
 			return;
 		final ItemStack newItem = event.getPlayer().getInventory().getItem(event.getNewSlot());
-		if (newItem.equals(SetupEvents.item)) {
+		if (newItem != null && newItem.equals(SetupEvents.item)) {
 			Skywars.get().NMS().sendTitle(event.getPlayer(), Messager.getMessage("SETUP_PLEASE_TITLE"), Messager.getMessage("SETUP_DROP_TO_EXIT_EDIT_MODE"));
 		} else {
 			Skywars.get().NMS().sendTitle(event.getPlayer(), Messager.getMessage("SETUP_WARNING_TITLE"), Messager.getMessage("SETUP_DROP_TO_EXIT_EDIT_MODE_EXCLAMATION"));

@@ -223,11 +223,16 @@ public class ConfigMenu implements Listener {
 			player.closeInventory();
 
 			playerLocations.put(player, player.getLocation());
-			player.teleport(arena.getCenterBlock().toLocation(arena.getWorld()).clone().add(new Vector(0, 5, 0)));
-			player.setVelocity(new Vector(0, 1f, 0));
-
-			player.setAllowFlight(true);
-			player.setFlying(true);
+			org.bukkit.World world = arena.getWorld();
+			if (world != null) {
+				player.teleport(arena.getCenterBlock().toLocation(world).clone().add(new Vector(0, 5, 0)));
+				player.setVelocity(new Vector(0, 1f, 0));
+				player.setAllowFlight(true);
+				player.setFlying(true);
+			} else {
+				player.sendMessage(Messager.getMessage("CONFIG_NO_WORLD_ERROR"));
+				Skywars.get().sendDebugMessage("Could not teleport player to arena: world is null for arena " + arena.getMap().getName());
+			}
 
 			Skywars.get().NMS().sendTitle(player, "&a&lENABLED", "&eSpawn edit mode");
 			player.playSound(player.getLocation(), Sounds.NOTE_PLING.bukkitSound(), 3, 2);

@@ -174,6 +174,7 @@ SETUP_DONE_TITLE: "&a&LDONE"
 SETUP_SPAWNS_SAVED_SUBTITLE: "&eSaved spawns"
 SETUP_EXIT_SPAWN_EDIT_MODE: "&e&lYou exited &b&lspawn edit mode"
 SETUP_PLEASE_TITLE: "&6Please"
+SETUP_WARNING_TITLE: "&cWarning!"
 SETUP_DROP_TO_EXIT_EDIT_MODE: "&eDrop the blaze rod to exit edit mode."
 SETUP_DROP_TO_EXIT_EDIT_MODE_EXCLAMATION: "&eDrop the blaze rod to exit edit mode!"
 SETUP_SPAWN_SET: "&eSpawn %s set!"
@@ -189,6 +190,7 @@ CONFIG_COULD_NOT_GET_RESOURCE_2: "Could not get resource: %s"
 # MapManager related keys
 MAPMANAGER_UNKNOWN_WORLD_FILE: "&6Unknown world file found: &b%s"
 MAPMANAGER_COULD_NOT_SAVE_CONFIG: "Could not save map configuration file for world: %s"
+CONFIG_NO_WORLD_ERROR: "&cError: Map world does not exist, cannot teleport!"
 
 INVALID_ARGUMENTS: "&cInvalid arguments! &eUse &b/sw help"
 

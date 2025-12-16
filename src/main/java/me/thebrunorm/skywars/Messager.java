@@ -38,14 +38,20 @@ public class Messager {
 			msg = Skywars.langConfig.getString(name);
 		if (msg == null)
 			return name;
-		// First handle numbered placeholders like {0}, {1}, etc.
+		
+		// Handle %s placeholders by replacing them with numbered placeholders first, then handle numbered ones
+		if (format.length > 0) {
+			for (int i = 0; i < format.length; i++) {
+				// Replace first occurrence of %s with {i} to make it compatible with existing system
+				msg = msg.replaceFirst("%s", String.format("{%d}", i));
+			}
+		}
+		
+		// Handle numbered placeholders like {0}, {1}, etc.
 		for (int i = 0; i < format.length; i++) {
 			msg = msg.replaceAll(String.format("\\{%s\\}", i), String.valueOf(format[i]));
 		}
-		// Then handle %s placeholders by replacing them in order
-		for (final Object obj : format) {
-			msg = msg.replaceFirst("%s", String.valueOf(obj));
-		}
+		
 		return Messager.color(msg);
 	}
 
