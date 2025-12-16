@@ -1,116 +1,118 @@
 # Skywars
 
-A Minecraft plugin that adds the Skywars minigame.
-Compatible with Bukkit and Spigot, from versions 1.8 upwards.
+一个添加Skywars小游戏的Minecraft插件。
+兼容Bukkit和Spigot，支持1.8及以上版本。
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/786de08d9dfa4332bc1e15e8f4373bd6)](https://www.codacy.com/gh/TheBrunoRM/Skywars/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=TheBrunoRM/Skywars&amp;utm_campaign=Badge_Grade)
-[![GitHub last commit](https://img.shields.io/github/last-commit/TheBrunoRM/Skywars.svg)](https://github.com/TheBrunoRM/Skywars/commits/master)
-[![version](https://img.shields.io/github/release/TheBrunoRM/Skywars.svg?colorB=7418f5)](https://github.com/TheBrunoRM/Skywars/releases/latest)
-[![view on SpigotMC](https://img.shields.io/badge/view%20on-spigotmc-orange.svg)](https://www.spigotmc.org/resources/98709)
+[![Codacy徽章](https://app.codacy.com/project/badge/Grade/786de08d9dfa4332bc1e15e8f4373bd6)](https://www.codacy.com/gh/TheBrunoRM/Skywars/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=TheBrunoRM/Skywars&amp;utm_campaign=Badge_Grade)
+[![GitHub最新提交](https://img.shields.io/github/last-commit/TheBrunoRM/Skywars.svg)](https://github.com/TheBrunoRM/Skywars/commits/master)
+[![版本](https://img.shields.io/github/release/TheBrunoRM/Skywars.svg?colorB=7418f5)](https://github.com/TheBrunoRM/Skywars/releases/latest)
+[![在SpigotMC上查看](https://img.shields.io/badge/view%20on-spigotmc-orange.svg)](https://www.spigotmc.org/resources/98709)
 
-# Table of Contents
-1. [How to install](#how-to-install)
-2. [How to use](#how-to-use)
-   * [How to play](#how-to-play)
-   * [Creating an arena](#creating-an-arena)
-   * [Creating signs](#creating-signs)
-3. [Current features](#current-features)
-4. [To do](#to-do)
-5. [Compatibility issues](#compatibility-issues)
+# 目录
+1. [如何安装](#如何安装)
+2. [如何使用](#如何使用)
+    * [如何玩游戏](#如何玩游戏)
+    * [创建竞技场](#创建竞技场)
+    * [创建告示牌](#创建告示牌)
+3. [当前功能](#当前功能)
+4. [待办事项](#待办事项)
+5. [兼容性问题](#兼容性问题)
 
-## How to install
+## 如何安装
 
-To install the plugin, drag the .jar file to your server's **plugins** folder.\
-The plugin does not need any other dependencies as it should work by itself.\
-You can start or reload the server after installing the plugin.
+要安装插件，请将.jar文件拖到服务器的**plugins**文件夹中。\
+插件不需要任何其他依赖项，因为它应该可以独立工作。\
+安装插件后，您可以启动或重新加载服务器。
 
-## How to use
+## 如何使用
 
-Type **/sw help** to see the available commands.\
-Add maps into the "worlds" folder; the plugin will\
-load the worlds and create the configuration files for their maps.
+输入**/sw help**查看可用命令。\
+将地图添加到"worlds"文件夹；插件将\
+加载世界并为其地图创建配置文件。
 
-To disable the default lobby scoreboard,\
-set the value of **lobby** in the **scoreboard.yml** file to **false**.
+要禁用默认大厅记分板，\
+将**scoreboard.yml**文件中的**lobby**值设置为**false**。
 
-If the plugin doesn't have a **main lobby** set,\
-players will be teleported to the **last location** they were at.\
-If it is set, then they will be teleported to it.
+如果插件没有设置**主大厅**，\
+玩家将被传送到他们之前所在的**最后位置**。\
+如果设置了，则他们将被传送到那里。
 
-### How to play
+### 如何玩游戏
 
-Type **/sw play** to open the arenas menu and click an arena to join.\
-Type **/sw start** to start the game countdown.\
-Type **/sw forcestart** to start the game immediately.
+输入**/sw play**打开竞技场菜单并点击一个竞技场加入。\
+输入**/sw start**开始游戏倒计时。\
+输入**/sw forcestart**立即开始游戏。
 
-### Creating an arena
+### 创建竞技场
 
-To create an arena, type **/sw create <arena>**\
-After creating the arena, type **/sw config <arena>** to open the configuration menu\
-You can configure most of the values of the arena on the configuration menu,\
-and for the ones you can't find, you can refer to the arena's configuration file.\
-Make sure to select a world folder.\
-To load an world folder, put it inside the **worlds** folder inside the plugin folder\
-You can set the arena's world through the configuration menu
+要创建竞技场，请输入**/sw create <arena>**\
+创建竞技场后，输入**/sw config <arena>**打开配置菜单\
+您可以在配置菜单上配置竞技场的大部分值，\
+对于找不到的值，您可以参考竞技场的配置文件。\
+确保选择一个世界文件夹。\
+要加载世界文件夹，请将其放在插件文件夹内的**worlds**文件夹中\
+您可以通过配置菜单设置竞技场的世界
 
-### Creating signs
+### 创建告示牌
 
-To create a sign, make it like this:
-* 2nd line: [SkyWars]
-* 3rd line: the arena name.
+要创建告示牌，请这样做：
+* 第2行：[SkyWars]
+* 第3行：竞技场名称。
 
-\* The casing of the signs is not relevant; there cannot be two arenas with the same name but different casing.
+\* 告示牌的大小写不重要；不能有两个名称相同但大小写不同的竞技场。
 
-![Sign image](https://cdn.discordapp.com/attachments/835594221456064544/876946375110189146/unknown.png)
+![告示牌图片](https://cdn.discordapp.com/attachments/835594221456064544/876946375110189146/unknown.png)
 
-To remove a sign, sneak (shift) while on creative mode and left click.
+要删除告示牌，在创造模式下潜行（shift）并左键单击。
 
-## Plugin hooks
-The plugin will hook to other plugins to add extra functionality.
-### Economy
-#### Current economy features:
-  * Coins
-#### Currently implemented economy plugin APIS ([Skywars.java](https://github.com/TheBrunoRM/Skywars/blob/master/src/main/java/me/brunorm/skywars/Skywars.java#L250)):
-  * Vault
-### Holograms
-#### Current hologram features:
-  * Holograms above chests to indicate refill time.
+## 插件挂钩
+插件将挂钩到其他插件以添加额外功能。
+### 经济系统
+#### 当前经济功能：
+* 硬币
+#### 当前实现的经济插件API（[Skywars.java](https://github.com/TheBrunoRM/Skywars/blob/master/src/main/java/me/brunorm/skywars/Skywars.java#L250)）：
+* Vault
+### 全息显示
+#### 当前全息功能：
+* 指示补给时间的箱子上方全息图。
 
-#### Currently implemented hologram plugins APIs ([HologramController.java](https://github.com/TheBrunoRM/Skywars/blob/master/src/main/java/me/brunorm/skywars/holograms/HologramController.java)):
-  * HolographicDisplays
-  * DecentHolograms
+#### 当前实现的全息插件API（[HologramController.java](https://github.com/TheBrunoRM/Skywars/blob/master/src/main/java/me/brunorm/skywars/holograms/HologramController.java)）：
+* HolographicDisplays
+* DecentHolograms
 
-## Current features
-  * Maps
-  * Kits
-  * Easy map setup menu
-  * Custom language file (not 100% of the messages, still working on it)
-  * Configuration options
-  * Chest refills
-  * 1.13+ compatible (still working on it, but it kinda works)
-  * Vault support (economy)
+## 当前功能
+* 地图
+* 套装
+* 简单的地图设置菜单
+* 自定义语言文件（不是100%的消息，仍在开发中）
+* 配置选项
+* 箱子补给
+* 1.13+兼容（仍在开发中，但基本可用）
+* Vault支持（经济系统）
 
-## To do
-  * More game events
-  * More configuration options
-  * Party options (?)
-  * Team games
-  * Custom cases (schematic)
-  * Ability to buy kits (inside and outside a game)
-  * Ability to change case (inside and outside a game)
-  * Game options (time, weather, chests, etc)
-  * Code optimization
-  * Plugin API events and methods
+## 待办事项
+* 更多游戏事件
+* 更多配置选项
+* 队伍选项（？）
+* 团队游戏
+* 自定义箱子（结构图）
+* 购买套装的能力（游戏内外）
+* 更改箱子的能力（游戏内外）
+* 游戏选项（时间、天气、箱子等）
+* 代码优化
+* 插件API事件和方法
 
-## Compatibility issues
-  * **Schematic files**\
-    The plugin no longer works with schematic files.\
-    I've decided to drop support for these type of files\
-    for various reasons like compatibility.\
-    I may consider implementing a new system for this.\
-    For now, the plugin works with world files.
-  * **Actionbar messages on Bukkit**\
-    do not work because of Bukkit limitations on message sending.\
-    If you find a way to send an actionbar message on Bukkit, please open an issue or a pull request.
+## 兼容性问题
+* **结构图文件**\
+  插件不再支持结构图文件。\
+  出于兼容性等各种原因，我决定放弃对这些类型文件的支持。\
+  我可能会考虑为此实现一个新系统。\
+  目前，插件支持世界文件。
+* **Bukkit上的动作栏消息**\
+  由于Bukkit在消息发送上的限制而无法工作。\
+  如果您找到在Bukkit上发送动作栏消息的方法，请开启问题或拉取请求。
 
-Contact me in Discord: brunorm
+在Discord上联系我：brunorm
+
+## 其他语言
+* [English](README_EN.md)

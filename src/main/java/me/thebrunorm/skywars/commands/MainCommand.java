@@ -61,14 +61,6 @@ public class MainCommand implements CommandExecutor {
 	 * "&b* You can use the shorthand version of the command: &e&l/sw" };
 	 */
 
-	String[] helpLines = {
-			Messager.color("&a&lCommand list - &b%s &a%s &eby &b%s", Skywars.get().name, Skywars.get().version,
-					String.join(", ", Skywars.get().authors)),
-			"&b/skywars setmainlobby &e- sets the main lobby", "&b/skywars lobby &e- teleports you to the main lobby",
-			"&b/skywars create <arena> &e- creates an arena", "&b/skywars delete <arena> &e- deletes an arena",
-			"&b/skywars config <arena> &e- opens the configuration menu", "&b/skywars play &e- open the arenas menu",
-			"&b/skywars start &e- starts a game", "&b/skywars forcestart &e- starts a game immediately" };
-
 	Schematic schematic;
 
 	BukkitTask task;
@@ -84,7 +76,7 @@ public class MainCommand implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String cmd, String[] args) {
 		try {
 			if (args.length <= 0) {
-				sender.sendMessage(Messager.color("&a&lSkyWars &e- /sw help"));
+				sender.sendMessage(Messager.getMessage("WELCOME_MESSAGE"));
 				return true;
 			}
 			Player player = null;
@@ -135,9 +127,16 @@ public class MainCommand implements CommandExecutor {
 				}
 				ConfigMenu.OpenConfigurationMenu(player, _map);
 			} else if (args[0].equalsIgnoreCase("help")) {
-				for (final String line : this.helpLines) {
-					sender.sendMessage(Messager.color(line));
-				}
+				sender.sendMessage(Messager.color("&a&lCommand list - &b%s &a%s &eby &b%s", Skywars.get().name, Skywars.get().version,
+						String.join(", ", Skywars.get().authors)));
+				sender.sendMessage(Messager.getMessage("HELP_SETMAINLOBBY"));
+				sender.sendMessage(Messager.getMessage("HELP_LOBBY"));
+				sender.sendMessage(Messager.getMessage("HELP_CREATE"));
+				sender.sendMessage(Messager.getMessage("HELP_DELETE"));
+				sender.sendMessage(Messager.getMessage("HELP_CONFIG"));
+				sender.sendMessage(Messager.getMessage("HELP_PLAY"));
+				sender.sendMessage(Messager.getMessage("HELP_START"));
+				sender.sendMessage(Messager.getMessage("HELP_FORCESTART"));
 			} else if (args[0].equalsIgnoreCase("leave")) {
 				if (!CommandsUtils.consoleCheckWithMessage(sender))
 					return true;
@@ -160,7 +159,7 @@ public class MainCommand implements CommandExecutor {
 				ArenaManager.joinMap(map, player);
 			} else if (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("about")
 					|| args[0].equalsIgnoreCase("ver") || args[0].equalsIgnoreCase("version")) {
-				sender.sendMessage(Messager.color("&b%s &eversion &a%s &emade by &b%s", Skywars.get().name,
+				sender.sendMessage(Messager.getFormattedMessage("PLUGIN_INFO", player, null, null, Skywars.get().name,
 						Skywars.get().version, String.join(", ", Skywars.get().authors)));
 			} else if (args[0].equalsIgnoreCase("server")) {
 				if (!CommandsUtils.permissionCheckWithMessage(sender, "skywars.admin"))
@@ -634,7 +633,7 @@ public class MainCommand implements CommandExecutor {
 				else
 					sender.sendMessage("Could not delete map");
 			} else {
-				sender.sendMessage(Messager.color("&cInvalid arguments! &eUse &b/sw help"));
+				sender.sendMessage(Messager.getMessage("INVALID_ARGUMENTS"));
 			}
 			return true;
 		} catch (final Exception e) {

@@ -28,6 +28,9 @@ public class Messager {
 	}
 
 	public static String getMessage(String name, Object... format) {
+		if (Skywars.langConfig == null) {
+			return name; // Return the key itself if langConfig is not loaded yet
+		}
 		String msg = "";
 		if (Skywars.langConfig.get(name) instanceof List)
 			msg = String.join("\n", Skywars.langConfig.getStringList(name));
@@ -43,7 +46,9 @@ public class Messager {
 
 	public static String getFormattedMessage(String name, Player player, Arena arena, SkywarsUser swp,
 			Object... format) {
-		return Messager.color(SkywarsUtils.format(getMessage(name, format), player, arena, swp));
-	}
-
+			if (Skywars.langConfig == null) {
+				return name; // Return the key itself if langConfig is not loaded yet
+			}
+			return Messager.color(SkywarsUtils.format(getMessage(name, format), player, arena, swp));
+		}
 }

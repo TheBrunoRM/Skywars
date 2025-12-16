@@ -30,7 +30,7 @@ public class SkywarsUpdater {
 
 	public static boolean update(boolean applyUpdate) {
 
-		final String JSON_URL = "https://api.github.com/repos/TheBrunoRM/Skywars/releases/latest";
+		final String JSON_URL = "https://api.github.com/repos/MinecraftNekoServer/Skywars/releases/latest";
 
 		long start = Instant.now().toEpochMilli();
 		try {

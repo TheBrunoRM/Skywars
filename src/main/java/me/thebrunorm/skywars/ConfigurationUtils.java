@@ -69,7 +69,11 @@ public class ConfigurationUtils {
 
 			for (final String key : section.getKeys(true)) {
 				if (conf.get(key) == null) {
-					Skywars.get().sendMessage("&cWarning: key &b%s &cis missing in file &b%s", key, fileName);
+					if (Skywars.langConfig != null) {
+						Skywars.get().sendMessage(Messager.getFormattedMessage("CONFIG_KEY_MISSING_WARNING", null, null, null, key, fileName));
+					} else {
+						Skywars.get().sendMessage("&cWarning: key &b" + key + " &cis missing in file &b" + fileName);
+					}
 					modified = true;
 
 					// setting the key in the configuration
@@ -79,7 +83,11 @@ public class ConfigurationUtils {
 				}
 			}
 			if (modified) {
-				Skywars.get().sendMessage("&6The plugin will use the default values for the missing keys.");
+				if (Skywars.langConfig != null) {
+					Skywars.get().sendMessage(Messager.getMessage("CONFIG_DEFAULT_VALUES_WARNING"));
+				} else {
+					Skywars.get().sendMessage("&6The plugin will use the default values for the missing keys.");
+				}
 			}
 		} catch (final Exception e) {
 			e.printStackTrace();
@@ -91,7 +99,7 @@ public class ConfigurationUtils {
 		try {
 			final InputStream stream = Skywars.get().getResource(defaultFileName);
 			if (stream == null) {
-				Skywars.get().sendMessage("Could not get resource: " + defaultFileName);
+				Skywars.get().sendMessage(Messager.getFormattedMessage("CONFIG_COULD_NOT_GET_RESOURCE", null, null, null, defaultFileName));
 				return null;
 			}
 			final Reader defaultConfigStream = new InputStreamReader(stream, "UTF-8");
@@ -113,7 +121,7 @@ public class ConfigurationUtils {
 				file.createNewFile();
 			final InputStream stream = Skywars.get().getResource(defaultFileName);
 			if (stream == null) {
-				Skywars.get().sendMessage("Could not get resource: " + defaultFileName);
+				Skywars.get().sendMessage(Messager.getFormattedMessage("CONFIG_COULD_NOT_GET_RESOURCE_2", null, null, null, defaultFileName));
 				return;
 			}
 			copyInputStreamToFile(stream, file);

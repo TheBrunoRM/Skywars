@@ -146,8 +146,65 @@ chest_holograms:
   empty: "&cEmpty"
   refilled: "&eRefilled!"
 
-tablist:
-  lobby:
+# Nuevas key añadidas
+WELCOME_MESSAGE: "&a&lSkyWars &e- /sw help"
+
+COMMAND_LIST: "&a&lCommand list - &b%s &a%s &eby &b%s"
+
+HELP_SETMAINLOBBY: "&b/skywars setmainlobby &e- sets the main lobby" 
+HELP_LOBBY: "&b/skywars lobby &e- teleports you to the main lobby"
+HELP_CREATE: "&b/skywars create <arena> &e- creates an arena"
+HELP_DELETE: "&b/skywars delete <arena> &e- deletes an arena"
+HELP_CONFIG: "&b/skywars config <arena> &e- opens the configuration menu"
+HELP_PLAY: "&b/skywars play &e- open the arenas menu"
+HELP_START: "&b/skywars start &e- starts a game"
+HELP_FORCESTART: "&b/skywars forcestart &e- starts a game immediately"
+
+PLUGIN_INFO: "&b%s &eversion &a%s &emade by &b%s"
+
+SENDING_TO_ANOTHER_GAME: "&aSending you to another game..."
+
+SIGN_MAP_NOT_FOUND: "&cCould not find a map with the name: &e%s"
+SIGN_NEED_MAP_NAME: "&cYou need to specify the map name in the line below!"
+SIGN_COULD_NOT_SET_UP: "&cCould not set up sign."
+SIGN_SUCCESSFULLY_SET_UP: "&eSuccessfully set up sign for map &b%s&e!"
+
+# SetupEvents related keys
+SETUP_DONE_TITLE: "&a&LDONE"
+SETUP_SPAWNS_SAVED_SUBTITLE: "&eSaved spawns"
+SETUP_EXIT_SPAWN_EDIT_MODE: "&e&lYou exited &b&lspawn edit mode"
+SETUP_PLEASE_TITLE: "&6Please"
+SETUP_DROP_TO_EXIT_EDIT_MODE: "&eDrop the blaze rod to exit edit mode."
+SETUP_DROP_TO_EXIT_EDIT_MODE_EXCLAMATION: "&eDrop the blaze rod to exit edit mode!"
+SETUP_SPAWN_SET: "&eSpawn %s set!"
+SETUP_NO_SPAWN: "&cNo spawn &c!"
+SETUP_SPAWN_REMOVED: "&cSpawn %s removed!"
+
+# ConfigurationUtils related keys
+CONFIG_KEY_MISSING_WARNING: "&cWarning: key &b%s &cis missing in file &b%s"
+CONFIG_DEFAULT_VALUES_WARNING: "&6The plugin will use the default values for the missing keys."
+CONFIG_COULD_NOT_GET_RESOURCE: "Could not get resource: %s"
+CONFIG_COULD_NOT_GET_RESOURCE_2: "Could not get resource: %s"
+
+# MapManager related keys
+MAPMANAGER_UNKNOWN_WORLD_FILE: "&6Unknown world file found: &b%s"
+MAPMANAGER_COULD_NOT_SAVE_CONFIG: "Could not save map configuration file for world: %s"
+
+INVALID_ARGUMENTS: "&cInvalid arguments! &eUse &b/sw help"
+
+# SignManager related keys
+SIGN_COULD_NOT_SAVE_SIGNS: "&cCould not save signs!"
+SIGN_LOADING_ERROR_FORMAT: "&4Error loading signs.yml: &cincorrectly formatted sign (&4%s&c): &b"
+SIGN_COULD_NOT_FIND_WORLD: "&4Error loading signs.yml: &ccould not find world: &b%s"
+SIGN_IS_NOT_SIGN: "&4Error loading signs.yml: &csign is not sign: &b%s"
+SIGN_DUPLICATED_SIGN: "&4Error loading signs.yml: &cduplicated sign: &b%s"
+SIGN_COULD_NOT_FIND_MAP: "&4Error loading signs.yml: &ccould not find map: &b%s"
+SIGN_LOADED_SIGN: "&eLoaded sign: &b%s "
+SIGN_COULD_NOT_CREATE_SIGNS_FILE: "&cCould not create &bsigns.yml &cfile!"
+SIGN_UPDATE_WARNING: "&4Warning updating signs: &csign is not sign: &b%s "
+SIGN_UPDATING_SIGN: "&eUpdating sign (&a%s&e): &b%s"
+
+tablist:  lobby:
     header:
     - "&b&lSKYWARS"
     footer:

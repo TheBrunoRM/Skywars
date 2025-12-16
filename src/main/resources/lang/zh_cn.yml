@@ -77,6 +77,7 @@ NO_PERMISSION: "&c没有权限."
 NOT_JOINED: "&c未加入."
 CANT_EXECUTE_COMMAND_IN_CONSOLE: "&c你不能在控制台中执行此命令!"
 NO_ARENA: "&c未找到由{0}命名的竞技场"
+MAIN_LOBBY_NOT_SET: "&c主大厅未设置."
 TELEPORTED_TO_MAIN_LOBBY: "&e已传送到大厅!"
 COULD_NOT_SEND_BACK: "&c无法将你传送回去!"
 MAIN_LOBBY_SET: "&e主大厅已设置在你当前位置."
@@ -124,6 +125,7 @@ chests:
   NORMAL: "&a普通箱子"
   OVERPOWERED: "&c超级箱子"
 vote: "&7{0} &e为 &7{1} 投票了"
+
 chest_holograms:
   empty: "&c空的"
   refilled: "&e已补给!"
@@ -210,23 +212,74 @@ scoreboard:
       - '&e%url%'
 
 countdown:
-
 - title: "&e%count% 秒"
-
   subtitle: "&e右键点击弓来选择套装!"
-
   color: 6
-
   range: 10
-
   #message:
-
   #sound:
-
 - title: "&c%count%"
-
   subtitle: "&e准备战斗!"
-
   color: c
-
   range: 5-1
+
+
+
+
+# 新增的命令和消息key
+WELCOME_MESSAGE: "&a&lSkyWars &e- /sw help"
+
+COMMAND_LIST: "&a&l命令列表 - &b%s &a%s &e作者 &b%s"
+
+HELP_SETMAINLOBBY: "&b/skywars setmainlobby &e- 设置主大厅"
+HELP_LOBBY: "&b/skywars lobby &e- 传送到主大厅"
+HELP_CREATE: "&b/skywars create <arena> &e- 创建竞技场"
+HELP_DELETE: "&b/skywars delete <arena> &e- 删除竞技场"
+HELP_CONFIG: "&b/skywars config <arena> &e- 打开配置菜单"
+HELP_PLAY: "&b/skywars play &e- 打开竞技场菜单"
+HELP_START: "&b/skywars start &e- 开始游戏"
+HELP_FORCESTART: "&b/skywars forcestart &e- 强制开始游戏"
+
+PLUGIN_INFO: "&b%s &e版本 &a%s &e作者 &b%s"
+
+SENDING_TO_ANOTHER_GAME: "&a正在将您发送到另一场游戏..."
+
+SIGN_MAP_NOT_FOUND: "&c找不到名称为 &e%s &c的地图"
+SIGN_NEED_MAP_NAME: "&c您需要在下一行指定地图名称！"
+SIGN_COULD_NOT_SET_UP: "&c无法设置告示牌。"
+SIGN_SUCCESSFULLY_SET_UP: "&e成功为地图 &b%s &e设置告示牌"
+
+# SetupEvents相关key
+SETUP_DONE_TITLE: "&a&L完成"
+SETUP_SPAWNS_SAVED_SUBTITLE: "&e已保存出生点"
+SETUP_EXIT_SPAWN_EDIT_MODE: "&e&l您已退出 &b&l出生点编辑模式"
+SETUP_PLEASE_TITLE: "&6请"
+SETUP_DROP_TO_EXIT_EDIT_MODE: "&e丢弃烈焰棒以退出编辑模式。"
+SETUP_DROP_TO_EXIT_EDIT_MODE_EXCLAMATION: "&e丢弃烈焰棒以退出编辑模式！"
+SETUP_SPAWN_SET: "&e出生点 %s 已设置！"
+SETUP_NO_SPAWN: "&c没有出生点 &c！"
+SETUP_SPAWN_REMOVED: "&c出生点 %s 已移除！"
+
+# ConfigurationUtils相关key
+CONFIG_KEY_MISSING_WARNING: "&c警告：键 &b%s &c在文件 &b%s &c中缺失"
+CONFIG_DEFAULT_VALUES_WARNING: "&6插件将对缺失的键使用默认值。"
+CONFIG_COULD_NOT_GET_RESOURCE: "无法获取资源： %s"
+CONFIG_COULD_NOT_GET_RESOURCE_2: "无法获取资源： %s"
+
+# MapManager相关key
+MAPMANAGER_UNKNOWN_WORLD_FILE: "&6发现未知世界文件： &b%s"
+MAPMANAGER_COULD_NOT_SAVE_CONFIG: "无法为世界保存地图配置文件： %s"
+
+INVALID_ARGUMENTS: "&c参数无效！ &e使用 &b/sw help"
+
+# SignManager相关key
+SIGN_COULD_NOT_SAVE_SIGNS: "&c无法保存告示牌！"
+SIGN_LOADING_ERROR_FORMAT: "&4加载signs.yml时出错： &c格式不正确的告示牌 (&4%s&c): &b"
+SIGN_COULD_NOT_FIND_WORLD: "&4加载signs.yml时出错： &c找不到世界： &b%s"
+SIGN_IS_NOT_SIGN: "&4加载signs.yml时出错： &c不是告示牌： &b%s"
+SIGN_DUPLICATED_SIGN: "&4加载signs.yml时出错： &c重复的告示牌： &b%s"
+SIGN_COULD_NOT_FIND_MAP: "&4加载signs.yml时出错： &c找不到地图： &b%s"
+SIGN_LOADED_SIGN: "&e已加载告示牌： &b%s "
+SIGN_COULD_NOT_CREATE_SIGNS_FILE: "&c无法创建 &bsigns.yml &c文件！"
+SIGN_UPDATE_WARNING: "&4更新告示牌时警告： &c不是告示牌： &b%s "
+SIGN_UPDATING_SIGN: "&e更新告示牌 (&a%s&e)： &b%s"

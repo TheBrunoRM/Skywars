@@ -145,8 +145,148 @@ chest_holograms:
   empty: "&cVacío"
   refilled: "&e¡Rellenado!"
 
-countdown:
-- title: "&e%count% segundos"
+# Nuevas key añadidas
+WELCOME_MESSAGE: "&a&lSkyWars &e- /sw help"
+
+COMMAND_LIST: "&a&lLista de comandos - &b%s &a%s &ehecho por &b%s"
+
+HELP_SETMAINLOBBY: "&b/skywars setmainlobby &e- establece el lobby principal" 
+HELP_LOBBY: "&b/skywars lobby &e- te teletransporta al lobby principal"
+HELP_CREATE: "&b/skywars create <arena> &e- crea una arena"
+HELP_DELETE: "&b/skywars delete <arena> &e- borra una arena"
+HELP_CONFIG: "&b/skywars config <arena> &e- abre el menú de configuración"
+HELP_PLAY: "&b/skywars play &e- abre el menú de arenas"
+HELP_START: "&b/skywars start &e- inicia un juego"
+HELP_FORCESTART: "&b/skywars forcestart &e- inicia un juego inmediatamente"
+
+PLUGIN_INFO: "&b%s &eversión &a%s &ehecha por &b%s"
+
+SENDING_TO_ANOTHER_GAME: "&aEnviándote a otro juego..."
+
+SIGN_MAP_NOT_FOUND: "&cNo se pudo encontrar un mapa con el nombre: &e%s"
+SIGN_NEED_MAP_NAME: "&c¡Necesitás especificar el nombre del mapa en la siguiente línea!"
+SIGN_COULD_NOT_SET_UP: "&cNo se pudo configurar el cartel."
+SIGN_SUCCESSFULLY_SET_UP: "&e¡Cartel configurado exitosamente para el mapa &b%s&e!"
+
+# SetupEvents related keys
+SETUP_DONE_TITLE: "&a&LHECHO"
+SETUP_SPAWNS_SAVED_SUBTITLE: "&e¡Spawns guardados!"
+SETUP_EXIT_SPAWN_EDIT_MODE: "&e&l¡Saliste del &b&lmodo edición de spawns!"
+SETUP_PLEASE_TITLE: "&6Por favor"
+SETUP_DROP_TO_EXIT_EDIT_MODE: "&eSoltá la vara de blaze para salir del modo edición."
+SETUP_DROP_TO_EXIT_EDIT_MODE_EXCLAMATION: "&e¡Soltá la vara de blaze para salir del modo edición!"
+SETUP_SPAWN_SET: "&e¡Spawn %s establecido!"
+SETUP_NO_SPAWN: "&c¡No hay spawn &c!"
+SETUP_SPAWN_REMOVED: "&c¡Spawn %s removido!"
+
+# ConfigurationUtils related keys
+CONFIG_KEY_MISSING_WARNING: "&cAdvertencia: la clave &b%s &cno se encuentra en el archivo &b%s"
+CONFIG_DEFAULT_VALUES_WARNING: "&6El plugin usará los valores por defecto para las claves faltantes."
+CONFIG_COULD_NOT_GET_RESOURCE: "No se pudo obtener el recurso: %s"
+CONFIG_COULD_NOT_GET_RESOURCE_2: "No se pudo obtener el recurso: %s"
+
+# MapManager related keys
+MAPMANAGER_UNKNOWN_WORLD_FILE: "&6Archivo de mundo desconocido encontrado: &b%s"
+MAPMANAGER_COULD_NOT_SAVE_CONFIG: "No se pudo guardar el archivo de configuración del mapa para el mundo: %s"
+
+INVALID_ARGUMENTS: "&c¡Argumentos inválidos! &eUsá &b/sw help"
+
+# SignManager related keys
+SIGN_COULD_NOT_SAVE_SIGNS: "&c¡No se pudieron guardar los carteles!"
+SIGN_LOADING_ERROR_FORMAT: "&4Error cargando signs.yml: &cformato de cartel incorrecto (&4%s&c): &b"
+SIGN_COULD_NOT_FIND_WORLD: "&4Error cargando signs.yml: &cno se pudo encontrar el mundo: &b%s"
+SIGN_IS_NOT_SIGN: "&4Error cargando signs.yml: &cel cartel no es cartel: &b%s"
+SIGN_DUPLICATED_SIGN: "&4Error cargando signs.yml: &ccartel duplicado: &b%s"
+SIGN_COULD_NOT_FIND_MAP: "&4Error cargando signs.yml: &cno se pudo encontrar el mapa: &b%s"
+SIGN_LOADED_SIGN: "&eCartel cargado: &b%s "
+SIGN_COULD_NOT_CREATE_SIGNS_FILE: "&c¡No se pudo crear el archivo &bsigns.yml&c!"
+SIGN_UPDATE_WARNING: "&4Advertencia actualizando carteles: &cel cartel no es cartel: &b%s "
+SIGN_UPDATING_SIGN: "&eActualizando cartel (&a%s&e): &b%s"
+
+tablist:
+  lobby:
+    header:
+      - "&b&lSKYWARS"
+    footer:
+      - "&e%url%"
+  arena:
+    player:
+      header:
+        - "&a&lSkyWars"
+        - "&eKit actual: &b%kit%"
+        - "&eMapa: &b%map%"
+      footer:
+        - "&c%players% &ejugadores restantes"
+        - "&ePróximo evento: &b%event%"
+    spectator:
+      header:
+        - "&a&lSkyWars"
+        - "&bEstás especteando"
+        - "&eMapa: &b%map%"
+      footer:
+        - "&c%players% &ejugadores restantes"
+        - "&ePróximo evento: &b%event%"
+    intermission:
+      header:
+        - "&a&lSkywars"
+        - "&eMapa: &b%map%"
+      footer:
+        - ""
+        - "%status%"
+
+scoreboard:
+  title: '&e&lSkyWars'
+
+  lobby:
+    - '&7%date%'
+    - ''
+    - 'Monedas: &6%coins%'
+    - 'Almas: &b%souls%'
+    - 'Victorias: &a%totalwins%'
+    - 'Muertes: &6%totalkills%'
+    - 'Muertes: &c%totaldeaths%'
+    - ''
+    - '&e%url%'
+
+  arena:
+    player:
+      - '&7%date%'
+      - ''
+      - 'Próximo evento:'
+      - '%event%'
+      - ''
+      - 'Jugadores restantes: &a%players%'
+      - ''
+      - 'Muertes: &a%kills%'
+      - ''
+      - 'Mapa: &a%map%'
+      - ''
+      - '&e%url%'
+
+    spectator:
+      - '&7%date%'
+      - ''
+      - 'Próximo evento:'
+      - '%event%'
+      - ''
+      - '%status%'
+      - ''
+      - 'Mapa: &a%map%'
+      - 'Jugadores restantes: &a%players%'
+      - ''
+      - '&e%url%'
+
+    intermission:
+      - '&7%date%'
+      - ''
+      - '%status%'
+      - ''
+      - 'Mapa: &a%map%'
+      - 'Jugadores: &a%players%/%maxplayers%'
+      - ''
+      - '&e%url%'
+
+countdown:- title: "&e%count% segundos"
   subtitle: "&e¡Hacé clic derecho con el arco para seleccionar tu kit!"
   color: 6
   range: 10

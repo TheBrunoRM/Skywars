@@ -1,6 +1,7 @@
 # Skywars configuration file
 
 # the language used for the messages (lang folder)
+# en/en_ar/zh_cn
 locale: zh_cn
 
 # the url for displaying the %url% placeholder (scoreboard)
