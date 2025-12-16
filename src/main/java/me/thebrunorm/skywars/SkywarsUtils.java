@@ -64,7 +64,7 @@ public class SkywarsUtils {
 
 			final String balance = Skywars.get().getEconomy() != null
 					? SkywarsUtils.formatDouble(Skywars.get().getEconomy().getBalance(player))
-					: "Vaultn't";
+					: "&6Vaultn't";
 			text = text.replaceAll(getVariableCode("coins"), balance).replaceAll(getVariableCode("money"), balance)
 					.replaceAll(getVariableCode("balance"), balance).replaceAll(getVariableCode("economy"), balance)
 					.replaceAll(getVariableCode("souls"), String.valueOf(Skywars.get().getPlayerSouls(player)))
@@ -224,39 +224,39 @@ public class SkywarsUtils {
 		// TODO add messages
 		if (player != null)
 			if (Skywars.get().getPlayerArena(player) != null) {
-				player.sendMessage("already joined");
+				player.sendMessage(Messager.getMessage("JOIN_PROBLEM_ALREADY_JOINED"));
 				return JoinProblem.ALREADY_JOINED;
 			}
 		if (arena == null) {
 			if (player != null)
-				player.sendMessage("arena doesnt exist");
+				player.sendMessage(Messager.getMessage("JOIN_PROBLEM_ARENA_DOES_NOT_EXIST"));
 			return JoinProblem.ARENA_DOES_NOT_EXIST;
 		}
 		if (arena.getStatus() == ArenaStatus.DISABLED) {
 			if (player != null)
-				player.sendMessage("arena is disabled");
+				player.sendMessage(Messager.getMessage("JOIN_PROBLEM_ARENA_IS_DISABLED"));
 			return JoinProblem.ARENA_IS_DISABLED;
 		}
 		if (arena.getStatus() == ArenaStatus.RESTARTING) {
 			if (player != null)
-				player.sendMessage("arena is ending");
+				player.sendMessage(Messager.getMessage("JOIN_PROBLEM_ARENA_IS_ENDING"));
 			return JoinProblem.ARENA_IS_ENDING;
 		}
 		if (arena.getStatus() == ArenaStatus.PLAYING) {
 			if (player != null)
-				player.sendMessage("arena is playing");
+				player.sendMessage(Messager.getMessage("JOIN_PROBLEM_ARENA_IS_PLAYING"));
 			return JoinProblem.ARENA_IS_PLAYING;
 		}
 		if (arena.getWorld() == null) {
 			if (player != null)
-				player.sendMessage("world not set");
+				player.sendMessage(Messager.getMessage("WORLD_NOT_SET"));
 			return JoinProblem.WORLD_NOT_SET;
 		}
 		final int spawns = arena.getMap().getSpawns().size();
 		if (arena.getAlivePlayerCount() >= spawns) {
 			if (player != null)
 				player.sendMessage(
-						Messager.color("this arena is full! (%s/%s players)", arena.getAlivePlayerCount(), spawns));
+						Messager.getFormattedMessage("JOIN_PROBLEM_ARENA_IS_FULL", player, arena, null, arena.getAlivePlayerCount(), spawns));
 			return JoinProblem.ARENA_IS_FULL;
 		}
 		return null;

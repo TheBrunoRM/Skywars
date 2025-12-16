@@ -166,7 +166,7 @@ public class Skywars extends JavaPlugin {
 		
 		// 更新调试信息以显示当前加载的语言
 		if (this.langConfig != null) {
-			this.sendDebugMessage("Reloaded locale: " + this.getConfig().getString("locale") + " - " + this.langConfig.getString("language_name"));
+			this.sendDebugMessage(Messager.getFormattedMessage("RELOADED_LOCALE_MESSAGE", null, null, null, this.getConfig().getString("locale"), this.langConfig.getString("language_name")));
 		}
 		
 		// 刷新所有在线玩家的记分板、动作栏和标签列表以应用新的语言设置
@@ -220,13 +220,13 @@ public class Skywars extends JavaPlugin {
 				deleteWorldsConfig.save(worldsToDeleteFile);
 			} catch (final IOException e) {
 				e.printStackTrace();
-				this.sendMessage("Could not save the world deletion list to file: " + worldsToDeleteFile.getPath());
+				this.sendMessage(Messager.getFormattedMessage("COULD_NOT_SAVE_WORLD_DELETION_LIST", null, null, null, worldsToDeleteFile.getPath()));
 			}
 		}
 
 		// load stuff
 		if (!this.loadConfig()) {
-			this.sendMessage("Could not load configuration files! Disabling plugin.");
+			this.sendMessage(Messager.getMessage("COULD_NOT_LOAD_CONFIG_FILES"));
 			this.setEnabled(false);
 			return;
 		}
@@ -280,7 +280,7 @@ public class Skywars extends JavaPlugin {
 			this.sendMessage(Messager.getMessage("HOLOGRAMS_NO_PLUGIN_FOUND"));
 		} else {
 			holograms = true;
-			this.sendMessage("&eHolograms: &a" + this.hologramController.getClass().getSimpleName());
+			this.sendMessage(Messager.getFormattedMessage("HOLOGRAMS_PLUGIN_FOUND", null, null, null, this.hologramController.getClass().getSimpleName()));
 		}
 
 		economyEnabled = Skywars.get().getConfig().getBoolean("economy.enabled");
@@ -362,7 +362,7 @@ public class Skywars extends JavaPlugin {
 			config.save(file);
 		} catch (final IOException e) {
 			e.printStackTrace();
-			this.sendMessage("Could not write world list to file.");
+			this.sendMessage(Messager.getMessage("COULD_NOT_WRITE_WORLD_LIST_TO_FILE"));
 		}
 		this.arenas.clear();
 	}
@@ -379,13 +379,13 @@ public class Skywars extends JavaPlugin {
 		if (!economyEnabled)
 			return false;
 		if (this.getServer().getPluginManager().getPlugin("Vault") == null) {
-			this.sendMessage("&eEconomy (Vault): &6plugin not found.");
+			this.sendMessage(Messager.getMessage("ECONOMY_PLUGIN_NOT_FOUND"));
 			return false;
 		}
 
 		this.economyProvider = this.getServer().getServicesManager().getRegistration(Economy.class);
 		if (this.economyProvider == null) {
-			this.sendMessage("&eEconomy (Vault): &6plugin found &cbut no registered service provider!");
+			this.sendMessage(Messager.getMessage("ECONOMY_PLUGIN_FOUND_NO_PROVIDER"));
 			return false;
 		}
 		this.economy = this.economyProvider.getProvider();
@@ -425,10 +425,10 @@ public class Skywars extends JavaPlugin {
 		cmds.put("leave", new LeaveCommand());
 		for (final String cmd : cmds.keySet()) {
 			if (!this.getConfig().getStringList("disabledCommands").contains(cmd)) {
-				this.sendDebugMessage("&eLoading command &a%s&e...", cmd);
+				this.sendDebugMessage(Messager.getFormattedMessage("LOADING_COMMAND_MESSAGE", null, null, null, cmd));
 				this.getCommand(cmd).setExecutor(cmds.get(cmd));
 			} else
-				this.sendDebugMessage("&7Skipping command &c%s&e...", cmd);
+				this.sendDebugMessage(Messager.getFormattedMessage("SKIPPING_COMMAND_MESSAGE", null, null, null, cmd));
 		}
 	}
 

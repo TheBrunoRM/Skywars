@@ -97,6 +97,10 @@ public class ArenaManager {
 	}
 
 	public static boolean unloadAndDeleteWorldForMap(World world, SkywarsMap map) {
+		if (world == null) {
+			Skywars.get().sendDebugMessage("Cannot unload world, world is null for map: %s", map.getName());
+			return false;
+		}
 		if (Bukkit.getWorld(world.getName()) == null) {
 			Skywars.get().sendDebugMessage("Can't unload world, it does not exist: %s", world.getName());
 			return false;

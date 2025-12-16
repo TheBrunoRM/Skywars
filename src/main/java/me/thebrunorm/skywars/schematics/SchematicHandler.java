@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import me.thebrunorm.skywars.Messager;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -84,7 +85,7 @@ public class SchematicHandler {
 	public static HashMap<String, String> materials = new HashMap<String, String>();
 
 	public static void loadMaterials() {
-		Skywars.get().sendMessage("Loading materials...");
+		Skywars.get().sendMessage(Messager.getMessage("LOADING_MATERIALS_MESSAGE"));
 		final InputStream stream = Skywars.get().getResource("items.tsv");
 		final Scanner myReader = new Scanner(stream);
 		while (myReader.hasNextLine()) {
@@ -95,9 +96,7 @@ public class SchematicHandler {
 			String _mat = s[3].toUpperCase();
 			if (Material.matchMaterial(_mat) == null)
 				_mat = s[2].replaceAll(" ", "_").toUpperCase();
-			// if(Material.matchMaterial(_mat) == null)
-			// Skywars.get().sendDebugMessage("Could not find material for " +
-			// String.join(", ", s));
+
 			materials.put(_id + ":" + _data, _mat);
 		}
 		myReader.close();
@@ -282,10 +281,10 @@ public class SchematicHandler {
 									state.update();
 								}
 							} else {
-								Skywars.get().sendMessage("null material for %s, %s:%s", name, id, blockData[index]);
+								Skywars.get().sendMessage(Messager.getFormattedMessage("COULD_NOT_FIND_MATERIAL_FOR", null, null, null, name, id, blockData[index]));
 							}
 						} else {
-							Skywars.get().sendMessage("null name for %s:%s", id, blockData[index]);
+							Skywars.get().sendMessage(Messager.getFormattedMessage("COULD_NOT_FIND_MATERIAL_NAME_FOR", null, null, null, id, blockData[index]));
 						}
 					} else {
 						// 1.8 - 1.12 method for setting blocks
@@ -297,8 +296,7 @@ public class SchematicHandler {
 			}
 		}
 
-		Skywars.get().sendDebugMessage("Skipped " + skipped.size() + " blocks: "
-				+ String.join(", ", skipped.stream().map(a -> a.toString()).collect(Collectors.toList())));
+		Skywars.get().sendDebugMessage(Messager.getFormattedMessage("SKIPPED_BLOCKS_MESSAGE", null, null, null, skipped.size(), String.join(", ", skipped.stream().map(a -> a.toString()).collect(Collectors.toList()))));
 
 		for (final CompoundTag values : tileEntities) {
 			if (values.getString("id").equals("Sign")) {
@@ -352,7 +350,7 @@ public class SchematicHandler {
 	@SuppressWarnings("deprecation")
 	public static void pasteSchematic(Location loc, Schematic schematic) {
 		if (XMaterial.isNewVersion()) {
-			Skywars.get().sendMessage("Can't paste schematic: schematic files are not supported in 1.13+");
+			Skywars.get().sendMessage(Messager.getFormattedMessage("SCHEMATIC_NOT_SUPPORTED_IN_VERSION", null, null, null, "schematic"));
 			return;
 		}
 
@@ -370,7 +368,7 @@ public class SchematicHandler {
 
 		final ArrayList<Integer> skipped = new ArrayList<>();
 
-		Skywars.get().sendDebugMessage("size: " + length + ", " + width + ", " + height);
+		Skywars.get().sendDebugMessage(Messager.getFormattedMessage("SCHEMATIC_SIZE_INFO", null, null, null, length, width, height));
 
 		for (int x = 0; x < width; ++x) {
 			for (int y = 0; y < height; ++y) {
@@ -388,7 +386,7 @@ public class SchematicHandler {
 							metadata = data.split("\\[")[1].split("\\]")[0].split(",");
 						final XMaterial xmat = XMaterial.matchXMaterial(matName).get();
 						if (xmat == null) {
-							Skywars.get().sendDebugMessage("Could not get material for: " + matName);
+							Skywars.get().sendDebugMessage(Messager.getFormattedMessage("COULD_NOT_GET_MATERIAL_FOR", null, null, null, matName));
 							continue;
 						}
 						final Material mat = xmat.parseMaterial();
