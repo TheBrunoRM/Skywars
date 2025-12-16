@@ -192,8 +192,6 @@ public class Skywars extends JavaPlugin {
 		this.packageName = this.getServer().getClass().getPackage().getName();
 		this.serverPackageVersion = this.packageName.substring(this.packageName.lastIndexOf('.') + 1);
 
-		this.sendDebugMessage(Messager.getFormattedMessage("SERVER_VERSION_INFO", null, null, null, this.packageName, this.serverPackageVersion));
-
 		final File worldsToDeleteFile = new File(this.getDataFolder(), "delete_worlds.yml");
 		if (worldsToDeleteFile.exists()) {
 			final YamlConfiguration deleteWorldsConfig = YamlConfiguration.loadConfiguration(worldsToDeleteFile);
@@ -780,6 +778,7 @@ public class Skywars extends JavaPlugin {
 		langConfig = ConfigurationUtils.loadConfiguration("lang/" + lang + ".yml", "lang/" + lang + ".yml",
 				"lang/en.yml");
 
+		this.sendDebugMessage(Messager.getFormattedMessage("SERVER_VERSION_INFO", null, null, null, this.packageName, this.serverPackageVersion));
 		this.sendDebugMessage("Loaded locale: " + lang + " - " + langConfig.getString("language_name"));
 
 		lobbyConfig = ConfigurationUtils.loadConfiguration("lobby.yml", "lobby.yml");
