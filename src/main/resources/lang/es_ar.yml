@@ -220,6 +220,31 @@ ECONOMY_COULD_NOT_HOOK: "&eEconomía (Vault): &cno se pudo conectar."
 ECONOMY_DISABLED_IN_CONFIG: "&eEconomía (Vault): &6deshabilitado en la configuración."
 PLACEHOLDER_API_STATUS: "&ePlaceholderAPI: %s"
 
+# GUI related keys
+SPAWN_EDIT_MODE_ENTERED: "&eAhora estás en &a&lmodo edición de spawns"
+SPAWN_EDIT_MODE_INSTRUCTIONS_GENERAL: "&eUsá el &6&lbastón de blaze &epara &b&lestablecer y remover spawns"
+SPAWN_EDIT_MODE_INSTRUCTIONS_ADD_SPAWN: "&ePodés &a&lhacer clic derecho &ea un bloque para &a&lagregar un spawn"
+SPAWN_EDIT_MODE_INSTRUCTIONS_REMOVE_SPAWN: "&ePodés &c&lhacer clic derecho &ea un bloque para &c&lremover &4&lel último spawn establecido"
+SPAWN_EDIT_MODE_EXIT_INSTRUCTIONS: "&e&lPara salir, &b&lsoltá el bastón de blaze"
+SPAWNS_CALCULATED_AND_SAVED: "&a&bCalculaste &ay &bguardaste &6%s spawns&a con éxito."
+MAP_SUCCESSFULLY_CREATED: "Mapa creado exitosamente: %s"
+MAP_SUCCESSFULLY_DELETED: "Mapa eliminado exitosamente"
+CLICK_TO_PLAY: "&e¡Hacé clic para jugar!"
+KIT_CLICK_TO_PURCHASE: "&a¡Hacé clic para comprar este kit!"
+KIT_CLICK_TO_SELECT: "&e¡Hacé clic para seleccionar!"
+GAMES_MENU_JOIN_RANDOM_GAME: "&ahacé clic para unirte a un juego aleatorio"
+GAMES_MENU_LITERALLY_JUST_CLICK: "&eliteralmente solo hacé clic acá"
+GAMES_MENU_TO_JOIN_GAME: "&epara unirte al juego que"
+GAMES_MENU_MOST_PLAYERS: "&etiene la mayoría de jugadores en él"
+CLICK_TO_SELECT_FILE: "&eHacé clic para seleccionar este archivo"
+LEFT_CLICK_TO_ADD: "&eHacé clic izquierdo para agregar"
+RIGHT_CLICK_TO_REMOVE: "&eHacé clic derecho para remover"
+YOU_CAN_CLICK_BLOCKS_ON_ARENA: "&epodés hacer clic en los bloques en la arena"
+CLICK_THE_BLOCKS_THAT: "&eHacé clic en los bloques que"
+YOU_WANT_TO_ADD_SPAWNS_FOR: "&equerés agregar spawns para"
+YOU_CAN_ALSO_RIGHT_CLICK: "&eTambién podés hacer clic derecho"
+TO_REMOVE_LAST_SET_SPAWN: "&epara remover el último spawn establecido"
+
 tablist:
   lobby:
     header:

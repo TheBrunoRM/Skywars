@@ -223,6 +223,31 @@ ECONOMY_COULD_NOT_HOOK: "&eEconomy (Vault): &ccould not hook."
 ECONOMY_DISABLED_IN_CONFIG: "&eEconomy (Vault): &6disabled in config."
 PLACEHOLDER_API_STATUS: "&ePlaceholderAPI: %s"
 
+# GUI related keys
+SPAWN_EDIT_MODE_ENTERED: "&eYou are now in &a&lspawn edit mode"
+SPAWN_EDIT_MODE_INSTRUCTIONS_GENERAL: "&eUse the &6&lblaze rod &eto &b&lset and remove spawns"
+SPAWN_EDIT_MODE_INSTRUCTIONS_ADD_SPAWN: "&eYou can &a&lright-click &ea block to &a&ladd an spawn"
+SPAWN_EDIT_MODE_INSTRUCTIONS_REMOVE_SPAWN: "&eYou can &c&lright-click &ea block to &c&lremove &4&lthe last set spawn"
+SPAWN_EDIT_MODE_EXIT_INSTRUCTIONS: "&e&lTo exit, &b&ldrop the blaze rod"
+SPAWNS_CALCULATED_AND_SAVED: "&aSuccessfully &bcalculated &aand &bsaved &6%s spawns&a."
+MAP_SUCCESSFULLY_CREATED: "Map successfully created: %s"
+MAP_SUCCESSFULLY_DELETED: "Map successfully deleted"
+CLICK_TO_PLAY: "&eClick to play!"
+KIT_CLICK_TO_PURCHASE: "&aClick to purchase this kit!"
+KIT_CLICK_TO_SELECT: "&eClick to select!"
+GAMES_MENU_JOIN_RANDOM_GAME: "&aclick to join random game"
+GAMES_MENU_LITERALLY_JUST_CLICK: "&eliterally just click this"
+GAMES_MENU_TO_JOIN_GAME: "&eto join the game that"
+GAMES_MENU_MOST_PLAYERS: "&ehas the most players in it"
+CLICK_TO_SELECT_FILE: "&eClick to select this file"
+LEFT_CLICK_TO_ADD: "&eLeft-click to add"
+RIGHT_CLICK_TO_REMOVE: "&eRight-click to remove"
+YOU_CAN_CLICK_BLOCKS_ON_ARENA: "&eyou can click blocks on the arena"
+CLICK_THE_BLOCKS_THAT: "&eClick the blocks that"
+YOU_WANT_TO_ADD_SPAWNS_FOR: "&eyou want to add spawns for."
+YOU_CAN_ALSO_RIGHT_CLICK: "&eYou can also rightclick"
+TO_REMOVE_LAST_SET_SPAWN: "&eto remove the last set spawn"
+
 tablist:
   lobby:
     header:

@@ -613,7 +613,7 @@ public class MainCommand implements CommandExecutor {
 					return true;
 				}
 				if (Skywars.get().getMapManager().createMap(name)) {
-					sender.sendMessage("Map successfully created: " + name);
+					sender.sendMessage(Messager.getFormattedMessage("MAP_SUCCESSFULLY_CREATED", null, null, null, name));
 					sender.sendMessage("Use /sw config " + name + " to configure this map.");
 				} else
 					sender.sendMessage("Could not create map");
@@ -629,7 +629,7 @@ public class MainCommand implements CommandExecutor {
 					return true;
 				}
 				if (Skywars.get().getMapManager().deleteMap(name))
-					sender.sendMessage("Map successfully deleted");
+					sender.sendMessage(Messager.getMessage("MAP_SUCCESSFULLY_DELETED"));
 				else
 					sender.sendMessage("Could not delete map");
 			} else {

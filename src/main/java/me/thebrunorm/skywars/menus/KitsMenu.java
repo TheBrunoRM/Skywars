@@ -63,7 +63,7 @@ public class KitsMenu implements Listener {
 					if (playerMoney >= kit.getPrice()) {
 						lore.add(Messager.color("&aPrice: " + kit.getPrice()));
 						lore.add(Messager.color("&6Your money: &a" + playerMoney));
-						lore.add(Messager.color("&aClick to purchase this kit!"));
+						lore.add(Messager.getMessage("KIT_CLICK_TO_PURCHASE"));
 					} else {
 						lore.add(Messager.color("&cPrice: " + kit.getPrice()));
 						lore.add(Messager.color("&6Your money: &c" + playerMoney));
@@ -74,7 +74,7 @@ public class KitsMenu implements Listener {
 				lore.add(Messager.color("&aThis kit is free!"));
 
 			if (!selected && selectable)
-				lore.add(Messager.color("&eClick to select!"));
+				lore.add(Messager.getMessage("KIT_CLICK_TO_SELECT"));
 
 			meta.setLore(lore);
 			item.setItemMeta(meta);

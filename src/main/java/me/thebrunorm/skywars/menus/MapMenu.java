@@ -48,7 +48,7 @@ public class MapMenu implements Listener {
 
 			lore.add(Messager.color("&eCurrent arenas: &a%s", ArenaManager.getArenasByMap(map).size()));
 			lore.add(Messager.color("&eCurrent players: &a%s", players));
-			lore.add(Messager.color("&eClick to play!"));
+			lore.add(Messager.getMessage("CLICK_TO_PLAY"));
 			// lore.add(Messager.color("&eClick derecho para alternarlo como favorito!"));
 
 			final ItemStack item = new ItemStack(XMaterial.FIREWORK_STAR.parseItem());

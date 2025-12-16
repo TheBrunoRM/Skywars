@@ -75,7 +75,7 @@ public class ConfigMenu implements Listener {
 			}
 
 			if (!alreadyUsing)
-				lore.add(Messager.color("&eClick to select this file"));
+				lore.add(Messager.getMessage("CLICK_TO_SELECT_FILE"));
 
 			final ItemStack item = new ItemStack(XMaterial.PAPER.parseItem());
 			final ItemMeta meta = item.getItemMeta();
@@ -116,8 +116,8 @@ public class ConfigMenu implements Listener {
 		final SkywarsMap currentMap = currentArena.getMap();
 
 		InventoryUtils.addItem(inventory, XMaterial.SADDLE.parseMaterial(), 11,
-				Messager.color(teamSizeName, currentMap.getTeamSize()), "&eLeft-click to add",
-				"&eRight-click to remove");
+				Messager.color(teamSizeName, currentMap.getTeamSize()), Messager.getMessage("LEFT_CLICK_TO_ADD"),
+				Messager.getMessage("RIGHT_CLICK_TO_REMOVE"));
 
 		String currentWorldName = currentMap.getWorldName();
 		if (currentWorldName == null)
@@ -135,7 +135,7 @@ public class ConfigMenu implements Listener {
 
 		final List<String> spawnLore = new ArrayList<String>();
 		spawnLore.add(Messager.color("&eWhen you enter &bSpawn Setup Mode&e,"));
-		spawnLore.add(Messager.color("&eyou can click blocks on the arena"));
+		spawnLore.add(Messager.getMessage("YOU_CAN_CLICK_BLOCKS_ON_ARENA"));
 		spawnLore.add(Messager.color("&eto set spawns easily."));
 		if (currentMap.getSpawns().size() > 0) {
 			spawnLore.add(Messager.color(""));
@@ -210,10 +210,10 @@ public class ConfigMenu implements Listener {
 			final ItemStack item = new ItemStack(XMaterial.BLAZE_ROD.parseItem());
 			final ItemMeta meta = item.getItemMeta();
 			final List<String> lore = new ArrayList<String>();
-			lore.add(Messager.color("&eClick the blocks that"));
-			lore.add(Messager.color("&eyou want to add spawns for."));
-			lore.add(Messager.color("&eYou can also rightclick"));
-			lore.add(Messager.color("&eto remove the last set spawn."));
+			lore.add(Messager.getMessage("CLICK_THE_BLOCKS_THAT"));
+			lore.add(Messager.getMessage("YOU_WANT_TO_ADD_SPAWNS_FOR"));
+			lore.add(Messager.getMessage("YOU_CAN_ALSO_RIGHT_CLICK"));
+			lore.add(Messager.getMessage("TO_REMOVE_LAST_SET_SPAWN"));
 			meta.setDisplayName(Messager.color("&eSpawn Configurator"));
 			meta.setLore(lore);
 			item.setItemMeta(meta);
@@ -241,19 +241,17 @@ public class ConfigMenu implements Listener {
 				player.sendMessage(Messager.color("&6Old arena spawns deleted."));
 			currentMap.getSpawns().clear();
 
-			player.sendMessage(Messager.color("&eYou are now in &a&lspawn edit mode"));
-			player.sendMessage(Messager.color("&eUse the &6&lblaze rod &eto &b&lset and remove spawns"));
-			player.sendMessage(Messager.color("&eYou can &a&lright-click &ea block to &a&ladd an spawn"));
-			player.sendMessage(
-					Messager.color("&eYou can &c&lright-click &ea block to &c&lremove &4&lthe last set spawn"));
-			player.sendMessage(Messager.color("&e&lTo exit, &b&ldrop the blaze rod"));
+			player.sendMessage(Messager.getMessage("SPAWN_EDIT_MODE_ENTERED"));
+			player.sendMessage(Messager.getMessage("SPAWN_EDIT_MODE_INSTRUCTIONS_GENERAL"));
+			player.sendMessage(Messager.getMessage("SPAWN_EDIT_MODE_INSTRUCTIONS_ADD_SPAWN"));
+			player.sendMessage(Messager.getMessage("SPAWN_EDIT_MODE_INSTRUCTIONS_REMOVE_SPAWN"));
+			player.sendMessage(Messager.getMessage("SPAWN_EDIT_MODE_EXIT_INSTRUCTIONS"));
 			return;
 		}
 
 		if (name.equals(Messager.color(calculateSpawnsName))) {
 			currentMap.calculateSpawns();
-			player.sendMessage(Messager.color("&aSuccessfully &bcalculated &aand &bsaved &6%s spawns&a.",
-					currentMap.getSpawns().size()));
+			player.sendMessage(Messager.getFormattedMessage("SPAWNS_CALCULATED_AND_SAVED", null, null, null, currentMap.getSpawns().size()));
 			if (currentMap.getSpawns().size() <= 0)
 				player.sendMessage(Messager.color("&cWarning: &7did you place beacons on the map?"));
 		}
