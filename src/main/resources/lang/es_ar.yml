@@ -205,6 +205,21 @@ SIGN_COULD_NOT_CREATE_SIGNS_FILE: "&c¡No se pudo crear el archivo &bsigns.yml&c
 SIGN_UPDATE_WARNING: "&4Advertencia actualizando carteles: &cel cartel no es cartel: &b%s "
 SIGN_UPDATING_SIGN: "&eActualizando cartel (&a%s&e): &b%s"
 
+# Skywars related keys
+PLUGIN_HOOKS_HEADER: "&b&l--- HOOKS DEL PLUGIN ---"
+HOLOGRAMS_NO_PLUGIN_FOUND: "&eHologramas: &c¡no se encontró ningún plugin de hologramas soportado!"
+PLUGIN_ENABLED_MESSAGE: "&ael plugin ha sido habilitado: &bv%s"
+PLUGIN_UPDATED_AND_DISABLED: "&6El plugin ha sido actualizado y deshabilitado."
+COULD_NOT_DELETE_WORLD_FOLDER: "&cNo se pudo eliminar la carpeta del mundo: &b%s"
+LOBBY_WORLD_DOES_NOT_EXIST: "&cEl mundo del lobby (&b%s&c) no existe!"
+
+# Additional Skywars related keys
+SERVER_VERSION_INFO: "&bVersión del servidor: &e%s (&a%s&e)"
+ECONOMY_PLUGIN_NAME: "&eEconomía (Vault): &a%s"
+ECONOMY_COULD_NOT_HOOK: "&eEconomía (Vault): &cno se pudo conectar."
+ECONOMY_DISABLED_IN_CONFIG: "&eEconomía (Vault): &6deshabilitado en la configuración."
+PLACEHOLDER_API_STATUS: "&ePlaceholderAPI: %s"
+
 tablist:
   lobby:
     header:
@@ -288,7 +303,8 @@ scoreboard:
       - ''
       - '&e%url%'
 
-countdown:- title: "&e%count% segundos"
+countdown:
+- title: "&e%count% segundos"
   subtitle: "&e¡Hacé clic derecho con el arco para seleccionar tu kit!"
   color: 6
   range: 10

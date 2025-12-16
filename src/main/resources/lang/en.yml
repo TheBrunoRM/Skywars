@@ -86,6 +86,8 @@ CANT_EXECUTE_COMMAND_IN_CONSOLE: "&cYou can't execute this command in the consol
 NO_ARENA: "&cNo arena found by {0}"
 MAIN_LOBBY_NOT_SET: "&cMain lobby not set."
 TELEPORTED_TO_MAIN_LOBBY: "&eTeleported to the lobby!"
+
+# Additional Skywars related keys
 COULD_NOT_SEND_BACK: "&cCould not send you back!"
 MAIN_LOBBY_SET: "&eThe main lobby has been set to your current position."
 COUNTDOWN_STOPPED: "&eCountdown stopped, not enough players to start the game!"
@@ -206,7 +208,23 @@ SIGN_COULD_NOT_CREATE_SIGNS_FILE: "&cCould not create &bsigns.yml &cfile!"
 SIGN_UPDATE_WARNING: "&4Warning updating signs: &csign is not sign: &b%s "
 SIGN_UPDATING_SIGN: "&eUpdating sign (&a%s&e): &b%s"
 
-tablist:  lobby:
+# Skywars related keys
+PLUGIN_HOOKS_HEADER: "&b&l--- PLUGIN HOOKS ---"
+HOLOGRAMS_NO_PLUGIN_FOUND: "&eHolograms: &cno supported holograms plugin found!"
+PLUGIN_ENABLED_MESSAGE: "&ahas been enabled: &bv%s"
+PLUGIN_UPDATED_AND_DISABLED: "&6The plugin has been updated and disabled."
+COULD_NOT_DELETE_WORLD_FOLDER: "&cCould not delete world folder: &b%s"
+LOBBY_WORLD_DOES_NOT_EXIST: "&cLobby world (&b%s&c) does not exist!"
+
+# Additional Skywars related keys
+SERVER_VERSION_INFO: "&bServer version: &e%s (&a%s&e)"
+ECONOMY_PLUGIN_NAME: "&eEconomy (Vault): &a%s"
+ECONOMY_COULD_NOT_HOOK: "&eEconomy (Vault): &ccould not hook."
+ECONOMY_DISABLED_IN_CONFIG: "&eEconomy (Vault): &6disabled in config."
+PLACEHOLDER_API_STATUS: "&ePlaceholderAPI: %s"
+
+tablist:
+  lobby:
     header:
     - "&b&lSKYWARS"
     footer:

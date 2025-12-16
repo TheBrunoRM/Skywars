@@ -78,6 +78,8 @@ NOT_JOINED: "&c未加入."
 CANT_EXECUTE_COMMAND_IN_CONSOLE: "&c你不能在控制台中执行此命令!"
 NO_ARENA: "&c未找到由{0}命名的竞技场"
 MAIN_LOBBY_NOT_SET: "&c主大厅未设置."
+
+# Additional Skywars related keys
 TELEPORTED_TO_MAIN_LOBBY: "&e已传送到大厅!"
 COULD_NOT_SEND_BACK: "&c无法将你传送回去!"
 MAIN_LOBBY_SET: "&e主大厅已设置在你当前位置."
@@ -285,3 +287,18 @@ SIGN_LOADED_SIGN: "&e已加载告示牌： &b%s "
 SIGN_COULD_NOT_CREATE_SIGNS_FILE: "&c无法创建 &bsigns.yml &c文件！"
 SIGN_UPDATE_WARNING: "&4更新告示牌时警告： &c不是告示牌： &b%s "
 SIGN_UPDATING_SIGN: "&e更新告示牌 (&a%s&e)： &b%s"
+
+# Skywars related keys
+PLUGIN_HOOKS_HEADER: "&b&l--- 插件HOOK ---"
+HOLOGRAMS_NO_PLUGIN_FOUND: "&e全息显示: &c未找到支持的全息插件！"
+PLUGIN_ENABLED_MESSAGE: "&a插件已启用: &bv%s"
+PLUGIN_UPDATED_AND_DISABLED: "&6插件已更新并禁用。"
+COULD_NOT_DELETE_WORLD_FOLDER: "&c无法删除世界文件夹: &b%s"
+LOBBY_WORLD_DOES_NOT_EXIST: "&c大厅世界 (&b%s&c) 不存在!"
+
+# Additional Skywars related keys
+SERVER_VERSION_INFO: "&b服务器版本: &e%s (&a%s&e)"
+ECONOMY_PLUGIN_NAME: "&e经济 (Vault): &a%s"
+ECONOMY_COULD_NOT_HOOK: "&e经济 (Vault): &c无法钩入。"
+ECONOMY_DISABLED_IN_CONFIG: "&e经济 (Vault): &6在配置中禁用。"
+PLACEHOLDER_API_STATUS: "&ePlaceholderAPI: %s"
