@@ -1,0 +1,232 @@
+status:
+  waiting: 等待玩家加入...
+  starting: '&a%seconds%秒后开始'
+  playing: '&a%players% &r名玩家剩余'
+  ended: '&a游戏结束!'
+  restarting: '&a%seconds%秒后结束'
+
+language_name: 简体中文
+
+none: "&r无"
+events:
+  format: "&a%name% %time%"
+  refill: "补给"
+  noevent: "&r无事件"
+items:
+  show_context: true
+  context: '&7(右键点击)'
+
+  KIT_SELECTOR:
+    name: '&a&l套装选择器'
+    description:
+      - "&7右键点击选择你的套装"
+
+  GAME_OPTIONS:
+    name: '&b&l游戏选项'
+    description:
+      - "&7右键点击更改游戏选项"
+
+  START_GAME:
+    name: "&6&l开始游戏"
+
+  STOP_GAME:
+    name: "&c&l停止游戏"
+
+  SPECTATOR_OPTIONS:
+    name: '&b&l观察者选项'
+    description:
+      - "&7右键点击更改你的观察者选项"
+
+  LEAVE:
+    name: '&c&l离开'
+    description:
+      - "&7右键点击回到主大厅"
+      - "&7主大厅。"
+
+  PLAY_AGAIN:
+    name: '&b&l再次游戏'
+    description:
+      - "&7右键点击再次游戏"
+
+  TELEPORTER:
+    name: '&b&l传送器'
+    description:
+      - "&7右键点击传送到玩家身边"
+arena_join:
+  title: "&eSkyWars"
+  subtitle: "&c疯狂模式"
+  message: ""
+
+arena_start:
+  title: "&c&l疯狂模式"
+  subtitle: ""
+  message: "&e笼子已打开! &c战斗开始!"
+died:
+  title: "&c&l你已死亡!"
+  subtitle: "&7你现在是一名观察者!"
+  message: ""
+won:
+  title: "&6&l你赢了"
+  subtitle: "&7恭喜!"
+  message: ""
+actionbar:
+  waiting: '&e当前套装: &a%kit%'
+RELOADED: "&aSkywars配置已重新加载."
+NO_MAP: "&c没有地图."
+NO_PERMISSION: "&c没有权限."
+NOT_JOINED: "&c未加入."
+CANT_EXECUTE_COMMAND_IN_CONSOLE: "&c你不能在控制台中执行此命令!"
+NO_ARENA: "&c未找到由{0}命名的竞技场"
+TELEPORTED_TO_MAIN_LOBBY: "&e已传送到大厅!"
+COULD_NOT_SEND_BACK: "&c无法将你传送回去!"
+MAIN_LOBBY_SET: "&e主大厅已设置在你当前位置."
+COUNTDOWN_STOPPED: "&e倒计时已停止，玩家数量不足无法开始游戏!"
+JOIN: "&7{0} &e已加入 (&b{1}&e/&b{2}&e)!"
+
+LEAVE: "&7{0} &e已离开 (&b{1}&e/&b{2}&e)"
+LEAVE_SELF: "&e你离开了竞技场 &b%arena%"
+already_started: "&c游戏已经开始!"
+started_countdown: "&a已开始倒计时!"
+started_game: "&a已开始游戏!"
+
+FORCED_START: "&b&l{0} &e&l强制开始了游戏!"
+refill:
+  title: ""
+  subtitle: "&e箱子已补给!"
+  message: "&e箱子已补给!"
+GAME_STARTING: "&e游戏将在 &6{0} &e秒后开始!"
+GAME_STARTING_SECOND: "&e游戏将在 %count% &e秒后开始!"
+GAME_STARTING_SECONDS: "&e游戏将在 %count% &e秒后开始!"
+
+PLAYERS_REMAINING: "&c{0} &e名玩家剩余"
+# this is displayed when the game starts
+startLines:
+  - "&a&l---------------------------------------------"
+  - ""
+  - "                                  &f&lSkyWars"
+  - ""
+  - "    &e&l在你的岛屿上收集资源和装备"
+  - "      &e&l以便消除其他所有玩家."
+  - "     &e&l前往中心岛屿获取特殊箱子"
+  - "                       &e&l里面有特殊物品!"
+  - ""
+  - "&a&l---------------------------------------------"
+where: "&e你在 &a{0}中"
+the_console: "控制台"
+time:
+  DAY: "&a白天"
+  NIGHT: "&b夜晚"
+
+weather:
+  CLEAR: "&b晴朗天气"
+  RAIN: "&b雨天天气"
+chests:
+  NORMAL: "&a普通箱子"
+  OVERPOWERED: "&c超级箱子"
+vote: "&7{0} &e为 &7{1} 投票了"
+chest_holograms:
+  empty: "&c空的"
+  refilled: "&e已补给!"
+tablist:
+  lobby:
+    header:
+      - "&b&lSKYWARS"
+    footer:
+      - "&e%url%"
+  arena:
+    player:
+      header:
+        - "&a&lSkyWars"
+        - "&e当前套装: &b%kit%"
+        - "&e地图: &b%map%"
+      footer:
+        - "&c%players% &e名玩家剩余"
+        - "&e下个事件: &b%event%"
+    spectator:
+      header:
+        - "&a&lSkyWars"
+        - "&b你正在观察"
+        - "&e地图: &b%map%"
+      footer:
+        - "&c%players% &e名玩家剩余"
+        - "&e下个事件: &b%event%"
+    intermission:
+      header:
+        - "&a&lSkywars"
+        - "&e地图: &b%map%"
+      footer:
+        - ""
+        - "%status%"
+scoreboard:
+  title: '&e&lSkyWars'
+
+  lobby:
+    - '&7%date%'
+    - ''
+    - '硬币: &6%coins%'
+    - '灵魂: &b%souls%'
+    - '胜利: &a%totalwins%'
+    - '击杀: &6%totalkills%'
+    - '死亡: &c%totaldeaths%'
+    - ''
+    - '&e%url%'
+
+  arena:
+    player:
+      - '&7%date%'
+      - ''
+      - '下个事件:'
+      - '%event%'
+      - ''
+      - '剩余玩家: &a%players%'
+      - ''
+      - '击杀: &a%kills%'
+      - ''
+      - '地图: &a%map%'
+      - ''
+      - '&e%url%'
+
+    spectator:
+      - '&7%date%'
+      - ''
+      - '下个事件:'
+      - '%event%'
+      - ''
+      - '%status%'
+      - ''
+      - '地图: &a%map%'
+      - '剩余玩家: &a%players%'
+      - ''
+      - '&e%url%'
+
+    intermission:
+      - '&7%date%'
+      - ''
+      - '%status%'
+      - ''
+      - '地图: &a%map%'
+      - '玩家: &a%players%/%maxplayers%'
+      - ''
+      - '&e%url%'
+
+countdown:
+
+- title: "&e%count% 秒"
+
+  subtitle: "&e右键点击弓来选择套装!"
+
+  color: 6
+
+  range: 10
+
+  #message:
+
+  #sound:
+
+- title: "&c%count%"
+
+  subtitle: "&e准备战斗!"
+
+  color: c
+
+  range: 5-1

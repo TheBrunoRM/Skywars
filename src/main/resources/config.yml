@@ -1,10 +1,10 @@
 # Skywars configuration file
 
 # the language used for the messages (lang folder)
-locale: en
+locale: zh_cn
 
 # the url for displaying the %url% placeholder (scoreboard)
-url: "www.example.com"
+url: "cnmsb.xin"
 
 # the format for displaying the %date% placeholder (scoreboard)
 dateFormat: "dd/MM/yyyy"
