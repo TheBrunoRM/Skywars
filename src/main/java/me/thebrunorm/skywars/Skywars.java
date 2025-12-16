@@ -163,6 +163,18 @@ public class Skywars extends JavaPlugin {
 		this.chestManager.loadChests();
 		this.signManager.loadSigns();
 		this.loadKits();
+		
+		// 更新调试信息以显示当前加载的语言
+		if (this.langConfig != null) {
+			this.sendDebugMessage("Reloaded locale: " + this.getConfig().getString("locale") + " - " + this.langConfig.getString("language_name"));
+		}
+		
+		// 刷新所有在线玩家的记分板、动作栏和标签列表以应用新的语言设置
+		for (final Player player : Bukkit.getOnlinePlayers()) {
+			SkywarsScoreboard.update(player);
+			SkywarsActionbar.update(player);
+			SkywarsTablist.update(player);
+		}
 	}
 
 	@Override
@@ -218,6 +230,9 @@ public class Skywars extends JavaPlugin {
 			this.setEnabled(false);
 			return;
 		}
+
+		// Ensure all language files are released
+		this.extractAllLanguageFiles();
 
 		if (!config.getBoolean("disableUpdates") && SkywarsUpdater.update(config.getBoolean("autoUpdate"))) {
 			this.updated = true;
@@ -801,5 +816,33 @@ public class Skywars extends JavaPlugin {
 
 	public HologramController getHologramController() {
 		return this.hologramController;
+	}
+
+	/**
+	 * Extracts all language files to the plugin directory
+	 */
+	private void extractAllLanguageFiles() {
+		this.sendDebugMessage("&eExtracting all language files...");
+
+		// Create lang directory if it doesn't exist
+		final File langDir = new File(this.getDataFolder(), "lang");
+		if (!langDir.exists()) {
+			langDir.mkdirs();
+		}
+
+		// List of language files to extract
+		final String[] languageFiles = {"lang/en.yml", "lang/es_ar.yml", "lang/zh_cn.yml"};
+
+		for (final String langFile : languageFiles) {
+			final File targetFile = new File(langDir, langFile.replace("lang/", ""));
+			if (!targetFile.exists()) {
+				this.sendDebugMessage("&eExtracting language file: &a%s", targetFile.getName());
+				ConfigurationUtils.copyDefaultContentsToFile(langFile, targetFile);
+			} else {
+				this.sendDebugMessage("&7Language file already exists: &r%s", targetFile.getName());
+			}
+		}
+
+		this.sendDebugMessage("&aFinished extracting language files.");
 	}
 }
