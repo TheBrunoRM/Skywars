@@ -71,10 +71,9 @@ public class ConfigurationUtils {
 				if (conf.get(key) == null) {
 					if (Skywars.langConfig != null) {
 						Skywars.get().sendMessage(Messager.getFormattedMessage("CONFIG_KEY_MISSING_WARNING", null, null, null, key, fileName));
-					} else {
-						Skywars.get().sendMessage("&cWarning: key &b" + key + " &cis missing in file &b" + fileName);
-					}
-					modified = true;
+									} else {
+										Skywars.get().sendMessage(Messager.getFormattedMessage("CONFIGURATION_KEY_MISSING_FALLBACK", null, null, null, key, fileName));
+									}					modified = true;
 
 					// setting the key in the configuration
 					// so it uses the default value if is not set
@@ -86,7 +85,7 @@ public class ConfigurationUtils {
 				if (Skywars.langConfig != null) {
 					Skywars.get().sendMessage(Messager.getMessage("CONFIG_DEFAULT_VALUES_WARNING"));
 				} else {
-					Skywars.get().sendMessage("&6The plugin will use the default values for the missing keys.");
+					Skywars.get().sendMessage(Messager.getMessage("CONFIGURATION_DEFAULT_VALUES_FALLBACK"));
 				}
 			}
 		} catch (final Exception e) {

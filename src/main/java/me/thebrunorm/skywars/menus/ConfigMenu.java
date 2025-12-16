@@ -238,7 +238,7 @@ public class ConfigMenu implements Listener {
 			player.playSound(player.getLocation(), Sounds.NOTE_PLING.bukkitSound(), 3, 2);
 
 			if (currentMap.getSpawns().size() > 0)
-				player.sendMessage(Messager.color("&6Old arena spawns deleted."));
+				player.sendMessage(Messager.getMessage("OLD_ARENA_SPAWNS_DELETED"));
 			currentMap.getSpawns().clear();
 
 			player.sendMessage(Messager.getMessage("SPAWN_EDIT_MODE_ENTERED"));
@@ -253,40 +253,39 @@ public class ConfigMenu implements Listener {
 			currentMap.calculateSpawns();
 			player.sendMessage(Messager.getFormattedMessage("SPAWNS_CALCULATED_AND_SAVED", null, null, null, currentMap.getSpawns().size()));
 			if (currentMap.getSpawns().size() <= 0)
-				player.sendMessage(Messager.color("&cWarning: &7did you place beacons on the map?"));
+				player.sendMessage(Messager.getMessage("WARNING_NO_BEACONS_ON_MAP"));
 		}
 
 		if (name.equals(Messager.color(regenerateCasesName))) {
 			currentArena.resetCases();
 			if (currentMap.getSpawns().size() <= 0)
-				player.sendMessage(Messager.color("&cWarning: &7no spawns to create cases for."));
-			player.sendMessage(Messager.color("Regenerated cases for %s spawns", currentMap.getSpawns().size()));
+				player.sendMessage(Messager.getMessage("WARNING_NO_SPAWNS_TO_CREATE_CASES"));
+			player.sendMessage(Messager.getFormattedMessage("REGENERATED_CASES_FOR_SPAWNS", null, null, null, currentMap.getSpawns().size()));
 			return;
 		}
 
 		final World arenaWorld = currentArena.getWorld();
 
-		if (name.equals(Messager.color(teleportName))) {
-			if (arenaWorld == null) {
-				player.sendMessage("world not set");
-				return;
-			}
-			Location loc = ConfigurationUtils.getLocationConfig(arenaWorld,
-					currentArena.getMap().getConfig().getConfigurationSection("center"));
-			if (loc == null)
-				loc = currentArena.getWorld().getSpawnLocation();
-			if (loc == null)
-				player.sendMessage("Location not set");
-			else {
-				player.teleport(loc);
-				player.sendMessage("Teleported");
-			}
-			return;
-		}
-
+					if (name.equals(Messager.color(teleportName))) {
+					if (arenaWorld == null) {
+						player.sendMessage(Messager.getMessage("WORLD_NOT_SET"));
+						return;
+					}
+					Location loc = ConfigurationUtils.getLocationConfig(arenaWorld,
+							currentArena.getMap().getConfig().getConfigurationSection("center"));
+					if (loc == null)
+						loc = currentArena.getWorld().getSpawnLocation();
+					if (loc == null)
+						player.sendMessage(Messager.getMessage("LOCATION_NOT_SET"));
+					else {
+						player.teleport(loc);
+						player.sendMessage(Messager.getMessage("TELEPORTED_SUCCESSFULLY"));
+					}
+					return;
+				}
 		if (name.equals(Messager.color(chestsName))) {
 			currentArena.fillChests();
-			player.sendMessage("Chests filled");
+			player.sendMessage(Messager.getMessage("CHESTS_FILLED"));
 			return;
 		}
 
@@ -294,15 +293,15 @@ public class ConfigMenu implements Listener {
 			ArenaManager.removeArena(currentArena);
 			currentArenas.remove(player);
 			currentArena = null;
-			player.sendMessage("Cleared");
+			player.sendMessage(Messager.getMessage("CONFIG_MENU_CLEARED"));
 			player.closeInventory();
 		}
 
 		if (name.equals(Messager.color(worldFolderName, currentWorldName))) {
 			if (this.worldsFolder.exists() && this.worldsFolder.listFiles().length <= 0) {
 				player.closeInventory();
-				player.sendMessage("&c&lThere are no world folders!");
-				player.sendMessage("&e&lYou need to put &bschematics files &ein the &bschematics folder");
+				player.sendMessage(Messager.getMessage("NO_WORLD_FOLDERS_AVAILABLE"));
+				player.sendMessage(Messager.getMessage("NEED_TO_PUT_SCHEMATICS_IN_FOLDER"));
 			} else
 				OpenWorldsMenu(player);
 			return;
