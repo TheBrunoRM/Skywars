@@ -23,6 +23,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 import me.thebrunorm.skywars.ArenaStatus;
 import me.thebrunorm.skywars.Skywars;
@@ -53,7 +54,15 @@ public class Events implements Listener {
 	}
 
 	@EventHandler
+	void onJoin(PlayerJoinEvent event) {
+		// Cancel the default join message
+		event.setJoinMessage(null);
+	}
+	
+	@EventHandler
 	void onLeave(PlayerQuitEvent event) {
+		// Cancel the default quit message
+		event.setQuitMessage(null);
 		final Arena arena = Skywars.get().getPlayerArena(event.getPlayer());
 		if (arena == null)
 			return;

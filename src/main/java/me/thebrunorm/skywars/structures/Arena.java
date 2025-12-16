@@ -149,8 +149,6 @@ public class Arena {
 		if (Skywars.config.getBoolean("debug.enabled"))
 			player.sendMessage("[DEBUG] You joined team " + team.getNumber());
 		for (final SkywarsUser players : this.getUsers()) {
-			players.getPlayer().sendMessage(Messager.getMessage("JOIN", player.getName(), this.getAlivePlayerCount(),
-					this.map.getMaxPlayers()));
 			SkywarsUtils.playSoundsFromConfig(player.getPlayer(), "sounds.join");
 		}
 
@@ -302,8 +300,6 @@ public class Arena {
 	public void leavePlayer(SkywarsUser player) {
 		if (player == null)
 			return;
-		player.getPlayer().sendMessage(
-				Messager.getFormattedMessage("LEAVE_SELF", player.getPlayer(), this, player, this.map.getName()));
 		if (!this.started())
 			this.joinable = true;
 		if (player.getTeam().getUsers().size() <= 1)
@@ -312,8 +308,6 @@ public class Arena {
 		this.removePlayer(player);
 		if (this.getStatus() != ArenaStatus.RESTARTING && !player.isSpectator()) {
 			for (final SkywarsUser players : this.getUsers()) {
-				players.getPlayer().sendMessage(Messager.getFormattedMessage("LEAVE", player.getPlayer(), this, player,
-						player.getPlayer().getName(), this.getUsers().size(), this.map.getMaxPlayers()));
 				final String sound = Skywars.config.getString("sounds.leave");
 				final String[] splitted = sound.split(";");
 				players.getPlayer().playSound(players.getPlayer().getLocation(),
