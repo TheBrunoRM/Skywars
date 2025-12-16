@@ -3,6 +3,8 @@
 一个添加Skywars小游戏的Minecraft插件。
 兼容Bukkit和Spigot，支持1.8及以上版本。
 
+* [English](README_EN.md)
+
 [![Codacy徽章](https://app.codacy.com/project/badge/Grade/786de08d9dfa4332bc1e15e8f4373bd6)](https://www.codacy.com/gh/TheBrunoRM/Skywars/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=TheBrunoRM/Skywars&amp;utm_campaign=Badge_Grade)
 [![GitHub最新提交](https://img.shields.io/github/last-commit/TheBrunoRM/Skywars.svg)](https://github.com/TheBrunoRM/Skywars/commits/master)
 [![版本](https://img.shields.io/github/release/TheBrunoRM/Skywars.svg?colorB=7418f5)](https://github.com/TheBrunoRM/Skywars/releases/latest)
@@ -112,7 +114,6 @@
   由于Bukkit在消息发送上的限制而无法工作。\
   如果您找到在Bukkit上发送动作栏消息的方法，请开启问题或拉取请求。
 
-在Discord上联系我：brunorm
+在Discord上联系原作者：brunorm
 
-## 其他语言
-* [English](README_EN.md)
+分支作者官网：https://cnmsb.xin
