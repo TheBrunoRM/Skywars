@@ -130,3 +130,31 @@ debug:
 # it breaks the plugin (for now)
 disableUpdates: true
 autoUpdate: false
+
+# ????
+# ?????
+bungeecord:
+  enabled: true
+  hubserver: Skylobby
+  endgame-in-lobby: true
+  full-restart: true
+  spigot-restart: true
+  motds:
+    lobby: |
+      $regionname$
+      &7???[&b$currentplayers$&7/&b$maxplayers$&7]
+    running: |
+      $regionname$
+      &7???[&b$currentplayers$&7/&b$maxplayers$&7]
+    stopped: |
+      $regionname$
+      &c???[Stopped]
+    full: '&c[Full]'
+
+# ?????
+Mysql:
+  host: 127.0.0.1
+  port: 3306
+  db: nekobedwars
+  user: root
+  password: wcjs123
