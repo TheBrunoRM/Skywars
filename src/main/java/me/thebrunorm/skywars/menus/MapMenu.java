@@ -25,11 +25,24 @@ import me.thebrunorm.skywars.structures.SkywarsMap;
 public class MapMenu implements Listener {
 
 	public static void open(Player player) {
+		ArrayList<SkywarsMap> maps = Skywars.get().getMapManager().getMaps();
+		
+		// 检查是否只有一个已配置的地图
+		if (maps.size() == 1) {
+			// 如果只有一个地图，直接将玩家送入该游戏
+			SkywarsMap singleMap = maps.get(0);
+			if (!ArenaManager.joinMap(singleMap, player)) {
+				player.sendMessage(Messager.get("CANT_JOIN_MAP"));
+			}
+			return;
+		}
+		
+		// 如果有多个地图，显示地图选择菜单
 		final Inventory inventory = Bukkit.createInventory(null, 9 * 6, Messager.color("&aMaps"));
 		PlayerInventoryManager.setMenu(player, MenuType.MAP_SELECTION);
 
 		int index = 10;
-		for (final SkywarsMap map : Skywars.get().getMapManager().getMaps()) {
+		for (final SkywarsMap map : maps) {
 			// Skywars.get().sendDebugMessage("current index: " + index);
 			if ((index + 1) % 9 == 0)
 				index += 2;

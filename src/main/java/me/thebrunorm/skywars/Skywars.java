@@ -165,11 +165,13 @@ public class Skywars extends JavaPlugin {
 		this.loadKits();
 		
 		// 更新调试信息以显示当前加载的语言
+		// Update debug information to show the currently loaded language
 		if (this.langConfig != null) {
 			this.sendDebugMessage(Messager.getFormattedMessage("RELOADED_LOCALE_MESSAGE", null, null, null, this.getConfig().getString("locale"), this.langConfig.getString("language_name")));
 		}
 		
 		// 刷新所有在线玩家的记分板、动作栏和标签列表以应用新的语言设置
+		// Refresh the scoreboard, action bar, and tab list for all online players to apply the new language settings.
 		for (final Player player : Bukkit.getOnlinePlayers()) {
 			SkywarsScoreboard.update(player);
 			SkywarsActionbar.update(player);
