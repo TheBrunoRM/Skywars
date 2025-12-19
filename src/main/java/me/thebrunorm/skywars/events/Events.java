@@ -57,6 +57,19 @@ public class Events implements Listener {
 	void onJoin(PlayerJoinEvent event) {
 		// Cancel the default join message
 		event.setJoinMessage(null);
+		
+		// 检查是否只有一个可运行的游戏地图，如果是则自动将玩家加入游戏
+		final Player player = event.getPlayer();
+		final java.util.ArrayList<me.thebrunorm.skywars.structures.SkywarsMap> maps = Skywars.get().getMapManager().getMaps();
+		
+		// 如果只有一个已配置的地图，自动将玩家加入游戏
+		if (maps.size() == 1) {
+			final me.thebrunorm.skywars.structures.SkywarsMap singleMap = maps.get(0);
+			if (!me.thebrunorm.skywars.managers.ArenaManager.joinMap(singleMap, player)) {
+				// 如果加入失败，可以给玩家发送提示消息
+				// player.sendMessage(me.thebrunorm.skywars.Messager.get("CANT_JOIN_MAP"));
+			}
+		}
 	}
 	
 	@EventHandler
