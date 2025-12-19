@@ -2,12 +2,13 @@
 
 # the language used for the messages (lang folder)
 # en/en_ar/zh_cn
-locale: zh_cn
+locale: en
 
 # the url for displaying the %url% placeholder (scoreboard)
 url: "www.example.com"
 
 # the format for displaying the %date% placeholder (scoreboard)
+# 中国习惯：YYYY/dd/MM 按需修改
 dateFormat: "dd/MM/yyyy"
 
 # minimum players to start the game automatically
@@ -129,17 +130,16 @@ debug:
 # do not enable updates nor autoUpdate
 # it breaks the plugin (for now)
 disableUpdates: true
-autoUpdate: false
+autoUpdate: true
 
 # 尚为实现
 # 大厅服务器
 # lobby Server
 bungeecord:
   enabled: true
+  # game over send player to "lobby Server"
   lobbyserver: Skylobby
-  endgame-in-lobby: true
-  full-restart: true
-  spigot-restart: true
+  # in game motd edit
   motds:
     waiting: |
       $regionname$
@@ -158,9 +158,12 @@ bungeecord:
 # database connect
 database: mysql
 # mysql/sqlite/yml
+
+# MySQL connect setting
 Mysql:
   host: 127.0.0.1
   port: 3306
-  db: nekobedwars
+  db: Skywars
   user: root
-  password: wcjs123
+  password: password
+  ssl: false
