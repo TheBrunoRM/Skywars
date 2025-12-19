@@ -6,6 +6,10 @@ items:
   - ARROW
   # tools
   - type: IRON_AXE
+    #     name: "樵夫的斧头"
+    #     lore:
+    #     - "一个非常强大的斧头"
+    #     - "可以砍伐任何树木。"
     name: "&aLumberjack's Axe"
     lore:
     - "&eA very powerful axe"
