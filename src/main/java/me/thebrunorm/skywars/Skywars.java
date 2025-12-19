@@ -829,17 +829,37 @@ public class Skywars extends JavaPlugin {
 			langDir.mkdirs();
 		}
 
-		// List of language files to extract
-		final String[] languageFiles = {"lang/en.yml", "lang/es_ar.yml", "lang/zh_cn.yml"};
-
-		for (final String langFile : languageFiles) {
-			final File targetFile = new File(langDir, langFile.replace("lang/", ""));
-			if (!targetFile.exists()) {
-				this.sendDebugMessage("&eExtracting language file: &a%s", targetFile.getName());
-				ConfigurationUtils.copyDefaultContentsToFile(langFile, targetFile);
-			} else {
-				this.sendDebugMessage("&7Language file already exists: &r%s", targetFile.getName());
+		// Extract all language files from the JAR by iterating through its entries
+		try {
+			// Get the plugin JAR file
+			java.io.File pluginJar = this.getFile();
+			java.util.jar.JarFile jar = new java.util.jar.JarFile(pluginJar);
+			java.util.Enumeration<java.util.jar.JarEntry> entries = jar.entries();
+			
+			while (entries.hasMoreElements()) {
+				java.util.jar.JarEntry entry = entries.nextElement();
+				String name = entry.getName();
+				
+				// Check if this is a language file in the lang directory
+				if (name.startsWith("lang/") && name.endsWith(".yml") && !name.equals("lang/")) {
+					// Extract just the filename part after lang/
+					String fileName = name.substring("lang/".length());
+					if (!fileName.isEmpty() && !entry.isDirectory()) {
+						final File targetFile = new File(langDir, fileName);
+						if (!targetFile.exists()) {
+							this.sendDebugMessage("&eExtracting language file: &a%s", targetFile.getName());
+							ConfigurationUtils.copyDefaultContentsToFile(name, targetFile);
+						} else {
+							this.sendDebugMessage("&7Language file already exists: &r%s", targetFile.getName());
+						}
+					}
+				}
 			}
+			
+			jar.close();
+		} catch (Exception e) {
+			this.sendDebugMessage("&cError extracting language files: &r%s", e.getMessage());
+			e.printStackTrace();
 		}
 
 		this.sendDebugMessage("&aFinished extracting language files.");

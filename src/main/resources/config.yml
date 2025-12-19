@@ -133,6 +133,7 @@ autoUpdate: false
 
 # 尚为实现
 # 大厅服务器
+# lobby Server
 bungeecord:
   enabled: true
   lobbyserver: Skylobby
@@ -140,7 +141,7 @@ bungeecord:
   full-restart: true
   spigot-restart: true
   motds:
-    lobby: |
+    waiting: |
       $regionname$
       &7等待中[&b$currentplayers$&7/&b$maxplayers$&7]
     running: |
@@ -154,6 +155,7 @@ bungeecord:
       &c对局满人[Full]
 
 # 数据库连接
+# database connect
 database: mysql
 # mysql/sqlite/yml
 Mysql:
