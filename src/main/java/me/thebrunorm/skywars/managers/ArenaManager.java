@@ -93,7 +93,6 @@ public class ArenaManager {
 		Skywars.get().sendDebugMessage("removing arena " + arena.getMap().getName());
 		Skywars.get().getArenas().remove(arena);
 		unloadAndDeleteWorldForMap(arena.getWorld(), arena.getMap());
-		arena = null;
 		Skywars.get().getSignManager().updateSigns();
 	}
 
@@ -103,7 +102,7 @@ public class ArenaManager {
 			return false;
 		}
 
-		// teleport all players outside of the world
+		// teleport all players outside the world
 		// before unloading it
 		final List<Player> players = world.getPlayers();
 		if (players.size() > 0) {

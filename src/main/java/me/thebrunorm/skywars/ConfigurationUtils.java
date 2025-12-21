@@ -24,6 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.cryptomorin.xseries.XMaterial;
+import org.jetbrains.annotations.Nullable;
 
 public class ConfigurationUtils {
 
@@ -145,65 +146,73 @@ public class ConfigurationUtils {
 	public static Location getLocationConfig(World world, ConfigurationSection section) {
 		if (section == null)
 			return null;
-		final Location loc = new Location(world, section.getInt("x"), section.getInt("y"), section.getInt("z"));
-		return loc;
+		return new Location(world, section.getInt("x"), section.getInt("y"), section.getInt("z"));
 	}
 
 	@SuppressWarnings("unchecked")
 	public static ItemStack parseItemFromConfig(Object a) {
-		if (a instanceof String) {
-			final String[] splitted = ((String) a).split("[\\s\\W]+");
-			final Optional<XMaterial> xmat = XMaterial.matchXMaterial(splitted[0]);
-			if (!xmat.isPresent())
+		if (a instanceof String)
+			return parseItemFromString((String) a);
+		else if (a instanceof HashMap)
+			return parseItemFromHashMap((HashMap<Object, Object>) a);
+		else return null;
+	}
+
+	private static @Nullable ItemStack parseItemFromHashMap(HashMap<Object, Object> hashmap) {
+		if (hashmap.size() == 1) {
+			final Entry<Object, Object> b = hashmap.entrySet().iterator().next();
+			final Optional<XMaterial> xmat = XMaterial.matchXMaterial(b.getKey().toString());
+			if (xmat.isEmpty())
 				return null;
 			final Material mat = xmat.get().parseMaterial();
-			final int amount = splitted.length > 1 ? Integer.parseInt(splitted[1]) : mat.getMaxStackSize();
+			final int amount = Integer.parseInt(b.getValue().toString());
 			return new ItemStack(mat, amount);
-		} else if (a instanceof HashMap) {
-			final HashMap<Object, Object> hash = (HashMap<Object, Object>) a;
-			if (hash.size() == 1) {
-				final Entry<Object, Object> b = hash.entrySet().iterator().next();
-				final Optional<XMaterial> xmat = XMaterial.matchXMaterial(b.getKey().toString());
-				if (xmat == null)
-					return null;
-				final Material mat = xmat.get().parseMaterial();
-				final int amount = Integer.parseInt(b.getValue().toString());
-				return new ItemStack(mat, amount);
-			} else {
-				final Optional<XMaterial> xmat = XMaterial.matchXMaterial(hash.get("type").toString());
-				if (xmat == null)
-					return null;
-				final Material mat = xmat.get().parseMaterial();
-				int amount = mat.getMaxStackSize();
-				if (hash.containsKey("amount"))
-					try {
-						amount = Integer.parseInt(hash.get("amount").toString());
-					} catch (final NumberFormatException e) {
-					}
-
-				final ItemStack item = new ItemStack(mat, amount);
-				final ItemMeta meta = item.getItemMeta();
-
-				if (hash.containsKey("name")) {
-					final String itemName = hash.get("name").toString();
-					meta.setDisplayName(Messager.color(itemName));
-				}
-
-				final Object lore = hash.get("lore");
-				if (lore != null) {
-					final List<String> loreLines = new ArrayList<String>();
-					if (lore instanceof String)
-						loreLines.add(Messager.color(lore.toString()));
-					else if (lore instanceof ArrayList)
-						for (final String loreLine : ((ArrayList<String>) lore))
-							loreLines.add(Messager.color(loreLine));
-					meta.setLore(loreLines);
-				}
-
-				item.setItemMeta(meta);
-				return item;
-			}
 		}
-		return null;
+
+		final Optional<XMaterial> xmat = XMaterial.matchXMaterial(hashmap.get("type").toString());
+		if (xmat.isEmpty())
+			return null;
+
+		final Material mat = xmat.get().parseMaterial();
+		int amount = mat.getMaxStackSize();
+		if (hashmap.containsKey("amount"))
+			try {
+				amount = Integer.parseInt(hashmap.get("amount").toString());
+			} catch (final NumberFormatException ignored) {
+			}
+
+		final ItemStack item = new ItemStack(mat, amount);
+		final ItemMeta meta = item.getItemMeta();
+
+		if (hashmap.containsKey("name")) {
+			final String itemName = hashmap.get("name").toString();
+			meta.setDisplayName(Messager.color(itemName));
+		}
+
+		final Object lore = hashmap.get("lore");
+		if (lore != null) {
+			final List<String> loreLines = new ArrayList<String>();
+			if (lore instanceof String)
+				loreLines.add(Messager.color(lore.toString()));
+			else if (lore instanceof ArrayList)
+				for (final String loreLine : ((ArrayList<String>) lore))
+					loreLines.add(Messager.color(loreLine));
+			meta.setLore(loreLines);
+		}
+
+		item.setItemMeta(meta);
+		return item;
+	}
+
+	private static @Nullable ItemStack parseItemFromString(String a) {
+		final String[] splitted = a.split("[\\s\\W]+");
+		final Optional<XMaterial> xmat = XMaterial.matchXMaterial(splitted[0]);
+
+		if (xmat.isEmpty())
+			return null;
+
+		final Material mat = xmat.get().parseMaterial();
+		final int amount = splitted.length > 1 ? Integer.parseInt(splitted[1]) : mat.getMaxStackSize();
+		return new ItemStack(mat, amount);
 	}
 }
