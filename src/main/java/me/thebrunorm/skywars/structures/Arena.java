@@ -329,7 +329,7 @@ public class Arena {
 			.filter(team -> team.getUsers().stream().anyMatch(p -> !p.isSpectator()))
 			.count();
 
-		if (aliveTeamsCount == 1) {
+		if (aliveTeamsCount <= 1) {
 			Optional<SkywarsTeam> winning = this.getTeams().stream()
 				.filter(team -> team.getUsers().stream().anyMatch(p -> !p.isSpectator()))
 				.findFirst();
@@ -354,23 +354,24 @@ public class Arena {
 
 		final double winMoney = Skywars.get().getConfig().getDouble("economy.win");
 
-		for (SkywarsUser user : winningTeam.getUsers()) {
-			Skywars.get().incrementPlayerTotalWins(user.getPlayer());
-			if (winMoney > 0 && Skywars.get().getEconomy() != null) {
-				Skywars.get().getEconomy().depositPlayer(user.getPlayer(), winMoney);
-				user.getPlayer().sendMessage(MessageUtils.color("&6+$%s", SkywarsUtils.formatDouble(winMoney)));
+		if (winningTeam != null)
+			for (SkywarsUser user : winningTeam.getUsers()) {
+				Skywars.get().incrementPlayerTotalWins(user.getPlayer());
+				if (winMoney > 0 && Skywars.get().getEconomy() != null) {
+					Skywars.get().getEconomy().depositPlayer(user.getPlayer(), winMoney);
+					user.getPlayer().sendMessage(MessageUtils.color("&6+$%s", SkywarsUtils.formatDouble(winMoney)));
+				}
 			}
-		}
 
 		for (final SkywarsUser user : this.getUsers()) {
-			if (winningTeam.getUsers().contains(user)) {
+			if (winningTeam != null && winningTeam.getUsers().contains(user)) {
 				Skywars.get().NMS().sendTitle(user.getPlayer(), MessageUtils.getMessage("won.title"),
 					MessageUtils.getMessage("won.subtitle"), 0, 80, 0);
 			} else {
 				Skywars.get().NMS().sendTitle(user.getPlayer(),
 					"&c&lGAME ENDED", "&7You didn't win this time.", 0, 80, 0);
 			}
-			if (winningTeam.getUsers().size() <= 0) {
+			if (winningTeam == null || winningTeam.getUsers().isEmpty()) {
 				user.getPlayer().sendMessage(MessageUtils.color("&cnobody &ewon"));
 			} else {
 				user.getPlayer().sendMessage(MessageUtils.color("&c%s &ewon!",
@@ -490,12 +491,11 @@ public class Arena {
 
 					final SkywarsEvent event = Arena.this.getEventManager().getNextEvent();
 
-					if (event != null) {
-						event.decreaseTime();
-						if (event.getTime() <= 0) {
-							Arena.this.getEventManager().skipEvent();
-							event.run();
-						}
+					if (event == null) return;
+
+					event.decreaseTime();
+					if (event.getTime() <= 0) {
+						Arena.this.getEventManager().executeEvent();
 					}
 				}
 			}, 0L, 20L);
@@ -509,15 +509,15 @@ public class Arena {
 					this.time--;
 					Arena.this.countdown = this.time;
 
-					for (SkywarsUser winner : winningTeam.getUsers()) {
-						if (this.fireworks <= Skywars.get().getConfig().getInt("endFireworks") && winner != null
-							&& Arena.this.getUser(winner.getPlayer()) != null && !winner.isSpectator()) {
-							final Player p = winner.getPlayer();
-							SkywarsUtils.spawnRandomFirework(p.getLocation());
+					if (winningTeam != null)
+						for (SkywarsUser winner : winningTeam.getUsers()) {
+							if (this.fireworks <= Skywars.get().getConfig().getInt("endFireworks") && winner != null
+								&& Arena.this.getUser(winner.getPlayer()) != null && !winner.isSpectator()) {
+								final Player p = winner.getPlayer();
+								SkywarsUtils.spawnRandomFirework(p.getLocation());
+							}
+							this.fireworks++;
 						}
-						this.fireworks++;
-					}
-
 
 					if (this.time == 0) {
 						Arena.this.clear();
