@@ -769,7 +769,7 @@ public class Arena {
 		if (this.getSpawn(this.getAlivePlayerCount()) == null)
 			problems.add(String.format("Spawn %s not set", this.getAlivePlayerCount()));
 		if (this.map.getMaxPlayers() <= 0)
-			problems.add("Max players not set");
+			problems.add("No players can join: no spawns!");
 		if (this.getWorldName() == null) {
 			problems.add("No world set");
 		}

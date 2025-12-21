@@ -206,7 +206,7 @@ public class SkywarsMap {
 	}
 
 	public int getMaxPlayers() {
-		return this.getSpawns().size();
+		return this.getSpawns().size() * getTeamSize();
 	}
 
 	public int getTeamSize() {
