@@ -1,5 +1,5 @@
 package mrblobman.sounds;
-// The following license should allow reuse, redistribution, with or without edits and with or without attribution. 
+// The following license should allow reuse, redistribution, with or without edits and with or without attribution.
 
 // Do what you want with it!
 

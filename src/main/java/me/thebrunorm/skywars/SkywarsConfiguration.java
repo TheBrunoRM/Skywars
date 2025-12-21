@@ -1,3 +1,4 @@
+/* (C) 2021 Bruno */
 package me.thebrunorm.skywars;
 
 import org.bukkit.configuration.file.YamlConfiguration;

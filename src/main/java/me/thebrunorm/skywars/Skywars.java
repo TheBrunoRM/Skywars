@@ -1,3 +1,4 @@
+/* (C) 2021 Bruno */
 package me.thebrunorm.skywars;
 
 import java.io.File;
@@ -376,9 +377,9 @@ public class Skywars extends JavaPlugin {
 		if (config.getBoolean("debug.projectileTests")) {
 			pluginManager.registerEvents(new ProjectileTrails(), this);
 		}
-		final Listener[] listeners = { new InteractEvent(), new Events(), new GamesMenu(), new MapMenu(),
-				new KitsMenu(), new SetupEvents(), new ConfigMenu(), new GameOptionsMenu(),
-				new PlayerInventoryManager(), };
+		final Listener[] listeners = {new InteractEvent(), new Events(), new GamesMenu(), new MapMenu(),
+			new KitsMenu(), new SetupEvents(), new ConfigMenu(), new GameOptionsMenu(),
+			new PlayerInventoryManager(),};
 		for (final Listener listener : listeners) {
 			pluginManager.registerEvents(listener, this);
 		}
@@ -434,7 +435,7 @@ public class Skywars extends JavaPlugin {
 			final String name = file.getName().replaceFirst("[.][^.]+$", "");
 			final YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			ConfigurationUtils.createMissingKeys(config, ConfigurationUtils.getDefaultConfig("kits/default.yml"),
-					file.getPath());
+				file.getPath());
 
 			// create kit and set values from config
 			final Kit kit = new Kit(name);
@@ -468,37 +469,37 @@ public class Skywars extends JavaPlugin {
 
 	public static void createBigCase(Location location, XMaterial material) {
 		final int[][] blocks = {
-				// base
-				{ -1, -1, -1 }, { 0, -1, -1 }, { 1, -1, -1 }, { -1, -1, 0 }, { 0, -1, 0 }, { 1, -1, 0 }, { -1, -1, 1 },
-				{ 0, -1, 1 }, { 1, -1, 1 },
+			// base
+			{-1, -1, -1}, {0, -1, -1}, {1, -1, -1}, {-1, -1, 0}, {0, -1, 0}, {1, -1, 0}, {-1, -1, 1},
+			{0, -1, 1}, {1, -1, 1},
 
-				// top
-				{ -1, 3, -1 }, { 0, 3, -1 }, { 1, 3, -1 }, { -1, 3, 0 }, { 0, 3, 0 }, { 1, 3, 0 }, { -1, 3, 1 },
-				{ 0, 3, 1 }, { 1, 3, 1 },
+			// top
+			{-1, 3, -1}, {0, 3, -1}, {1, 3, -1}, {-1, 3, 0}, {0, 3, 0}, {1, 3, 0}, {-1, 3, 1},
+			{0, 3, 1}, {1, 3, 1},
 
-				// left wall
-				{ 2, 0, -1 }, { 2, 0, 0 }, { 2, 0, 1 }, { 2, 1, -1 }, { 2, 1, 0 }, { 2, 1, 1 }, { 2, 2, -1 },
-				{ 2, 2, 0 }, { 2, 2, 1 },
+			// left wall
+			{2, 0, -1}, {2, 0, 0}, {2, 0, 1}, {2, 1, -1}, {2, 1, 0}, {2, 1, 1}, {2, 2, -1},
+			{2, 2, 0}, {2, 2, 1},
 
-				// front wall
-				{ -1, 0, 2 }, { 0, 0, 2 }, { 1, 0, 2 }, { -1, 1, 2 }, { 0, 1, 2 }, { 1, 1, 2 }, { -1, 2, 2 },
-				{ 0, 2, 2 }, { 1, 2, 2 },
+			// front wall
+			{-1, 0, 2}, {0, 0, 2}, {1, 0, 2}, {-1, 1, 2}, {0, 1, 2}, {1, 1, 2}, {-1, 2, 2},
+			{0, 2, 2}, {1, 2, 2},
 
-				// right wall
-				{ -2, 0, -1 }, { -2, 0, 0 }, { -2, 0, 1 }, { -2, 1, -1 }, { -2, 1, 0 }, { -2, 1, 1 }, { -2, 2, -1 },
-				{ -2, 2, 0 }, { -2, 2, 1 },
+			// right wall
+			{-2, 0, -1}, {-2, 0, 0}, {-2, 0, 1}, {-2, 1, -1}, {-2, 1, 0}, {-2, 1, 1}, {-2, 2, -1},
+			{-2, 2, 0}, {-2, 2, 1},
 
-				// back wall
-				{ -1, 0, -2 }, { 0, 0, -2 }, { 1, 0, -2 }, { -1, 1, -2 }, { 0, 1, -2 }, { 1, 1, -2 }, { -1, 2, -2 },
-				{ 0, 2, -2 }, { 1, 2, -2 }, };
-		final int[][] airBlocks = { { -1, 0, -1 }, { 0, 0, -1 }, { 1, 0, -1 }, { -1, 0, 0 }, { 0, 0, 0 }, { 1, 0, 0 },
-				{ -1, 0, 1 }, { 0, 0, 1 }, { 1, 0, 1 },
+			// back wall
+			{-1, 0, -2}, {0, 0, -2}, {1, 0, -2}, {-1, 1, -2}, {0, 1, -2}, {1, 1, -2}, {-1, 2, -2},
+			{0, 2, -2}, {1, 2, -2},};
+		final int[][] airBlocks = {{-1, 0, -1}, {0, 0, -1}, {1, 0, -1}, {-1, 0, 0}, {0, 0, 0}, {1, 0, 0},
+			{-1, 0, 1}, {0, 0, 1}, {1, 0, 1},
 
-				{ -1, 1, -1 }, { 0, 1, -1 }, { 1, 1, -1 }, { -1, 1, 0 }, { 0, 1, 0 }, { 1, 1, 0 }, { -1, 1, 1 },
-				{ 0, 1, 1 }, { 1, 1, 1 },
+			{-1, 1, -1}, {0, 1, -1}, {1, 1, -1}, {-1, 1, 0}, {0, 1, 0}, {1, 1, 0}, {-1, 1, 1},
+			{0, 1, 1}, {1, 1, 1},
 
-				{ -1, 2, -1 }, { 0, 2, -1 }, { 1, 2, -1 }, { -1, 2, 0 }, { 0, 2, 0 }, { 1, 2, 0 }, { -1, 2, 1 },
-				{ 0, 2, 1 }, { 1, 2, 1 }, };
+			{-1, 2, -1}, {0, 2, -1}, {1, 2, -1}, {-1, 2, 0}, {0, 2, 0}, {1, 2, 0}, {-1, 2, 1},
+			{0, 2, 1}, {1, 2, 1},};
 		for (final int[] relative : airBlocks) {
 			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
 			block.setType(XMaterial.AIR.parseMaterial());
@@ -522,19 +523,19 @@ public class Skywars extends JavaPlugin {
 			return;
 		}
 		final int[][] blocks = {
-				// first layer
-				{ -1, 0, 0 }, { 1, 0, 0 }, { 0, 0, -1 }, { 0, 0, 1 },
-				// second layer
-				{ -1, 1, 0 }, { 1, 1, 0 }, { 0, 1, -1 }, { 0, 1, 1 },
-				// third layer
-				{ -1, 2, 0 }, { 1, 2, 0 }, { 0, 2, -1 }, { 0, 2, 1 },
-				// base and top
-				{ 0, -1, 0 }, { 0, 3, 0 },
-				// base joints
-				{ -1, -1, 0 }, { 1, -1, 0 }, { 0, -1, -1 }, { 0, -1, 1 },
-				// top joints
-				{ -1, 3, 0 }, { 1, 3, 0 }, { 0, 3, -1 }, { 0, 3, 1 }, };
-		final int[][] airBlocks = { { 0, 0, 0 }, { 0, 1, 0 }, { 0, 2, 0 } };
+			// first layer
+			{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1},
+			// second layer
+			{-1, 1, 0}, {1, 1, 0}, {0, 1, -1}, {0, 1, 1},
+			// third layer
+			{-1, 2, 0}, {1, 2, 0}, {0, 2, -1}, {0, 2, 1},
+			// base and top
+			{0, -1, 0}, {0, 3, 0},
+			// base joints
+			{-1, -1, 0}, {1, -1, 0}, {0, -1, -1}, {0, -1, 1},
+			// top joints
+			{-1, 3, 0}, {1, 3, 0}, {0, 3, -1}, {0, 3, 1},};
+		final int[][] airBlocks = {{0, 0, 0}, {0, 1, 0}, {0, 2, 0}};
 		for (final int[] relative : airBlocks) {
 			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
 			block.setType(XMaterial.AIR.parseMaterial());
@@ -620,7 +621,7 @@ public class Skywars extends JavaPlugin {
 			final File file = this.getPlayerConfigFile(player);
 			config.save(file);
 			ConfigurationUtils.createMissingKeys(config, ConfigurationUtils.getDefaultConfig("players/default.yml"),
-					file.getPath());
+				file.getPath());
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
@@ -631,7 +632,7 @@ public class Skywars extends JavaPlugin {
 	public Kit getKit(String name) {
 		for (int i = 0; i < this.kits.size(); i++) {
 			if (this.kits.get(i).getName().equalsIgnoreCase(name)
-					|| this.kits.get(i).getDisplayName().equalsIgnoreCase(name)) {
+				|| this.kits.get(i).getDisplayName().equalsIgnoreCase(name)) {
 				return this.kits.get(i);
 			}
 		}
@@ -746,7 +747,7 @@ public class Skywars extends JavaPlugin {
 
 		final String lang = Skywars.get().getConfig().getString("locale");
 		langConfig = ConfigurationUtils.loadConfiguration("lang/" + lang + ".yml", "lang/" + lang + ".yml",
-				"lang/en.yml");
+			"lang/en.yml");
 
 		this.sendDebugMessage("Loaded locale: " + lang + " - " + langConfig.getString("language_name"));
 
