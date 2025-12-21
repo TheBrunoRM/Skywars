@@ -43,7 +43,8 @@ public class InteractEvent implements Listener {
 			return;
 		if (event.getClickedBlock() == null)
 			return;
-		if (!(event.getClickedBlock().getState() instanceof Sign sign))
+		BlockState blockState = event.getClickedBlock().getState();
+		if (!(blockState instanceof Sign))
 			return;
 		if (player.getGameMode() == GameMode.CREATIVE && player.isSneaking())
 			return;
@@ -55,6 +56,8 @@ public class InteractEvent implements Listener {
 			ArenaManager.joinMap(map, player);
 			return;
 		}
+
+		Sign sign = (Sign) blockState;
 
 		String line1 = sign.getLine(1);
 		String line2 = sign.getLine(2);
@@ -69,7 +72,8 @@ public class InteractEvent implements Listener {
 	}
 
 	Material getConfiguredMaterial(FileConfiguration config, String key) {
-		return XMaterial.matchXMaterial(config.getString("item_types." + key)).get().parseMaterial();
+		return XMaterial.matchXMaterial(config.getString("item_types." + key))
+			.map(XMaterial::parseMaterial).orElse(null);
 	}
 
 	void handleArenaInteraction(PlayerInteractEvent event, Player player, Arena arena) {
