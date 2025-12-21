@@ -1,12 +1,22 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.commands;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.cryptomorin.xseries.XMaterial;
+import me.thebrunorm.skywars.Messager;
+import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.SkywarsUtils;
+import me.thebrunorm.skywars.handlers.SkywarsScoreboard;
+import me.thebrunorm.skywars.managers.ArenaManager;
+import me.thebrunorm.skywars.managers.ChestManager;
+import me.thebrunorm.skywars.managers.MapManager;
+import me.thebrunorm.skywars.menus.ConfigMenu;
+import me.thebrunorm.skywars.menus.GamesMenu;
+import me.thebrunorm.skywars.menus.MapMenu;
+import me.thebrunorm.skywars.schematics.Schematic;
+import me.thebrunorm.skywars.schematics.SchematicHandler;
+import me.thebrunorm.skywars.structures.Arena;
+import me.thebrunorm.skywars.structures.SkywarsMap;
+import me.thebrunorm.skywars.structures.SkywarsUser;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -23,23 +33,11 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
-import com.cryptomorin.xseries.XMaterial;
-
-import me.thebrunorm.skywars.Messager;
-import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.SkywarsUtils;
-import me.thebrunorm.skywars.handlers.SkywarsScoreboard;
-import me.thebrunorm.skywars.managers.ArenaManager;
-import me.thebrunorm.skywars.managers.ChestManager;
-import me.thebrunorm.skywars.managers.MapManager;
-import me.thebrunorm.skywars.menus.ConfigMenu;
-import me.thebrunorm.skywars.menus.GamesMenu;
-import me.thebrunorm.skywars.menus.MapMenu;
-import me.thebrunorm.skywars.schematics.Schematic;
-import me.thebrunorm.skywars.schematics.SchematicHandler;
-import me.thebrunorm.skywars.structures.Arena;
-import me.thebrunorm.skywars.structures.SkywarsMap;
-import me.thebrunorm.skywars.structures.SkywarsUser;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MainCommand implements CommandExecutor {
 
@@ -201,7 +199,7 @@ public class MainCommand implements CommandExecutor {
 
 				player.sendMessage("Teleporting any players inside the world outside of it...");
 				for (final Player p : world.getPlayers())
-					SkywarsUtils.teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(p, true);
+					SkywarsUtils.teleportPlayerLobbyOrLastLocation(p, true);
 
 				if (!Bukkit.unloadWorld(world, true)) {
 					player.sendMessage("Could not save and unload world :(");

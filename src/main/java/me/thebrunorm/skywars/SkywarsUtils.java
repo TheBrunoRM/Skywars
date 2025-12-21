@@ -127,12 +127,12 @@ public class SkywarsUtils {
 		}
 	}
 
-	public static void teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(Player player) {
-		teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(player, false);
+	public static void teleportPlayerLobbyOrLastLocation(Player player) {
+		teleportPlayerLobbyOrLastLocation(player, false);
 	}
 
-	public static boolean teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(Player player,
-																							  boolean force) {
+	public static boolean teleportPlayerLobbyOrLastLocation(Player player,
+															boolean force) {
 		final Location lobby = Skywars.get().getLobby();
 		if (lobby != null) {
 			player.getPlayer().teleport(lobby);

@@ -345,7 +345,7 @@ public class Arena {
 			return;
 
 		if (this.isInBoundaries(player.getPlayer()))
-			SkywarsUtils.teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(player.getPlayer());
+			SkywarsUtils.teleportPlayerLobbyOrLastLocation(player.getPlayer());
 
 		player.getSavedPlayer().Restore();
 	}

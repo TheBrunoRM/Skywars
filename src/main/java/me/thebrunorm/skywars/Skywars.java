@@ -1,13 +1,23 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
+import com.cryptomorin.xseries.XMaterial;
+import me.thebrunorm.skywars.commands.*;
+import me.thebrunorm.skywars.events.*;
+import me.thebrunorm.skywars.handlers.SkywarsActionbar;
+import me.thebrunorm.skywars.handlers.SkywarsScoreboard;
+import me.thebrunorm.skywars.handlers.SkywarsTablist;
 import me.thebrunorm.skywars.holograms.*;
+import me.thebrunorm.skywars.managers.ChestManager;
+import me.thebrunorm.skywars.managers.MapManager;
+import me.thebrunorm.skywars.managers.SignManager;
+import me.thebrunorm.skywars.menus.*;
+import me.thebrunorm.skywars.nms.ReflectionNMS;
+import me.thebrunorm.skywars.schematics.SchematicHandler;
+import me.thebrunorm.skywars.structures.Arena;
+import me.thebrunorm.skywars.structures.Kit;
+import me.thebrunorm.skywars.structures.SkywarsUser;
+import net.milkbowl.vault.economy.Economy;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -26,37 +36,11 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 
-import com.cryptomorin.xseries.XMaterial;
-
-import me.thebrunorm.skywars.commands.ForceStartCommand;
-import me.thebrunorm.skywars.commands.LeaveCommand;
-import me.thebrunorm.skywars.commands.MainCommand;
-import me.thebrunorm.skywars.commands.StartCommand;
-import me.thebrunorm.skywars.commands.WhereCommand;
-import me.thebrunorm.skywars.events.DisableWeather;
-import me.thebrunorm.skywars.events.Events;
-import me.thebrunorm.skywars.events.InteractEvent;
-import me.thebrunorm.skywars.events.MessageSound;
-import me.thebrunorm.skywars.events.ProjectileTrails;
-import me.thebrunorm.skywars.events.SetupEvents;
-import me.thebrunorm.skywars.handlers.SkywarsActionbar;
-import me.thebrunorm.skywars.handlers.SkywarsScoreboard;
-import me.thebrunorm.skywars.handlers.SkywarsTablist;
-import me.thebrunorm.skywars.managers.ChestManager;
-import me.thebrunorm.skywars.managers.MapManager;
-import me.thebrunorm.skywars.managers.SignManager;
-import me.thebrunorm.skywars.menus.ConfigMenu;
-import me.thebrunorm.skywars.menus.GameOptionsMenu;
-import me.thebrunorm.skywars.menus.GamesMenu;
-import me.thebrunorm.skywars.menus.KitsMenu;
-import me.thebrunorm.skywars.menus.MapMenu;
-import me.thebrunorm.skywars.menus.PlayerInventoryManager;
-import me.thebrunorm.skywars.nms.ReflectionNMS;
-import me.thebrunorm.skywars.schematics.SchematicHandler;
-import me.thebrunorm.skywars.structures.Arena;
-import me.thebrunorm.skywars.structures.Kit;
-import me.thebrunorm.skywars.structures.SkywarsUser;
-import net.milkbowl.vault.economy.Economy;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @SuppressWarnings("deprecation")
 public class Skywars extends JavaPlugin {
@@ -188,7 +172,7 @@ public class Skywars extends JavaPlugin {
 				final World world = Bukkit.getWorld(worldName);
 				if (world != null) {
 					for (final Player p : world.getPlayers())
-						SkywarsUtils.teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(p, true);
+						SkywarsUtils.teleportPlayerLobbyOrLastLocation(p, true);
 					Bukkit.unloadWorld(worldName, false);
 				}
 				final File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
@@ -309,7 +293,7 @@ public class Skywars extends JavaPlugin {
 			if (item == null)
 				return;
 			player.getInventory().removeItem(item);
-			SkywarsUtils.teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(player);
+			SkywarsUtils.teleportPlayerLobbyOrLastLocation(player);
 		});
 
 		this.sendDebugMessage("Stopping arenas...");

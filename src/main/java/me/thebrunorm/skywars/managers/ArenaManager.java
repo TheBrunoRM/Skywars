@@ -1,18 +1,17 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.managers;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.SkywarsUtils;
+import me.thebrunorm.skywars.structures.Arena;
+import me.thebrunorm.skywars.structures.SkywarsMap;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
-import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.SkywarsUtils;
-import me.thebrunorm.skywars.structures.Arena;
-import me.thebrunorm.skywars.structures.SkywarsMap;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ArenaManager {
 
@@ -109,7 +108,7 @@ public class ArenaManager {
 			Skywars.get().sendDebugMessage("There are %s players in the world,"
 					+ " teleporting them back to the lobby or to their last location...", players.size());
 			for (final Player p : players)
-				SkywarsUtils.teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(p, true);
+				SkywarsUtils.teleportPlayerLobbyOrLastLocation(p, true);
 		}
 
 		Skywars.get().sendDebugMessage("Unloading world '%s' for map '%s'", world.getName(), map.getName());
