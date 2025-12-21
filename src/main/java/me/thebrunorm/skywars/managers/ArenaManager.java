@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ArenaManager {
 
@@ -62,7 +63,7 @@ public class ArenaManager {
 	}
 
 	public static boolean joinMap(SkywarsMap map, Player player) {
-		if(map == null) {
+		if (map == null) {
 			Skywars.get().sendDebugMessage("could not find or create arena for a null map");
 			return false;
 		}
@@ -77,8 +78,15 @@ public class ArenaManager {
 	}
 
 	public static void joinRandomMap(Player player) {
-		final SkywarsMap map = Skywars.get().getMapManager().getRandomMap();
-		joinMap(map, player);
+		Optional<Arena> arena = Skywars.get().getArenas().stream()
+			.filter(a -> !a.started() && !a.isUnusable())
+			.min((a, b) -> b.getUsers().size() - a.getUsers().size());
+		if (!arena.isPresent()) {
+			final SkywarsMap map = Skywars.get().getMapManager().getRandomMap();
+			joinMap(map, player);
+			return;
+		}
+		joinMap(arena.get().getMap(), player);
 	}
 
 	public static Arena createNewArena(SkywarsMap map) {
@@ -106,7 +114,7 @@ public class ArenaManager {
 		final List<Player> players = world.getPlayers();
 		if (players.size() > 0) {
 			Skywars.get().sendDebugMessage("There are %s players in the world,"
-					+ " teleporting them back to the lobby or to their last location...", players.size());
+				+ " teleporting them back to the lobby or to their last location...", players.size());
 			for (final Player p : players)
 				SkywarsUtils.teleportPlayerLobbyOrLastLocation(p, true);
 		}
@@ -123,12 +131,12 @@ public class ArenaManager {
 			for (final Player p : world.getPlayers()) {
 				Skywars.get().sendDebugMessage("Teleporting player %s to another world", p.getName());
 				p.teleport(Bukkit.getWorlds().stream().filter(w -> w.getName() != world.getName()).findFirst().get()
-						.getSpawnLocation());
+					.getSpawnLocation());
 			}
 			unloaded = Bukkit.unloadWorld(world, false);
 			if (unloaded) {
 				Skywars.get().sendDebugMessage("Successfully unloaded world '%s' for map '%s'", world.getName(),
-						map.getName());
+					map.getName());
 			}
 		}
 
@@ -138,7 +146,7 @@ public class ArenaManager {
 		try {
 			FileUtils.deleteDirectory(world.getWorldFolder());
 			Skywars.get().sendDebugMessage("Sucessfully deleted world '%s' for map '%s'", world.getName(),
-					map.getName());
+				map.getName());
 		} catch (final Exception e) {
 			e.printStackTrace();
 			Skywars.get().sendMessage("Could not delete world '%s' for map '%s'", world.getName(), map.getName());
