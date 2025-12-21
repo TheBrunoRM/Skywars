@@ -35,7 +35,7 @@ public class SkywarsUpdater {
 
 		long start = Instant.now().toEpochMilli();
 		try {
-			Skywars.get().sendMessage("&6Checking for updates...");
+			Skywars.get().sendMessage(Messager.getMessage("UPDATER_CHECKING_FOR_UPDATES"));
 
 			final String json = readUrl(JSON_URL);
 			final Gson gson = new Gson();
@@ -49,23 +49,23 @@ public class SkywarsUpdater {
 			Skywars.get().sendDebugMessage("&6Current version: " + pdf.getVersion());
 
 			if (pdf.getVersion().equalsIgnoreCase(version)) {
-				Skywars.get().sendMessage("&aYou have the last version! &e(%sms)",
-						Instant.now().toEpochMilli() - start);
+				Skywars.get().sendMessage(Messager.getMessage("UPDATER_LAST_VERSION", 
+						Instant.now().toEpochMilli() - start));
 				return false;
 			}
 
-			Skywars.get().sendMessage("&bThere is an update available! &e(%sms)", Instant.now().toEpochMilli() - start);
+			Skywars.get().sendMessage(Messager.getMessage("UPDATER_UPDATE_AVAILABLE", Instant.now().toEpochMilli() - start));
 
 			final String FILE_URL = release.assets.get(0).browser_download_url;
 			Skywars.get().sendDebugMessage("File URL: " + FILE_URL);
 
 			if (!applyUpdate) {
-				Skywars.get().sendMessage("&eYou can download the update here:");
-				Skywars.get().sendMessage("&b" + FILE_URL);
+				Skywars.get().sendMessage(Messager.getMessage("UPDATER_DOWNLOAD_HERE"));
+				Skywars.get().sendMessage(Messager.getMessage("UPDATER_FILE_URL", FILE_URL));
 				return true;
 			}
 
-			Skywars.get().sendMessage("&6Updating the plugin...");
+			Skywars.get().sendMessage(Messager.getMessage("UPDATER_UPDATING_PLUGIN"));
 
 			start = Instant.now().toEpochMilli();
 
@@ -75,12 +75,12 @@ public class SkywarsUpdater {
 
 			Files.write(path, IOUtils.toByteArray(in), StandardOpenOption.WRITE);
 
-			Skywars.get().sendMessage("&aThe plugin has been updated! &e(%sms)", Instant.now().toEpochMilli() - start);
-			Skywars.get().sendMessage("&6The update will be applied after reloading the server.");
+			Skywars.get().sendMessage(Messager.getMessage("UPDATER_PLUGIN_UPDATED", Instant.now().toEpochMilli() - start));
+			Skywars.get().sendMessage(Messager.getMessage("UPDATER_UPDATE_WILL_BE_APPLIED"));
 			return true;
 		} catch (final Exception e) {
 			e.printStackTrace();
-			Skywars.get().sendMessage("&cCould not check for updates! &6(%sms)", Instant.now().toEpochMilli() - start);
+			Skywars.get().sendMessage(Messager.getMessage("UPDATER_COULD_NOT_CHECK_UPDATES", Instant.now().toEpochMilli() - start));
 			return false;
 		}
 	}

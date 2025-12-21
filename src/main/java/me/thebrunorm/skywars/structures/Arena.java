@@ -115,7 +115,7 @@ public class Arena {
 			return false;
 		if (!this.checkProblems()) {
 			for (final String problem : this.getProblems()) {
-				player.sendMessage("problem when joining map: " + problem);
+				player.sendMessage(Messager.getMessage("PROBLEM_WHEN_JOINING_MAP", problem));
 			}
 			return false;
 		}
@@ -125,14 +125,14 @@ public class Arena {
 		final int index = this.getNextAvailablePlayerSlot();
 		final Location spawn = this.getVectorInArena(this.getSpawn(index));
 		if (spawn == null) {
-			player.sendMessage(String.format("spawn %s of arena %s not set", index, this.map.getName()));
+			player.sendMessage(Messager.getMessage("SPAWN_NOT_SET", index, this.map.getName()));
 			return false;
 		}
 		final SkywarsTeam team = this.getNextFreeTeamOrCreateIfItDoesntExist();
 		final SkywarsUser swPlayer = new SkywarsUser(player, team, index);
 		this.users.add(swPlayer);
 		if (Skywars.config.getBoolean("debug.enabled"))
-			player.sendMessage("[DEBUG] You joined team " + team.getNumber());
+			player.sendMessage(Messager.getMessage("DEBUG_YOU_JOINED_TEAM", team.getNumber()));
 		for (final SkywarsUser players : this.getUsers()) {
 			players.getPlayer().sendMessage(Messager.getMessage("JOIN", player.getName(), this.getAlivePlayerCount(),
 				this.map.getMaxPlayers()));
@@ -196,10 +196,10 @@ public class Arena {
 				final double killMoney = Skywars.get().getConfig().getDouble("economy.kill");
 				if (Skywars.get().getEconomy() != null && killMoney > 0) {
 					Skywars.get().getEconomy().depositPlayer(killer, killMoney);
-					killer.sendMessage(Messager.color("&6+$%s", SkywarsUtils.formatDouble(killMoney)));
+					killer.sendMessage(Messager.getMessage("YOU_WON_MONEY_FORMAT", SkywarsUtils.formatDouble(killMoney)));
 				}
 				Skywars.get().incrementPlayerSouls(killer);
-				killer.sendMessage(Messager.color("&b+%s Soul", 1));
+				killer.sendMessage(Messager.getMessage("YOU_GOT_SOUL_FORMAT", 1));
 			}
 		}
 		Skywars.get().incrementPlayerTotalDeaths(player);
@@ -378,7 +378,7 @@ public class Arena {
 			Skywars.get().incrementPlayerTotalWins(this.getWinner().getPlayer());
 			if (winMoney > 0 && Skywars.get().getEconomy() != null) {
 				Skywars.get().getEconomy().depositPlayer(this.getWinner().getPlayer(), winMoney);
-				this.getWinner().getPlayer().sendMessage(Messager.color("&6+$%s", SkywarsUtils.formatDouble(winMoney)));
+				this.getWinner().getPlayer().sendMessage(Messager.getMessage("YOU_WON_MONEY_FORMAT", SkywarsUtils.formatDouble(winMoney)));
 			}
 		}
 
@@ -390,9 +390,9 @@ public class Arena {
 				Skywars.get().NMS().sendTitle(p.getPlayer(), "&c&lGAME ENDED", "&7You didn't win this time.", 0, 80, 0);
 			}
 			if (this.winner == null) {
-				p.getPlayer().sendMessage(Messager.color("&cnobody &ewon"));
+				p.getPlayer().sendMessage(Messager.getMessage("NOBODY_WON"));
 			} else {
-				p.getPlayer().sendMessage(Messager.color("&c%s &ewon!", this.winner.getPlayer().getName()));
+				p.getPlayer().sendMessage(Messager.getMessage("SOMEONE_WON_FORMAT", this.winner.getPlayer().getName()));
 			}
 		}
 
@@ -761,7 +761,7 @@ public class Arena {
 					final double playMoney = Skywars.get().getConfig().getDouble("economy.play");
 					if (Skywars.get().getEconomy() != null && playMoney > 0) {
 						Skywars.get().getEconomy().depositPlayer(player.getPlayer(), playMoney);
-						player.getPlayer().sendMessage(Messager.color("&6+$%s", SkywarsUtils.formatDouble(playMoney)));
+						player.getPlayer().sendMessage(Messager.getMessage("YOU_WON_MONEY_FORMAT", SkywarsUtils.formatDouble(playMoney)));
 					}
 				}
 			}, 20 * 10);
@@ -865,7 +865,7 @@ public class Arena {
 
 		final World world = this.getWorld();
 		if (world == null) {
-			Skywars.get().sendMessage("Could not get world for map: ", this.getMap().getName());
+			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not get world for map: " + this.getMap().getName());
 			return list;
 		}
 
@@ -963,11 +963,11 @@ public class Arena {
 					Skywars.get().sendDebugMessage("&cCould not delete uid.dat from %s", newParent.getName());
 		} catch (final Exception e) {
 			e.printStackTrace();
-			Skywars.get().sendMessage("Could not create world for map: ", this.map.getName());
+			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not create world for map: " + this.map.getName());
 			return null;
 		}
 		if (!bukkitWorldFolder.isDirectory()) {
-			Skywars.get().sendMessage("Could not load world for map: ", this.map.getName());
+			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not load world for map: " + this.map.getName());
 			return null;
 		}
 		final World world = Bukkit.createWorld(new WorldCreator(worldName));
@@ -980,7 +980,7 @@ public class Arena {
 
 		final World world = this.getWorld();
 		if (world == null) {
-			Skywars.get().sendMessage("Could not get world for map: ", this.getMap().getName());
+			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not get world for map: " + this.getMap().getName());
 			return list;
 		}
 
@@ -1020,7 +1020,7 @@ public class Arena {
 
 		final World world = this.getWorld();
 		if (world == null) {
-			Skywars.get().sendMessage("&cCould not get world for map: ", this.getMap().getName());
+			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not get world for map: " + this.getMap().getName());
 			return list;
 		}
 

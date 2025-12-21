@@ -214,32 +214,32 @@ public class SkywarsUtils {
 		// TODO add messages
 		if (player != null)
 			if (Skywars.get().getPlayerArena(player) != null) {
-				player.sendMessage("already joined");
+				player.sendMessage(Messager.getMessage("ALREADY_JOINED_PROBLEM"));
 				return JoinProblem.ALREADY_JOINED;
 			}
 		if (arena == null) {
 			if (player != null)
-				player.sendMessage("arena doesnt exist");
+				player.sendMessage(Messager.getMessage("ARENA_DOES_NOT_EXIST_PROBLEM"));
 			return JoinProblem.ARENA_DOES_NOT_EXIST;
 		}
 		if (arena.getStatus() == ArenaStatus.DISABLED) {
 			if (player != null)
-				player.sendMessage("arena is disabled");
+				player.sendMessage(Messager.getMessage("ARENA_IS_DISABLED_PROBLEM"));
 			return JoinProblem.ARENA_IS_DISABLED;
 		}
 		if (arena.getStatus() == ArenaStatus.RESTARTING) {
 			if (player != null)
-				player.sendMessage("arena is ending");
+				player.sendMessage(Messager.getMessage("ARENA_IS_ENDING_PROBLEM"));
 			return JoinProblem.ARENA_IS_ENDING;
 		}
 		if (arena.getStatus() == ArenaStatus.PLAYING) {
 			if (player != null)
-				player.sendMessage("arena is playing");
+				player.sendMessage(Messager.getMessage("ARENA_IS_PLAYING_PROBLEM"));
 			return JoinProblem.ARENA_IS_PLAYING;
 		}
 		if (arena.getWorld() == null) {
 			if (player != null)
-				player.sendMessage("world not set");
+				player.sendMessage(Messager.getMessage("WORLD_NOT_SET_PROBLEM"));
 			return JoinProblem.WORLD_NOT_SET;
 		}
 		final int spawns = arena.getMap().getSpawns().size();

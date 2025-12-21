@@ -64,7 +64,7 @@ public class ConfigurationUtils {
 
 			for (final String key : section.getKeys(true)) {
 				if (conf.get(key) == null) {
-					Skywars.get().sendMessage("&cWarning: key &b%s &cis missing in file &b%s", key, fileName);
+					org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Configuration key '" + key + "' is missing from " + fileName + ", using default value.");
 					modified = true;
 
 					// setting the key in the configuration
@@ -74,7 +74,7 @@ public class ConfigurationUtils {
 				}
 			}
 			if (modified) {
-				Skywars.get().sendMessage("&6The plugin will use the default values for the missing keys.");
+				org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Some configuration values were missing and default values have been applied.");
 			}
 		} catch (final Exception e) {
 			e.printStackTrace();
@@ -85,7 +85,7 @@ public class ConfigurationUtils {
 	static YamlConfiguration getDefaultConfig(String defaultFileName) {
 		final InputStream stream = Skywars.get().getResource(defaultFileName);
 		if (stream == null) {
-			Skywars.get().sendMessage("Could not get resource: " + defaultFileName);
+			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not get resource: " + defaultFileName);
 			return null;
 		}
 		final Reader defaultConfigStream = new InputStreamReader(stream, StandardCharsets.UTF_8);
@@ -102,7 +102,7 @@ public class ConfigurationUtils {
 				file.createNewFile();
 			final InputStream stream = Skywars.get().getResource(defaultFileName);
 			if (stream == null) {
-				Skywars.get().sendMessage("Could not get resource: " + defaultFileName);
+				org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not get resource: " + defaultFileName);
 				return;
 			}
 			copyInputStreamToFile(stream, file);

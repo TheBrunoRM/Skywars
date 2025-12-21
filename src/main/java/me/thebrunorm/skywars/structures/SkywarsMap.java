@@ -2,6 +2,7 @@
 package me.thebrunorm.skywars.structures;
 
 import com.cryptomorin.xseries.XMaterial;
+import me.thebrunorm.skywars.Messager;
 import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.SkywarsUtils;
 import me.thebrunorm.skywars.managers.ArenaManager;
@@ -94,10 +95,9 @@ public class SkywarsMap {
 			if (!mapFile.exists()) {
 				try {
 					mapFile.createNewFile();
-				} catch (final IOException e) {
-					Skywars.get().sendMessage("Could not create map file: " + mapFile.getPath());
-				}
-			}
+						} catch (final IOException e) {
+							org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not create map file: " + mapFile.getPath());
+						}			}
 			this.setConfigFile(mapFile);
 		}
 		try {
@@ -251,7 +251,7 @@ public class SkywarsMap {
 			FileUtils.copyDirectory(baseWorld, worldFile);
 		} catch (final IOException e) {
 			e.printStackTrace();
-			Skywars.get().sendMessage("Could not make backup of world '%s' for map: %s", name, this.getName());
+			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not make backup of world: " + name + " for map: " + this.getName());
 		}
 	}
 

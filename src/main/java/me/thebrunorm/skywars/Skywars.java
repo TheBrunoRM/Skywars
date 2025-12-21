@@ -132,7 +132,7 @@ public class Skywars extends JavaPlugin {
 				final double z = lobbyConfig.getDouble("lobby.z");
 				this.lobby = new Location(world, x, y, z);
 			} else
-				this.sendMessage("&cLobby world (&b%s&c) does not exist!", worldName);
+				org.bukkit.Bukkit.getConsoleSender().sendMessage(Messager.color(this.prefix) + " " + Messager.getMessage("LOBBY_WORLD_DOES_NOT_EXIST", worldName));
 		}
 	}
 
@@ -209,13 +209,13 @@ public class Skywars extends JavaPlugin {
 		if (!economyEnabled)
 			return false;
 		if (this.getServer().getPluginManager().getPlugin("Vault") == null) {
-			this.sendMessage("&eEconomy (Vault): &6plugin not found.");
+			org.bukkit.Bukkit.getConsoleSender().sendMessage(Messager.color(this.prefix) + " " + Messager.getMessage("ECONOMY_PLUGIN_NOT_FOUND"));
 			return false;
 		}
 
 		this.economyProvider = this.getServer().getServicesManager().getRegistration(Economy.class);
 		if (this.economyProvider == null) {
-			this.sendMessage("&eEconomy (Vault): &6plugin found &cbut no registered service provider!");
+			org.bukkit.Bukkit.getConsoleSender().sendMessage(Messager.color(this.prefix) + " " + Messager.getMessage("ECONOMY_PLUGIN_FOUND_NO_PROVIDER"));
 			return false;
 		}
 		this.economy = this.economyProvider.getProvider();
@@ -291,7 +291,7 @@ public class Skywars extends JavaPlugin {
 		String packageName = this.getServer().getClass().getPackage().getName();
 		this.serverPackageVersion = packageName.substring(packageName.lastIndexOf('.') + 1);
 
-		this.sendDebugMessage("&bServer version: &e%s (&a%s&e)", packageName, this.serverPackageVersion);
+		Bukkit.getConsoleSender().sendMessage("[Skywars] Server version: " + packageName + " (" + this.serverPackageVersion + ")");
 
 		final File worldsToDeleteFile = new File(this.getDataFolder(), "delete_worlds.yml");
 		if (worldsToDeleteFile.exists()) {
@@ -310,7 +310,7 @@ public class Skywars extends JavaPlugin {
 						FileUtils.deleteDirectory(worldFolder);
 					} catch (final IOException e) {
 						e.printStackTrace();
-						Skywars.get().sendMessage("&cCould not delete world folder: &b" + worldFolder.getPath());
+						Bukkit.getConsoleSender().sendMessage("[Skywars] Could not delete world folder: " + worldFolder.getPath());
 					}
 				list.remove(worldName);
 			}
@@ -319,13 +319,13 @@ public class Skywars extends JavaPlugin {
 				deleteWorldsConfig.save(worldsToDeleteFile);
 			} catch (final IOException e) {
 				e.printStackTrace();
-				this.sendMessage("Could not save the world deletion list to file: " + worldsToDeleteFile.getPath());
+				Bukkit.getConsoleSender().sendMessage("[Skywars] Could not save the world deletion list to file: " + worldsToDeleteFile.getPath());
 			}
 		}
 
 		// load stuff
 		if (!this.loadConfig()) {
-			this.sendMessage("Could not load configuration files! Disabling plugin.");
+			Bukkit.getConsoleSender().sendMessage("[Skywars] Could not load config files.");
 			this.setEnabled(false);
 			return;
 		}
@@ -348,7 +348,7 @@ public class Skywars extends JavaPlugin {
 		this.nmsHandler = new ReflectionNMS();
 		SchematicHandler.initializeReflection();
 
-		this.sendMessage("&b&l--- PLUGIN HOOKS ---");
+		org.bukkit.Bukkit.getConsoleSender().sendMessage(Messager.color(this.prefix) + " " + Messager.getMessage("PLUGIN_HOOKS_HEADER"));
 		if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
 			this.hologramController = new DecentHologramsController();
 		} else if (Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays")) {
@@ -359,33 +359,33 @@ public class Skywars extends JavaPlugin {
 		}
 		if (this.hologramController == null) {
 			this.hologramController = new DefaultHologramController();
-			this.sendMessage("&eHolograms: &cno supported holograms plugin found!");
+			org.bukkit.Bukkit.getConsoleSender().sendMessage(Messager.color(this.prefix) + " " + Messager.getMessage("HOLOGRAMS_NO_PLUGIN_FOUND"));
 		} else {
 			holograms = true;
-			this.sendMessage("&eHolograms: &a" + this.hologramController.getClass().getSimpleName());
+			org.bukkit.Bukkit.getConsoleSender().sendMessage(Messager.color(this.prefix) + " " + Messager.getMessage("HOLOGRAMS_PLUGIN_FOUND", this.hologramController.getClass().getSimpleName()));
 		}
 
 		economyEnabled = Skywars.get().getConfig().getBoolean("economy.enabled");
 		if (economyEnabled)
 			try {
 				if (this.setupEconomy()) {
-					this.sendMessage("&eEconomy (Vault): &a" + this.economyProvider.getPlugin().getName());
+					org.bukkit.Bukkit.getConsoleSender().sendMessage(Messager.color(this.prefix) + " " + Messager.getMessage("ECONOMY_PLUGIN_NAME", this.economyProvider.getPlugin().getName()));
 				}
 			} catch (final Exception e) {
-				this.sendMessage("&eEconomy (Vault): &ccould not hook.");
+				org.bukkit.Bukkit.getConsoleSender().sendMessage(Messager.color(this.prefix) + " " + Messager.getMessage("ECONOMY_COULD_NOT_HOOK"));
 				e.printStackTrace();
 			}
 		else
-			this.sendMessage("&eEconomy (Vault): &6disabled in config.");
+			org.bukkit.Bukkit.getConsoleSender().sendMessage(Messager.color(this.prefix) + " " + Messager.getMessage("ECONOMY_DISABLED_IN_CONFIG"));
 
 		// placeholder api
 		if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
 			placeholders = true;
 		}
-		this.sendMessage("&ePlaceholderAPI: " + (placeholders ? "&ahooked." : "&cnot found."));
+		org.bukkit.Bukkit.getConsoleSender().sendMessage(Messager.color(this.prefix) + " " + Messager.getMessage("PLACEHOLDER_API_STATUS", placeholders ? "hooked." : "not found."));
 
 		// done
-		this.sendMessage("&ahas been enabled: &bv%s", this.version);
+		org.bukkit.Bukkit.getConsoleSender().sendMessage(Messager.color(this.prefix) + " " + Messager.getMessage("PLUGIN_ENABLED_MESSAGE", this.version));
 
 		if (placeholders)
 			new SkywarsPlaceholderExpansion().register();
@@ -410,7 +410,7 @@ public class Skywars extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		if (this.updated) {
-			this.sendMessage("&6The plugin has been updated and disabled.");
+			org.bukkit.Bukkit.getConsoleSender().sendMessage(Messager.color(this.prefix) + " " + Messager.getMessage("PLUGIN_UPDATED_AND_DISABLED"));
 			return;
 		}
 
@@ -448,7 +448,7 @@ public class Skywars extends JavaPlugin {
 			config.save(file);
 		} catch (final IOException e) {
 			e.printStackTrace();
-			this.sendMessage("Could not write world list to file.");
+			org.bukkit.Bukkit.getConsoleSender().sendMessage(Messager.color(this.prefix) + " " + Messager.getMessage("COULD_NOT_WRITE_WORLD_LIST_TO_FILE"));
 		}
 		this.arenas.clear();
 	}

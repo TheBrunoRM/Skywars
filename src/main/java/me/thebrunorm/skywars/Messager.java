@@ -40,9 +40,21 @@ public class Messager {
 			msg = Skywars.langConfig.getString(name);
 		if (msg == null)
 			return name;
+		
+		// 首先替换 {0}, {1}, {2}... 格式
 		for (int i = 0; i < format.length; i++) {
 			msg = msg.replaceAll(String.format("\\{%s\\}", i), String.valueOf(format[i]));
 		}
+		
+		// 然后处理 %s 格式占位符
+		if (format.length > 0) {
+			try {
+				msg = String.format(msg, format);
+			} catch (final Exception e) {
+				// 如果格式化失败，回退到简单的替换
+			}
+		}
+		
 		return Messager.color(msg);
 	}
 

@@ -1,6 +1,7 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.managers;
 
+import me.thebrunorm.skywars.Messager;
 import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.SkywarsUtils;
 import me.thebrunorm.skywars.structures.Arena;
@@ -133,7 +134,7 @@ public class ArenaManager {
 		}
 
 		if (!unloaded)
-			Skywars.get().sendMessage("Could not unload world '%s' for map '%s'", world.getName(), map.getName());
+			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not unload world: " + world.getName() + " for map: " + map.getName());
 
 		try {
 			FileUtils.deleteDirectory(world.getWorldFolder());
@@ -141,7 +142,7 @@ public class ArenaManager {
 					map.getName());
 		} catch (final Exception e) {
 			e.printStackTrace();
-			Skywars.get().sendMessage("Could not delete world '%s' for map '%s'", world.getName(), map.getName());
+			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not delete world: " + world.getName() + " for map: " + map.getName());
 		}
 
 		return unloaded;

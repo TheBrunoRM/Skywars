@@ -46,7 +46,7 @@ public class SetupEvents implements Listener {
 			event.getItemDrop().remove();
 			Skywars.get().NMS().sendTitle(player, "&a&LDONE", "&eSaved spawns");
 			player.playSound(player.getLocation(), Sounds.LEVEL_UP.bukkitSound(), 3, 1);
-			player.sendMessage(Messager.color("&e&lYou exited &b&lspawn edit mode"));
+			player.sendMessage(Messager.getMessage("SETUP_EXIT_SPAWN_EDIT_MODE"));
 		}
 	}
 

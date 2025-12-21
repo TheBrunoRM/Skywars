@@ -53,7 +53,7 @@ public class GamesMenu implements Listener {
 			event.setCancelled(true);
 			final Arena arena = Skywars.get().getRandomJoinableArena();
 			if (arena == null) {
-				player.sendMessage("couldn't find joinable arena");
+				player.sendMessage(Messager.getMessage("COULD_NOT_FIND_JOINABLE_ARENA_NO_STATUS"));
 				return;
 			}
 			arena.joinPlayer(player);

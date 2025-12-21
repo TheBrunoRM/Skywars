@@ -56,18 +56,18 @@ public class SignManager implements Listener {
 		final String mapName = event.getLine(titleLine + 1);
 		final Player player = event.getPlayer();
 		if (mapName == null) {
-			player.sendMessage(Messager.color("&cYou need to specify the map name in the line below!"));
+			player.sendMessage(Messager.getMessage("SIGN_NEED_MAP_NAME"));
 			return;
 		}
 		final SkywarsMap map = Skywars.get().getMapManager().getMap(mapName);
 		if (map == null) {
-			player.sendMessage("&cCould not find a map with the name: &e" + mapName);
+			player.sendMessage(Messager.getMessage("SIGN_COULD_NOT_FIND_MAP_BY_NAME", mapName));
 			return;
 		}
 
 		final YamlConfiguration config = this.loadSignConfig();
 		if (config == null) {
-			player.sendMessage(Messager.color("&cCould not set up sign."));
+			player.sendMessage(Messager.getMessage("SIGN_COULD_NOT_SET_UP"));
 			return;
 		}
 		final List<String> signsConfig = config.getStringList("signs");
@@ -81,7 +81,7 @@ public class SignManager implements Listener {
 
 		this.signs.put(loc, map);
 
-		player.sendMessage(Messager.color("&eSuccessfully set up sign for map &b" + map.getName()));
+		player.sendMessage(Messager.getMessage("SIGN_SUCCESSFULLY_SET_UP", map.getName()));
 		event.setCancelled(true);
 		this.updateSign((Sign) event.getBlock().getState(), map);
 	}
@@ -91,7 +91,7 @@ public class SignManager implements Listener {
 			config.save(this.getSignConfigFile());
 		} catch (final IOException e) {
 			e.printStackTrace();
-			Skywars.get().sendMessage("&cCould not save signs!");
+			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] SignManager could not save signs.");
 		}
 	}
 
@@ -111,7 +111,7 @@ public class SignManager implements Listener {
 			final String worldName = splitted[0];
 			final World world = Bukkit.getWorld(worldName);
 			if (world == null) {
-				Skywars.get().sendMessage("&4Error loading signs.yml: &ccould not find world: &b" + worldName);
+				org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Sign loading error: world not found - " + worldName);
 				continue;
 			}
 			final Location loc = new Location( //
@@ -121,7 +121,7 @@ public class SignManager implements Listener {
 					Double.parseDouble(splitted[3]));
 			if (!(loc.getBlock().getState() instanceof Sign)) {
 				newSigns.remove(s);
-				Skywars.get().sendMessage("&4Error loading signs.yml: &csign is not sign: &b" + loc);
+				org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Sign loading error: not a sign - " + loc);
 				continue;
 			}
 
@@ -133,7 +133,7 @@ public class SignManager implements Listener {
 			final SkywarsMap map = Skywars.get().getMapManager().getMap(mapName);
 			if (map == null) {
 				newSigns.remove(s);
-				Skywars.get().sendMessage("&4Error loading signs.yml: &ccould not find map: &b" + mapName);
+				org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not find map: " + mapName);
 				continue;
 			}
 			this.signs.put(loc, map);
@@ -156,7 +156,7 @@ public class SignManager implements Listener {
 				signsFile.createNewFile();
 			} catch (final IOException e) {
 				e.printStackTrace();
-				Skywars.get().sendMessage("&cCould not create &bsigns.yml &cfile!");
+				org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] SignManager could not create signs file.");
 				return null;
 			}
 		}

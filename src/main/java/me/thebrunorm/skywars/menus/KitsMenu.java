@@ -98,7 +98,7 @@ public class KitsMenu implements Listener {
 		final String name = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
 		final Kit kit = Skywars.get().getKit(name);
 		if (kit == null) {
-			player.sendMessage(Messager.color("&cError: &7could not select kit"));
+			player.sendMessage(Messager.getMessage("ERROR_COULD_NOT_SELECT_KIT"));
 			return;
 		}
 		boolean selected = false;
@@ -114,14 +114,14 @@ public class KitsMenu implements Listener {
 				conf.set("ownedKits", list);
 				Skywars.get().savePlayerConfig(player, conf);
 				selected = true;
-				player.sendMessage(Messager.color("&bBought kit &e" + name));
+				player.sendMessage(Messager.getMessage("KIT_BOUGHT_FORMAT", name));
 			} else {
-				player.sendMessage(Messager.color("&cYou don't have this kit!"));
+				player.sendMessage(Messager.getMessage("YOU_DONT_HAVE_THIS_KIT"));
 			}
 		}
 		if (selected) {
 			Skywars.get().setPlayerKit(player, kit);
-			player.sendMessage(Messager.color("&aSelected kit &e" + name));
+			player.sendMessage(Messager.getMessage("KIT_SELECTED_FORMAT", name));
 		}
 		open(player);
 	}
