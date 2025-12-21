@@ -75,30 +75,6 @@ public class Arena {
 	public Arena(SkywarsMap map) {
 		this.map = map;
 		this.status = ArenaStatus.WAITING;
-		this.events.add(new SkywarsEvent(this, SkywarsEventType.REFILL, 60));
-		this.events.add(new SkywarsEvent(this, SkywarsEventType.REFILL, 60));
-		this.events.add(new SkywarsEvent(this, SkywarsEventType.ENDER_DRAGON, 60 * 3));
-	}
-
-	public SkywarsEvent getNextEvent() {
-		if (this.events.isEmpty()) return null;
-		return this.events.get(0);
-	}
-
-	public String getNextEventText() {
-		if (this.status == ArenaStatus.RESTARTING)
-			return Skywars.langConfig.getString("status.ended");
-		final SkywarsEvent event = this.getNextEvent();
-		if (event == null)
-			return MessageUtils.getMessage("events.noevent");
-		final int time = event.getTime();
-		final int minutes = time / 60;
-		final int seconds = time % 60;
-		final String timeString = String.format("%d:%02d", minutes, seconds);
-		return MessageUtils.color(Skywars.langConfig.getString("events.format")
-			.replaceAll("%name%", Skywars.langConfig.getString("events." + event.getType().name().toLowerCase()))
-			.replaceAll("%time%", timeString));
-
 	}
 
 	SkywarsTeam getNextFreeTeamOrCreateIfItDoesntExist() {
@@ -434,6 +410,8 @@ public class Arena {
 		return time >= first && time <= last;
 	}
 
+	private final ArenaEventManager eventManager = new ArenaEventManager(this);
+
 	public boolean startTimerAndSetStatus(ArenaStatus status) {
 		Skywars.get().sendDebugMessage("startTimer for %s: %s", this.getMap().getName(), status);
 		if (this.getStatus() == status)
@@ -503,12 +481,12 @@ public class Arena {
 				@Override
 				public void run() {
 
-					final SkywarsEvent event = Arena.this.getNextEvent();
+					final SkywarsEvent event = Arena.this.getEventManager().getNextEvent();
 
 					if (event != null) {
 						event.decreaseTime();
 						if (event.getTime() <= 0) {
-							Arena.this.events.remove(event);
+							Arena.this.getEventManager().skipEvent();
 							event.run();
 						}
 					}
@@ -542,11 +520,13 @@ public class Arena {
 
 	}
 
+	public ArenaEventManager getEventManager() {
+		return eventManager;
+	}
+
 	public boolean startGame() {
 		return this.startGame(null);
 	}
-
-	private final ArrayList<SkywarsEvent> events = new ArrayList<>();
 
 	private void applyGameSettings() {
 
@@ -1131,9 +1111,5 @@ public class Arena {
 			return;
 		this.chestVotes.put(player.getUniqueId(), chests);
 		this.broadcastMessage(MessageUtils.get("vote", player.getName(), MessageUtils.get("chests." + chests)));
-	}
-
-	public SkywarsEvent skipEvent() {
-		return events.remove(0);
 	}
 }

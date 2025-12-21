@@ -74,7 +74,7 @@ public class SkywarsUtils {
 
 			text = text.replaceAll(getVariableCode("map"), arena.getMap().getName())
 				.replaceAll(getVariableCode("arena"), arena.getMap().getName())
-				.replaceAll(getVariableCode("event"), arena.getNextEventText())
+				.replaceAll(getVariableCode("event"), arena.getEventManager().getNextEventText())
 				.replaceAll(getVariableCode("players"), Integer.toString(arena.getAlivePlayerCount()))
 				.replaceAll(getVariableCode("maxplayers"), Integer.toString(arena.getMap().getSpawns().size()))
 				.replaceAll(getVariableCode("seconds"), Integer.toString(arena.getCountdown()))

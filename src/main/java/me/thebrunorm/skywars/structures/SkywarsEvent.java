@@ -42,7 +42,7 @@ public class SkywarsEvent {
 	public void decreaseTime() {
 		this.setTime(this.getTime() - 1);
 		if (this.getType() == SkywarsEventType.REFILL)
-			this.arena.displayChestHolograms(this.arena.getNextEventText());
+			this.arena.displayChestHolograms(this.arena.getEventManager().getNextEventText());
 	}
 
 	public void run() {

@@ -15,6 +15,7 @@ import me.thebrunorm.skywars.menus.MapMenu;
 import me.thebrunorm.skywars.schematics.Schematic;
 import me.thebrunorm.skywars.schematics.SchematicHandler;
 import me.thebrunorm.skywars.structures.Arena;
+import me.thebrunorm.skywars.structures.ArenaEventManager;
 import me.thebrunorm.skywars.structures.SkywarsMap;
 import me.thebrunorm.skywars.structures.SkywarsUser;
 import org.bukkit.Bukkit;
@@ -192,7 +193,8 @@ public class MainCommand implements CommandExecutor {
 			else if (args[0].equalsIgnoreCase("skip")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
-				MessageUtils.send(sender, "&6Skipped &b%s&6. &eNext event: &a%s", arena.skipEvent(), arena.getNextEventText());
+				ArenaEventManager events = arena.getEventManager();
+				MessageUtils.send(sender, "&6Skipped &b%s&6. &eNext event: &a%s", events.skipEvent(), events.getNextEventText());
 			} else if (args[0].equalsIgnoreCase("testconfig")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
