@@ -1,11 +1,23 @@
+/* (C) 2021 Bruno */
 package me.thebrunorm.skywars;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
+import com.cryptomorin.xseries.XMaterial;
+import me.thebrunorm.skywars.commands.*;
+import me.thebrunorm.skywars.events.*;
+import me.thebrunorm.skywars.handlers.SkywarsActionbar;
+import me.thebrunorm.skywars.handlers.SkywarsScoreboard;
+import me.thebrunorm.skywars.handlers.SkywarsTablist;
+import me.thebrunorm.skywars.holograms.*;
+import me.thebrunorm.skywars.managers.ChestManager;
+import me.thebrunorm.skywars.managers.MapManager;
+import me.thebrunorm.skywars.managers.SignManager;
+import me.thebrunorm.skywars.menus.*;
+import me.thebrunorm.skywars.nms.ReflectionNMS;
+import me.thebrunorm.skywars.schematics.SchematicHandler;
+import me.thebrunorm.skywars.structures.Arena;
+import me.thebrunorm.skywars.structures.Kit;
+import me.thebrunorm.skywars.structures.SkywarsUser;
+import net.milkbowl.vault.economy.Economy;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -24,41 +36,11 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 
-import com.cryptomorin.xseries.XMaterial;
-
-import me.thebrunorm.skywars.commands.ForceStartCommand;
-import me.thebrunorm.skywars.commands.LeaveCommand;
-import me.thebrunorm.skywars.commands.MainCommand;
-import me.thebrunorm.skywars.commands.StartCommand;
-import me.thebrunorm.skywars.commands.WhereCommand;
-import me.thebrunorm.skywars.events.DisableWeather;
-import me.thebrunorm.skywars.events.Events;
-import me.thebrunorm.skywars.events.InteractEvent;
-import me.thebrunorm.skywars.events.MessageSound;
-import me.thebrunorm.skywars.events.ProjectileTrails;
-import me.thebrunorm.skywars.events.SetupEvents;
-import me.thebrunorm.skywars.handlers.SkywarsActionbar;
-import me.thebrunorm.skywars.handlers.SkywarsScoreboard;
-import me.thebrunorm.skywars.handlers.SkywarsTablist;
-import me.thebrunorm.skywars.holograms.DecentHologramsController;
-import me.thebrunorm.skywars.holograms.HologramController;
-import me.thebrunorm.skywars.holograms.HolographicDisplaysNewController;
-import me.thebrunorm.skywars.holograms.HolographicDisplaysOldController;
-import me.thebrunorm.skywars.managers.ChestManager;
-import me.thebrunorm.skywars.managers.MapManager;
-import me.thebrunorm.skywars.managers.SignManager;
-import me.thebrunorm.skywars.menus.ConfigMenu;
-import me.thebrunorm.skywars.menus.GameOptionsMenu;
-import me.thebrunorm.skywars.menus.GamesMenu;
-import me.thebrunorm.skywars.menus.KitsMenu;
-import me.thebrunorm.skywars.menus.MapMenu;
-import me.thebrunorm.skywars.menus.PlayerInventoryManager;
-import me.thebrunorm.skywars.nms.ReflectionNMS;
-import me.thebrunorm.skywars.schematics.SchematicHandler;
-import me.thebrunorm.skywars.structures.Arena;
-import me.thebrunorm.skywars.structures.Kit;
-import me.thebrunorm.skywars.structures.SkywarsUser;
-import net.milkbowl.vault.economy.Economy;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @SuppressWarnings("deprecation")
 public class Skywars extends JavaPlugin {
@@ -190,7 +172,7 @@ public class Skywars extends JavaPlugin {
 				final World world = Bukkit.getWorld(worldName);
 				if (world != null) {
 					for (final Player p : world.getPlayers())
-						SkywarsUtils.teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(p, true);
+						SkywarsUtils.teleportPlayerLobbyOrLastLocation(p, true);
 					Bukkit.unloadWorld(worldName, false);
 				}
 				final File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
@@ -247,21 +229,7 @@ public class Skywars extends JavaPlugin {
 				this.hologramController = new HolographicDisplaysNewController();
 		}
 		if (this.hologramController == null) {
-			this.hologramController = new HologramController() {
-				@Override
-				public void removeHologram(Object id) {
-				}
-
-				@Override
-				public String createHologram(Object id, Location location, String text) {
-					return null;
-				}
-
-				@Override
-				public boolean changeHologram(Object id, String text, int line) {
-					return false;
-				}
-			};
+			this.hologramController = new DefaultHologramController();
 			this.sendMessage("&eHolograms: &cno supported holograms plugin found!");
 		} else {
 			holograms = true;
@@ -325,7 +293,7 @@ public class Skywars extends JavaPlugin {
 			if (item == null)
 				return;
 			player.getInventory().removeItem(item);
-			SkywarsUtils.teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(player);
+			SkywarsUtils.teleportPlayerLobbyOrLastLocation(player);
 		});
 
 		this.sendDebugMessage("Stopping arenas...");
@@ -393,9 +361,9 @@ public class Skywars extends JavaPlugin {
 		if (config.getBoolean("debug.projectileTests")) {
 			pluginManager.registerEvents(new ProjectileTrails(), this);
 		}
-		final Listener[] listeners = { new InteractEvent(), new Events(), new GamesMenu(), new MapMenu(),
-				new KitsMenu(), new SetupEvents(), new ConfigMenu(), new GameOptionsMenu(),
-				new PlayerInventoryManager(), };
+		final Listener[] listeners = {new InteractEvent(), new Events(), new GamesMenu(), new MapMenu(),
+			new KitsMenu(), new SetupEvents(), new ConfigMenu(), new GameOptionsMenu(),
+			new PlayerInventoryManager(),};
 		for (final Listener listener : listeners) {
 			pluginManager.registerEvents(listener, this);
 		}
@@ -451,7 +419,7 @@ public class Skywars extends JavaPlugin {
 			final String name = file.getName().replaceFirst("[.][^.]+$", "");
 			final YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			ConfigurationUtils.createMissingKeys(config, ConfigurationUtils.getDefaultConfig("kits/default.yml"),
-					file.getPath());
+				file.getPath());
 
 			// create kit and set values from config
 			final Kit kit = new Kit(name);
@@ -485,37 +453,37 @@ public class Skywars extends JavaPlugin {
 
 	public static void createBigCase(Location location, XMaterial material) {
 		final int[][] blocks = {
-				// base
-				{ -1, -1, -1 }, { 0, -1, -1 }, { 1, -1, -1 }, { -1, -1, 0 }, { 0, -1, 0 }, { 1, -1, 0 }, { -1, -1, 1 },
-				{ 0, -1, 1 }, { 1, -1, 1 },
+			// base
+			{-1, -1, -1}, {0, -1, -1}, {1, -1, -1}, {-1, -1, 0}, {0, -1, 0}, {1, -1, 0}, {-1, -1, 1},
+			{0, -1, 1}, {1, -1, 1},
 
-				// top
-				{ -1, 3, -1 }, { 0, 3, -1 }, { 1, 3, -1 }, { -1, 3, 0 }, { 0, 3, 0 }, { 1, 3, 0 }, { -1, 3, 1 },
-				{ 0, 3, 1 }, { 1, 3, 1 },
+			// top
+			{-1, 3, -1}, {0, 3, -1}, {1, 3, -1}, {-1, 3, 0}, {0, 3, 0}, {1, 3, 0}, {-1, 3, 1},
+			{0, 3, 1}, {1, 3, 1},
 
-				// left wall
-				{ 2, 0, -1 }, { 2, 0, 0 }, { 2, 0, 1 }, { 2, 1, -1 }, { 2, 1, 0 }, { 2, 1, 1 }, { 2, 2, -1 },
-				{ 2, 2, 0 }, { 2, 2, 1 },
+			// left wall
+			{2, 0, -1}, {2, 0, 0}, {2, 0, 1}, {2, 1, -1}, {2, 1, 0}, {2, 1, 1}, {2, 2, -1},
+			{2, 2, 0}, {2, 2, 1},
 
-				// front wall
-				{ -1, 0, 2 }, { 0, 0, 2 }, { 1, 0, 2 }, { -1, 1, 2 }, { 0, 1, 2 }, { 1, 1, 2 }, { -1, 2, 2 },
-				{ 0, 2, 2 }, { 1, 2, 2 },
+			// front wall
+			{-1, 0, 2}, {0, 0, 2}, {1, 0, 2}, {-1, 1, 2}, {0, 1, 2}, {1, 1, 2}, {-1, 2, 2},
+			{0, 2, 2}, {1, 2, 2},
 
-				// right wall
-				{ -2, 0, -1 }, { -2, 0, 0 }, { -2, 0, 1 }, { -2, 1, -1 }, { -2, 1, 0 }, { -2, 1, 1 }, { -2, 2, -1 },
-				{ -2, 2, 0 }, { -2, 2, 1 },
+			// right wall
+			{-2, 0, -1}, {-2, 0, 0}, {-2, 0, 1}, {-2, 1, -1}, {-2, 1, 0}, {-2, 1, 1}, {-2, 2, -1},
+			{-2, 2, 0}, {-2, 2, 1},
 
-				// back wall
-				{ -1, 0, -2 }, { 0, 0, -2 }, { 1, 0, -2 }, { -1, 1, -2 }, { 0, 1, -2 }, { 1, 1, -2 }, { -1, 2, -2 },
-				{ 0, 2, -2 }, { 1, 2, -2 }, };
-		final int[][] airBlocks = { { -1, 0, -1 }, { 0, 0, -1 }, { 1, 0, -1 }, { -1, 0, 0 }, { 0, 0, 0 }, { 1, 0, 0 },
-				{ -1, 0, 1 }, { 0, 0, 1 }, { 1, 0, 1 },
+			// back wall
+			{-1, 0, -2}, {0, 0, -2}, {1, 0, -2}, {-1, 1, -2}, {0, 1, -2}, {1, 1, -2}, {-1, 2, -2},
+			{0, 2, -2}, {1, 2, -2},};
+		final int[][] airBlocks = {{-1, 0, -1}, {0, 0, -1}, {1, 0, -1}, {-1, 0, 0}, {0, 0, 0}, {1, 0, 0},
+			{-1, 0, 1}, {0, 0, 1}, {1, 0, 1},
 
-				{ -1, 1, -1 }, { 0, 1, -1 }, { 1, 1, -1 }, { -1, 1, 0 }, { 0, 1, 0 }, { 1, 1, 0 }, { -1, 1, 1 },
-				{ 0, 1, 1 }, { 1, 1, 1 },
+			{-1, 1, -1}, {0, 1, -1}, {1, 1, -1}, {-1, 1, 0}, {0, 1, 0}, {1, 1, 0}, {-1, 1, 1},
+			{0, 1, 1}, {1, 1, 1},
 
-				{ -1, 2, -1 }, { 0, 2, -1 }, { 1, 2, -1 }, { -1, 2, 0 }, { 0, 2, 0 }, { 1, 2, 0 }, { -1, 2, 1 },
-				{ 0, 2, 1 }, { 1, 2, 1 }, };
+			{-1, 2, -1}, {0, 2, -1}, {1, 2, -1}, {-1, 2, 0}, {0, 2, 0}, {1, 2, 0}, {-1, 2, 1},
+			{0, 2, 1}, {1, 2, 1},};
 		for (final int[] relative : airBlocks) {
 			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
 			block.setType(XMaterial.AIR.parseMaterial());
@@ -539,19 +507,19 @@ public class Skywars extends JavaPlugin {
 			return;
 		}
 		final int[][] blocks = {
-				// first layer
-				{ -1, 0, 0 }, { 1, 0, 0 }, { 0, 0, -1 }, { 0, 0, 1 },
-				// second layer
-				{ -1, 1, 0 }, { 1, 1, 0 }, { 0, 1, -1 }, { 0, 1, 1 },
-				// third layer
-				{ -1, 2, 0 }, { 1, 2, 0 }, { 0, 2, -1 }, { 0, 2, 1 },
-				// base and top
-				{ 0, -1, 0 }, { 0, 3, 0 },
-				// base joints
-				{ -1, -1, 0 }, { 1, -1, 0 }, { 0, -1, -1 }, { 0, -1, 1 },
-				// top joints
-				{ -1, 3, 0 }, { 1, 3, 0 }, { 0, 3, -1 }, { 0, 3, 1 }, };
-		final int[][] airBlocks = { { 0, 0, 0 }, { 0, 1, 0 }, { 0, 2, 0 } };
+			// first layer
+			{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1},
+			// second layer
+			{-1, 1, 0}, {1, 1, 0}, {0, 1, -1}, {0, 1, 1},
+			// third layer
+			{-1, 2, 0}, {1, 2, 0}, {0, 2, -1}, {0, 2, 1},
+			// base and top
+			{0, -1, 0}, {0, 3, 0},
+			// base joints
+			{-1, -1, 0}, {1, -1, 0}, {0, -1, -1}, {0, -1, 1},
+			// top joints
+			{-1, 3, 0}, {1, 3, 0}, {0, 3, -1}, {0, 3, 1},};
+		final int[][] airBlocks = {{0, 0, 0}, {0, 1, 0}, {0, 2, 0}};
 		for (final int[] relative : airBlocks) {
 			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
 			block.setType(XMaterial.AIR.parseMaterial());
@@ -637,7 +605,7 @@ public class Skywars extends JavaPlugin {
 			final File file = this.getPlayerConfigFile(player);
 			config.save(file);
 			ConfigurationUtils.createMissingKeys(config, ConfigurationUtils.getDefaultConfig("players/default.yml"),
-					file.getPath());
+				file.getPath());
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
@@ -648,7 +616,7 @@ public class Skywars extends JavaPlugin {
 	public Kit getKit(String name) {
 		for (int i = 0; i < this.kits.size(); i++) {
 			if (this.kits.get(i).getName().equalsIgnoreCase(name)
-					|| this.kits.get(i).getDisplayName().equalsIgnoreCase(name)) {
+				|| this.kits.get(i).getDisplayName().equalsIgnoreCase(name)) {
 				return this.kits.get(i);
 			}
 		}
@@ -763,7 +731,7 @@ public class Skywars extends JavaPlugin {
 
 		final String lang = Skywars.get().getConfig().getString("locale");
 		langConfig = ConfigurationUtils.loadConfiguration("lang/" + lang + ".yml", "lang/" + lang + ".yml",
-				"lang/en.yml");
+			"lang/en.yml");
 
 		this.sendDebugMessage("Loaded locale: " + lang + " - " + langConfig.getString("language_name"));
 

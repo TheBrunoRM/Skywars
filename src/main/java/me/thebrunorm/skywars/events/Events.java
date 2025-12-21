@@ -28,6 +28,23 @@ import me.thebrunorm.skywars.ArenaStatus;
 import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.structures.Arena;
 import me.thebrunorm.skywars.structures.SkywarsUser;
+/* (C) 2021 Bruno */
+package me.thebrunorm.skywars.events;
+
+import me.thebrunorm.skywars.ArenaStatus;
+import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.structures.Arena;
+import me.thebrunorm.skywars.structures.SkywarsUser;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.entity.*;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.*;
 
 public class Events implements Listener {
 
@@ -50,6 +67,7 @@ public class Events implements Listener {
 
 		if (!swp.isSpectator())
 			arena.makeSpectator(swp);
+		else arena.teleportPlayerToOwnSpawnAsSpectator(swp);
 	}
 
 	@EventHandler
@@ -70,18 +88,22 @@ public class Events implements Listener {
 		if (arena == null)
 			return;
 		final SkywarsUser swPlayer = arena.getUser(player);
-		if (swPlayer.isSpectator())
+
+		if (swPlayer.isSpectator()) {
 			event.setCancelled(true);
+			if (event.getCause() == DamageCause.VOID)
+				//arena.goBackToCenter(player);
+				arena.teleportPlayerToOwnSpawnAsSpectator(swPlayer);
+			return;
+		}
+
 		if (arena.getStatus() != ArenaStatus.PLAYING || arena.isInvencibility()) {
 			event.setCancelled(true);
-		} else if (arena.getStatus() == ArenaStatus.PLAYING) {
-			if (swPlayer.isSpectator() && event.getCause() == DamageCause.VOID) {
-				arena.goBackToCenter(player);
-			} else if (event.getCause() == DamageCause.VOID) {
-				event.setCancelled(true);
-				arena.makeSpectator(swPlayer);
-			}
+		} else if (arena.getStatus() == ArenaStatus.PLAYING && event.getCause() == DamageCause.VOID) {
+			event.setCancelled(true);
+			arena.makeSpectator(swPlayer);
 		}
+
 		if (player.getHealth() - event.getDamage() <= 0) {
 			// event.setCancelled(true);
 			// instead of cancelling the event,
@@ -195,7 +217,7 @@ public class Events implements Listener {
 		if (!(block.getState() instanceof Chest))
 			return;
 		final Chest chest = (Chest) block.getState();
-		if (!arena.getChests().contains(chest))
+		if (!arena.getActiveChests().contains(chest))
 			return;
 		arena.removeChest(chest);
 	}
@@ -221,7 +243,7 @@ public class Events implements Listener {
 		if (!(block.getState() instanceof Chest))
 			return;
 		final Chest chest = (Chest) block.getState();
-		if (!arena.getChests().contains(chest))
+		if (!arena.getActiveChests().contains(chest))
 			return;
 
 		arena.addChestHologram(chest);
@@ -282,13 +304,12 @@ public class Events implements Listener {
 		if (arena == null)
 			return;
 		final SkywarsUser swp = arena.getUser(player);
-		if (swp == null)
-			return;
-		if (!swp.isSpectator())
+		if (swp == null || !swp.isSpectator())
 			return;
 
-		// TODO: do something since this cant be cancelled
-		// event.setCancelled(true);
+		// this event can't be cancelled
+		// TODO: check if this actually works
+		player.setTotalExperience(player.getTotalExperience());
 	}
 
 	// prevent spectators from clicking their inventory
