@@ -82,7 +82,7 @@
             <version>3.1.0</version>
             
             <configuration>
-                <ratchetFrom>origin/main</ratchetFrom>
+                <ratchetFrom>origin/master</ratchetFrom>
 
                 <formats>
                     <format>
