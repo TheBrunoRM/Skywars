@@ -48,10 +48,10 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-resources-plugin</artifactId>
             <version>3.3.1</version>
-            
+
             <configuration>
-                <propertiesEncoding>ISO-8859-1</propertiesEncoding>
-                <encoding>ISO-8859-1</encoding>
+                <propertiesEncoding>UTF-8</propertiesEncoding>
+                <encoding>UTF-8</encoding>
                 <nonFilteredFileExtensions>
                     <nonFilteredFileExtension>schematic</nonFilteredFileExtension>
                 </nonFilteredFileExtensions>
@@ -80,7 +80,7 @@
             <groupId>com.diffplug.spotless</groupId>
             <artifactId>spotless-maven-plugin</artifactId>
             <version>3.1.0</version>
-            
+
             <configuration>
                 <ratchetFrom>origin/master</ratchetFrom>
 
