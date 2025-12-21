@@ -1133,4 +1133,7 @@ public class Arena {
 		this.broadcastMessage(MessageUtils.get("vote", player.getName(), MessageUtils.get("chests." + chests)));
 	}
 
+	public SkywarsEvent skipEvent() {
+		return events.remove(0);
+	}
 }

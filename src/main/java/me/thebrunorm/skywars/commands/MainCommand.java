@@ -189,7 +189,11 @@ public class MainCommand implements CommandExecutor {
 			// return true;
 			// TEST COMMANDS
 
-			else if (args[0].equalsIgnoreCase("testconfig")) {
+			else if (args[0].equalsIgnoreCase("skip")) {
+				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
+					return true;
+				MessageUtils.send(sender, "&6Skipped &b%s&6. &eNext event: &a%s", arena.skipEvent(), arena.getNextEventText());
+			} else if (args[0].equalsIgnoreCase("testconfig")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
 			} else if (args[0].equalsIgnoreCase("importworld")) {
