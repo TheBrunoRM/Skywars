@@ -51,6 +51,7 @@ public class Events implements Listener {
 
 		if (!swp.isSpectator())
 			arena.makeSpectator(swp);
+		else arena.teleportPlayerToOwnSpawnAsSpectator(swp);
 	}
 
 	@EventHandler
@@ -71,18 +72,22 @@ public class Events implements Listener {
 		if (arena == null)
 			return;
 		final SkywarsUser swPlayer = arena.getUser(player);
-		if (swPlayer.isSpectator())
+
+		if (swPlayer.isSpectator()) {
 			event.setCancelled(true);
+			if (event.getCause() == DamageCause.VOID)
+				//arena.goBackToCenter(player);
+				arena.teleportPlayerToOwnSpawnAsSpectator(swPlayer);
+			return;
+		}
+
 		if (arena.getStatus() != ArenaStatus.PLAYING || arena.isInvencibility()) {
 			event.setCancelled(true);
-		} else if (arena.getStatus() == ArenaStatus.PLAYING) {
-			if (swPlayer.isSpectator() && event.getCause() == DamageCause.VOID) {
-				arena.goBackToCenter(player);
-			} else if (event.getCause() == DamageCause.VOID) {
-				event.setCancelled(true);
-				arena.makeSpectator(swPlayer);
-			}
+		} else if (arena.getStatus() == ArenaStatus.PLAYING && event.getCause() == DamageCause.VOID) {
+			event.setCancelled(true);
+			arena.makeSpectator(swPlayer);
 		}
+
 		if (player.getHealth() - event.getDamage() <= 0) {
 			// event.setCancelled(true);
 			// instead of cancelling the event,

@@ -195,15 +195,15 @@ public class Arena {
 		this.makeSpectator(p, null, cause);
 	}
 
-	public void makeSpectator(SkywarsUser p, Player killer, DamageCause cause) {
+	public void makeSpectator(SkywarsUser user, Player killer, DamageCause cause) {
 		if (!this.started())
 			return;
 
-		if (p.isSpectator())
+		if (user.isSpectator())
 			return;
 
-		p.setSpectator(true);
-		final Player player = p.getPlayer();
+		user.setSpectator(true);
+		final Player player = user.getPlayer();
 
 		if (killer != null) {
 			final SkywarsUser killerPlayer = this.getUser(killer);
@@ -242,14 +242,14 @@ public class Arena {
 			// send death message to players
 			for (final SkywarsUser players : this.getUsers()) {
 				// TODO: add more death messages
-				players.getPlayer().sendMessage(this.getDeathMessage(p, killer, cause));
+				players.getPlayer().sendMessage(this.getDeathMessage(user, killer, cause));
 			}
 
-		this.spectator(player, this.getVectorInArena(this.getSpawn(p.teamNumber)));
+		this.spectator(user);
 
-		this.removePlayer(p);
+		this.removePlayer(user);
 
-		if (this.getWinner() != p)
+		if (this.getWinner() != user)
 			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
 				@Override
 				public void run() {
@@ -259,12 +259,20 @@ public class Arena {
 			}, 20);
 	}
 
-	private void spectator(Player player, Location location) {
-		// TODO: make customizable spectator mode
-
-		SkywarsUtils.clearPlayer(player, true);
+	public void teleportPlayerToOwnSpawnAsSpectator(SkywarsUser user) {
+		Player player = user.getPlayer();
 		player.setAllowFlight(true);
 		player.setFlying(true);
+		player.teleport(SkywarsUtils.getCenteredLocation(this.getVectorInArena(this.getSpawn(user.teamNumber))));
+		player.setVelocity(new Vector(0, 1f, 0));
+	}
+
+	private void spectator(SkywarsUser user) {
+		// TODO: make customizable spectator mode
+
+		Player player = user.getPlayer();
+
+		SkywarsUtils.clearPlayer(player, true);
 		player.setGameMode(GameMode.ADVENTURE);
 
 		for (final Player players : Bukkit.getOnlinePlayers()) {
@@ -278,9 +286,7 @@ public class Arena {
 
 		// give spectator items (player tracker, spectator settings, leave item)
 		SkywarsUtils.setPlayerInventory(player, "spectator");
-
-		player.teleport(SkywarsUtils.getCenteredLocation(location));
-		player.setVelocity(new Vector(0, 1f, 0));
+		teleportPlayerToOwnSpawnAsSpectator(user);
 	}
 
 	private String getDeathMessage(SkywarsUser p, Player killer, DamageCause cause) {
