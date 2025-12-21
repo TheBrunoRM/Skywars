@@ -95,7 +95,7 @@ started_game: "&a已开始游戏!"
 
 FORCED_START: "&b&l{0} &e&l强制开始了游戏!"
 refill:
-  title: ""
+  title: "补给"
   subtitle: "&e箱子已补给!"
   message: "&e箱子已补给!"
 GAME_STARTING: "&e游戏将在 &6{0} &e秒后开始!"

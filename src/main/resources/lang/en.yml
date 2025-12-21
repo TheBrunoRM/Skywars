@@ -105,7 +105,7 @@ started_game: "&aStarted the game!"
 FORCED_START: "&b&l{0} &e&lforced the game to start!"
 
 refill:
-  title: ""
+  title: "refill"
   subtitle: "&eChests have been refilled!"
   message: "&eChests have been refilled!"
 

@@ -865,7 +865,7 @@ public class Arena {
 
 		final World world = this.getWorld();
 		if (world == null) {
-			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not get world for map: " + this.getMap().getName());
+			org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Could not get world for map: " + this.getMap().getName());
 			return list;
 		}
 
@@ -963,11 +963,11 @@ public class Arena {
 					Skywars.get().sendDebugMessage("&cCould not delete uid.dat from %s", newParent.getName());
 		} catch (final Exception e) {
 			e.printStackTrace();
-			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not create world for map: " + this.map.getName());
+			org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Could not create world for map: " + this.map.getName());
 			return null;
 		}
 		if (!bukkitWorldFolder.isDirectory()) {
-			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not load world for map: " + this.map.getName());
+			org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Could not load world for map: " + this.map.getName());
 			return null;
 		}
 		final World world = Bukkit.createWorld(new WorldCreator(worldName));
@@ -975,16 +975,14 @@ public class Arena {
 		return world;
 	}
 
-	public ArrayList<BlockState> getAllBlockStatesInMap(Material mat) {
-		final ArrayList<BlockState> list = new ArrayList<>();
-
-		final World world = this.getWorld();
-		if (world == null) {
-			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not get world for map: " + this.getMap().getName());
-			return list;
-		}
-
-		for (final Chunk chunk : this.getAllChunksInMap()) {
+		public ArrayList<BlockState> getAllBlockStatesInMap(Material mat) {
+				final ArrayList<BlockState> list = new ArrayList<>();
+		
+				final World world = this.getWorld();
+				if (world == null) {
+					org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Could not get world for map: " + this.getMap().getName());
+					return list;
+				}		for (final Chunk chunk : this.getAllChunksInMap()) {
 			for (final BlockState state : chunk.getTileEntities()) {
 				if (state.getType() != mat)
 					continue;
@@ -1015,16 +1013,14 @@ public class Arena {
 		return this.activeChests;
 	}
 
-	public ArrayList<Block> getAllBlocksInMap(Material mat) {
-		final ArrayList<Block> list = new ArrayList<>();
-
-		final World world = this.getWorld();
-		if (world == null) {
-			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not get world for map: " + this.getMap().getName());
-			return list;
-		}
-
-		Skywars.get().sendDebugMessage("chunks gotten: " + this.getAllChunksInMap().size());
+		public ArrayList<Block> getAllBlocksInMap(Material mat) {
+			final ArrayList<Block> list = new ArrayList<>();
+	
+					final World world = this.getWorld();
+					if (world == null) {
+						org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Could not get world for map: " + this.getMap().getName());
+						return list;
+					}		Skywars.get().sendDebugMessage("chunks gotten: " + this.getAllChunksInMap().size());
 
 		for (final Chunk chunk : this.getAllChunksInMap()) {
 			for (int x = 0; x < 15; x++) {

@@ -64,7 +64,7 @@ public class ConfigurationUtils {
 
 			for (final String key : section.getKeys(true)) {
 				if (conf.get(key) == null) {
-					org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Configuration key '" + key + "' is missing from " + fileName + ", using default value.");
+					org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Configuration key '" + key + "' is missing from " + fileName + ", using default value.");
 					modified = true;
 
 					// setting the key in the configuration
@@ -74,7 +74,7 @@ public class ConfigurationUtils {
 				}
 			}
 			if (modified) {
-				org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Some configuration values were missing and default values have been applied.");
+				org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Some configuration values were missing and default values have been applied.");
 			}
 		} catch (final Exception e) {
 			e.printStackTrace();
@@ -83,12 +83,10 @@ public class ConfigurationUtils {
 	}
 
 	static YamlConfiguration getDefaultConfig(String defaultFileName) {
-		final InputStream stream = Skywars.get().getResource(defaultFileName);
-		if (stream == null) {
-			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not get resource: " + defaultFileName);
-			return null;
-		}
-		final Reader defaultConfigStream = new InputStreamReader(stream, StandardCharsets.UTF_8);
+				final InputStream stream = Skywars.get().getResource(defaultFileName);
+				if (stream == null) {
+					org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Could not get resource: " + defaultFileName);			return null;
+				}		final Reader defaultConfigStream = new InputStreamReader(stream, StandardCharsets.UTF_8);
 		return YamlConfiguration.loadConfiguration(defaultConfigStream);
 	}
 
@@ -102,7 +100,7 @@ public class ConfigurationUtils {
 				file.createNewFile();
 			final InputStream stream = Skywars.get().getResource(defaultFileName);
 			if (stream == null) {
-				org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not get resource: " + defaultFileName);
+				org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Could not get resource: " + defaultFileName);
 				return;
 			}
 			copyInputStreamToFile(stream, file);

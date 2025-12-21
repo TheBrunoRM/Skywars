@@ -84,7 +84,7 @@ public class SchematicHandler {
 	public static HashMap<String, String> materials = new HashMap<>();
 
 	public static void loadMaterials() {
-		org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Loading materials...");
+		org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Loading materials...");
 		final InputStream stream = Skywars.get().getResource("items.tsv");
 		final Scanner myReader = new Scanner(stream);
 		while (myReader.hasNextLine()) {
@@ -282,10 +282,10 @@ public class SchematicHandler {
 									state.update();
 								}
 							} else {
-								org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Null material for ID: " + name + " (" + id + ":" + blockData[index] + ")");
+								org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Null material for ID: " + name + " (" + id + ":" + blockData[index] + ")");
 							}
 						} else {
-							org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Null name for ID: " + id + ":" + blockData[index]);
+							org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Null name for ID: " + id + ":" + blockData[index]);
 						}
 					} else {
 						// 1.8 - 1.12 method for setting blocks
@@ -352,7 +352,7 @@ public class SchematicHandler {
 	@SuppressWarnings("deprecation")
 	public static void pasteSchematic(Location loc, Schematic schematic) {
 		if (XMaterial.isNewVersion()) {
-			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Can't paste schematic on this version.");
+			org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Can't paste schematic on this version.");
 			return;
 		}
 

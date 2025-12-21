@@ -52,6 +52,10 @@ public class Skywars extends JavaPlugin {
 	public List<String> authors = this.pdf.getAuthors();
 	private final String prefix = Messager.color("&6[&e%s&6]&e", this.name);
 	private final String debugPrefix = Messager.color("&7[&c%s&7]&e", this.name);
+	
+	public String getPrefix() {
+		return this.prefix;
+	}
 	public static String kitsPath;
 	public static String worldsPath;
 	public static String mapsPath;
@@ -291,7 +295,7 @@ public class Skywars extends JavaPlugin {
 		String packageName = this.getServer().getClass().getPackage().getName();
 		this.serverPackageVersion = packageName.substring(packageName.lastIndexOf('.') + 1);
 
-		Bukkit.getConsoleSender().sendMessage("[Skywars] Server version: " + packageName + " (" + this.serverPackageVersion + ")");
+		Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Server version: " + packageName + " (" + this.serverPackageVersion + ")");
 
 		final File worldsToDeleteFile = new File(this.getDataFolder(), "delete_worlds.yml");
 		if (worldsToDeleteFile.exists()) {
@@ -310,7 +314,7 @@ public class Skywars extends JavaPlugin {
 						FileUtils.deleteDirectory(worldFolder);
 					} catch (final IOException e) {
 						e.printStackTrace();
-						Bukkit.getConsoleSender().sendMessage("[Skywars] Could not delete world folder: " + worldFolder.getPath());
+						Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Could not delete world folder: " + worldFolder.getPath());
 					}
 				list.remove(worldName);
 			}
@@ -319,13 +323,13 @@ public class Skywars extends JavaPlugin {
 				deleteWorldsConfig.save(worldsToDeleteFile);
 			} catch (final IOException e) {
 				e.printStackTrace();
-				Bukkit.getConsoleSender().sendMessage("[Skywars] Could not save the world deletion list to file: " + worldsToDeleteFile.getPath());
+				Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Could not save the world deletion list to file: " + worldsToDeleteFile.getPath());
 			}
 		}
 
 		// load stuff
 		if (!this.loadConfig()) {
-			Bukkit.getConsoleSender().sendMessage("[Skywars] Could not load config files.");
+			Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Could not load config files.");
 			this.setEnabled(false);
 			return;
 		}
