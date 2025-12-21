@@ -15,10 +15,10 @@ public class InventoryUtils {
 			String... loreLines) {
 		try {
 			final ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(Messager.color(displayName));
+			meta.setDisplayName(MessageUtils.color(displayName));
 			final List<String> lore = new ArrayList<>();
 			for (final String line : loreLines)
-				lore.add(Messager.color("&e" + line));
+				lore.add(MessageUtils.color("&e" + line));
 			meta.setLore(lore);
 			item.setItemMeta(meta);
 			inventory.setItem(slot, item);

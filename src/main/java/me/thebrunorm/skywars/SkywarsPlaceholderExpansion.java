@@ -1,13 +1,12 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars;
 
+import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import me.thebrunorm.skywars.structures.Kit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import me.thebrunorm.skywars.structures.Kit;
-import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 
 public class SkywarsPlaceholderExpansion extends PlaceholderExpansion {
 
@@ -40,12 +39,12 @@ public class SkywarsPlaceholderExpansion extends PlaceholderExpansion {
 		case "game":
 		case "match":
 			if (player == null)
-				return Messager.get("not_online");
+				return MessageUtils.get("not_online");
 			return Skywars.get().getPlayerArena(player).getMap().getName();
 		case "kills":
 		case "game_kills":
 			if (player == null)
-				return Messager.get("not_online");
+				return MessageUtils.get("not_online");
 			return String.valueOf(Skywars.get().getSkywarsUser(player).getKills());
 
 		// solo
@@ -86,10 +85,10 @@ public class SkywarsPlaceholderExpansion extends PlaceholderExpansion {
 		case "kit":
 			final Kit kit = Skywars.get().getPlayerKit(offline);
 			if (kit == null)
-				return Messager.get("none");
+				return MessageUtils.get("none");
 			return String.valueOf(kit.getDisplayName());
 		case "case":
-			return config.getString("case", Messager.get("none"));
+			return config.getString("case", MessageUtils.get("none"));
 		default:
 			return null;
 		}

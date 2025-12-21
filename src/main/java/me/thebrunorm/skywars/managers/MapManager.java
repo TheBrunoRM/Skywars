@@ -2,7 +2,7 @@
 package me.thebrunorm.skywars.managers;
 
 import me.thebrunorm.skywars.ConfigurationUtils;
-import me.thebrunorm.skywars.Messager;
+import me.thebrunorm.skywars.MessageUtils;
 import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.structures.SkywarsMap;
 import org.bukkit.Difficulty;
@@ -172,7 +172,7 @@ public class MapManager {
 		}
 
 		if (folder.listFiles().length <= 0) {
-			Skywars.get().sendDebugMessage(Messager.color("&eSetting up default map."));
+			Skywars.get().sendDebugMessage(MessageUtils.color("&eSetting up default map."));
 			ConfigurationUtils.copyDefaultContentsToFile("maps/MiniTrees.yml",
 					new File(Skywars.mapsPath, "MiniTrees.yml"));
 		}
@@ -182,7 +182,7 @@ public class MapManager {
 		if (!schematics.exists())
 			schematics.mkdirs();
 		if (schematics.listFiles().length <= 0) {
-			Skywars.get().sendDebugMessage(Messager.color("&eSetting up default schematic."));
+			Skywars.get().sendDebugMessage(MessageUtils.color("&eSetting up default schematic."));
 			ConfigurationUtils.copyDefaultContentsToFile("schematics/mini_trees.schematic",
 					new File(Skywars.schematicsPath, "mini_trees.schematic"));
 		}

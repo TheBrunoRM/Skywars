@@ -106,24 +106,24 @@ public class SkywarsUtils {
 		if (config.getBoolean("items.show_context")) {
 			final String context = config.getString("items.context");
 			if (context != null) {
-				name = name + " " + Messager.color(context);
+				name = name + " " + MessageUtils.color(context);
 			}
 		}
-		return Messager.color(name);
+		return MessageUtils.color(name);
 	}
 
 	public static String getStatus(Arena arena) {
 		switch (arena.getStatus()) {
 			case WAITING:
-				return Messager.get("status.waiting");
+				return MessageUtils.get("status.waiting");
 			case STARTING:
-				return Messager.get("status.starting");
+				return MessageUtils.get("status.starting");
 			case PLAYING:
-				return Messager.get("status.playing");
+				return MessageUtils.get("status.playing");
 			case RESTARTING:
-				return Messager.get("status.restarting");
+				return MessageUtils.get("status.restarting");
 			default:
-				return Messager.get("status.unknown");
+				return MessageUtils.get("status.unknown");
 		}
 	}
 
@@ -145,7 +145,7 @@ public class SkywarsUtils {
 				player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
 				return true;
 			} else {
-				player.sendMessage(Messager.get("could_not_send_back"));
+				player.sendMessage(MessageUtils.get("could_not_send_back"));
 				return false;
 			}
 		}
@@ -246,7 +246,7 @@ public class SkywarsUtils {
 		if (arena.getAlivePlayerCount() >= spawns) {
 			if (player != null)
 				player.sendMessage(
-					Messager.color("this arena is full! (%s/%s players)", arena.getAlivePlayerCount(), spawns));
+					MessageUtils.color("this arena is full! (%s/%s players)", arena.getAlivePlayerCount(), spawns));
 			return JoinProblem.ARENA_IS_FULL;
 		}
 		return null;
@@ -324,10 +324,10 @@ public class SkywarsUtils {
 		if (Skywars.langConfig.getBoolean("items.show_context")) {
 			final String context = Skywars.langConfig.getString("items.context");
 			if (context != null) {
-				configName = configName + " " + Messager.color(context);
+				configName = configName + " " + MessageUtils.color(context);
 			}
 		}
-		return Messager.color(configName);
+		return MessageUtils.color(configName);
 	}
 
 	public static void setPlayerInventory(Player player, String category) {
@@ -375,10 +375,10 @@ public class SkywarsUtils {
 				final ItemStack item = new ItemStack(material);
 				final ItemMeta itemMeta = item.getItemMeta();
 				final String configName = getItemNameFromConfig(itemType);
-				itemMeta.setDisplayName(Messager.color(configName));
+				itemMeta.setDisplayName(MessageUtils.color(configName));
 				final List<String> itemLore = new ArrayList<>();
 				for (final String loreLine : Skywars.langConfig.getStringList("items." + itemType.name() + ".description")) {
-					itemLore.add(Messager.color(loreLine));
+					itemLore.add(MessageUtils.color(loreLine));
 				}
 				itemMeta.setLore(itemLore);
 				item.setItemMeta(itemMeta);

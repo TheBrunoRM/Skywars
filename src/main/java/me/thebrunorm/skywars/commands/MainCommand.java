@@ -2,7 +2,7 @@
 package me.thebrunorm.skywars.commands;
 
 import com.cryptomorin.xseries.XMaterial;
-import me.thebrunorm.skywars.Messager;
+import me.thebrunorm.skywars.MessageUtils;
 import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.SkywarsUtils;
 import me.thebrunorm.skywars.handlers.SkywarsScoreboard;
@@ -61,7 +61,7 @@ public class MainCommand implements CommandExecutor {
 	 */
 
 	String[] helpLines = {
-			Messager.color("&a&lCommand list - &b%s &a%s &eby &b%s", Skywars.get().name, Skywars.get().version,
+		MessageUtils.color("&a&lCommand list - &b%s &a%s &eby &b%s", Skywars.get().name, Skywars.get().version,
 					String.join(", ", Skywars.get().authors)),
 			"&b/skywars setmainlobby &e- sets the main lobby", "&b/skywars lobby &e- teleports you to the main lobby",
 			"&b/skywars create <arena> &e- creates an arena", "&b/skywars delete <arena> &e- deletes an arena",
@@ -83,7 +83,7 @@ public class MainCommand implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String cmd, String[] args) {
 		try {
 			if (args.length <= 0) {
-				sender.sendMessage(Messager.color("&a&lSkyWars &e- /sw help"));
+				sender.sendMessage(MessageUtils.color("&a&lSkyWars &e- /sw help"));
 				return true;
 			}
 			Player player = null;
@@ -103,7 +103,7 @@ public class MainCommand implements CommandExecutor {
 					return true;
 				if (CommandsUtils.hasPermission(player, "skywars.setmainlobby")) {
 					Skywars.get().setLobby(player.getLocation());
-					player.sendMessage(Messager.getMessage("MAIN_LOBBY_SET"));
+					player.sendMessage(MessageUtils.getMessage("MAIN_LOBBY_SET"));
 				}
 			} else if (args[0].equalsIgnoreCase("lobby")) {
 				if (CommandsUtils.consoleCheck(sender))
@@ -113,9 +113,9 @@ public class MainCommand implements CommandExecutor {
 				}
 				if (Skywars.get().getLobby() != null) {
 					player.teleport(Skywars.get().getLobby());
-					player.sendMessage(Messager.getMessage("TELEPORTED_TO_MAIN_LOBBY"));
+					player.sendMessage(MessageUtils.getMessage("TELEPORTED_TO_MAIN_LOBBY"));
 				} else {
-					player.sendMessage(Messager.getMessage("MAIN_LOBBY_NOT_SET"));
+					player.sendMessage(MessageUtils.getMessage("MAIN_LOBBY_NOT_SET"));
 				}
 			} else if (args[0].equalsIgnoreCase("play")) {
 				MapMenu.open(player);
@@ -129,13 +129,13 @@ public class MainCommand implements CommandExecutor {
 				final String _name = String.join(" ", list);
 				final SkywarsMap _map = Skywars.get().getMapManager().getMap(_name);
 				if (_map == null) {
-					player.sendMessage(Messager.getMessage("NO_MAP"));
+					player.sendMessage(MessageUtils.getMessage("NO_MAP"));
 					return true;
 				}
 				ConfigMenu.OpenConfigurationMenu(player, _map);
 			} else if (args[0].equalsIgnoreCase("help")) {
 				for (final String line : this.helpLines) {
-					sender.sendMessage(Messager.color(line));
+					sender.sendMessage(MessageUtils.color(line));
 				}
 			} else if (args[0].equalsIgnoreCase("leave")) {
 				if (CommandsUtils.consoleCheck(sender))
@@ -159,7 +159,7 @@ public class MainCommand implements CommandExecutor {
 				ArenaManager.joinMap(map, player);
 			} else if (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("about")
 					|| args[0].equalsIgnoreCase("ver") || args[0].equalsIgnoreCase("version")) {
-				sender.sendMessage(Messager.color("&b%s &eversion &a%s &emade by &b%s", Skywars.get().name,
+				sender.sendMessage(MessageUtils.color("&b%s &eversion &a%s &emade by &b%s", Skywars.get().name,
 						Skywars.get().version, String.join(", ", Skywars.get().authors)));
 			} else if (args[0].equalsIgnoreCase("server")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
@@ -182,7 +182,7 @@ public class MainCommand implements CommandExecutor {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
 				Skywars.get().Reload();
-				sender.sendMessage(Messager.getMessage("RELOADED"));
+				sender.sendMessage(MessageUtils.getMessage("RELOADED"));
 			}
 
 			// else if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.test"))
@@ -633,7 +633,7 @@ public class MainCommand implements CommandExecutor {
 				else
 					sender.sendMessage("Could not delete map");
 			} else {
-				sender.sendMessage(Messager.color("&cInvalid arguments! &eUse &b/sw help"));
+				sender.sendMessage(MessageUtils.color("&cInvalid arguments! &eUse &b/sw help"));
 			}
 			return true;
 		} catch (final Exception e) {

@@ -100,7 +100,7 @@ public class InteractEvent implements Listener {
 			&& displayName.equals(SkywarsUtils.getItemNameFromConfig(SkywarsItemType.PLAY_AGAIN))) {
 			if (swp.isSpectator()) {
 				event.setCancelled(true);
-				player.sendMessage(Messager.color("&aSending you to another game..."));
+				player.sendMessage(MessageUtils.color("&aSending you to another game..."));
 				arena.leavePlayer(swp);
 				ArenaManager.joinRandomMap(player);
 			}

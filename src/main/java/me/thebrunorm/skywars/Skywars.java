@@ -50,8 +50,8 @@ public class Skywars extends JavaPlugin {
 	public String name = this.pdf.getName();
 	public String version = this.pdf.getVersion();
 	public List<String> authors = this.pdf.getAuthors();
-	private final String prefix = Messager.color("&6[&e%s&6]&e", this.name);
-	private final String debugPrefix = Messager.color("&7[&c%s&7]&e", this.name);
+	private final String prefix = MessageUtils.color("&6[&e%s&6]&e", this.name);
+	private final String debugPrefix = MessageUtils.color("&7[&c%s&7]&e", this.name);
 	public static String kitsPath;
 	public static String worldsPath;
 	public static String mapsPath;
@@ -757,11 +757,11 @@ public class Skywars extends JavaPlugin {
 	}
 
 	public void sendMessage(String text, Object... format) {
-		this.sendMessageWithPrefix(Messager.color(this.prefix), Messager.color(text, format));
+		this.sendMessageWithPrefix(MessageUtils.color(this.prefix), MessageUtils.color(text, format));
 	}
 
 	public void sendMessageWithPrefix(String prefix, String text, Object... format) {
-		Bukkit.getConsoleSender().sendMessage(Messager.color(prefix) + " " + Messager.color(text, format));
+		Bukkit.getConsoleSender().sendMessage(MessageUtils.color(prefix) + " " + MessageUtils.color(text, format));
 	}
 
 	public HologramController getHologramController() {

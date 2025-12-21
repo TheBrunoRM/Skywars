@@ -2,7 +2,7 @@
 package me.thebrunorm.skywars.menus;
 
 import com.cryptomorin.xseries.XMaterial;
-import me.thebrunorm.skywars.Messager;
+import me.thebrunorm.skywars.MessageUtils;
 import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.structures.Arena;
 import org.bukkit.Bukkit;
@@ -24,11 +24,11 @@ public class GamesMenu implements Listener {
 		PlayerInventoryManager.setMenu(player, MenuType.GAMES_MENU);
 		final ItemStack item = new ItemStack(XMaterial.BOW.parseItem());
 		final ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(Messager.color("&aclick to join random game"));
+		meta.setDisplayName(MessageUtils.color("&aclick to join random game"));
 		final List<String> lore = new ArrayList<>();
-		lore.add(Messager.color("&eliterally just click this"));
-		lore.add(Messager.color("&eto join the game that"));
-		lore.add(Messager.color("&ehas the most players in it"));
+		lore.add(MessageUtils.color("&eliterally just click this"));
+		lore.add(MessageUtils.color("&eto join the game that"));
+		lore.add(MessageUtils.color("&ehas the most players in it"));
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		inventory.setItem(11, item);

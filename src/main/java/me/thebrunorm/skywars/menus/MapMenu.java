@@ -2,7 +2,7 @@
 package me.thebrunorm.skywars.menus;
 
 import com.cryptomorin.xseries.XMaterial;
-import me.thebrunorm.skywars.Messager;
+import me.thebrunorm.skywars.MessageUtils;
 import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.managers.ArenaManager;
 import me.thebrunorm.skywars.structures.Arena;
@@ -24,7 +24,7 @@ import java.util.List;
 public class MapMenu implements Listener {
 
 	public static void open(Player player) {
-		final Inventory inventory = Bukkit.createInventory(null, 9 * 6, Messager.color("&aMaps"));
+		final Inventory inventory = Bukkit.createInventory(null, 9 * 6, MessageUtils.color("&aMaps"));
 		PlayerInventoryManager.setMenu(player, MenuType.MAP_SELECTION);
 
 		int index = 10;
@@ -43,16 +43,16 @@ public class MapMenu implements Listener {
 			final ArrayList<Arena> arenas = ArenaManager.getArenasByMap(map);
 			final int players = arenas.stream().map(arena -> arena.getAlivePlayerCount()).reduce(0, (a, b) -> a + b);
 
-			lore.add(Messager.color("&eCurrent arenas: &a%s", ArenaManager.getArenasByMap(map).size()));
-			lore.add(Messager.color("&eCurrent players: &a%s", players));
-			lore.add(Messager.color("&eClick to play!"));
+			lore.add(MessageUtils.color("&eCurrent arenas: &a%s", ArenaManager.getArenasByMap(map).size()));
+			lore.add(MessageUtils.color("&eCurrent players: &a%s", players));
+			lore.add(MessageUtils.color("&eClick to play!"));
 			// lore.add(Messager.color("&eClick derecho para alternarlo como favorito!"));
 
 			final ItemStack item = new ItemStack(XMaterial.FIREWORK_STAR.parseItem());
 			final ItemMeta meta = item.getItemMeta();
 			meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 
-			meta.setDisplayName(Messager.color("&a%s", map.getName()));
+			meta.setDisplayName(MessageUtils.color("&a%s", map.getName()));
 			meta.setLore(lore);
 			item.setItemMeta(meta);
 			inventory.setItem(index, item);
@@ -75,7 +75,7 @@ public class MapMenu implements Listener {
 		final String name = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
 		final SkywarsMap map = Skywars.get().getMapManager().getMap(name);
 		if (!ArenaManager.joinMap(map, player))
-			player.sendMessage(Messager.get("CANT_JOIN_MAP"));
+			player.sendMessage(MessageUtils.get("CANT_JOIN_MAP"));
 	}
 
 }

@@ -1,13 +1,12 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.handlers;
 
-import org.bukkit.entity.Player;
-
-import me.thebrunorm.skywars.Messager;
+import me.thebrunorm.skywars.MessageUtils;
 import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.SkywarsUtils;
 import me.thebrunorm.skywars.structures.Arena;
 import me.thebrunorm.skywars.structures.SkywarsUser;
+import org.bukkit.entity.Player;
 
 public class SkywarsTablist {
 	public static void update(Player player) {
@@ -36,7 +35,7 @@ public class SkywarsTablist {
 			}
 		}
 		Skywars.get().NMS().sendTablist(player,
-				SkywarsUtils.format(Messager.get("tablist." + tablist + ".header"), player, arena, swp),
-				SkywarsUtils.format(Messager.get("tablist." + tablist + ".footer"), player, arena, swp));
+			SkywarsUtils.format(MessageUtils.get("tablist." + tablist + ".header"), player, arena, swp),
+			SkywarsUtils.format(MessageUtils.get("tablist." + tablist + ".footer"), player, arena, swp));
 	}
 }

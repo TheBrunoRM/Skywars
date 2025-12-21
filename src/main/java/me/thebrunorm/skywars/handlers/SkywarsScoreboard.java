@@ -2,7 +2,7 @@
 package me.thebrunorm.skywars.handlers;
 
 import me.thebrunorm.skywars.ArenaStatus;
-import me.thebrunorm.skywars.Messager;
+import me.thebrunorm.skywars.MessageUtils;
 import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.SkywarsUtils;
 import me.thebrunorm.skywars.structures.Arena;
@@ -57,12 +57,12 @@ public class SkywarsScoreboard {
 		final Scoreboard board = manager.getNewScoreboard();
 		final Objective objective = board.registerNewObjective("skywars", "");
 
-		objective.setDisplayName(SkywarsUtils.format(Messager.get("scoreboard.title"), player, arena, swp));
+		objective.setDisplayName(SkywarsUtils.format(MessageUtils.get("scoreboard.title"), player, arena, swp));
 		objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
 		for (int i = 0; i < stringList.size(); i++) {
 			final String text = SkywarsUtils.format(stringList.get(i), player, arena, swp);
-			texts.add(i, Messager.color(text));
+			texts.add(i, MessageUtils.color(text));
 		}
 
 		int textIndex = 0;
@@ -71,7 +71,7 @@ public class SkywarsScoreboard {
 			if (text == null)
 				continue;
 			if (text.equals(""))
-				text = Messager.color("&" + SkywarsUtils.COLOR_SYMBOLS[textIndex]);
+				text = MessageUtils.color("&" + SkywarsUtils.COLOR_SYMBOLS[textIndex]);
 			final Score score = objective.getScore(text);
 			score.setScore(i);
 			textIndex++;

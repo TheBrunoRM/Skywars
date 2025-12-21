@@ -1,6 +1,12 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.events;
 
+import me.thebrunorm.skywars.MessageUtils;
+import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.menus.ConfigMenu;
+import me.thebrunorm.skywars.structures.Arena;
+import me.thebrunorm.skywars.structures.SkywarsMap;
+import mrblobman.sounds.Sounds;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -12,13 +18,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
-
-import me.thebrunorm.skywars.Messager;
-import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.menus.ConfigMenu;
-import me.thebrunorm.skywars.structures.Arena;
-import me.thebrunorm.skywars.structures.SkywarsMap;
-import mrblobman.sounds.Sounds;
 
 public class SetupEvents implements Listener {
 
@@ -46,7 +45,7 @@ public class SetupEvents implements Listener {
 			event.getItemDrop().remove();
 			Skywars.get().NMS().sendTitle(player, "&a&LDONE", "&eSaved spawns");
 			player.playSound(player.getLocation(), Sounds.LEVEL_UP.bukkitSound(), 3, 1);
-			player.sendMessage(Messager.color("&e&lYou exited &b&lspawn edit mode"));
+			player.sendMessage(MessageUtils.color("&e&lYou exited &b&lspawn edit mode"));
 		}
 	}
 

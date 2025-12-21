@@ -180,17 +180,17 @@ public class ConfigurationUtils {
 
 		if (hashmap.containsKey("name")) {
 			final String itemName = hashmap.get("name").toString();
-			meta.setDisplayName(Messager.color(itemName));
+			meta.setDisplayName(MessageUtils.color(itemName));
 		}
 
 		final Object lore = hashmap.get("lore");
 		if (lore != null) {
 			final List<String> loreLines = new ArrayList<>();
 			if (lore instanceof String)
-				loreLines.add(Messager.color(lore.toString()));
+				loreLines.add(MessageUtils.color(lore.toString()));
 			else if (lore instanceof ArrayList)
 				for (final String loreLine : ((ArrayList<String>) lore))
-					loreLines.add(Messager.color(loreLine));
+					loreLines.add(MessageUtils.color(loreLine));
 			meta.setLore(loreLines);
 		}
 

@@ -3,7 +3,7 @@ package me.thebrunorm.skywars.structures;
 
 import com.cryptomorin.xseries.XMaterial;
 import me.thebrunorm.skywars.ArenaStatus;
-import me.thebrunorm.skywars.Messager;
+import me.thebrunorm.skywars.MessageUtils;
 import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.SkywarsUtils;
 import me.thebrunorm.skywars.commands.CommandsUtils;
@@ -90,12 +90,12 @@ public class Arena {
 			return Skywars.langConfig.getString("status.ended");
 		final SkywarsEvent event = this.getNextEvent();
 		if (event == null)
-			return Messager.getMessage("events.noevent");
+			return MessageUtils.getMessage("events.noevent");
 		final int time = event.getTime();
 		final int minutes = time / 60;
 		final int seconds = time % 60;
 		final String timeString = String.format("%d:%02d", minutes, seconds);
-		return Messager.color(Skywars.langConfig.getString("events.format")
+		return MessageUtils.color(Skywars.langConfig.getString("events.format")
 			.replaceAll("%name%", Skywars.langConfig.getString("events." + event.getType().name().toLowerCase()))
 			.replaceAll("%time%", timeString));
 
@@ -134,13 +134,13 @@ public class Arena {
 		if (Skywars.config.getBoolean("debug.enabled"))
 			player.sendMessage("[DEBUG] You joined team " + team.getNumber());
 		for (final SkywarsUser players : this.getUsers()) {
-			players.getPlayer().sendMessage(Messager.getMessage("JOIN", player.getName(), this.getAlivePlayerCount(),
+			players.getPlayer().sendMessage(MessageUtils.getMessage("JOIN", player.getName(), this.getAlivePlayerCount(),
 				this.map.getMaxPlayers()));
 			SkywarsUtils.playSoundsFromConfig(player.getPlayer(), "sounds.join");
 		}
 
 		if (this.getTask() != null && this.getStatus() == ArenaStatus.STARTING)
-			player.sendMessage(Messager.getMessage("GAME_STARTING", this.getCountdown()));
+			player.sendMessage(MessageUtils.getMessage("GAME_STARTING", this.getCountdown()));
 
 		Skywars.createCase(spawn, Skywars.get().getPlayerCaseXMaterial(player));
 
@@ -196,10 +196,10 @@ public class Arena {
 				final double killMoney = Skywars.get().getConfig().getDouble("economy.kill");
 				if (Skywars.get().getEconomy() != null && killMoney > 0) {
 					Skywars.get().getEconomy().depositPlayer(killer, killMoney);
-					killer.sendMessage(Messager.color("&6+$%s", SkywarsUtils.formatDouble(killMoney)));
+					killer.sendMessage(MessageUtils.color("&6+$%s", SkywarsUtils.formatDouble(killMoney)));
 				}
 				Skywars.get().incrementPlayerSouls(killer);
-				killer.sendMessage(Messager.color("&b+%s Soul", 1));
+				killer.sendMessage(MessageUtils.color("&b+%s Soul", 1));
 			}
 		}
 		Skywars.get().incrementPlayerTotalDeaths(player);
@@ -237,8 +237,8 @@ public class Arena {
 			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
 				@Override
 				public void run() {
-					Skywars.get().NMS().sendTitle(player, Messager.getMessage("died.title"),
-						Messager.getMessage("died.subtitle"), 0, 80, 0);
+					Skywars.get().NMS().sendTitle(player, MessageUtils.getMessage("died.title"),
+						MessageUtils.getMessage("died.subtitle"), 0, 80, 0);
 				}
 			}, 20);
 	}
@@ -276,14 +276,14 @@ public class Arena {
 	private String getDeathMessage(SkywarsUser p, Player killer, DamageCause cause) {
 		final Player player = p.getPlayer();
 		if (killer != null)
-			return Messager.color("&c%s &ekilled &c%s", killer.getName(), player.getName());
+			return MessageUtils.color("&c%s &ekilled &c%s", killer.getName(), player.getName());
 		else if (p.getLastHit() != null)
-			return Messager.color("&c%s &edied while trying to escape &c%s", player.getName(),
+			return MessageUtils.color("&c%s &edied while trying to escape &c%s", player.getName(),
 				p.getLastHit().getName());
 		else if (cause == DamageCause.VOID)
-			return Messager.color("&c%s &efell in the void.", player.getName());
+			return MessageUtils.color("&c%s &efell in the void.", player.getName());
 		else
-			return Messager.color("&c%s &edied.", player.getName());
+			return MessageUtils.color("&c%s &edied.", player.getName());
 	}
 
 	public void leavePlayer(Player player) {
@@ -294,7 +294,7 @@ public class Arena {
 		if (player == null)
 			return;
 		player.getPlayer().sendMessage(
-			Messager.getFormattedMessage("LEAVE_SELF", player.getPlayer(), this, player, this.map.getName()));
+			MessageUtils.getFormattedMessage("LEAVE_SELF", player.getPlayer(), this, player, this.map.getName()));
 		if (!this.started())
 			this.joinable = true;
 		if (player.getTeam().getUsers().size() <= 1)
@@ -303,7 +303,7 @@ public class Arena {
 		this.removePlayer(player);
 		if (this.getStatus() != ArenaStatus.RESTARTING && !player.isSpectator()) {
 			for (final SkywarsUser players : this.getUsers()) {
-				players.getPlayer().sendMessage(Messager.getFormattedMessage("LEAVE", player.getPlayer(), this, player,
+				players.getPlayer().sendMessage(MessageUtils.getFormattedMessage("LEAVE", player.getPlayer(), this, player,
 					player.getPlayer().getName(), this.getUsers().size(), this.map.getMaxPlayers()));
 				final String sound = Skywars.config.getString("sounds.leave");
 				final String[] splitted = sound.split(";");
@@ -323,7 +323,7 @@ public class Arena {
 			// Skywars.get().sendDebugMessage("stopping start cooldown");
 			this.setStatus(ArenaStatus.WAITING);
 			for (final SkywarsUser players : this.getUsers()) {
-				players.getPlayer().sendMessage(Messager.getMessage("COUNTDOWN_STOPPED", this.getAlivePlayerCount()));
+				players.getPlayer().sendMessage(MessageUtils.getMessage("COUNTDOWN_STOPPED", this.getAlivePlayerCount()));
 			}
 			this.cancelTimer();
 		}
@@ -358,7 +358,7 @@ public class Arena {
 
 		for (final SkywarsUser p : this.getUsers()) {
 			Skywars.get().NMS().sendActionbar(p.getPlayer(),
-				Messager.getMessage("PLAYERS_REMAINING", this.getAlivePlayerCount()));
+				MessageUtils.getMessage("PLAYERS_REMAINING", this.getAlivePlayerCount()));
 		}
 	}
 
@@ -378,21 +378,21 @@ public class Arena {
 			Skywars.get().incrementPlayerTotalWins(this.getWinner().getPlayer());
 			if (winMoney > 0 && Skywars.get().getEconomy() != null) {
 				Skywars.get().getEconomy().depositPlayer(this.getWinner().getPlayer(), winMoney);
-				this.getWinner().getPlayer().sendMessage(Messager.color("&6+$%s", SkywarsUtils.formatDouble(winMoney)));
+				this.getWinner().getPlayer().sendMessage(MessageUtils.color("&6+$%s", SkywarsUtils.formatDouble(winMoney)));
 			}
 		}
 
 		for (final SkywarsUser p : this.getUsers()) {
 			if (p == this.getWinner()) {
-				Skywars.get().NMS().sendTitle(p.getPlayer(), Messager.getMessage("won.title"),
-					Messager.getMessage("won.subtitle"), 0, 80, 0);
+				Skywars.get().NMS().sendTitle(p.getPlayer(), MessageUtils.getMessage("won.title"),
+					MessageUtils.getMessage("won.subtitle"), 0, 80, 0);
 			} else {
 				Skywars.get().NMS().sendTitle(p.getPlayer(), "&c&lGAME ENDED", "&7You didn't win this time.", 0, 80, 0);
 			}
 			if (this.winner == null) {
-				p.getPlayer().sendMessage(Messager.color("&cnobody &ewon"));
+				p.getPlayer().sendMessage(MessageUtils.color("&cnobody &ewon"));
 			} else {
-				p.getPlayer().sendMessage(Messager.color("&c%s &ewon!", this.winner.getPlayer().getName()));
+				p.getPlayer().sendMessage(MessageUtils.color("&c%s &ewon!", this.winner.getPlayer().getName()));
 			}
 		}
 
@@ -449,7 +449,7 @@ public class Arena {
 			if (this.forcedStart && this.forcedStartPlayer != null) {
 				for (final SkywarsUser player : this.getUsers()) {
 					player.getPlayer()
-						.sendMessage(Messager.getMessage("FORCED_START", this.forcedStartPlayer.getName()));
+						.sendMessage(MessageUtils.getMessage("FORCED_START", this.forcedStartPlayer.getName()));
 				}
 			}
 			this.task = Bukkit.getScheduler().runTaskTimer(Skywars.get(), new Runnable() {
@@ -490,7 +490,7 @@ public class Arena {
 							final String msg = Skywars.langConfig
 								.getString(this.time == 1 ? "GAME_STARTING_SECOND" : "GAME_STARTING_SECONDS");
 							player.getPlayer()
-								.sendMessage(Messager.color(SkywarsUtils.format(
+								.sendMessage(MessageUtils.color(SkywarsUtils.format(
 									msg.replaceAll("%count%", "&" + color + "%count%")
 										.replaceAll("%seconds%", "&" + color + "%seconds%"),
 									player.getPlayer(), Arena.this.get(), player)));
@@ -737,9 +737,9 @@ public class Arena {
 					player.getPlayer().getInventory().addItem(item);
 				}
 			}
-			player.getPlayer().sendMessage(Messager.getMessage("arena_start.message"));
-			Skywars.get().NMS().sendTitle(player.getPlayer(), Messager.getMessage("arena_start.title"),
-				Messager.getMessage("arena_start.subtitle"));
+			player.getPlayer().sendMessage(MessageUtils.getMessage("arena_start.message"));
+			Skywars.get().NMS().sendTitle(player.getPlayer(), MessageUtils.getMessage("arena_start.title"),
+				MessageUtils.getMessage("arena_start.subtitle"));
 			SkywarsUtils.playSoundsFromConfig(player.getPlayer(), "sounds.start");
 
 			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
@@ -748,7 +748,7 @@ public class Arena {
 					if (!Arena.this.started() || Arena.this.getUser(player.getPlayer()) == null || player.isSpectator())
 						return;
 					for (final String l : Skywars.langConfig.getStringList("startLines")) {
-						player.getPlayer().sendMessage(Messager.color(l));
+						player.getPlayer().sendMessage(MessageUtils.color(l));
 					}
 				}
 			}, 20);
@@ -761,7 +761,7 @@ public class Arena {
 					final double playMoney = Skywars.get().getConfig().getDouble("economy.play");
 					if (Skywars.get().getEconomy() != null && playMoney > 0) {
 						Skywars.get().getEconomy().depositPlayer(player.getPlayer(), playMoney);
-						player.getPlayer().sendMessage(Messager.color("&6+$%s", SkywarsUtils.formatDouble(playMoney)));
+						player.getPlayer().sendMessage(MessageUtils.color("&6+$%s", SkywarsUtils.formatDouble(playMoney)));
 					}
 				}
 			}, 20 * 10);
@@ -888,9 +888,9 @@ public class Arena {
 
 	public void broadcastRefillMessage() {
 		for (final SkywarsUser player : this.getUsers()) {
-			player.getPlayer().sendMessage(Messager.getMessage("refill.message"));
-			Skywars.get().NMS().sendTitle(player.getPlayer(), Messager.getMessage("refill.title"),
-				Messager.getMessage("refill.subtitle"));
+			player.getPlayer().sendMessage(MessageUtils.getMessage("refill.message"));
+			Skywars.get().NMS().sendTitle(player.getPlayer(), MessageUtils.getMessage("refill.title"),
+				MessageUtils.getMessage("refill.subtitle"));
 		}
 	}
 
@@ -1050,14 +1050,14 @@ public class Arena {
 			this.forcedStart = true;
 			this.forcedStartPlayer = player;
 			this.startTimerAndSetStatus(ArenaStatus.STARTING);
-			player.sendMessage(Messager.get("started_countdown"));
+			player.sendMessage(MessageUtils.get("started_countdown"));
 			return true;
 		}
 		final boolean started = this.startGame(player);
 		if (started)
-			player.sendMessage(Messager.get("started_game"));
+			player.sendMessage(MessageUtils.get("started_game"));
 		else
-			player.sendMessage(Messager.get("already_started"));
+			player.sendMessage(MessageUtils.get("already_started"));
 		return started;
 	}
 
@@ -1106,8 +1106,8 @@ public class Arena {
 			final int contents = Arrays.asList(chest.getInventory().getContents()).stream()
 				.filter(i -> i != null && i.getType() != XMaterial.AIR.parseMaterial()).collect(Collectors.toList())
 				.size();
-			controller.changeHologram(hologram, Messager.color(text), 0);
-			controller.changeHologram(hologram, contents <= 0 ? Messager.get("chest_holograms.empty") : "", 1);
+			controller.changeHologram(hologram, MessageUtils.color(text), 0);
+			controller.changeHologram(hologram, contents <= 0 ? MessageUtils.get("chest_holograms.empty") : "", 1);
 		}
 
 	}
@@ -1116,21 +1116,21 @@ public class Arena {
 		if (this.timeVotes.get(player.getUniqueId()) == time)
 			return;
 		this.timeVotes.put(player.getUniqueId(), time);
-		this.broadcastMessage(Messager.get("vote", player.getName(), Messager.get("time." + time)));
+		this.broadcastMessage(MessageUtils.get("vote", player.getName(), MessageUtils.get("time." + time)));
 	}
 
 	public void voteWeather(Player player, WeatherType weather) {
 		if (this.weatherVotes.get(player.getUniqueId()) == weather)
 			return;
 		this.weatherVotes.put(player.getUniqueId(), weather);
-		this.broadcastMessage(Messager.get("vote", player.getName(), Messager.get("weather." + weather)));
+		this.broadcastMessage(MessageUtils.get("vote", player.getName(), MessageUtils.get("weather." + weather)));
 	}
 
 	public void voteChests(Player player, ChestType chests) {
 		if (this.chestVotes.get(player.getUniqueId()) == chests)
 			return;
 		this.chestVotes.put(player.getUniqueId(), chests);
-		this.broadcastMessage(Messager.get("vote", player.getName(), Messager.get("chests." + chests)));
+		this.broadcastMessage(MessageUtils.get("vote", player.getName(), MessageUtils.get("chests." + chests)));
 	}
 
 }

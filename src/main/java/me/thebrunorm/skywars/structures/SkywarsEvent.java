@@ -1,7 +1,7 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.structures;
 
-import me.thebrunorm.skywars.Messager;
+import me.thebrunorm.skywars.MessageUtils;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
@@ -50,7 +50,7 @@ public class SkywarsEvent {
 			case REFILL:
 				this.arena.broadcastRefillMessage();
 				this.arena.fillChests();
-				this.arena.displayChestHolograms(Messager.get("chest_holograms.refilled"));
+				this.arena.displayChestHolograms(MessageUtils.get("chest_holograms.refilled"));
 				break;
 			case ENDER_DRAGON:
 				Vector position = this.arena.getCenterBlock().add(new Vector(0, 100, 0));
