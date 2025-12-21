@@ -81,7 +81,7 @@ public class MapManager {
 					// it may be a map configuration file
 					worldFolder.renameTo(new File(Skywars.mapsPath, worldFolder.getName()));
 				} else {
-					org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] MapManager found unknown world file: " + worldFolder.getName());
+					org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " MapManager found unknown world file: " + worldFolder.getName());
 				}
 			}
 
@@ -103,8 +103,7 @@ public class MapManager {
 			mapConfig.save(mapFile);
 		} catch (final IOException e) {
 			e.printStackTrace();
-			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] MapManager could not save config for world: " + worldFolder.getName());
-		}
+							org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " MapManager could not save config for world: " + worldFolder.getName());		}
 		Skywars.get().sendDebugMessage("Saved map configuration file '%s' for world: %s", mapFile.getName(),
 				worldFolder.getName());
 		return mapFile;

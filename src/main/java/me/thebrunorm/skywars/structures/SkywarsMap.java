@@ -96,7 +96,7 @@ public class SkywarsMap {
 				try {
 					mapFile.createNewFile();
 						} catch (final IOException e) {
-							org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not create map file: " + mapFile.getPath());
+							org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Could not create map file: " + mapFile.getPath());
 						}			}
 			this.setConfigFile(mapFile);
 		}
@@ -251,7 +251,7 @@ public class SkywarsMap {
 			FileUtils.copyDirectory(baseWorld, worldFile);
 		} catch (final IOException e) {
 			e.printStackTrace();
-			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not make backup of world: " + name + " for map: " + this.getName());
+			org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Could not make backup of world: " + name + " for map: " + this.getName());
 		}
 	}
 

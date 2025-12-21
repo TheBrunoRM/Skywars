@@ -102,7 +102,7 @@ started_game: "&a¡Se ha iniciado el juego!"
 FORCED_START: "&e¡&b&l{0} &e&lforzó el juego a iniciar!"
 
 refill:
-  title: ""
+  title: "rellenaron"
   subtitle: "&e¡Los cofres se rellenaron!"
   message: "&e¡Los cofres se rellenaron!"
 

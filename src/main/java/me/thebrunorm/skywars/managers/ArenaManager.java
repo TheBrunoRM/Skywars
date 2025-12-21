@@ -134,7 +134,7 @@ public class ArenaManager {
 		}
 
 		if (!unloaded)
-			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not unload world: " + world.getName() + " for map: " + map.getName());
+			org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Could not unload world: " + world.getName() + " for map: " + map.getName());
 
 		try {
 			FileUtils.deleteDirectory(world.getWorldFolder());
@@ -142,7 +142,7 @@ public class ArenaManager {
 					map.getName());
 		} catch (final Exception e) {
 			e.printStackTrace();
-			org.bukkit.Bukkit.getConsoleSender().sendMessage("[Skywars] Could not delete world: " + world.getName() + " for map: " + map.getName());
+			org.bukkit.Bukkit.getConsoleSender().sendMessage(Skywars.get().getPrefix() + " Could not delete world: " + world.getName() + " for map: " + map.getName());
 		}
 
 		return unloaded;
