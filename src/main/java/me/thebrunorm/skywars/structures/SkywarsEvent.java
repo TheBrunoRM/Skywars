@@ -48,16 +48,17 @@ public class SkywarsEvent {
 	public void run() {
 		switch (this.type) {
 			case REFILL:
-				this.arena.broadcastRefillMessage();
 				this.arena.fillChests();
 				this.arena.displayChestHolograms(MessageUtils.get("chest_holograms.refilled"));
 				break;
 			case ENDER_DRAGON:
 				Vector position = this.arena.getCenterBlock().add(new Vector(0, 100, 0));
 				World world = this.arena.getWorld();
+				world.setGameRuleValue("mobGriefing", "true");
 				Location location = position.toLocation(world);
 				world.spawnEntity(location, EntityType.ENDER_DRAGON);
 				break;
 		}
+		this.arena.broadcastEventMessage(this.type);
 	}
 }

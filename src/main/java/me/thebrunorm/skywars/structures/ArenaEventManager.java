@@ -29,7 +29,7 @@ public class ArenaEventManager {
 		final int minutes = time / 60;
 		final int seconds = time % 60;
 		final String timeString = String.format("%d:%02d", minutes, seconds);
-		final String eventNameKey = "events." + event.getType().name().toLowerCase();
+		final String eventNameKey = String.format("events.%s.name", event.getType().name());
 		return MessageUtils.color(Skywars.langConfig.getString("events.format", "<events.format>")
 			.replaceAll("%name%", Skywars.langConfig.getString(eventNameKey, String.format("<%s>", eventNameKey)))
 			.replaceAll("%time%", timeString));

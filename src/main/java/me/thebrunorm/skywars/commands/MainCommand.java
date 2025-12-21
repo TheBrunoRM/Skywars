@@ -14,10 +14,7 @@ import me.thebrunorm.skywars.menus.GamesMenu;
 import me.thebrunorm.skywars.menus.MapMenu;
 import me.thebrunorm.skywars.schematics.Schematic;
 import me.thebrunorm.skywars.schematics.SchematicHandler;
-import me.thebrunorm.skywars.structures.Arena;
-import me.thebrunorm.skywars.structures.ArenaEventManager;
-import me.thebrunorm.skywars.structures.SkywarsMap;
-import me.thebrunorm.skywars.structures.SkywarsUser;
+import me.thebrunorm.skywars.structures.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -174,7 +171,7 @@ public class MainCommand implements CommandExecutor {
 				if (!CommandsUtils.isInArenaJoined(player))
 					return true;
 				playerArena.fillChests();
-				playerArena.broadcastRefillMessage();
+				playerArena.broadcastEventMessage(SkywarsEventType.REFILL);
 			} else if (args[0].equalsIgnoreCase("menu")) {
 				if (CommandsUtils.consoleCheck(sender))
 					return true;

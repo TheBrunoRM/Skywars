@@ -39,8 +39,8 @@ public class MessageUtils {
 			msg = String.join("\n", Skywars.langConfig.getStringList(name));
 		else
 			msg = Skywars.langConfig.getString(name);
-		if (msg == null)
-			return name;
+		if (msg == null) return name;
+		if (msg.isEmpty()) return "";
 		for (int i = 0; i < format.length; i++) {
 			msg = msg.replaceAll(String.format("\\{%s\\}", i), String.valueOf(format[i]));
 		}

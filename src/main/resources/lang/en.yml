@@ -11,9 +11,17 @@ none: "&rnone"
 
 events:
   format: "&a%name% %time%"
-  refill: "Refill"
-  enderdragon: "Ender Dragon"
   no_event: "&rNo event"
+  REFILL:
+    name: "Refill"
+    title: ""
+    subtitle: "&eChests have been refilled!"
+    message: "&eChests have been refilled!"
+  ENDER_DRAGON:
+    name: "Ender Dragon"
+    title: "&c&lENDGAME"
+    subtitle: "&bThe ender dragon appeared!"
+    message: "&bThe ender dragon appeared!"
 
 items:
   show_context: true
@@ -101,11 +109,6 @@ started_countdown: "&aStarted the countdown!"
 started_game: "&aStarted the game!"
 
 FORCED_START: "&b&l{0} &e&lforced the game to start!"
-
-refill:
-  title: ""
-  subtitle: "&eChests have been refilled!"
-  message: "&eChests have been refilled!"
 
 GAME_STARTING: "&eThe game is starting in &6{0} &eseconds!"
 GAME_STARTING_SECOND: "&eThe game starts in %count% &esecond!"

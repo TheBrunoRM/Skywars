@@ -875,11 +875,11 @@ public class Arena {
 		return list;
 	}
 
-	public void broadcastRefillMessage() {
+	public void broadcastEventMessage(SkywarsEventType eventType) {
 		for (final SkywarsUser player : this.getUsers()) {
-			player.getPlayer().sendMessage(MessageUtils.getMessage("refill.message"));
-			Skywars.get().NMS().sendTitle(player.getPlayer(), MessageUtils.getMessage("refill.title"),
-				MessageUtils.getMessage("refill.subtitle"));
+			player.getPlayer().sendMessage(MessageUtils.getMessage(String.format("events.%s.message", eventType)));
+			Skywars.get().NMS().sendTitle(player.getPlayer(), MessageUtils.getMessage(String.format("events.%s.title", eventType)),
+				MessageUtils.getMessage(String.format("events.%s.subtitle", eventType)));
 		}
 	}
 

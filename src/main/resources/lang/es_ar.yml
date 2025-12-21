@@ -11,8 +11,16 @@ none: "&rninguno"
 
 events:
   format: "&a%name% %time%"
-  refill: "Rellenado"
-  enderdragon: "Rellenado"
+  REFILL:
+    name: "Rellenado"
+    title: ""
+    subtitle: "&e¡Los cofres han sido rellenados!"
+    message: "&e¡Los cofres han sido rellenados!"
+  ENDER_DRAGON:
+    name: "Dragón del Fín"
+    title: "&c&lBATALLA FINAL"
+    subtitle: "&b¡Apareció el Dragón del Fín!"
+    message: "&b¡Apareció el Dragón del Fín!"
   no_event: "&rNo hay evento"
 
 items:
