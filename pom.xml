@@ -103,7 +103,7 @@
 
                 <java>
                     <licenseHeader>
-                        <content>/* (C)$YEAR Bruno */</content>
+                        <content>/* (C) $YEAR Bruno */</content>
                     </licenseHeader>
                 </java>
             </configuration>
