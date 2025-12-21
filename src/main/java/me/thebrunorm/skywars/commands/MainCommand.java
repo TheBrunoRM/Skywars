@@ -190,11 +190,27 @@ public class MainCommand implements CommandExecutor {
 			// return true;
 			// TEST COMMANDS
 
-			else if (args[0].equalsIgnoreCase("skip")) {
+			else if (args[0].equalsIgnoreCase("events")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
 				ArenaEventManager events = arena.getEventManager();
-				MessageUtils.send(sender, "&6Skipped &b%s&6. &eNext event: &a%s", events.skipEvent(), events.getNextEventText());
+				if (events.getEvents().isEmpty()) {
+					MessageUtils.send(sender, "&cNo events remaining!");
+					return true;
+				}
+				MessageUtils.send(sender, "&eEvents: &b%s",
+					events.getEvents().stream().map(event -> event.getType().name())
+						.collect(Collectors.joining(", ")));
+			} else if (args[0].equalsIgnoreCase("skip")) {
+				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
+					return true;
+				ArenaEventManager events = arena.getEventManager();
+				if (events.getEvents().isEmpty()) {
+					MessageUtils.send(sender, "&cNo events remaining!");
+					return true;
+				}
+				MessageUtils.send(sender, "&6Executed &b%s&6. &eNext event: &a%s",
+					events.executeEvent().getType().name(), events.getNextEventText());
 			} else if (args[0].equalsIgnoreCase("testconfig")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
