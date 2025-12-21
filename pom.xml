@@ -110,7 +110,7 @@
                     </googleJavaFormat>
 
                     <licenseHeader>
-                        <content>/* (C)$YEAR */</content>
+                        <content>/* (C)$YEAR Bruno */</content>
                     </licenseHeader>
                 </java>
             </configuration>
