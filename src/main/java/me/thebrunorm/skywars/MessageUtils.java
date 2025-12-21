@@ -4,6 +4,7 @@ package me.thebrunorm.skywars;
 import me.thebrunorm.skywars.structures.Arena;
 import me.thebrunorm.skywars.structures.SkywarsUser;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -12,8 +13,8 @@ public class MessageUtils {
 
 	public static final char ALT_COLOR_CHAR = '&';
 
-	public static void send(Player player, String text, Object... format) {
-		player.sendMessage(color(text, format));
+	public static void send(CommandSender sender, String text, Object... format) {
+		sender.sendMessage(color(text, format));
 	}
 
 	public static String color(String text) {
