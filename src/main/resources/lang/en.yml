@@ -12,48 +12,49 @@ none: "&rnone"
 events:
   format: "&a%name% %time%"
   refill: "Refill"
-  noevent: "&rNo event"
+  enderdragon: "Ender Dragon"
+  no_event: "&rNo event"
 
 items:
   show_context: true
   context: '&7(Right Click)'
-  
+
   KIT_SELECTOR:
     name: '&a&lKit selector'
     description:
-    - "&7Right-click to select your kit"
-    
-  GAME_OPTIONS: 
+      - "&7Right-click to select your kit"
+
+  GAME_OPTIONS:
     name: '&b&lGame options'
     description:
-    - "&7Right-click to change the game options"
-    
+      - "&7Right-click to change the game options"
+
   START_GAME:
     name: "&6&lStart game"
-  
+
   STOP_GAME:
     name: "&c&lStop game"
-  
+
   SPECTATOR_OPTIONS:
     name: '&b&lSpectator options'
     description:
-    - "&7Right-click to change your spectator options"
-    
+      - "&7Right-click to change your spectator options"
+
   LEAVE:
     name: '&c&lLeave'
     description:
-    - "&7Right-click to go back to the"
-    - "&7main lobby."
-    
+      - "&7Right-click to go back to the"
+      - "&7main lobby."
+
   PLAY_AGAIN:
     name: '&b&lPlay again'
     description:
-    - "&7Right-click to play again"
-    
+      - "&7Right-click to play again"
+
   TELEPORTER:
     name: '&b&lTeleporter'
     description:
-    - "&7Right-click to teleport to players"
+      - "&7Right-click to teleport to players"
 
 arena_join:
   title: "&eSkyWars"
@@ -66,9 +67,9 @@ arena_start:
   message: "&eCages opened! &cFIGHT!"
 
 died:
-   title: "&c&lYOU DIED!"
-   subtitle: "&7You are now a spectator!"
-   message: ""
+  title: "&c&lYOU DIED!"
+  subtitle: "&7You are now a spectator!"
+  message: ""
 
 won:
   title: "&6&lYOU WON"
@@ -149,94 +150,94 @@ chest_holograms:
 tablist:
   lobby:
     header:
-    - "&b&lSKYWARS"
+      - "&b&lSKYWARS"
     footer:
-    - "&e%url%"
+      - "&e%url%"
   arena:
     player:
       header:
-      - "&a&lSkyWars"
-      - "&eCurrent kit: &b%kit%"
-      - "&eMap: &b%map%"
+        - "&a&lSkyWars"
+        - "&eCurrent kit: &b%kit%"
+        - "&eMap: &b%map%"
       footer:
-      - "&c%players% &eplayers left"
-      - "&eNext event: &b%event%"
+        - "&c%players% &eplayers left"
+        - "&eNext event: &b%event%"
     spectator:
       header:
-      - "&a&lSkyWars"
-      - "&bYou're spectating"
-      - "&eMap: &b%map%"
+        - "&a&lSkyWars"
+        - "&bYou're spectating"
+        - "&eMap: &b%map%"
       footer:
-      - "&c%players% &eplayers left"
-      - "&eNext event: &b%event%"
+        - "&c%players% &eplayers left"
+        - "&eNext event: &b%event%"
     intermission:
       header:
-      - "&a&lSkywars"
-      - "&eMap: &b%map%"
+        - "&a&lSkywars"
+        - "&eMap: &b%map%"
       footer:
-      - ""
-      - "%status%"
+        - ""
+        - "%status%"
 
 scoreboard:
   title: '&e&lSkyWars'
-  
+
   lobby:
-  - '&7%date%'
-  - ''
-  - 'Coins: &6%coins%'
-  - 'Souls: &b%souls%'
-  - 'Wins: &a%totalwins%'
-  - 'Kills: &6%totalkills%'
-  - 'Deaths: &c%totaldeaths%'
-  - ''
-  - '&e%url%'
-  
-  arena:
-    player:
     - '&7%date%'
     - ''
-    - 'Next event:'
-    - '%event%'
-    - ''
-    - 'Players left: &a%players%'
-    - ''
-    - 'Kills: &a%kills%'
-    - ''
-    - 'Map: &a%map%'
-    - ''
-    - '&e%url%'
-    
-    spectator:
-    - '&7%date%'
-    - ''
-    - 'Next event:'
-    - '%event%'
-    - ''
-    - '%status%'
-    - ''
-    - 'Map: &a%map%'
-    - 'Players left: &a%players%'
-    - ''
-    - '&e%url%'
-    
-    intermission:
-    - '&7%date%'
-    - ''
-    - '%status%'
-    - ''
-    - 'Map: &a%map%'
-    - 'Players: &a%players%/%maxplayers%'
+    - 'Coins: &6%coins%'
+    - 'Souls: &b%souls%'
+    - 'Wins: &a%totalwins%'
+    - 'Kills: &6%totalkills%'
+    - 'Deaths: &c%totaldeaths%'
     - ''
     - '&e%url%'
 
+  arena:
+    player:
+      - '&7%date%'
+      - ''
+      - 'Next event:'
+      - '%event%'
+      - ''
+      - 'Players left: &a%players%'
+      - ''
+      - 'Kills: &a%kills%'
+      - ''
+      - 'Map: &a%map%'
+      - ''
+      - '&e%url%'
+
+    spectator:
+      - '&7%date%'
+      - ''
+      - 'Next event:'
+      - '%event%'
+      - ''
+      - '%status%'
+      - ''
+      - 'Map: &a%map%'
+      - 'Players left: &a%players%'
+      - ''
+      - '&e%url%'
+
+    intermission:
+      - '&7%date%'
+      - ''
+      - '%status%'
+      - ''
+      - 'Map: &a%map%'
+      - 'Players: &a%players%/%maxplayers%'
+      - ''
+      - '&e%url%'
+
 countdown:
-- title: "&e%count% seconds"
-  subtitle: "&eRight-click the bow to select a kit!"
-  color: 6
-  range: 10
-  #message:
-  #sound:
-- title: "&c%count%"
-  subtitle: "&ePrepare to fight!"
-  color: c
-  range: 5-1
+  - title: "&e%count% seconds"
+    subtitle: "&eRight-click the bow to select a kit!"
+    color: 6
+    range: 10
+    #message:
+    #sound:
+  - title: "&c%count%"
+    subtitle: "&ePrepare to fight!"
+    color: c
+    range: 5-1

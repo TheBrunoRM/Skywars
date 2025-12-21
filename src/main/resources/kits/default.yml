@@ -9,15 +9,15 @@ icon: WOODEN_PICKAXE
 
 # These are the items that will be given to the player when the game starts
 items:
-- type: WOODEN_SWORD
-  name: "&bBeginner's Sword"
-  lore:
-  - "&eA very nice sword that"
-  - "&ecan do anything."
-  amount: 1 # defaults to item's max stack
-- WOODEN_PICKAXE
-- WOODEN_AXE
-- STEAK 3
+  - type: WOODEN_SWORD
+    name: "&bBeginner's Sword"
+    lore:
+      - "&eA very nice sword that"
+      - "&ecan do anything."
+    amount: 1 # defaults to item's max stack
+  - WOODEN_PICKAXE
+  - WOODEN_AXE
+  - STEAK 3
 
 # This is the price that will be used when players buy the kit (if economy support is enabled)
 price: 0

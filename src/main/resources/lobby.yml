@@ -1,2 +1,2 @@
 # set the main lobby using /sw setmainlobby
-lobby: {}
+lobby: { }

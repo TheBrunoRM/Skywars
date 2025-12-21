@@ -8,8 +8,8 @@ items:
   - type: IRON_AXE
     name: "&aLumberjack's Axe"
     lore:
-    - "&eA very powerful axe"
-    - "&ethat can harvest any tree."
+      - "&eA very powerful axe"
+      - "&ethat can harvest any tree."
   # blocks
   - OAK_PLANKS 16
   - COBBLESTONE 16

@@ -12,47 +12,48 @@ none: "&rninguno"
 events:
   format: "&a%name% %time%"
   refill: "Rellenado"
-  noevent: "&rNo hay evento"
+  enderdragon: "Rellenado"
+  no_event: "&rNo hay evento"
 
 items:
   show_context: true
   context: '&7(Clic derecho)'
-  
+
   KIT_SELECTOR:
     name: '&a&lSelector de kit'
     description:
-    - "&7Da clic derecho para seleccionar tu kit"
-  
+      - "&7Da clic derecho para seleccionar tu kit"
+
   START_GAME:
     name: "&6&lEmpezar juego"
-  
+
   STOP_GAME:
     name: "&c&lDetener juego"
-  
-  GAME_OPTIONS: 
+
+  GAME_OPTIONS:
     name: '&b&lOpciones del juego'
     description:
-    - "&7Da clic derecho para cambiar los ajustes del juego"
-    
+      - "&7Da clic derecho para cambiar los ajustes del juego"
+
   SPECTATOR_OPTIONS:
     name: '&b&lOpciones de espectador'
     description:
-    - "&7Da clic derecho para cambiar tus opciones de espectador"
-    
+      - "&7Da clic derecho para cambiar tus opciones de espectador"
+
   LEAVE:
     name: '&c&lSalir'
     description:
-    - "&7Hacé clic derecho para volver al lobby principal."
-    
+      - "&7Hacé clic derecho para volver al lobby principal."
+
   PLAY_AGAIN:
     name: '&b&lJugar de vuelta'
     description:
-    - "&7Hacé clic derecho para jugar de nuevo"
-    
+      - "&7Hacé clic derecho para jugar de nuevo"
+
   TELEPORTER:
     name: '&b&lTeletransportador'
     description:
-    - "&7Hacé clic derecho para teletransportarte hacia otros jugadores"
+      - "&7Hacé clic derecho para teletransportarte hacia otros jugadores"
 
 arena_join:
   title: "&eSkyWars"
@@ -65,9 +66,9 @@ arena_start:
   message: "&e¡Las jaulas se abrieron! &c¡A PELEAR!"
 
 died:
-   title: "&c&l¡MORISTE!"
-   subtitle: "&7¡Ahora sos un espectador!"
-   message: ""
+  title: "&c&l¡MORISTE!"
+  subtitle: "&7¡Ahora sos un espectador!"
+  message: ""
 
 won:
   title: "&6&lGANASTE"
@@ -146,13 +147,13 @@ chest_holograms:
   refilled: "&e¡Rellenado!"
 
 countdown:
-- title: "&e%count% segundos"
-  subtitle: "&e¡Hacé clic derecho con el arco para seleccionar tu kit!"
-  color: 6
-  range: 10
-  #message:
-  #sound:
-- title: "&c%count%"
-  subtitle: "&e¡Preparate para pelear!"
-  color: c
-  range: 5-1
+  - title: "&e%count% segundos"
+    subtitle: "&e¡Hacé clic derecho con el arco para seleccionar tu kit!"
+    color: 6
+    range: 10
+    #message:
+    #sound:
+  - title: "&c%count%"
+    subtitle: "&e¡Preparate para pelear!"
+    color: c
+    range: 5-1

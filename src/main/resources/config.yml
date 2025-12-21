@@ -40,8 +40,8 @@ maxMapSize: 200
 # leave empty to show in all worlds:
 # scoreboardWorlds: []
 scoreboardWorlds:
-- world
-- lobby
+  - world
+  - lobby
 
 # update task for actionbar and scoreboard
 taskUpdate:
@@ -79,7 +79,7 @@ decimalFormat: "0.#"
 # you can disable the plugin commands here
 # possible options: start, forcestart, leave, where, skywars
 # you probably dont want to disable the last one lol
-disabledCommands: []
+disabledCommands: [ ]
 
 # this is represented as
 # slot (from 0 to 8): item type
@@ -108,7 +108,7 @@ items:
   # if for some reason you want to give items when the game starts
   # you can do so here
   # (not yet implemented)
-  playing: {}
+  playing: { }
 
 # you can make custom items by adding them here
 # you can add the details (name, description) in the lang file
