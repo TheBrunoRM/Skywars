@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import me.thebrunorm.skywars.holograms.*;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -40,10 +41,6 @@ import me.thebrunorm.skywars.events.SetupEvents;
 import me.thebrunorm.skywars.handlers.SkywarsActionbar;
 import me.thebrunorm.skywars.handlers.SkywarsScoreboard;
 import me.thebrunorm.skywars.handlers.SkywarsTablist;
-import me.thebrunorm.skywars.holograms.DecentHologramsController;
-import me.thebrunorm.skywars.holograms.HologramController;
-import me.thebrunorm.skywars.holograms.HolographicDisplaysNewController;
-import me.thebrunorm.skywars.holograms.HolographicDisplaysOldController;
 import me.thebrunorm.skywars.managers.ChestManager;
 import me.thebrunorm.skywars.managers.MapManager;
 import me.thebrunorm.skywars.managers.SignManager;
@@ -247,21 +244,7 @@ public class Skywars extends JavaPlugin {
 				this.hologramController = new HolographicDisplaysNewController();
 		}
 		if (this.hologramController == null) {
-			this.hologramController = new HologramController() {
-				@Override
-				public void removeHologram(Object id) {
-				}
-
-				@Override
-				public String createHologram(Object id, Location location, String text) {
-					return null;
-				}
-
-				@Override
-				public boolean changeHologram(Object id, String text, int line) {
-					return false;
-				}
-			};
+			this.hologramController = new DefaultHologramController();
 			this.sendMessage("&eHolograms: &cno supported holograms plugin found!");
 		} else {
 			holograms = true;
