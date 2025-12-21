@@ -17,6 +17,10 @@ public class MessageUtils {
 		sender.sendMessage(color(text, format));
 	}
 
+	public static void sendTranslated(CommandSender sender, String key, Object... format) {
+		sender.sendMessage(getMessage(key, format));
+	}
+
 	public static String color(String text) {
 		return ChatColor.translateAlternateColorCodes(ALT_COLOR_CHAR, text);
 	}
