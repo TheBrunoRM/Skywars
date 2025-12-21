@@ -4,12 +4,13 @@ import me.thebrunorm.skywars.ArenaStatus;
 import me.thebrunorm.skywars.MessageUtils;
 import me.thebrunorm.skywars.Skywars;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class ArenaEventManager {
 
 	private final Arena arena;
-	private final ArrayList<SkywarsEvent> events = new ArrayList<>();
+	private final Queue<SkywarsEvent> events = new LinkedList<>();
 
 	public ArenaEventManager(Arena arena) {
 		this.arena = arena;
@@ -23,23 +24,30 @@ public class ArenaEventManager {
 			return Skywars.langConfig.getString("status.ended");
 		final SkywarsEvent event = this.getNextEvent();
 		if (event == null)
-			return MessageUtils.getMessage("events.noevent");
+			return MessageUtils.getMessage("events.no_event");
 		final int time = event.getTime();
 		final int minutes = time / 60;
 		final int seconds = time % 60;
 		final String timeString = String.format("%d:%02d", minutes, seconds);
-		return MessageUtils.color(Skywars.langConfig.getString("events.format")
-			.replaceAll("%name%", Skywars.langConfig.getString("events." + event.getType().name().toLowerCase()))
+		final String eventNameKey = "events." + event.getType().name().toLowerCase();
+		return MessageUtils.color(Skywars.langConfig.getString("events.format", "<events.format>")
+			.replaceAll("%name%", Skywars.langConfig.getString(eventNameKey, String.format("<%s>", eventNameKey)))
 			.replaceAll("%time%", timeString));
 
 	}
 
 	public SkywarsEvent getNextEvent() {
-		if (this.events.isEmpty()) return null;
-		return this.events.get(0);
+		return events.peek();
 	}
 
-	public SkywarsEvent skipEvent() {
-		return events.remove(0);
+	public SkywarsEvent executeEvent() {
+		SkywarsEvent event = events.poll();
+		if (event == null) return null;
+		event.run();
+		return event;
+	}
+
+	public Queue<SkywarsEvent> getEvents() {
+		return events;
 	}
 }
