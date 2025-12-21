@@ -41,8 +41,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
-@SuppressWarnings("deprecation")
 public class Skywars extends JavaPlugin {
 
 	// get plugin data
@@ -80,9 +80,8 @@ public class Skywars extends JavaPlugin {
 	public static YamlConfiguration langConfig;
 	public static YamlConfiguration lobbyConfig;
 
-	public HashMap<Player, Location> playerLocations = new HashMap<Player, Location>();
+	private final List<Kit> kits = new ArrayList<>();
 
-	private String packageName;
 	private String serverPackageVersion;
 	private ReflectionNMS nmsHandler;
 
@@ -146,6 +145,136 @@ public class Skywars extends JavaPlugin {
 		this.signManager.loadSigns();
 		this.loadKits();
 	}
+	public HashMap<Player, Location> playerLocations = new HashMap<>();
+
+	public static void createBigCase(Location location, XMaterial material) {
+		final int[][] blocks = {
+			// base
+			{-1, -1, -1}, {0, -1, -1}, {1, -1, -1}, {-1, -1, 0}, {0, -1, 0}, {1, -1, 0}, {-1, -1, 1},
+			{0, -1, 1}, {1, -1, 1},
+
+			// top
+			{-1, 3, -1}, {0, 3, -1}, {1, 3, -1}, {-1, 3, 0}, {0, 3, 0}, {1, 3, 0}, {-1, 3, 1},
+			{0, 3, 1}, {1, 3, 1},
+
+			// left wall
+			{2, 0, -1}, {2, 0, 0}, {2, 0, 1}, {2, 1, -1}, {2, 1, 0}, {2, 1, 1}, {2, 2, -1},
+			{2, 2, 0}, {2, 2, 1},
+
+			// front wall
+			{-1, 0, 2}, {0, 0, 2}, {1, 0, 2}, {-1, 1, 2}, {0, 1, 2}, {1, 1, 2}, {-1, 2, 2},
+			{0, 2, 2}, {1, 2, 2},
+
+			// right wall
+			{-2, 0, -1}, {-2, 0, 0}, {-2, 0, 1}, {-2, 1, -1}, {-2, 1, 0}, {-2, 1, 1}, {-2, 2, -1},
+			{-2, 2, 0}, {-2, 2, 1},
+
+			// back wall
+			{-1, 0, -2}, {0, 0, -2}, {1, 0, -2}, {-1, 1, -2}, {0, 1, -2}, {1, 1, -2}, {-1, 2, -2},
+			{0, 2, -2}, {1, 2, -2},};
+		final int[][] airBlocks = {{-1, 0, -1}, {0, 0, -1}, {1, 0, -1}, {-1, 0, 0}, {0, 0, 0}, {1, 0, 0},
+			{-1, 0, 1}, {0, 0, 1}, {1, 0, 1},
+
+			{-1, 1, -1}, {0, 1, -1}, {1, 1, -1}, {-1, 1, 0}, {0, 1, 0}, {1, 1, 0}, {-1, 1, 1},
+			{0, 1, 1}, {1, 1, 1},
+
+			{-1, 2, -1}, {0, 2, -1}, {1, 2, -1}, {-1, 2, 0}, {0, 2, 0}, {1, 2, 0}, {-1, 2, 1},
+			{0, 2, 1}, {1, 2, 1},};
+		for (final int[] relative : airBlocks) {
+			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
+			block.setType(XMaterial.AIR.parseMaterial());
+		}
+		for (final int[] relative : blocks) {
+			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
+			block.setType(material.parseMaterial());
+			if (XMaterial.isNewVersion()) continue;
+
+			try {
+				block.getClass().getMethod("setData", byte.class).invoke(block, material.getData());
+			} catch (final Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public ReflectionNMS NMS() {
+		return this.nmsHandler;
+	}
+
+	public String getServerPackageVersion() {
+		return this.serverPackageVersion;
+	}
+
+	private boolean setupEconomy() {
+		if (!economyEnabled)
+			return false;
+		if (this.getServer().getPluginManager().getPlugin("Vault") == null) {
+			this.sendMessage("&eEconomy (Vault): &6plugin not found.");
+			return false;
+		}
+
+		this.economyProvider = this.getServer().getServicesManager().getRegistration(Economy.class);
+		if (this.economyProvider == null) {
+			this.sendMessage("&eEconomy (Vault): &6plugin found &cbut no registered service provider!");
+			return false;
+		}
+		this.economy = this.economyProvider.getProvider();
+		return this.economy != null;
+	}
+
+	public void loadEvents() {
+		final FileConfiguration config = this.getConfig();
+		final PluginManager pluginManager = this.getServer().getPluginManager();
+		if (config.getBoolean("signsEnabled")) {
+			this.signManager = new SignManager();
+			pluginManager.registerEvents(this.signManager, this);
+		}
+		if (config.getBoolean("messageSounds.enabled")) {
+			pluginManager.registerEvents(new MessageSound(), this);
+		}
+		if (config.getBoolean("disableWeather")) {
+			pluginManager.registerEvents(new DisableWeather(), this);
+		}
+		if (config.getBoolean("debug.projectileTests")) {
+			pluginManager.registerEvents(new ProjectileTrails(), this);
+		}
+		final Listener[] listeners = {new InteractEvent(), new Events(), new GamesMenu(), new MapMenu(),
+			new KitsMenu(), new SetupEvents(), new ConfigMenu(), new GameOptionsMenu(),
+			new PlayerInventoryManager(),};
+		for (final Listener listener : listeners) {
+			pluginManager.registerEvents(listener, this);
+		}
+	}
+
+	public void loadCommands() {
+		final HashMap<String, CommandExecutor> cmds = new HashMap<>();
+		cmds.put("skywars", new MainCommand());
+		cmds.put("where", new WhereCommand());
+		cmds.put("start", new StartCommand());
+		cmds.put("forcestart", new ForceStartCommand());
+		cmds.put("leave", new LeaveCommand());
+		for (final String cmd : cmds.keySet()) {
+			if (!this.getConfig().getStringList("disabledCommands").contains(cmd)) {
+				this.sendDebugMessage("&eLoading command &a%s&e...", cmd);
+				this.getCommand(cmd).setExecutor(cmds.get(cmd));
+			} else
+				this.sendDebugMessage("&7Skipping command &c%s&e...", cmd);
+		}
+	}
+
+	ChestManager chestManager = new ChestManager();
+
+	public ChestManager getChestManager() {
+		return this.chestManager;
+	}
+
+	MapManager mapManager = new MapManager();
+
+	public MapManager getMapManager() {
+		return this.mapManager;
+	}
+
+	// kits
 
 	@Override
 	public void onEnable() {
@@ -159,16 +288,16 @@ public class Skywars extends JavaPlugin {
 		playersPath = this.getDataFolder() + "/players";
 		chestsPath = this.getDataFolder() + "/chests";
 
-		this.packageName = this.getServer().getClass().getPackage().getName();
-		this.serverPackageVersion = this.packageName.substring(this.packageName.lastIndexOf('.') + 1);
+		String packageName = this.getServer().getClass().getPackage().getName();
+		this.serverPackageVersion = packageName.substring(packageName.lastIndexOf('.') + 1);
 
-		this.sendDebugMessage("&bServer version: &e%s (&a%s&e)", this.packageName, this.serverPackageVersion);
+		this.sendDebugMessage("&bServer version: &e%s (&a%s&e)", packageName, this.serverPackageVersion);
 
 		final File worldsToDeleteFile = new File(this.getDataFolder(), "delete_worlds.yml");
 		if (worldsToDeleteFile.exists()) {
 			final YamlConfiguration deleteWorldsConfig = YamlConfiguration.loadConfiguration(worldsToDeleteFile);
 			final List<String> list = deleteWorldsConfig.getStringList("worlds");
-			for (final String worldName : new ArrayList<String>(list)) {
+			for (final String worldName : new ArrayList<>(list)) {
 				final World world = Bukkit.getWorld(worldName);
 				if (world != null) {
 					for (final Player p : world.getPlayers())
@@ -274,6 +403,10 @@ public class Skywars extends JavaPlugin {
 			}, 0L, Skywars.get().getConfig().getLong("taskUpdate.interval") * 20);
 	}
 
+	public List<Kit> getKits() {
+		return this.kits;
+	}
+
 	@Override
 	public void onDisable() {
 		if (this.updated) {
@@ -300,7 +433,7 @@ public class Skywars extends JavaPlugin {
 		// add world names to a file
 		// to try to delete those worlds
 		// the next time the plugin starts up
-		final List<String> worldNames = new ArrayList<String>(this.arenas.size());
+		final List<String> worldNames = new ArrayList<>(this.arenas.size());
 		for (final Arena arena : this.arenas) {
 			arena.clear(false);
 			worldNames.add(arena.getWorldName());
@@ -320,102 +453,18 @@ public class Skywars extends JavaPlugin {
 		this.arenas.clear();
 	}
 
-	public ReflectionNMS NMS() {
-		return this.nmsHandler;
-	}
-
-	public String getServerPackageVersion() {
-		return this.serverPackageVersion;
-	}
-
-	private boolean setupEconomy() {
-		if (!economyEnabled)
-			return false;
-		if (this.getServer().getPluginManager().getPlugin("Vault") == null) {
-			this.sendMessage("&eEconomy (Vault): &6plugin not found.");
-			return false;
-		}
-
-		this.economyProvider = this.getServer().getServicesManager().getRegistration(Economy.class);
-		if (this.economyProvider == null) {
-			this.sendMessage("&eEconomy (Vault): &6plugin found &cbut no registered service provider!");
-			return false;
-		}
-		this.economy = this.economyProvider.getProvider();
-		return this.economy != null;
-	}
-
-	public void loadEvents() {
-		final FileConfiguration config = this.getConfig();
-		final PluginManager pluginManager = this.getServer().getPluginManager();
-		if (config.getBoolean("signsEnabled")) {
-			this.signManager = new SignManager();
-			pluginManager.registerEvents(this.signManager, this);
-		}
-		if (config.getBoolean("messageSounds.enabled")) {
-			pluginManager.registerEvents(new MessageSound(), this);
-		}
-		if (config.getBoolean("disableWeather")) {
-			pluginManager.registerEvents(new DisableWeather(), this);
-		}
-		if (config.getBoolean("debug.projectileTests")) {
-			pluginManager.registerEvents(new ProjectileTrails(), this);
-		}
-		final Listener[] listeners = {new InteractEvent(), new Events(), new GamesMenu(), new MapMenu(),
-			new KitsMenu(), new SetupEvents(), new ConfigMenu(), new GameOptionsMenu(),
-			new PlayerInventoryManager(),};
-		for (final Listener listener : listeners) {
-			pluginManager.registerEvents(listener, this);
-		}
-	}
-
-	public void loadCommands() {
-		final HashMap<String, CommandExecutor> cmds = new HashMap<>();
-		cmds.put("skywars", new MainCommand());
-		cmds.put("where", new WhereCommand());
-		cmds.put("start", new StartCommand());
-		cmds.put("forcestart", new ForceStartCommand());
-		cmds.put("leave", new LeaveCommand());
-		for (final String cmd : cmds.keySet()) {
-			if (!this.getConfig().getStringList("disabledCommands").contains(cmd)) {
-				this.sendDebugMessage("&eLoading command &a%s&e...", cmd);
-				this.getCommand(cmd).setExecutor(cmds.get(cmd));
-			} else
-				this.sendDebugMessage("&7Skipping command &c%s&e...", cmd);
-		}
-	}
-
-	ChestManager chestManager = new ChestManager();
-
-	public ChestManager getChestManager() {
-		return this.chestManager;
-	}
-
-	MapManager mapManager = new MapManager();
-
-	public MapManager getMapManager() {
-		return this.mapManager;
-	}
-
-	// kits
-
-	private final List<Kit> kits = new ArrayList<Kit>();
-
-	public List<Kit> getKits() {
-		return this.kits;
-	}
-
 	public void loadKits() {
 		this.kits.clear();
 		final File folder = new File(kitsPath);
 		if (!folder.exists()) {
 			folder.mkdirs();
 		}
-		if (folder.listFiles().length <= 0) {
+		File[] files = Objects.requireNonNull(folder.listFiles());
+		if (files.length <= 0) {
 			this.sendDebugMessage("&eSetting up default kit.");
 			ConfigurationUtils.copyDefaultContentsToFile("kits/default.yml", new File(kitsPath, "default.yml"));
 		}
-		for (final File file : folder.listFiles()) {
+		for (final File file : files) {
 			final String name = file.getName().replaceFirst("[.][^.]+$", "");
 			final YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			ConfigurationUtils.createMissingKeys(config, ConfigurationUtils.getDefaultConfig("kits/default.yml"),
@@ -428,7 +477,7 @@ public class Skywars extends JavaPlugin {
 			kit.setDisplayName(config.getString("name"));
 
 			// load items
-			final List<ItemStack> items = new ArrayList<ItemStack>();
+			final List<ItemStack> items = new ArrayList<>();
 
 			for (final Object a : config.getList("items")) {
 				final ItemStack item = ConfigurationUtils.parseItemFromConfig(a);
@@ -449,56 +498,6 @@ public class Skywars extends JavaPlugin {
 			this.sendDebugMessage("&eLoaded kit: &a%s", kit.getName());
 		}
 		this.sendDebugMessage("Finished loading kits.");
-	}
-
-	public static void createBigCase(Location location, XMaterial material) {
-		final int[][] blocks = {
-			// base
-			{-1, -1, -1}, {0, -1, -1}, {1, -1, -1}, {-1, -1, 0}, {0, -1, 0}, {1, -1, 0}, {-1, -1, 1},
-			{0, -1, 1}, {1, -1, 1},
-
-			// top
-			{-1, 3, -1}, {0, 3, -1}, {1, 3, -1}, {-1, 3, 0}, {0, 3, 0}, {1, 3, 0}, {-1, 3, 1},
-			{0, 3, 1}, {1, 3, 1},
-
-			// left wall
-			{2, 0, -1}, {2, 0, 0}, {2, 0, 1}, {2, 1, -1}, {2, 1, 0}, {2, 1, 1}, {2, 2, -1},
-			{2, 2, 0}, {2, 2, 1},
-
-			// front wall
-			{-1, 0, 2}, {0, 0, 2}, {1, 0, 2}, {-1, 1, 2}, {0, 1, 2}, {1, 1, 2}, {-1, 2, 2},
-			{0, 2, 2}, {1, 2, 2},
-
-			// right wall
-			{-2, 0, -1}, {-2, 0, 0}, {-2, 0, 1}, {-2, 1, -1}, {-2, 1, 0}, {-2, 1, 1}, {-2, 2, -1},
-			{-2, 2, 0}, {-2, 2, 1},
-
-			// back wall
-			{-1, 0, -2}, {0, 0, -2}, {1, 0, -2}, {-1, 1, -2}, {0, 1, -2}, {1, 1, -2}, {-1, 2, -2},
-			{0, 2, -2}, {1, 2, -2},};
-		final int[][] airBlocks = {{-1, 0, -1}, {0, 0, -1}, {1, 0, -1}, {-1, 0, 0}, {0, 0, 0}, {1, 0, 0},
-			{-1, 0, 1}, {0, 0, 1}, {1, 0, 1},
-
-			{-1, 1, -1}, {0, 1, -1}, {1, 1, -1}, {-1, 1, 0}, {0, 1, 0}, {1, 1, 0}, {-1, 1, 1},
-			{0, 1, 1}, {1, 1, 1},
-
-			{-1, 2, -1}, {0, 2, -1}, {1, 2, -1}, {-1, 2, 0}, {0, 2, 0}, {1, 2, 0}, {-1, 2, 1},
-			{0, 2, 1}, {1, 2, 1},};
-		for (final int[] relative : airBlocks) {
-			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
-			block.setType(XMaterial.AIR.parseMaterial());
-		}
-		for (final int[] relative : blocks) {
-			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
-			block.setType(material.parseMaterial());
-			if (!XMaterial.isNewVersion()) {
-				try {
-					block.getClass().getMethod("setData", byte.class).invoke(block, material.getData());
-				} catch (final Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 
 	public static void createCase(Location location, XMaterial material) {
@@ -547,7 +546,7 @@ public class Skywars extends JavaPlugin {
 
 	public Arena getRandomJoinableArena() {
 		for (final Arena arena : this.arenas) {
-			if (!arena.isJoinable())
+			if (arena.isUnusable())
 				continue;
 			return arena;
 		}
@@ -568,12 +567,11 @@ public class Skywars extends JavaPlugin {
 
 	// TODO make this a cached hashmap
 	public Arena getPlayerArena(Player player) {
-		for (int i = 0; i < this.arenas.size(); i++) {
-			final List<SkywarsUser> players = this.arenas.get(i).getUsers();
-			for (int j = 0; j < players.size(); j++) {
-				if (players.get(j).getPlayer().equals(player)) {
-					return this.arenas.get(i);
-				}
+		for (Arena arena : this.arenas) {
+			final List<SkywarsUser> players = arena.getUsers();
+			for (SkywarsUser user : players) {
+				if (!user.getPlayer().equals(player)) continue;
+				return arena;
 			}
 		}
 		return null;
@@ -614,11 +612,10 @@ public class Skywars extends JavaPlugin {
 	// kits
 
 	public Kit getKit(String name) {
-		for (int i = 0; i < this.kits.size(); i++) {
-			if (this.kits.get(i).getName().equalsIgnoreCase(name)
-				|| this.kits.get(i).getDisplayName().equalsIgnoreCase(name)) {
-				return this.kits.get(i);
-			}
+		for (Kit kit : this.kits) {
+			if (!kit.getName().equalsIgnoreCase(name)
+				&& !kit.getDisplayName().equalsIgnoreCase(name)) continue;
+			return kit;
 		}
 		return null;
 	}

@@ -1,9 +1,10 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.menus;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.cryptomorin.xseries.XMaterial;
+import me.thebrunorm.skywars.Messager;
+import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.structures.Arena;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,11 +14,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.cryptomorin.xseries.XMaterial;
-
-import me.thebrunorm.skywars.Messager;
-import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.structures.Arena;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GamesMenu implements Listener {
 
@@ -27,7 +25,7 @@ public class GamesMenu implements Listener {
 		final ItemStack item = new ItemStack(XMaterial.BOW.parseItem());
 		final ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(Messager.color("&aclick to join random game"));
-		final List<String> lore = new ArrayList<String>();
+		final List<String> lore = new ArrayList<>();
 		lore.add(Messager.color("&eliterally just click this"));
 		lore.add(Messager.color("&eto join the game that"));
 		lore.add(Messager.color("&ehas the most players in it"));

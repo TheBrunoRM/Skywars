@@ -5,7 +5,7 @@ import org.bukkit.WeatherType;
 
 public class ArenaGameSettings {
 
-	Arena arena;
+	final Arena arena;
 	long time;
 	WeatherType weather;
 	ChestType chestType;

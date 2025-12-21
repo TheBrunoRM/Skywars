@@ -1,9 +1,13 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.menus;
 
-import java.util.HashMap;
-import java.util.UUID;
-
+import com.cryptomorin.xseries.XMaterial;
+import me.thebrunorm.skywars.InventoryUtils;
+import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.structures.Arena;
+import me.thebrunorm.skywars.structures.ChestType;
+import me.thebrunorm.skywars.structures.TimeType;
+import me.thebrunorm.skywars.structures.WeatherType;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,18 +16,12 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import com.cryptomorin.xseries.XMaterial;
-
-import me.thebrunorm.skywars.InventoryUtils;
-import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.structures.Arena;
-import me.thebrunorm.skywars.structures.ChestType;
-import me.thebrunorm.skywars.structures.TimeType;
-import me.thebrunorm.skywars.structures.WeatherType;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class GameOptionsMenu implements Listener {
 
-	static HashMap<UUID, GameOptionType> currentMenus = new HashMap<UUID, GameOptionType>();
+	final static HashMap<UUID, GameOptionType> currentMenus = new HashMap<>();
 
 	public static void open(Player player) {
 		open(player, GameOptionType.MAIN);
