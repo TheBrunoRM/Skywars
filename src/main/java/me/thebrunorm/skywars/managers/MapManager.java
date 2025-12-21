@@ -126,10 +126,10 @@ public class MapManager {
 		Skywars.get().sendDebugMessage("worldname for %s: %s", map.getName(), worldName);
 
 		if (mapConfig.get("spawn") == null) {
-			Skywars.get().sendDebugMessage("Found no spawns when loading map, calculating spawns...");
+			Skywars.get().sendDebugMessage(Messager.getMessage("SETUP_NO_SPAWN_FOUND_WHEN_LOADING_MAP_DEBUG"));
 			map.calculateSpawns();
 		} else {
-			Skywars.get().sendDebugMessage("Loading spawns for map: %s", map.getName());
+			Skywars.get().sendDebugMessage(Messager.getMessage("MAP_LOADING_SPAWNS_FOR_MAP_DEBUG", map.getName()));
 			for (final String spawn : mapConfig.getConfigurationSection("spawn").getKeys(false)) {
 				final int i = Integer.parseInt(spawn);
 				if (mapConfig.get(String.format("spawn.%s", i)) == null)
@@ -143,9 +143,9 @@ public class MapManager {
 		}
 
 		if (mapConfig.get("chest") == null) {
-			Skywars.get().sendDebugMessage("Found no chests when loading map.");
+			Skywars.get().sendDebugMessage(Messager.getMessage("MAP_NO_CHESTS_FOUND_WHEN_LOADING_MAP_DEBUG"));
 		} else {
-			Skywars.get().sendDebugMessage("Loading chests for map: %s", map.getName());
+			Skywars.get().sendDebugMessage(Messager.getMessage("MAP_LOADING_CHESTS_FOR_MAP_DEBUG", map.getName()));
 			for (final String spawn : mapConfig.getConfigurationSection("chest").getKeys(false)) {
 				final int i = Integer.parseInt(spawn);
 				if (mapConfig.get(String.format("chest.%s", i)) == null)
@@ -189,7 +189,7 @@ public class MapManager {
 
 		for (final File file : folder.listFiles()) {
 			if (file.isDirectory()) {
-				Skywars.get().sendDebugMessage("Loading world in maps folder: %s", file.getName());
+				Skywars.get().sendDebugMessage(Messager.getMessage("MAP_LOADING_WORLD_IN_MAPS_FOLDER_DEBUG", file.getName()));
 				file.renameTo(new File(Skywars.worldsPath, file.getName()));
 				continue;
 			}

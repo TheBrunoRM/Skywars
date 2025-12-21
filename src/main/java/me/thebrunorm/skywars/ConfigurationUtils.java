@@ -127,13 +127,13 @@ public class ConfigurationUtils {
 		if (worldName == null)
 			worldName = config.getString("worldName");
 		if (worldName == null) {
-			Skywars.get().sendDebugMessage("warning, getlocationconfig: worldname is null");
+			Skywars.get().sendDebugMessage(Messager.getMessage("CONFIG_DEBUG_GETLOCATIONCONFIG_WORLDNAME_NULL"));
 			return null;
 		}
 		final World world = Bukkit.getWorld(worldName);
 		if (world != null)
 			return getLocationConfig(world, section);
-		Skywars.get().sendDebugMessage("warning, getlocationconfig: world is null");
+		Skywars.get().sendDebugMessage(Messager.getMessage("CONFIG_DEBUG_GETLOCATIONCONFIG_WORLD_NULL"));
 		return null;
 	}
 

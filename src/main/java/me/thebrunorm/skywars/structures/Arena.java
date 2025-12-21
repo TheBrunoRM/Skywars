@@ -787,7 +787,7 @@ public class Arena {
 		if (this.getWorld() == null)
 			problems.add("World not found");
 		if (this.getSpawn(this.getAlivePlayerCount()) == null)
-			problems.add(String.format("Spawn %s not set", this.getAlivePlayerCount()));
+			problems.add(Messager.getMessage("SPAWN_X_NOT_SET_PROBLEM", this.getAlivePlayerCount()));
 		if (this.map.getMaxPlayers() <= 0)
 			problems.add("Max players not set");
 		if (this.getWorldName() == null) {
@@ -938,7 +938,7 @@ public class Arena {
 			return null;
 		}
 
-		Skywars.get().sendDebugMessage("Loading world for map: " + this.getMap().getName());
+		Skywars.get().sendDebugMessage(Messager.getMessage("ARENA_LOADING_WORLD_FOR_MAP_DEBUG", this.getMap().getName()));
 		final File bukkitWorldFolder = new File(Bukkit.getWorldContainer(), worldName);
 		try {
 			if (bukkitWorldFolder.isDirectory()) {
