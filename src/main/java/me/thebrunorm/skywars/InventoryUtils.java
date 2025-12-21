@@ -1,13 +1,13 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class InventoryUtils {
 
@@ -16,7 +16,7 @@ public class InventoryUtils {
 		try {
 			final ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName(Messager.color(displayName));
-			final List<String> lore = new ArrayList<String>();
+			final List<String> lore = new ArrayList<>();
 			for (final String line : loreLines)
 				lore.add(Messager.color("&e" + line));
 			meta.setLore(lore);

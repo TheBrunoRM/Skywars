@@ -376,7 +376,7 @@ public class SkywarsUtils {
 				final ItemMeta itemMeta = item.getItemMeta();
 				final String configName = getItemNameFromConfig(itemType);
 				itemMeta.setDisplayName(Messager.color(configName));
-				final List<String> itemLore = new ArrayList<String>();
+				final List<String> itemLore = new ArrayList<>();
 				for (final String loreLine : Skywars.langConfig.getStringList("items." + itemType.name() + ".description")) {
 					itemLore.add(Messager.color(loreLine));
 				}

@@ -97,7 +97,7 @@ public class Events implements Listener {
 			return;
 		}
 
-		if (arena.getStatus() != ArenaStatus.PLAYING || arena.isInvencibility()) {
+		if (arena.getStatus() != ArenaStatus.PLAYING || arena.isInvincibility()) {
 			event.setCancelled(true);
 		} else if (arena.getStatus() == ArenaStatus.PLAYING && event.getCause() == DamageCause.VOID) {
 			event.setCancelled(true);
@@ -121,7 +121,7 @@ public class Events implements Listener {
 			return;
 		final LivingEntity livingEntity = (LivingEntity) entity;
 		final Entity damager = event.getDamager();
-		if (damager == null || !(damager instanceof Player))
+		if (!(damager instanceof Player))
 			return;
 		final Player attacker = (Player) damager;
 

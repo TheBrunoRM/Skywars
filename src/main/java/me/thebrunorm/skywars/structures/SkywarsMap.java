@@ -36,8 +36,8 @@ public class SkywarsMap {
 		return this.worldName;
 	}
 
-	HashMap<Integer, Vector> spawns = new HashMap<Integer, Vector>();
-	HashMap<Integer, Vector> chests = new HashMap<Integer, Vector>();
+	HashMap<Integer, Vector> spawns = new HashMap<>();
+	HashMap<Integer, Vector> chests = new HashMap<>();
 
 	public SkywarsMap(String name, int teamSize) {
 		this.name = name;
@@ -111,7 +111,7 @@ public class SkywarsMap {
 
 		Skywars.get().sendDebugMessage("&bCalculating spawns for map &6" + this.name);
 
-		final ArrayList<Vector> spawnLocations = new ArrayList<Vector>();
+		final ArrayList<Vector> spawnLocations = new ArrayList<>();
 
 		// get beacon locations from world
 

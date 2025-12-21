@@ -1,9 +1,10 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.managers;
 
-import java.io.File;
-import java.util.HashMap;
-
+import com.cryptomorin.xseries.XMaterial;
+import me.thebrunorm.skywars.ConfigurationUtils;
+import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.SkywarsUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -11,15 +12,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import com.cryptomorin.xseries.XMaterial;
-
-import me.thebrunorm.skywars.ConfigurationUtils;
-import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.SkywarsUtils;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Objects;
 
 public class ChestManager {
 
-	HashMap<String, YamlConfiguration> chestConfigurations = new HashMap<String, YamlConfiguration>();
+	final HashMap<String, YamlConfiguration> chestConfigurations = new HashMap<>();
 
 	public HashMap<String, YamlConfiguration> getChestConfigurations() {
 		return this.chestConfigurations;
@@ -48,12 +47,13 @@ public class ChestManager {
 		final File folder = new File(Skywars.chestsPath);
 		if (!folder.exists())
 			folder.mkdirs();
-		if (folder.listFiles().length <= 0) {
+		File[] files = Objects.requireNonNull(folder.listFiles());
+		if (files.length <= 0) {
 			Skywars.get().sendDebugMessage("&eSetting up default chest configuration.");
 			ConfigurationUtils.copyDefaultContentsToFile("chests/normal.yml",
 					new File(Skywars.chestsPath, "normal.yml"));
 		}
-		for (final File file : folder.listFiles()) {
+		for (final File file : files) {
 			final YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 			this.chestConfigurations.put(file.getName().split("\\.(\\w+)$")[0], config);
 		}

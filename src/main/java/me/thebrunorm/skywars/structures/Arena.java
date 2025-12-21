@@ -35,7 +35,7 @@ public class Arena {
 	private ArenaStatus status;
 	private int countdown;
 	private boolean joinable = true;
-	private boolean invencibility = false;
+	private boolean invincibility = false;
 	private boolean forcedStart;
 	private Player forcedStartPlayer;
 	private SkywarsUser winner;
@@ -62,13 +62,11 @@ public class Arena {
 		return this.map;
 	}
 
-	private final ArrayList<SkywarsTeam> teams = new ArrayList<SkywarsTeam>();
-	private final ArrayList<SkywarsUser> users = new ArrayList<SkywarsUser>();
-	private final ArrayList<SkywarsEvent> events = new ArrayList<SkywarsEvent>();
-
-	// TODO store chest locations and types (normal or center chests)
-	private final ArrayList<Chest> activeChests = new ArrayList<Chest>();
-	private final HashMap<Chest, String> chestHolograms = new HashMap<Chest, String>();
+	final HashMap<UUID, TimeType> timeVotes = new HashMap<>();
+	final HashMap<UUID, WeatherType> weatherVotes = new HashMap<>();
+	final HashMap<UUID, ChestType> chestVotes = new HashMap<>();
+	private final ArrayList<SkywarsTeam> teams = new ArrayList<>();
+	private final ArrayList<SkywarsUser> users = new ArrayList<>();
 
 	public ArrayList<SkywarsTeam> getTeams() {
 		return this.teams;
@@ -79,13 +77,12 @@ public class Arena {
 		this.status = ArenaStatus.WAITING;
 		this.events.add(new SkywarsEvent(this, SkywarsEventType.REFILL, 60));
 		this.events.add(new SkywarsEvent(this, SkywarsEventType.REFILL, 60));
-		this.joinable = true;
+		this.events.add(new SkywarsEvent(this, SkywarsEventType.ENDER_DRAGON, 60 * 3));
 	}
 
 	public SkywarsEvent getNextEvent() {
-		if (this.events.size() > 0)
-			return this.events.get(0);
-		return null;
+		if (this.events.isEmpty()) return null;
+		return this.events.get(0);
 	}
 
 	public String getNextEventText() {
@@ -549,75 +546,7 @@ public class Arena {
 		return this.startGame(null);
 	}
 
-	public boolean startGame(Player playerStarted) {
-		if (playerStarted != null) {
-			if (!CommandsUtils.permissionCheckWithMessage(playerStarted, "skywars.forcestart"))
-				return false;
-			if (!CommandsUtils.arenaCheckWithMessage(playerStarted))
-				return false;
-		}
-		if (this.started())
-			return false;
-		this.cancelTimer();
-		this.startTimerAndSetStatus(ArenaStatus.PLAYING);
-		this.fillChests();
-		this.applyGameSettings();
-		for (final Vector spawn : this.map.getSpawns().values()) {
-			Skywars.createCase(this.getVectorInArena(spawn), XMaterial.AIR);
-		}
-		for (final SkywarsUser player : this.getAlivePlayers()) {
-			SkywarsUtils.clearPlayer(player.getPlayer());
-			player.getPlayer().setGameMode(GameMode.SURVIVAL);
-			final Kit kit = Skywars.get().getPlayerKit(player.getPlayer());
-			if (kit != null) {
-				for (final ItemStack item : kit.getItems()) {
-					player.getPlayer().getInventory().addItem(item);
-				}
-			}
-			player.getPlayer().sendMessage(Messager.getMessage("arena_start.message"));
-			Skywars.get().NMS().sendTitle(player.getPlayer(), Messager.getMessage("arena_start.title"),
-				Messager.getMessage("arena_start.subtitle"));
-			SkywarsUtils.playSoundsFromConfig(player.getPlayer(), "sounds.start");
-
-			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
-				@Override
-				public void run() {
-					if (!Arena.this.started() || Arena.this.getUser(player.getPlayer()) == null || player.isSpectator())
-						return;
-					for (final String l : Skywars.langConfig.getStringList("startLines")) {
-						player.getPlayer().sendMessage(Messager.color(l));
-					}
-				}
-			}, 20);
-
-			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
-				@Override
-				public void run() {
-					if (!Arena.this.started() || Arena.this.getUser(player.getPlayer()) == null || player.isSpectator())
-						return;
-					final double playMoney = Skywars.get().getConfig().getDouble("economy.play");
-					if (Skywars.get().getEconomy() != null && playMoney > 0) {
-						Skywars.get().getEconomy().depositPlayer(player.getPlayer(), playMoney);
-						player.getPlayer().sendMessage(Messager.color("&6+$%s", SkywarsUtils.formatDouble(playMoney)));
-					}
-				}
-			}, 20 * 10);
-		}
-
-		if (Skywars.configuration.invencibilityEnabled) {
-			this.setInvencibility(true);
-			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
-
-				@Override
-				public void run() {
-					Arena.this.setInvencibility(false);
-				}
-
-			}, Skywars.configuration.invencibilityTicks);
-		}
-
-		return true;
-	}
+	private final ArrayList<SkywarsEvent> events = new ArrayList<>();
 
 	private void applyGameSettings() {
 
@@ -682,21 +611,8 @@ public class Arena {
 		}
 	}
 
-	public ArrayList<String> getProblems() {
-		final ArrayList<String> problems = new ArrayList<String>();
-		if (this.getWorld() == null)
-			problems.add("World not found");
-		if (this.getSpawn(this.getAlivePlayerCount()) == null)
-			problems.add(String.format("Spawn %s not set", this.getAlivePlayerCount()));
-		if (this.map.getMaxPlayers() <= 0)
-			problems.add("Max players not set");
-		if (this.getWorldName() == null) {
-			problems.add("No world set");
-		}
-		if (!this.isJoinable())
-			problems.add("Arena is not joinable");
-		return problems;
-	}
+	// TODO store chest locations and types (normal or center chests)
+	private final ArrayList<Chest> activeChests = new ArrayList<>();
 
 	boolean checkProblems() {
 		return this.getProblems().size() <= 0;
@@ -794,109 +710,124 @@ public class Arena {
 			.collect(Collectors.toCollection(ArrayList::new));
 	}
 
-	public boolean hasPlayer(Player player) {
-		for (int i = 0; i < this.users.size(); i++) {
-			if (this.users.get(i).getPlayer().getName().equals(player.getName())) {
-				return true;
+	private final HashMap<Chest, String> chestHolograms = new HashMap<>();
+
+	public boolean startGame(Player playerStarted) {
+		if (playerStarted != null) {
+			if (!CommandsUtils.hasPermission(playerStarted, "skywars.forcestart"))
+				return false;
+			if (!CommandsUtils.isInArenaJoined(playerStarted))
+				return false;
+		}
+		if (this.started())
+			return false;
+		this.cancelTimer();
+		this.startTimerAndSetStatus(ArenaStatus.PLAYING);
+		this.fillChests();
+		this.applyGameSettings();
+		for (final Vector spawn : this.map.getSpawns().values()) {
+			Skywars.createCase(this.getVectorInArena(spawn), XMaterial.AIR);
+		}
+		for (final SkywarsUser player : this.getAlivePlayers()) {
+			SkywarsUtils.clearPlayer(player.getPlayer());
+			player.getPlayer().setGameMode(GameMode.SURVIVAL);
+			final Kit kit = Skywars.get().getPlayerKit(player.getPlayer());
+			if (kit != null) {
+				for (final ItemStack item : kit.getItems()) {
+					player.getPlayer().getInventory().addItem(item);
+				}
 			}
+			player.getPlayer().sendMessage(Messager.getMessage("arena_start.message"));
+			Skywars.get().NMS().sendTitle(player.getPlayer(), Messager.getMessage("arena_start.title"),
+				Messager.getMessage("arena_start.subtitle"));
+			SkywarsUtils.playSoundsFromConfig(player.getPlayer(), "sounds.start");
+
+			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
+				@Override
+				public void run() {
+					if (!Arena.this.started() || Arena.this.getUser(player.getPlayer()) == null || player.isSpectator())
+						return;
+					for (final String l : Skywars.langConfig.getStringList("startLines")) {
+						player.getPlayer().sendMessage(Messager.color(l));
+					}
+				}
+			}, 20);
+
+			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
+				@Override
+				public void run() {
+					if (!Arena.this.started() || Arena.this.getUser(player.getPlayer()) == null || player.isSpectator())
+						return;
+					final double playMoney = Skywars.get().getConfig().getDouble("economy.play");
+					if (Skywars.get().getEconomy() != null && playMoney > 0) {
+						Skywars.get().getEconomy().depositPlayer(player.getPlayer(), playMoney);
+						player.getPlayer().sendMessage(Messager.color("&6+$%s", SkywarsUtils.formatDouble(playMoney)));
+					}
+				}
+			}, 20 * 10);
+		}
+
+		if (Skywars.configuration.invencibilityEnabled) {
+			this.setInvincibility(true);
+			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
+
+				@Override
+				public void run() {
+					Arena.this.setInvincibility(false);
+				}
+
+			}, Skywars.configuration.invencibilityTicks);
+		}
+
+		return true;
+	}
+
+	public ArrayList<String> getProblems() {
+		final ArrayList<String> problems = new ArrayList<>();
+		if (this.getWorld() == null)
+			problems.add("World not found");
+		if (this.getSpawn(this.getAlivePlayerCount()) == null)
+			problems.add(String.format("Spawn %s not set", this.getAlivePlayerCount()));
+		if (this.map.getMaxPlayers() <= 0)
+			problems.add("Max players not set");
+		if (this.getWorldName() == null) {
+			problems.add("No world set");
+		}
+		if (this.isUnusable())
+			problems.add("Arena is not joinable");
+		return problems;
+	}
+
+	public boolean hasPlayer(Player player) {
+		for (SkywarsUser user : this.users) {
+			if (!user.getPlayer().getName().equals(player.getName())) continue;
+			return true;
 		}
 		return false;
 	}
 
 	SkywarsUser getUser(int index) {
 		for (final SkywarsUser swp : this.getUsers()) {
-			if (swp.getNumber() == index)
-				return swp;
+			if (swp.getNumber() != index) continue;
+			return swp;
 		}
 		return null;
 	}
 
 	public SkywarsUser getUser(String name) {
 		for (final SkywarsUser swp : this.getUsers()) {
-			if (swp.getPlayer().getName().equals(name))
-				return swp;
+			if (!swp.getPlayer().getName().equals(name)) continue;
+			return swp;
 		}
 		return null;
 	}
 
 	public SkywarsUser getUser(Player player) {
 		for (final SkywarsUser swp : this.getUsers()) {
-			if (swp.getPlayer().getName().equals(player.getName()))
-				return swp;
+			if (!swp.getPlayer().getName().equals(player.getName())) continue;
+			return swp;
 		}
 		return null;
-	}
-
-	public ArrayList<Chunk> getAllChunksInMap() {
-		final ArrayList<Chunk> list = new ArrayList<Chunk>();
-
-		final World world = this.getWorld();
-		if (world == null) {
-			Skywars.get().sendMessage("Could not get world for map: ", this.getMap().getName());
-			return list;
-		}
-
-		final int maxMapSizeInBlocks = Skywars.config.getInt("maxMapSize");
-		final int minBlock = -maxMapSizeInBlocks / 2;
-		final int maxBlock = maxMapSizeInBlocks / 2;
-
-		final Chunk minChunk = world.getChunkAt(new Location(world, minBlock, 0, minBlock));
-		final Chunk maxChunk = world.getChunkAt(new Location(world, maxBlock, 0, maxBlock));
-
-		for (int x = minChunk.getX(); x < maxChunk.getX(); x++) {
-			for (int z = minChunk.getZ(); z < maxChunk.getZ(); z++) {
-				final Chunk chunk = world.getChunkAt(x, z);
-				list.add(chunk);
-			}
-		}
-
-		return list;
-	}
-
-	public ArrayList<BlockState> getAllBlockStatesInMap(Material mat) {
-		final ArrayList<BlockState> list = new ArrayList<BlockState>();
-
-		final World world = this.getWorld();
-		if (world == null) {
-			Skywars.get().sendMessage("Could not get world for map: ", this.getMap().getName());
-			return list;
-		}
-
-		for (final Chunk chunk : this.getAllChunksInMap()) {
-			for (final BlockState state : chunk.getTileEntities()) {
-				if (state.getType() != mat)
-					continue;
-				list.add(state);
-			}
-		}
-
-		return list;
-	}
-
-	public ArrayList<Block> getAllBlocksInMap(Material mat) {
-		final ArrayList<Block> list = new ArrayList<Block>();
-
-		final World world = this.getWorld();
-		if (world == null) {
-			Skywars.get().sendMessage("&cCould not get world for map: ", this.getMap().getName());
-			return list;
-		}
-
-		Skywars.get().sendDebugMessage("chunks gotten: " + this.getAllChunksInMap().size());
-
-		for (final Chunk chunk : this.getAllChunksInMap()) {
-			for (int x = 0; x < 15; x++) {
-				for (int z = 0; z < 15; z++) {
-					for (int y = 0; y < 256; y++) {
-						final Block block = chunk.getBlock(x, y, z);
-						if (block.getType() == mat)
-							list.add(block);
-					}
-				}
-			}
-		}
-
-		return list;
 	}
 
 	public void fillChests() {
@@ -926,27 +857,33 @@ public class Arena {
 	}
 
 	public Vector getCenterBlock() {
-		return new Vector(0, 0, 0);
+		return new Vector(0, Skywars.get().getConfig().getInt("defaultArenaCenterHeight", 100), 0);
 	}
 
-	public boolean softStart(Player player) {
-		if (!CommandsUtils.permissionCheckWithMessage(player, "skywars.start"))
-			return false;
-		if (!CommandsUtils.arenaCheckWithMessage(player))
-			return false;
-		if (this.getStatus() == ArenaStatus.WAITING && this.getTask() == null) {
-			this.forcedStart = true;
-			this.forcedStartPlayer = player;
-			this.startTimerAndSetStatus(ArenaStatus.STARTING);
-			player.sendMessage(Messager.get("started_countdown"));
-			return true;
+	public ArrayList<Chunk> getAllChunksInMap() {
+		final ArrayList<Chunk> list = new ArrayList<>();
+
+		final World world = this.getWorld();
+		if (world == null) {
+			Skywars.get().sendMessage("Could not get world for map: ", this.getMap().getName());
+			return list;
 		}
-		final boolean started = this.startGame(player);
-		if (started)
-			player.sendMessage(Messager.get("started_game"));
-		else
-			player.sendMessage(Messager.get("already_started"));
-		return started;
+
+		final int maxMapSizeInBlocks = Skywars.config.getInt("maxMapSize");
+		final int minBlock = -maxMapSizeInBlocks / 2;
+		final int maxBlock = maxMapSizeInBlocks / 2;
+
+		final Chunk minChunk = world.getChunkAt(new Location(world, minBlock, 0, minBlock));
+		final Chunk maxChunk = world.getChunkAt(new Location(world, maxBlock, 0, maxBlock));
+
+		for (int x = minChunk.getX(); x < maxChunk.getX(); x++) {
+			for (int z = minChunk.getZ(); z < maxChunk.getZ(); z++) {
+				final Chunk chunk = world.getChunkAt(x, z);
+				list.add(chunk);
+			}
+		}
+
+		return list;
 	}
 
 	public void broadcastRefillMessage() {
@@ -1038,16 +975,32 @@ public class Arena {
 		return world;
 	}
 
-	public boolean isJoinable() {
-		return this.joinable;
+	public ArrayList<BlockState> getAllBlockStatesInMap(Material mat) {
+		final ArrayList<BlockState> list = new ArrayList<>();
+
+		final World world = this.getWorld();
+		if (world == null) {
+			Skywars.get().sendMessage("Could not get world for map: ", this.getMap().getName());
+			return list;
+		}
+
+		for (final Chunk chunk : this.getAllChunksInMap()) {
+			for (final BlockState state : chunk.getTileEntities()) {
+				if (state.getType() != mat)
+					continue;
+				list.add(state);
+			}
+		}
+
+		return list;
 	}
 
-	public boolean isInvencibility() {
-		return this.invencibility;
+	public boolean isInvincibility() {
+		return this.invincibility;
 	}
 
-	public void setInvencibility(boolean invencibility) {
-		this.invencibility = invencibility;
+	public void setInvincibility(boolean invincibility) {
+		this.invincibility = invincibility;
 	}
 
 	public SkywarsUser getWinner() {
@@ -1062,42 +1015,54 @@ public class Arena {
 		return this.activeChests;
 	}
 
-	public boolean removeChest(Chest chest) {
-		if (!Skywars.holograms)
-			return true;
-		if (this.chestHolograms.containsKey(chest))
-			Skywars.get().getHologramController().removeHologram(this.chestHolograms.remove(chest));
-		return this.activeChests.remove(chest);
-	}
+	public ArrayList<Block> getAllBlocksInMap(Material mat) {
+		final ArrayList<Block> list = new ArrayList<>();
 
-	public boolean addChestHologram(Chest chest) {
-		if (!Skywars.holograms)
-			return true;
-		if (this.chestHolograms.containsKey(chest))
-			return false;
-		final Block block = chest.getBlock();
-		final String name = Skywars.get().getHologramController().createHologram(
-			"Skywars_chest_" + block.getLocation().getBlockX() + "_" + block.getLocation().getBlockY() + "_"
-				+ block.getLocation().getBlockZ() + "_" + Instant.now().toEpochMilli(),
-			block.getLocation().add(new Vector(0.5, 2, 0.5)), "");
-		this.chestHolograms.put(chest, name);
-		return true;
-	}
-
-	public void displayChestHolograms(String text) {
-		if (!Skywars.holograms)
-			return;
-
-		final HologramController controller = Skywars.get().getHologramController();
-		for (final Entry<Chest, String> h : this.chestHolograms.entrySet()) {
-			final Chest chest = h.getKey();
-			final int contents = Arrays.asList(chest.getInventory().getContents()).stream()
-				.filter(i -> i != null && i.getType() != XMaterial.AIR.parseMaterial()).collect(Collectors.toList())
-				.size();
-			controller.changeHologram(h.getValue(), Messager.color(text), 0);
-			controller.changeHologram(h.getValue(), contents <= 0 ? Messager.get("chest_holograms.empty") : "", 1);
+		final World world = this.getWorld();
+		if (world == null) {
+			Skywars.get().sendMessage("&cCould not get world for map: ", this.getMap().getName());
+			return list;
 		}
 
+		Skywars.get().sendDebugMessage("chunks gotten: " + this.getAllChunksInMap().size());
+
+		for (final Chunk chunk : this.getAllChunksInMap()) {
+			for (int x = 0; x < 15; x++) {
+				for (int z = 0; z < 15; z++) {
+					for (int y = 0; y < 256; y++) {
+						final Block block = chunk.getBlock(x, y, z);
+						if (block.getType() == mat)
+							list.add(block);
+					}
+				}
+			}
+		}
+
+		return list;
+	}
+
+	public boolean softStart(Player player) {
+		if (!CommandsUtils.hasPermission(player, "skywars.start"))
+			return false;
+		if (!CommandsUtils.isInArenaJoined(player))
+			return false;
+		if (this.getStatus() == ArenaStatus.WAITING && this.getTask() == null) {
+			this.forcedStart = true;
+			this.forcedStartPlayer = player;
+			this.startTimerAndSetStatus(ArenaStatus.STARTING);
+			player.sendMessage(Messager.get("started_countdown"));
+			return true;
+		}
+		final boolean started = this.startGame(player);
+		if (started)
+			player.sendMessage(Messager.get("started_game"));
+		else
+			player.sendMessage(Messager.get("already_started"));
+		return started;
+	}
+
+	public boolean isUnusable() {
+		return !this.joinable;
 	}
 
 	public ArenaGameSettings getGameSettings() {
@@ -1109,9 +1074,43 @@ public class Arena {
 			user.getPlayer().sendMessage(string);
 	}
 
-	HashMap<UUID, TimeType> timeVotes = new HashMap<UUID, TimeType>();
-	HashMap<UUID, WeatherType> weatherVotes = new HashMap<UUID, WeatherType>();
-	HashMap<UUID, ChestType> chestVotes = new HashMap<UUID, ChestType>();
+	public void removeChest(Chest chest) {
+		if (!Skywars.holograms)
+			return;
+		if (this.chestHolograms.containsKey(chest))
+			Skywars.get().getHologramController().removeHologram(this.chestHolograms.remove(chest));
+		this.activeChests.remove(chest);
+	}
+
+	public void addChestHologram(Chest chest) {
+		if (!Skywars.holograms)
+			return;
+		if (this.chestHolograms.containsKey(chest))
+			return;
+		final Block block = chest.getBlock();
+		final String name = Skywars.get().getHologramController().createHologram(
+			"Skywars_chest_" + block.getLocation().getBlockX() + "_" + block.getLocation().getBlockY() + "_"
+				+ block.getLocation().getBlockZ() + "_" + Instant.now().toEpochMilli(),
+			block.getLocation().add(new Vector(0.5, 2, 0.5)), "");
+		this.chestHolograms.put(chest, name);
+	}
+
+	public void displayChestHolograms(String text) {
+		if (!Skywars.holograms)
+			return;
+
+		final HologramController controller = Skywars.get().getHologramController();
+		for (final Entry<Chest, String> entry : this.chestHolograms.entrySet()) {
+			final Chest chest = entry.getKey();
+			final String hologram = entry.getValue();
+			final int contents = Arrays.asList(chest.getInventory().getContents()).stream()
+				.filter(i -> i != null && i.getType() != XMaterial.AIR.parseMaterial()).collect(Collectors.toList())
+				.size();
+			controller.changeHologram(hologram, Messager.color(text), 0);
+			controller.changeHologram(hologram, contents <= 0 ? Messager.get("chest_holograms.empty") : "", 1);
+		}
+
+	}
 
 	public void voteTime(Player player, TimeType time) {
 		if (this.timeVotes.get(player.getUniqueId()) == time)

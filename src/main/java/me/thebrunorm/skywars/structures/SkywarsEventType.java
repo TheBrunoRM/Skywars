@@ -2,5 +2,5 @@
 package me.thebrunorm.skywars.structures;
 
 public enum SkywarsEventType {
-	REFILL
+	REFILL, ENDER_DRAGON
 }

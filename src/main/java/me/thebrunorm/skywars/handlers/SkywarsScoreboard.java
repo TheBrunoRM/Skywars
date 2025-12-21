@@ -1,24 +1,19 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.handlers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
-
 import me.thebrunorm.skywars.ArenaStatus;
 import me.thebrunorm.skywars.Messager;
 import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.SkywarsUtils;
 import me.thebrunorm.skywars.structures.Arena;
 import me.thebrunorm.skywars.structures.SkywarsUser;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class SkywarsScoreboard {
 
@@ -26,7 +21,7 @@ public class SkywarsScoreboard {
 
 	public static void update(Player player) {
 
-		final ArrayList<String> texts = new ArrayList<String>();
+		final ArrayList<String> texts = new ArrayList<>();
 
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		SkywarsUser swp = null;
@@ -86,6 +81,8 @@ public class SkywarsScoreboard {
 			// just in case
 			player.setScoreboard(board);
 		} catch (final Exception e) {
+			e.printStackTrace();
+			Skywars.get().sendDebugMessage("Could not set scoreboard for player %s", player);
 		}
 
 	}
