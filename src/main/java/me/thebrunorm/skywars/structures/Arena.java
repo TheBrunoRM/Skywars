@@ -35,7 +35,7 @@ public class Arena {
 	private ArenaStatus status;
 	private int countdown;
 	private boolean joinable = true;
-	private boolean invencibility = false;
+	private boolean invincibility = false;
 	private boolean forcedStart;
 	private Player forcedStartPlayer;
 	private SkywarsUser winner;
@@ -766,12 +766,12 @@ public class Arena {
 		}
 
 		if (Skywars.configuration.invencibilityEnabled) {
-			this.setInvencibility(true);
+			this.setInvincibility(true);
 			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
 
 				@Override
 				public void run() {
-					Arena.this.setInvencibility(false);
+					Arena.this.setInvincibility(false);
 				}
 
 			}, Skywars.configuration.invencibilityTicks);
@@ -993,12 +993,12 @@ public class Arena {
 		return list;
 	}
 
-	public boolean isInvencibility() {
-		return this.invencibility;
+	public boolean isInvincibility() {
+		return this.invincibility;
 	}
 
-	public void setInvencibility(boolean invencibility) {
-		this.invencibility = invencibility;
+	public void setInvincibility(boolean invincibility) {
+		this.invincibility = invincibility;
 	}
 
 	public SkywarsUser getWinner() {

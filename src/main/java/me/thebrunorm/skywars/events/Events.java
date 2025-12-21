@@ -67,7 +67,7 @@ public class Events implements Listener {
 			return;
 		}
 
-		if (arena.getStatus() != ArenaStatus.PLAYING || arena.isInvencibility()) {
+		if (arena.getStatus() != ArenaStatus.PLAYING || arena.isInvincibility()) {
 			event.setCancelled(true);
 		} else if (arena.getStatus() == ArenaStatus.PLAYING && event.getCause() == DamageCause.VOID) {
 			event.setCancelled(true);
