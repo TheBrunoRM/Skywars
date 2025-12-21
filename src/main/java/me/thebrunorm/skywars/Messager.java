@@ -16,6 +16,10 @@ public class Messager {
 
 	public static final char ALT_COLOR_CHAR = '&';
 
+	public static void send(Player player, String text, Object... format) {
+		player.sendMessage(color(text, format));
+	}
+	
 	public static String color(String text) {
 		return ChatColor.translateAlternateColorCodes(ALT_COLOR_CHAR, text);
 	}
