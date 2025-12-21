@@ -23,45 +23,44 @@ import java.util.List;
 
 public class MapMenu implements Listener {
 
-	public static void open(Player player) {
-		final Inventory inventory = Bukkit.createInventory(null, 9 * 6, Messager.color("&aMaps"));
-		PlayerInventoryManager.setMenu(player, MenuType.MAP_SELECTION);
-
-		int index = 10;
-		for (final SkywarsMap map : Skywars.get().getMapManager().getMaps()) {
-			// Skywars.get().sendDebugMessage("current index: " + index);
-			if ((index + 1) % 9 == 0)
-				index += 2;
-			final List<String> lore = new ArrayList<>();
-			// lore.add(Messager.color("&7"));
-			// lore.add(Messager.color("&8Solo Insane"));
-			// lore.add(Messager.color("&7"));
-			// lore.add(Messager.color("&7Servidores Disponibles: &a1"));
-			// lore.add(Messager.color("&7Veces Unidas: &a0"));
-			// lore.add(Messager.color("&7Selecciones de Mapa: &a1"));
-
-			final ArrayList<Arena> arenas = ArenaManager.getArenasByMap(map);
-			final int players = arenas.stream().map(arena -> arena.getAlivePlayerCount()).reduce(0, (a, b) -> a + b);
-
-			lore.add(Messager.color("&eCurrent arenas: &a%s", ArenaManager.getArenasByMap(map).size()));
-			lore.add(Messager.color("&eCurrent players: &a%s", players));
-			lore.add(Messager.color("&eClick to play!"));
-			// lore.add(Messager.color("&eClick derecho para alternarlo como favorito!"));
-
-			final ItemStack item = new ItemStack(XMaterial.FIREWORK_STAR.parseItem());
-			final ItemMeta meta = item.getItemMeta();
-			meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-
-			meta.setDisplayName(Messager.color("&a%s", map.getName()));
-			meta.setLore(lore);
-			item.setItemMeta(meta);
-			inventory.setItem(index, item);
-			index++;
+		public static void open(Player player) {
+			final Inventory inventory = Bukkit.createInventory(null, 9 * 6, Messager.getMessage("MAP_MENU_TITLE"));
+			PlayerInventoryManager.setMenu(player, MenuType.MAP_SELECTION);
+	
+			int index = 10;
+			for (final SkywarsMap map : Skywars.get().getMapManager().getMaps()) {
+				// Skywars.get().sendDebugMessage("current index: " + index);
+				if ((index + 1) % 9 == 0)
+					index += 2;
+				final List<String> lore = new ArrayList<>();
+				// lore.add(Messager.color("&7"));
+				// lore.add(Messager.color("&8Solo Insane"));
+				// lore.add(Messager.color("&7"));
+				// lore.add(Messager.color("&7Servidores Disponibles: &a1"));
+				// lore.add(Messager.color("&7Veces Unidas: &a0"));
+				// lore.add(Messager.color("&7Selecciones de Mapa: &a1"));
+	
+				final ArrayList<Arena> arenas = ArenaManager.getArenasByMap(map);
+				final int players = arenas.stream().map(arena -> arena.getAlivePlayerCount()).reduce(0, (a, b) -> a + b);
+	
+				lore.add(Messager.color(Messager.getMessage("MAP_MENU_CURRENT_ARENAS"), ArenaManager.getArenasByMap(map).size()));
+				lore.add(Messager.color(Messager.getMessage("MAP_MENU_CURRENT_PLAYERS"), players));
+				lore.add(Messager.color(Messager.getMessage("MAP_MENU_CLICK_TO_PLAY")));
+				// lore.add(Messager.color("&eClick derecho para alternarlo como favorito!"));
+	
+				final ItemStack item = new ItemStack(XMaterial.FIREWORK_STAR.parseItem());
+				final ItemMeta meta = item.getItemMeta();
+				meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+	
+				meta.setDisplayName(Messager.color("&a%s", map.getName()));
+				meta.setLore(lore);
+				item.setItemMeta(meta);
+				inventory.setItem(index, item);
+				index++;
+			}
+	
+			player.openInventory(inventory);
 		}
-
-		player.openInventory(inventory);
-	}
-
 	@EventHandler
 	void onClick(InventoryClickEvent event) {
 		final Player player = (Player) event.getWhoClicked();

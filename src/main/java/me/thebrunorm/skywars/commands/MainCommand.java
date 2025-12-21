@@ -60,14 +60,19 @@ public class MainCommand implements CommandExecutor {
 	 * "&b* You can use the shorthand version of the command: &e&l/sw" };
 	 */
 
-	String[] helpLines = {
-			Messager.color("&a&lCommand list - &b%s &a%s &eby &b%s", Skywars.get().name, Skywars.get().version,
-					String.join(", ", Skywars.get().authors)),
-			"&b/skywars setmainlobby &e- sets the main lobby", "&b/skywars lobby &e- teleports you to the main lobby",
-			"&b/skywars create <arena> &e- creates an arena", "&b/skywars delete <arena> &e- deletes an arena",
-			"&b/skywars config <arena> &e- opens the configuration menu", "&b/skywars play &e- open the arenas menu",
-			"&b/skywars start &e- starts a game", "&b/skywars forcestart &e- starts a game immediately" };
-
+		String[] helpLines = {
+				Messager.getMessage("COMMAND_LIST", Skywars.get().name, Skywars.get().version,
+						String.join(", ", Skywars.get().authors)),
+				Messager.getMessage("HELP_SETMAINLOBBY"),
+				Messager.getMessage("HELP_LOBBY"),
+				Messager.getMessage("HELP_CREATE"),
+				Messager.getMessage("HELP_DELETE"),
+				Messager.getMessage("HELP_CONFIG"),
+				Messager.getMessage("HELP_PLAY"),
+				Messager.getMessage("HELP_START"),
+				Messager.getMessage("HELP_FORCESTART"),
+				Messager.getMessage("HELP_LEAVE"),
+				Messager.getMessage("HELP_OTHER_COMMANDS") };
 	Schematic schematic;
 
 	BukkitTask task;
@@ -164,10 +169,9 @@ public class MainCommand implements CommandExecutor {
 			} else if (args[0].equalsIgnoreCase("server")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
-				sender.sendMessage(Messager.getMessage("SERVER_VERSION_ONLY_INFO"));
-				sender.sendMessage(Bukkit.getServer().getVersion());
-				sender.sendMessage(Bukkit.getServer().getBukkitVersion());
-			} else if (args[0].equalsIgnoreCase("refill")) {
+								sender.sendMessage(Messager.getMessage("SERVER_VERSION_SPIGOT_INFO"));
+								sender.sendMessage(Messager.getMessage("SERVER_VERSION_SPIGOT", Bukkit.getServer().getVersion()));
+								sender.sendMessage(Messager.getMessage("SERVER_VERSION_BUKKIT", Bukkit.getServer().getBukkitVersion()));			} else if (args[0].equalsIgnoreCase("refill")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
 				if (!CommandsUtils.isInArenaJoined(player))

@@ -17,38 +17,38 @@ events:
 items:
   show_context: true
   context: '&7(Clic derecho)'
-  
+
   KIT_SELECTOR:
     name: '&a&lSelector de kit'
     description:
     - "&7Da clic derecho para seleccionar tu kit"
-  
+
   START_GAME:
     name: "&6&lEmpezar juego"
-  
+
   STOP_GAME:
     name: "&c&lDetener juego"
-  
-  GAME_OPTIONS: 
+
+  GAME_OPTIONS:
     name: '&b&lOpciones del juego'
     description:
     - "&7Da clic derecho para cambiar los ajustes del juego"
-    
+
   SPECTATOR_OPTIONS:
     name: '&b&lOpciones de espectador'
     description:
     - "&7Da clic derecho para cambiar tus opciones de espectador"
-    
+
   LEAVE:
     name: '&c&lSalir'
     description:
     - "&7Hacé clic derecho para volver al lobby principal."
-    
+
   PLAY_AGAIN:
     name: '&b&lJugar de vuelta'
     description:
     - "&7Hacé clic derecho para jugar de nuevo"
-    
+
   TELEPORTER:
     name: '&b&lTeletransportador'
     description:
@@ -151,7 +151,7 @@ WELCOME_MESSAGE: "&a&lSkyWars &e- /sw help"
 
 COMMAND_LIST: "&a&lLista de comandos - &b%s &a%s &ehecho por &b%s"
 
-HELP_SETMAINLOBBY: "&b/skywars setmainlobby &e- establece el lobby principal" 
+HELP_SETMAINLOBBY: "&b/skywars setmainlobby &e- establece el lobby principal"
 HELP_LOBBY: "&b/skywars lobby &e- te teletransporta al lobby principal"
 HELP_CREATE: "&b/skywars create <arena> &e- crea una arena"
 HELP_DELETE: "&b/skywars delete <arena> &e- borra una arena"
@@ -226,7 +226,6 @@ COULD_NOT_DELETE_WORLD_FOLDER: "&cNo se pudo eliminar la carpeta del mundo: &b%s
 LOBBY_WORLD_DOES_NOT_EXIST: "&cEl mundo del lobby (&b%s&c) no existe!"
 
 # Additional Skywars related keys
-SERVER_VERSION_INFO: "&bVersión del servidor: &e%s (&a%s&e)"
 ECONOMY_PLUGIN_NAME: "&eEconomía (Vault): &a%s"
 ECONOMY_COULD_NOT_HOOK: "&eEconomía (Vault): &cno se pudo conectar."
 ECONOMY_DISABLED_IN_CONFIG: "&eEconomía (Vault): &6deshabilitado en la configuración."
@@ -257,7 +256,6 @@ YOU_WANT_TO_ADD_SPAWNS_FOR: "&equerés agregar spawns para"
 YOU_CAN_ALSO_RIGHT_CLICK: "&eTambién podés hacer clic derecho"
 TO_REMOVE_LAST_SET_SPAWN: "&epara remover el último spawn establecido"
 COULD_NOT_FIND_JOINABLE_ARENA: "&cno se pudo encontrar una arena para unirse"
-NOT_SET: "no establecido"
 WORLD_NOT_SET: "&cmundo no establecido"
 LOCATION_NOT_SET: "&eUbicación no establecida"
 TELEPORTED_SUCCESSFULLY: "&eTeletransportado"
@@ -294,26 +292,9 @@ SKIPPED_BLOCKS_MESSAGE: "Saltados %s bloques: %s"
 SCHEMATIC_NOT_SUPPORTED_IN_VERSION: "No se puede pegar esquemático: los archivos %s no son compatibles en 1.13+"
 SCHEMATIC_SIZE_INFO: "tamaño: %s, %s, %s"
 COULD_NOT_GET_MATERIAL_FOR: "No se pudo obtener material para: %s"
-TELEPORTING_PLAYERS_OUT_OF_WORLD: "Teletransportando a cualquier jugador dentro del mundo afuera de él..."
-WORLD_EXISTS_STATUS: "Mundo existe: %s"
-YOU_NEED_TO_BE_A_PLAYER: "¡Necesitás ser un jugador!"
-TELEPORTED_TO_WORLD: "Teletransportado al mundo: %s"
-COULD_NOT_TELEPORT_TO_WORLD: "No se pudo teletransportar al mundo: %s"
-CURRENT_WORLD_SETUP: "configuración actual del mundo: %s"
-AUTO_SAVE_STATUS: "autoguardado: %s"
-SET_UP_WORLD: "Configurar mundo: %s"
-WORLD_FOLDER_DOES_NOT_EXIST: "¡La carpeta del mundo no existe!"
-LOADED_WORLD: "Mundo cargado: %s"
-COULD_NOT_LOAD_WORLD: "No se pudo cargar el mundo: %s"
-UNLOADED_WORLD: "Mundo descargado: %s"
 COULD_NOT_UNLOAD_WORLD: "No se pudo descargar el mundo: %s"
 COULD_NOT_UNLOAD_WORLD_NAMED: "No se pudo descargar el mundo '%s' para el mapa '%s'"
 COULD_NOT_DELETE_WORLD_NAMED: "No se pudo eliminar el mundo '%s' para el mapa '%s'"
-SCHEMATIC_NOT_LOADED: "esquemático no cargado"
-BLOCK_DATA_INFO: "dato: %s"
-FILE_NOT_FOUND: "archivo no encontrado: %s"
-LOADED_SCHEMATIC: "Esquemático cargado %s"
-TESTING_BOOLEAN_RESULT: "xd: %s"
 NO_ARENA_FOUND_BY_NAME: "No se encontró ninguna arena por '%s'"
 SPAWNS_OF_ARENA_INFO: "generadores de la arena %s (%s)"
 SPAWN_NULL_INFO: "%s: nulo"
@@ -382,7 +363,6 @@ FILE_NOT_FOUND: "archivo no encontrado: %s"
 LOADED_SCHEMATIC: "Esquemático cargado %s"
 TESTING_BOOLEAN_RESULT: "xd: %s"
 NOT_SET: "no establecido"
-WORLDS_LIST: "Mundos: %s"
 REGENERATED_CASES: "regenerado"
 NULL_VALUE: "nulo"
 COULD_NOT_END_ARENA: "no se pudo terminar"

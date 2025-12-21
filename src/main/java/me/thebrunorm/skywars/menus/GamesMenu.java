@@ -19,22 +19,21 @@ import java.util.List;
 
 public class GamesMenu implements Listener {
 
-	public static void open(Player player) {
-		final Inventory inventory = Bukkit.createInventory(null, 9 * 3, "Skywars");
-		PlayerInventoryManager.setMenu(player, MenuType.GAMES_MENU);
-		final ItemStack item = new ItemStack(XMaterial.BOW.parseItem());
-		final ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(Messager.color("&aclick to join random game"));
-		final List<String> lore = new ArrayList<>();
-		lore.add(Messager.color("&eliterally just click this"));
-		lore.add(Messager.color("&eto join the game that"));
-		lore.add(Messager.color("&ehas the most players in it"));
-		meta.setLore(lore);
-		item.setItemMeta(meta);
-		inventory.setItem(11, item);
-		player.openInventory(inventory);
-	}
-
+		public static void open(Player player) {
+			final Inventory inventory = Bukkit.createInventory(null, 9 * 3, Messager.getMessage("GAMES_MENU_TITLE"));
+			PlayerInventoryManager.setMenu(player, MenuType.GAMES_MENU);
+			final ItemStack item = new ItemStack(XMaterial.BOW.parseItem());
+			final ItemMeta meta = item.getItemMeta();
+			meta.setDisplayName(Messager.color(Messager.getMessage("GAMES_MENU_JOIN_RANDOM_GAME")));
+			final List<String> lore = new ArrayList<>();
+			lore.add(Messager.color(Messager.getMessage("GAMES_MENU_LITERALLY_JUST_CLICK")));
+			lore.add(Messager.color(Messager.getMessage("GAMES_MENU_TO_JOIN_GAME")));
+			lore.add(Messager.color(Messager.getMessage("GAMES_MENU_MOST_PLAYERS")));
+			meta.setLore(lore);
+			item.setItemMeta(meta);
+			inventory.setItem(11, item);
+			player.openInventory(inventory);
+		}
 	@EventHandler
 	void onClick(InventoryClickEvent event) {
 		final Player player = (Player) event.getWhoClicked();
