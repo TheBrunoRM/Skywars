@@ -30,6 +30,9 @@ sounds: # sound name; volume; pitch
 # this is the reset cooldown for last hits (in seconds)
 lastHitResetCooldown: 15
 
+# this is the default height for the center of maps
+defaultArenaCenterHeight: 100
+
 # map size used for boundary calculation; in blocks
 maxMapSize: 200
 

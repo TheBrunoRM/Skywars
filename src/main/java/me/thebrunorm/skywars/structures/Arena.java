@@ -545,6 +545,7 @@ public class Arena {
 	public boolean startGame() {
 		return this.startGame(null);
 	}
+
 	private final ArrayList<SkywarsEvent> events = new ArrayList<>();
 
 	private void applyGameSettings() {
@@ -609,6 +610,7 @@ public class Arena {
 			Skywars.createCase(this.getVectorInArena(spawn), XMaterial.RED_STAINED_GLASS);
 		}
 	}
+
 	// TODO store chest locations and types (normal or center chests)
 	private final ArrayList<Chest> activeChests = new ArrayList<>();
 
@@ -707,6 +709,7 @@ public class Arena {
 		return this.users.stream().filter(player -> player.isSpectator())
 			.collect(Collectors.toCollection(ArrayList::new));
 	}
+
 	private final HashMap<Chest, String> chestHolograms = new HashMap<>();
 
 	public boolean startGame(Player playerStarted) {
@@ -854,7 +857,7 @@ public class Arena {
 	}
 
 	public Vector getCenterBlock() {
-		return new Vector(0, 0, 0);
+		return new Vector(0, Skywars.get().getConfig().getInt("defaultArenaCenterHeight", 100), 0);
 	}
 
 	public ArrayList<Chunk> getAllChunksInMap() {
