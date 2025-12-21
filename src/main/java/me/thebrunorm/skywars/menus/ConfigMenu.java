@@ -27,33 +27,32 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class ConfigMenu implements Listener {
 
-	static String teamSizeName = "&e&lTeam Size: &a&l%s";
-	static String positionName = "&e&lPosition: &a&l%s";
-	static String spawnName = "&e&lSpawn Setup";
-	static String worldFolderName = "&e&lWorld: &a&l%s";
-	static String statusName = "&e&lStatus: %s";
-	static String calculateSpawnsName = "&6&lCalculate spawns";
-	static String regenerateCasesName = "&6&lRegenerate cases";
-	static String pasteSchematicName = "&6&lPaste schematic";
-	static String clearName = "&c&lClear";
-	static String teleportName = "&6&lTeleport";
-	static String chestsName = "&6&lFill chests";
-
-	public static HashMap<Player, Location> playerLocations = new HashMap<Player, Location>();
-	public static HashMap<Player, Arena> currentArenas = new HashMap<Player, Arena>();
-	File worldsFolder = new File(Skywars.worldsPath);
+	public final static HashMap<Player, Location> playerLocations = new HashMap<>();
+	public final static HashMap<Player, Arena> currentArenas = new HashMap<>();
+	final static String teamSizeName = "&e&lTeam Size: &a&l%s";
+	final static String positionName = "&e&lPosition: &a&l%s";
+	final static String spawnName = "&e&lSpawn Setup";
+	final static String worldFolderName = "&e&lWorld: &a&l%s";
+	final static String statusName = "&e&lStatus: %s";
+	final static String calculateSpawnsName = "&6&lCalculate spawns";
+	final static String regenerateCasesName = "&6&lRegenerate cases";
+	final static String pasteSchematicName = "&6&lPaste schematic";
+	final static String clearName = "&c&lClear";
+	final static String teleportName = "&6&lTeleport";
+	final static String chestsName = "&6&lFill chests";
+	final File worldsFolder = new File(Skywars.worldsPath);
 
 	static void OpenWorldsMenu(Player player) {
 		final File folder = new File(Skywars.get().getDataFolder() + "/worlds");
 		final Inventory inventory = Bukkit.createInventory(null, 9 * 6, Messager.color("&aWorld folders"));
 
 		int index = 10;
-		for (final File worldFolder : folder.listFiles()) {
-			final List<String> lore = new ArrayList<String>();
-			lore.clear();
+		for (final File worldFolder : Objects.requireNonNull(folder.listFiles())) {
+			final List<String> lore = new ArrayList<>();
 
 			boolean alreadyUsing = false;
 			for (final SkywarsMap map : Skywars.get().getMapManager().getMaps()) {
@@ -72,7 +71,7 @@ public class ConfigMenu implements Listener {
 			if (!alreadyUsing)
 				lore.add(Messager.color("&eClick to select this file"));
 
-			final ItemStack item = new ItemStack(XMaterial.PAPER.parseItem());
+			final ItemStack item = new ItemStack(Objects.requireNonNull(XMaterial.PAPER.parseItem()));
 			final ItemMeta meta = item.getItemMeta();
 
 			meta.setDisplayName(Messager.color("&a%s", worldFolder.getName()));
@@ -90,7 +89,7 @@ public class ConfigMenu implements Listener {
 		final ItemStack item = new ItemStack(mat);
 		final ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(Messager.color(name));
-		final List<String> lore = new ArrayList<String>();
+		final List<String> lore = new ArrayList<>();
 		for (final String line : loreLines)
 			lore.add(Messager.color("&e" + line));
 		meta.setLore(lore);
@@ -114,10 +113,6 @@ public class ConfigMenu implements Listener {
 				Messager.color(teamSizeName, currentMap.getTeamSize()), "&eLeft-click to add",
 				"&eRight-click to remove");
 
-		String currentWorldName = currentMap.getWorldName();
-		if (currentWorldName == null)
-			currentWorldName = "none";
-
 		String currentWorldFile = currentMap.getWorldName();
 		if (currentWorldFile == null)
 			currentWorldFile = "none";
@@ -128,11 +123,11 @@ public class ConfigMenu implements Listener {
 		InventoryUtils.addItem(inventory, XMaterial.GLASS.parseMaterial(), 15,
 				Messager.color(statusName, "&6&lYES"));
 
-		final List<String> spawnLore = new ArrayList<String>();
+		final List<String> spawnLore = new ArrayList<>();
 		spawnLore.add(Messager.color("&eWhen you enter &bSpawn Setup Mode&e,"));
 		spawnLore.add(Messager.color("&eyou can click blocks on the arena"));
 		spawnLore.add(Messager.color("&eto set spawns easily."));
-		if (currentMap.getSpawns().size() > 0) {
+		if (!currentMap.getSpawns().isEmpty()) {
 			spawnLore.add(Messager.color(""));
 			spawnLore.add(Messager.color("&cThis will delete all current spawns."));
 		}
@@ -167,9 +162,9 @@ public class ConfigMenu implements Listener {
 	static String locationName(Location location) {
 		if (location == null)
 			return Messager.color(positionName, "none");
-		final String coords = String.format("%s, %s, %s", Math.floor(location.getBlockX()),
-				Math.floor(location.getBlockY()), Math.floor(location.getBlockZ()));
-		return Messager.color(positionName, coords);
+		final String positionString = String.format("%s, %s, %s", (double) location.getBlockX(),
+			(double) location.getBlockY(), (double) location.getBlockZ());
+		return Messager.color(positionName, positionString);
 	}
 
 	@EventHandler
@@ -202,9 +197,9 @@ public class ConfigMenu implements Listener {
 
 		if (name.equals(Messager.color(spawnName))) {
 			final Arena arena = currentArenas.get(player);
-			final ItemStack item = new ItemStack(XMaterial.BLAZE_ROD.parseItem());
+			final ItemStack item = new ItemStack(Objects.requireNonNull(XMaterial.BLAZE_ROD.parseItem()));
 			final ItemMeta meta = item.getItemMeta();
-			final List<String> lore = new ArrayList<String>();
+			final List<String> lore = new ArrayList<>();
 			lore.add(Messager.color("&eClick the blocks that"));
 			lore.add(Messager.color("&eyou want to add spawns for."));
 			lore.add(Messager.color("&eYou can also rightclick"));
@@ -227,7 +222,7 @@ public class ConfigMenu implements Listener {
 			Skywars.get().NMS().sendTitle(player, "&a&lENABLED", "&eSpawn edit mode");
 			player.playSound(player.getLocation(), Sounds.NOTE_PLING.bukkitSound(), 3, 2);
 
-			if (currentMap.getSpawns().size() > 0)
+			if (!currentMap.getSpawns().isEmpty())
 				player.sendMessage(Messager.color("&6Old arena spawns deleted."));
 			currentMap.getSpawns().clear();
 

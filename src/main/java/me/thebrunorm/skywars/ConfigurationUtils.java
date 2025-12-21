@@ -1,19 +1,7 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Optional;
-
+import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,9 +10,15 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import com.cryptomorin.xseries.XMaterial;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
 
 public class ConfigurationUtils {
 
@@ -191,7 +185,7 @@ public class ConfigurationUtils {
 
 		final Object lore = hashmap.get("lore");
 		if (lore != null) {
-			final List<String> loreLines = new ArrayList<String>();
+			final List<String> loreLines = new ArrayList<>();
 			if (lore instanceof String)
 				loreLines.add(Messager.color(lore.toString()));
 			else if (lore instanceof ArrayList)

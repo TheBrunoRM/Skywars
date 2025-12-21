@@ -1,9 +1,10 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.menus;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import me.thebrunorm.skywars.Messager;
+import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.structures.Kit;
+import net.milkbowl.vault.economy.Economy;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -18,10 +19,8 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import me.thebrunorm.skywars.Messager;
-import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.structures.Kit;
-import net.milkbowl.vault.economy.Economy;
+import java.util.ArrayList;
+import java.util.List;
 
 public class KitsMenu implements Listener {
 
@@ -38,7 +37,7 @@ public class KitsMenu implements Listener {
 			final ItemStack item = kit.getIcon();
 			final ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName(Messager.color("&a" + kit.getDisplayName()));
-			final List<String> lore = new ArrayList<String>();
+			final List<String> lore = new ArrayList<>();
 			for (final ItemStack i : kit.getItems()) {
 				String itemName = WordUtils.capitalizeFully(i.getType().name().replace("_", " "));
 				if (i.getAmount() > 1)

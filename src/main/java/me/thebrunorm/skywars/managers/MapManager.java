@@ -1,22 +1,21 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.managers;
 
+import me.thebrunorm.skywars.ConfigurationUtils;
+import me.thebrunorm.skywars.Messager;
+import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.structures.SkywarsMap;
+import org.bukkit.Difficulty;
+import org.bukkit.World;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.util.Vector;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.bukkit.Difficulty;
-import org.bukkit.World;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.util.Vector;
-
-import me.thebrunorm.skywars.ConfigurationUtils;
-import me.thebrunorm.skywars.Messager;
-import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.structures.SkywarsMap;
 
 public class MapManager {
 	private final ArrayList<SkywarsMap> maps = new ArrayList<>();
@@ -70,7 +69,7 @@ public class MapManager {
 		final File[] worlds = folder.listFiles();
 		Skywars.get().sendDebugMessage("Loading %s worlds", worlds.length);
 
-		final HashMap<String, SkywarsMap> worldNames = new HashMap<String, SkywarsMap>();
+		final HashMap<String, SkywarsMap> worldNames = new HashMap<>();
 		final List<SkywarsMap> filtered = this.getMaps().stream().filter(map -> map.getWorldName() != null)
 				.collect(Collectors.toList());
 		for (final SkywarsMap map : filtered)

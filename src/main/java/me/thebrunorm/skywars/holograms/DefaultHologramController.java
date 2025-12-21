@@ -6,17 +6,16 @@ import org.bukkit.Location;
 public class DefaultHologramController implements HologramController {
 
 	@Override
-	public void removeHologram(Object id) {
+	public void removeHologram(String id) {
 	}
 
 	@Override
-	public String createHologram(Object id, Location location, String text) {
+	public String createHologram(String id, Location location, String text) {
 		return null;
 	}
 
 	@Override
-	public boolean changeHologram(Object id, String text, int line) {
-		return false;
+	public void changeHologram(String id, String text, int line) {
 	}
 
 }

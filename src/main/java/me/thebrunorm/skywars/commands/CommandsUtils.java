@@ -1,36 +1,35 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.commands;
 
+import me.thebrunorm.skywars.Messager;
+import me.thebrunorm.skywars.Skywars;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import me.thebrunorm.skywars.Messager;
-import me.thebrunorm.skywars.Skywars;
-
 public class CommandsUtils {
 
-	public static boolean consoleCheckWithMessage(CommandSender sender) {
+	public static boolean consoleCheck(CommandSender sender) {
 		if (sender instanceof Player)
-			return true;
+			return false;
 		sender.sendMessage(Messager.getMessage("CANT_EXECUTE_COMMAND_IN_CONSOLE"));
-		return false;
+		return true;
 	}
 
-	public static boolean permissionCheckWithMessage(CommandSender sender, String permission) {
+	public static boolean lacksPermission(CommandSender sender, String permission) {
 		if (sender.hasPermission(permission))
-			return true;
+			return false;
 		sender.sendMessage(Messager.color(Skywars.langConfig.getString("NO_PERMISSION")));
-		return false;
+		return true;
 	}
 
-	public static boolean permissionCheckWithMessage(Player player, String permission) {
+	public static boolean hasPermission(Player player, String permission) {
 		if (player.hasPermission(permission))
 			return true;
 		player.sendMessage(Messager.color(Skywars.langConfig.getString("NO_PERMISSION")));
 		return false;
 	}
 
-	public static boolean arenaCheckWithMessage(Player player) {
+	public static boolean isInArenaJoined(Player player) {
 		if (Skywars.get().getPlayerArena(player) != null)
 			return true;
 		player.sendMessage(Messager.color(Skywars.langConfig.getString("NOT_JOINED")));

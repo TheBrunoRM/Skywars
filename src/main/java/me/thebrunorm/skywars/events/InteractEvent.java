@@ -111,12 +111,12 @@ public class InteractEvent implements Listener {
 			GameOptionsMenu.open(player);
 		}
 
-		if (itemType == getConfiguredMaterial(config, SkywarsItemType.START_GAME) && !arena.started() && CommandsUtils.permissionCheckWithMessage(player, "skywars.start")) {
+		if (itemType == getConfiguredMaterial(config, SkywarsItemType.START_GAME) && !arena.started() && CommandsUtils.hasPermission(player, "skywars.start")) {
 			event.setCancelled(true);
 			arena.softStart(player);
 		}
 
-		if (itemType == getConfiguredMaterial(config, SkywarsItemType.STOP_GAME) && arena.started() && CommandsUtils.permissionCheckWithMessage(player, "skywars.stop")) {
+		if (itemType == getConfiguredMaterial(config, SkywarsItemType.STOP_GAME) && arena.started() && CommandsUtils.hasPermission(player, "skywars.stop")) {
 			event.setCancelled(true);
 			arena.clear();
 		}

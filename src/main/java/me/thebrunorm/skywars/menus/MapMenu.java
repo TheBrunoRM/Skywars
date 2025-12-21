@@ -1,9 +1,12 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.menus;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.cryptomorin.xseries.XMaterial;
+import me.thebrunorm.skywars.Messager;
+import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.managers.ArenaManager;
+import me.thebrunorm.skywars.structures.Arena;
+import me.thebrunorm.skywars.structures.SkywarsMap;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -15,13 +18,8 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.cryptomorin.xseries.XMaterial;
-
-import me.thebrunorm.skywars.Messager;
-import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.managers.ArenaManager;
-import me.thebrunorm.skywars.structures.Arena;
-import me.thebrunorm.skywars.structures.SkywarsMap;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapMenu implements Listener {
 
@@ -34,10 +32,8 @@ public class MapMenu implements Listener {
 			// Skywars.get().sendDebugMessage("current index: " + index);
 			if ((index + 1) % 9 == 0)
 				index += 2;
-			final List<String> lore = new ArrayList<String>();
-			lore.clear();
+			final List<String> lore = new ArrayList<>();
 			// lore.add(Messager.color("&7"));
-
 			// lore.add(Messager.color("&8Solo Insane"));
 			// lore.add(Messager.color("&7"));
 			// lore.add(Messager.color("&7Servidores Disponibles: &a1"));

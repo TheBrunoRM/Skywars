@@ -1,13 +1,10 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.managers;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-
+import me.thebrunorm.skywars.Messager;
+import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.structures.Arena;
+import me.thebrunorm.skywars.structures.SkywarsMap;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -19,14 +16,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 
-import me.thebrunorm.skywars.Messager;
-import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.structures.Arena;
-import me.thebrunorm.skywars.structures.SkywarsMap;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 public class SignManager implements Listener {
 
-	HashMap<Location, SkywarsMap> signs = new HashMap<Location, SkywarsMap>();
+	HashMap<Location, SkywarsMap> signs = new HashMap<>();
 
 	public HashMap<Location, SkywarsMap> getSigns() {
 		return this.signs;
@@ -99,7 +98,7 @@ public class SignManager implements Listener {
 	public void loadSigns() {
 		final YamlConfiguration config = this.loadSignConfig();
 		final List<String> signs = config.getStringList("signs");
-		final List<String> newSigns = new ArrayList<String>(signs);
+		final List<String> newSigns = new ArrayList<>(signs);
 		Skywars.get().sendDebugMessage("&bLoading %s signs...", signs.size());
 		for (final String s : signs) {
 			final String[] splitted = s.split("[^\\w\\s-]");

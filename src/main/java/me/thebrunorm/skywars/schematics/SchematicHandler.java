@@ -1,6 +1,22 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.schematics;
 
+import com.cryptomorin.xseries.XMaterial;
+import me.thebrunorm.skywars.Skywars;
+import net.querz.nbt.io.NBTUtil;
+import net.querz.nbt.io.NamedTag;
+import net.querz.nbt.tag.CompoundTag;
+import net.querz.nbt.tag.IntTag;
+import net.querz.nbt.tag.ListTag;
+import net.querz.nbt.tag.Tag;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.material.MaterialData;
+import org.bukkit.util.Vector;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,24 +27,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.stream.Collectors;
-
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.material.MaterialData;
-import org.bukkit.util.Vector;
-
-import com.cryptomorin.xseries.XMaterial;
-
-import me.thebrunorm.skywars.Skywars;
-import net.querz.nbt.io.NBTUtil;
-import net.querz.nbt.io.NamedTag;
-import net.querz.nbt.tag.CompoundTag;
-import net.querz.nbt.tag.IntTag;
-import net.querz.nbt.tag.ListTag;
-import net.querz.nbt.tag.Tag;
 
 public class SchematicHandler {
 
@@ -82,7 +80,7 @@ public class SchematicHandler {
 				vector.getZ() + offset.getBlockZ());
 	}
 
-	public static HashMap<String, String> materials = new HashMap<String, String>();
+	public static HashMap<String, String> materials = new HashMap<>();
 
 	public static void loadMaterials() {
 		Skywars.get().sendMessage("Loading materials...");
@@ -458,7 +456,7 @@ public class SchematicHandler {
 		final CompoundTag compound = (CompoundTag) schematic.getTag();
 		final CompoundTag palette = compound.getCompoundTag("Palette");
 
-		final HashMap<Integer, String> dataMap = new HashMap<Integer, String>();
+		final HashMap<Integer, String> dataMap = new HashMap<>();
 		if (palette != null) {
 			final Iterable<Entry<String, Tag<?>>> set = palette.entrySet();
 

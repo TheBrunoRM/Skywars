@@ -91,7 +91,7 @@ public class Events implements Listener {
 			return;
 		final LivingEntity livingEntity = (LivingEntity) entity;
 		final Entity damager = event.getDamager();
-		if (damager == null || !(damager instanceof Player))
+		if (!(damager instanceof Player))
 			return;
 		final Player attacker = (Player) damager;
 

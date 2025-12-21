@@ -21,7 +21,7 @@ public class ArenaManager {
 		for (final Arena arena : Skywars.get().getArenas()) {
 			if (arena.started())
 				continue;
-			if (!arena.isJoinable())
+			if (arena.isUnusable())
 				continue;
 			if (arena.getMap() != map)
 				continue;
@@ -31,7 +31,7 @@ public class ArenaManager {
 	}
 
 	public static ArrayList<Arena> getArenasByMap(SkywarsMap map) {
-		final ArrayList<Arena> list = new ArrayList<Arena>();
+		final ArrayList<Arena> list = new ArrayList<>();
 		for (final Arena arena : Skywars.get().getArenas()) {
 			if (arena.getMap() == map)
 				list.add(arena);

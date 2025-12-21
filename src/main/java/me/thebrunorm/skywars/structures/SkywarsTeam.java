@@ -13,7 +13,7 @@ public class SkywarsTeam {
 		this.number = arena.getTeams().size();
 	}
 
-	ArrayList<SkywarsUser> users = new ArrayList<SkywarsUser>();
+	ArrayList<SkywarsUser> users = new ArrayList<>();
 
 	ArrayList<SkywarsUser> getUsers() {
 		return this.users;
