@@ -77,13 +77,12 @@ public class Arena {
 		this.status = ArenaStatus.WAITING;
 		this.events.add(new SkywarsEvent(this, SkywarsEventType.REFILL, 60));
 		this.events.add(new SkywarsEvent(this, SkywarsEventType.REFILL, 60));
-		this.joinable = true;
+		this.events.add(new SkywarsEvent(this, SkywarsEventType.ENDER_DRAGON, 60 * 3));
 	}
 
 	public SkywarsEvent getNextEvent() {
-		if (this.events.size() > 0)
-			return this.events.get(0);
-		return null;
+		if (this.events.isEmpty()) return null;
+		return this.events.get(0);
 	}
 
 	public String getNextEventText() {
