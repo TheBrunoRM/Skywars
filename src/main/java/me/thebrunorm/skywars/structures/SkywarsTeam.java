@@ -1,3 +1,4 @@
+/* (C) 2021 Bruno */
 package me.thebrunorm.skywars.structures;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class SkywarsTeam {
 
 	public void disband() {
 		this.disbanded = true;
-		this.users.forEach(user -> user.leaveTeam());
+		new ArrayList<>(this.users).forEach(SkywarsUser::leaveTeam);
 		this.users.clear();
 		this.arena.getTeams().remove(this);
 	}

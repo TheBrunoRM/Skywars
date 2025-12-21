@@ -75,7 +75,7 @@ public class ConfigMenu implements Listener {
 			}
 
 			if (!alreadyUsing)
-				lore.add(Messager.getMessage("CLICK_TO_SELECT_FILE"));
+				lore.add(Messager.color("&eClick to select this file"));
 
 			final ItemStack item = new ItemStack(XMaterial.PAPER.parseItem());
 			final ItemMeta meta = item.getItemMeta();
@@ -116,8 +116,8 @@ public class ConfigMenu implements Listener {
 		final SkywarsMap currentMap = currentArena.getMap();
 
 		InventoryUtils.addItem(inventory, XMaterial.SADDLE.parseMaterial(), 11,
-				Messager.color(teamSizeName, currentMap.getTeamSize()), Messager.getMessage("LEFT_CLICK_TO_ADD"),
-				Messager.getMessage("RIGHT_CLICK_TO_REMOVE"));
+				Messager.color(teamSizeName, currentMap.getTeamSize()), "&eLeft-click to add",
+				"&eRight-click to remove");
 
 		String currentWorldName = currentMap.getWorldName();
 		if (currentWorldName == null)
@@ -135,7 +135,7 @@ public class ConfigMenu implements Listener {
 
 		final List<String> spawnLore = new ArrayList<String>();
 		spawnLore.add(Messager.color("&eWhen you enter &bSpawn Setup Mode&e,"));
-		spawnLore.add(Messager.getMessage("YOU_CAN_CLICK_BLOCKS_ON_ARENA"));
+		spawnLore.add(Messager.color("&eyou can click blocks on the arena"));
 		spawnLore.add(Messager.color("&eto set spawns easily."));
 		if (currentMap.getSpawns().size() > 0) {
 			spawnLore.add(Messager.color(""));
@@ -210,10 +210,10 @@ public class ConfigMenu implements Listener {
 			final ItemStack item = new ItemStack(XMaterial.BLAZE_ROD.parseItem());
 			final ItemMeta meta = item.getItemMeta();
 			final List<String> lore = new ArrayList<String>();
-			lore.add(Messager.getMessage("CLICK_THE_BLOCKS_THAT"));
-			lore.add(Messager.getMessage("YOU_WANT_TO_ADD_SPAWNS_FOR"));
-			lore.add(Messager.getMessage("YOU_CAN_ALSO_RIGHT_CLICK"));
-			lore.add(Messager.getMessage("TO_REMOVE_LAST_SET_SPAWN"));
+			lore.add(Messager.color("&eClick the blocks that"));
+			lore.add(Messager.color("&eyou want to add spawns for."));
+			lore.add(Messager.color("&eYou can also rightclick"));
+			lore.add(Messager.color("&eto remove the last set spawn."));
 			meta.setDisplayName(Messager.color("&eSpawn Configurator"));
 			meta.setLore(lore);
 			item.setItemMeta(meta);
@@ -223,69 +223,67 @@ public class ConfigMenu implements Listener {
 			player.closeInventory();
 
 			playerLocations.put(player, player.getLocation());
-			org.bukkit.World world = arena.getWorld();
-			if (world != null) {
-				player.teleport(arena.getCenterBlock().toLocation(world).clone().add(new Vector(0, 5, 0)));
-				player.setVelocity(new Vector(0, 1f, 0));
-				player.setAllowFlight(true);
-				player.setFlying(true);
-			} else {
-				player.sendMessage(Messager.getMessage("CONFIG_NO_WORLD_ERROR"));
-				Skywars.get().sendDebugMessage("Could not teleport player to arena: world is null for arena " + arena.getMap().getName());
-			}
+			player.teleport(arena.getCenterBlock().toLocation(arena.getWorld()).clone().add(new Vector(0, 5, 0)));
+			player.setVelocity(new Vector(0, 1f, 0));
+
+			player.setAllowFlight(true);
+			player.setFlying(true);
 
 			Skywars.get().NMS().sendTitle(player, "&a&lENABLED", "&eSpawn edit mode");
 			player.playSound(player.getLocation(), Sounds.NOTE_PLING.bukkitSound(), 3, 2);
 
 			if (currentMap.getSpawns().size() > 0)
-				player.sendMessage(Messager.getMessage("OLD_ARENA_SPAWNS_DELETED"));
+				player.sendMessage(Messager.color("&6Old arena spawns deleted."));
 			currentMap.getSpawns().clear();
 
-			player.sendMessage(Messager.getMessage("SPAWN_EDIT_MODE_ENTERED"));
-			player.sendMessage(Messager.getMessage("SPAWN_EDIT_MODE_INSTRUCTIONS_GENERAL"));
-			player.sendMessage(Messager.getMessage("SPAWN_EDIT_MODE_INSTRUCTIONS_ADD_SPAWN"));
-			player.sendMessage(Messager.getMessage("SPAWN_EDIT_MODE_INSTRUCTIONS_REMOVE_SPAWN"));
-			player.sendMessage(Messager.getMessage("SPAWN_EDIT_MODE_EXIT_INSTRUCTIONS"));
+			player.sendMessage(Messager.color("&eYou are now in &a&lspawn edit mode"));
+			player.sendMessage(Messager.color("&eUse the &6&lblaze rod &eto &b&lset and remove spawns"));
+			player.sendMessage(Messager.color("&eYou can &a&lright-click &ea block to &a&ladd an spawn"));
+			player.sendMessage(
+					Messager.color("&eYou can &c&lright-click &ea block to &c&lremove &4&lthe last set spawn"));
+			player.sendMessage(Messager.color("&e&lTo exit, &b&ldrop the blaze rod"));
 			return;
 		}
 
 		if (name.equals(Messager.color(calculateSpawnsName))) {
 			currentMap.calculateSpawns();
-			player.sendMessage(Messager.getFormattedMessage("SPAWNS_CALCULATED_AND_SAVED", null, null, null, currentMap.getSpawns().size()));
+			player.sendMessage(Messager.color("&aSuccessfully &bcalculated &aand &bsaved &6%s spawns&a.",
+					currentMap.getSpawns().size()));
 			if (currentMap.getSpawns().size() <= 0)
-				player.sendMessage(Messager.getMessage("WARNING_NO_BEACONS_ON_MAP"));
+				player.sendMessage(Messager.color("&cWarning: &7did you place beacons on the map?"));
 		}
 
 		if (name.equals(Messager.color(regenerateCasesName))) {
 			currentArena.resetCases();
 			if (currentMap.getSpawns().size() <= 0)
-				player.sendMessage(Messager.getMessage("WARNING_NO_SPAWNS_TO_CREATE_CASES"));
-			player.sendMessage(Messager.getFormattedMessage("REGENERATED_CASES_FOR_SPAWNS", null, null, null, currentMap.getSpawns().size()));
+				player.sendMessage(Messager.color("&cWarning: &7no spawns to create cases for."));
+			player.sendMessage(Messager.color("Regenerated cases for %s spawns", currentMap.getSpawns().size()));
 			return;
 		}
 
 		final World arenaWorld = currentArena.getWorld();
 
-					if (name.equals(Messager.color(teleportName))) {
-					if (arenaWorld == null) {
-						player.sendMessage(Messager.getMessage("WORLD_NOT_SET"));
-						return;
-					}
-					Location loc = ConfigurationUtils.getLocationConfig(arenaWorld,
-							currentArena.getMap().getConfig().getConfigurationSection("center"));
-					if (loc == null)
-						loc = currentArena.getWorld().getSpawnLocation();
-					if (loc == null)
-						player.sendMessage(Messager.getMessage("LOCATION_NOT_SET"));
-					else {
-						player.teleport(loc);
-						player.sendMessage(Messager.getMessage("TELEPORTED_SUCCESSFULLY"));
-					}
-					return;
-				}
+		if (name.equals(Messager.color(teleportName))) {
+			if (arenaWorld == null) {
+				player.sendMessage("world not set");
+				return;
+			}
+			Location loc = ConfigurationUtils.getLocationConfig(arenaWorld,
+					currentArena.getMap().getConfig().getConfigurationSection("center"));
+			if (loc == null)
+				loc = currentArena.getWorld().getSpawnLocation();
+			if (loc == null)
+				player.sendMessage("Location not set");
+			else {
+				player.teleport(loc);
+				player.sendMessage("Teleported");
+			}
+			return;
+		}
+
 		if (name.equals(Messager.color(chestsName))) {
 			currentArena.fillChests();
-			player.sendMessage(Messager.getMessage("CHESTS_FILLED"));
+			player.sendMessage("Chests filled");
 			return;
 		}
 
@@ -293,15 +291,15 @@ public class ConfigMenu implements Listener {
 			ArenaManager.removeArena(currentArena);
 			currentArenas.remove(player);
 			currentArena = null;
-			player.sendMessage(Messager.getMessage("CONFIG_MENU_CLEARED"));
+			player.sendMessage("Cleared");
 			player.closeInventory();
 		}
 
 		if (name.equals(Messager.color(worldFolderName, currentWorldName))) {
 			if (this.worldsFolder.exists() && this.worldsFolder.listFiles().length <= 0) {
 				player.closeInventory();
-				player.sendMessage(Messager.getMessage("NO_WORLD_FOLDERS_AVAILABLE"));
-				player.sendMessage(Messager.getMessage("NEED_TO_PUT_SCHEMATICS_IN_FOLDER"));
+				player.sendMessage("&c&lThere are no world folders!");
+				player.sendMessage("&e&lYou need to put &bschematics files &ein the &bschematics folder");
 			} else
 				OpenWorldsMenu(player);
 			return;

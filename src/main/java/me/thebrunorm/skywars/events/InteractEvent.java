@@ -69,7 +69,7 @@ public class InteractEvent implements Listener {
 				if (!swp.isSpectator())
 					return;
 				event.setCancelled(true);
-				player.sendMessage(Messager.getMessage("SENDING_TO_ANOTHER_GAME"));
+				player.sendMessage(Messager.color("&aSending you to another game..."));
 				arena.leavePlayer(swp);
 				ArenaManager.joinRandomMap(player);
 			}

@@ -151,7 +151,7 @@ public class Skywars extends JavaPlugin {
 				final double z = lobbyConfig.getDouble("lobby.z");
 				this.lobby = new Location(world, x, y, z);
 			} else
-				this.sendMessage(Messager.getFormattedMessage("LOBBY_WORLD_DOES_NOT_EXIST", null, null, null, worldName));
+				this.sendMessage("&cLobby world (&b%s&c) does not exist!", worldName);
 		}
 	}
 
@@ -163,20 +163,6 @@ public class Skywars extends JavaPlugin {
 		this.chestManager.loadChests();
 		this.signManager.loadSigns();
 		this.loadKits();
-		
-		// 更新调试信息以显示当前加载的语言
-		// Update debug information to show the currently loaded language
-		if (this.langConfig != null) {
-			this.sendDebugMessage(Messager.getFormattedMessage("RELOADED_LOCALE_MESSAGE", null, null, null, this.getConfig().getString("locale"), this.langConfig.getString("language_name")));
-		}
-		
-		// 刷新所有在线玩家的记分板、动作栏和标签列表以应用新的语言设置
-		// Refresh the scoreboard, action bar, and tab list for all online players to apply the new language settings.
-		for (final Player player : Bukkit.getOnlinePlayers()) {
-			SkywarsScoreboard.update(player);
-			SkywarsActionbar.update(player);
-			SkywarsTablist.update(player);
-		}
 	}
 
 	@Override
@@ -193,6 +179,8 @@ public class Skywars extends JavaPlugin {
 
 		this.packageName = this.getServer().getClass().getPackage().getName();
 		this.serverPackageVersion = this.packageName.substring(this.packageName.lastIndexOf('.') + 1);
+
+		this.sendDebugMessage("&bServer version: &e%s (&a%s&e)", this.packageName, this.serverPackageVersion);
 
 		final File worldsToDeleteFile = new File(this.getDataFolder(), "delete_worlds.yml");
 		if (worldsToDeleteFile.exists()) {
@@ -211,7 +199,7 @@ public class Skywars extends JavaPlugin {
 						FileUtils.deleteDirectory(worldFolder);
 					} catch (final IOException e) {
 						e.printStackTrace();
-						Skywars.get().sendMessage(Messager.getFormattedMessage("COULD_NOT_DELETE_WORLD_FOLDER", null, null, null, worldFolder.getPath()));
+						Skywars.get().sendMessage("&cCould not delete world folder: &b" + worldFolder.getPath());
 					}
 				list.remove(worldName);
 			}
@@ -220,19 +208,16 @@ public class Skywars extends JavaPlugin {
 				deleteWorldsConfig.save(worldsToDeleteFile);
 			} catch (final IOException e) {
 				e.printStackTrace();
-				this.sendMessage(Messager.getFormattedMessage("COULD_NOT_SAVE_WORLD_DELETION_LIST", null, null, null, worldsToDeleteFile.getPath()));
+				this.sendMessage("Could not save the world deletion list to file: " + worldsToDeleteFile.getPath());
 			}
 		}
 
 		// load stuff
 		if (!this.loadConfig()) {
-			this.sendMessage(Messager.getMessage("COULD_NOT_LOAD_CONFIG_FILES"));
+			this.sendMessage("Could not load configuration files! Disabling plugin.");
 			this.setEnabled(false);
 			return;
 		}
-
-		// Ensure all language files are released
-		this.extractAllLanguageFiles();
 
 		if (!config.getBoolean("disableUpdates") && SkywarsUpdater.update(config.getBoolean("autoUpdate"))) {
 			this.updated = true;
@@ -252,7 +237,7 @@ public class Skywars extends JavaPlugin {
 		this.nmsHandler = new ReflectionNMS();
 		SchematicHandler.initializeReflection();
 
-		this.sendMessage(Messager.getMessage("PLUGIN_HOOKS_HEADER"));
+		this.sendMessage("&b&l--- PLUGIN HOOKS ---");
 		if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
 			this.hologramController = new DecentHologramsController();
 		} else if (Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays")) {
@@ -277,33 +262,33 @@ public class Skywars extends JavaPlugin {
 					return false;
 				}
 			};
-			this.sendMessage(Messager.getMessage("HOLOGRAMS_NO_PLUGIN_FOUND"));
+			this.sendMessage("&eHolograms: &cno supported holograms plugin found!");
 		} else {
 			holograms = true;
-			this.sendMessage(Messager.getFormattedMessage("HOLOGRAMS_PLUGIN_FOUND", null, null, null, this.hologramController.getClass().getSimpleName()));
+			this.sendMessage("&eHolograms: &a" + this.hologramController.getClass().getSimpleName());
 		}
 
 		economyEnabled = Skywars.get().getConfig().getBoolean("economy.enabled");
 		if (economyEnabled)
 			try {
 				if (this.setupEconomy()) {
-					this.sendMessage(Messager.getFormattedMessage("ECONOMY_PLUGIN_NAME", null, null, null, this.economyProvider.getPlugin().getName()));
+					this.sendMessage("&eEconomy (Vault): &a" + this.economyProvider.getPlugin().getName());
 				}
 			} catch (final Exception e) {
-				this.sendMessage(Messager.getMessage("ECONOMY_COULD_NOT_HOOK"));
+				this.sendMessage("&eEconomy (Vault): &ccould not hook.");
 				e.printStackTrace();
 			}
 		else
-			this.sendMessage(Messager.getMessage("ECONOMY_DISABLED_IN_CONFIG"));
+			this.sendMessage("&eEconomy (Vault): &6disabled in config.");
 
 		// placeholder api
 		if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
 			placeholders = true;
 		}
-		this.sendMessage(Messager.getFormattedMessage("PLACEHOLDER_API_STATUS", null, null, null, placeholders ? "hooked." : "not found."));
+		this.sendMessage("&ePlaceholderAPI: " + (placeholders ? "&ahooked." : "&cnot found."));
 
 		// done
-		this.sendMessage(Messager.getFormattedMessage("PLUGIN_ENABLED_MESSAGE", null, null, null, this.version));
+		this.sendMessage("&ahas been enabled: &bv%s", this.version);
 
 		if (placeholders)
 			new SkywarsPlaceholderExpansion().register();
@@ -324,7 +309,7 @@ public class Skywars extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		if (this.updated) {
-			this.sendMessage(Messager.getMessage("PLUGIN_UPDATED_AND_DISABLED"));
+			this.sendMessage("&6The plugin has been updated and disabled.");
 			return;
 		}
 
@@ -362,7 +347,7 @@ public class Skywars extends JavaPlugin {
 			config.save(file);
 		} catch (final IOException e) {
 			e.printStackTrace();
-			this.sendMessage(Messager.getMessage("COULD_NOT_WRITE_WORLD_LIST_TO_FILE"));
+			this.sendMessage("Could not write world list to file.");
 		}
 		this.arenas.clear();
 	}
@@ -379,13 +364,13 @@ public class Skywars extends JavaPlugin {
 		if (!economyEnabled)
 			return false;
 		if (this.getServer().getPluginManager().getPlugin("Vault") == null) {
-			this.sendMessage(Messager.getMessage("ECONOMY_PLUGIN_NOT_FOUND"));
+			this.sendMessage("&eEconomy (Vault): &6plugin not found.");
 			return false;
 		}
 
 		this.economyProvider = this.getServer().getServicesManager().getRegistration(Economy.class);
 		if (this.economyProvider == null) {
-			this.sendMessage(Messager.getMessage("ECONOMY_PLUGIN_FOUND_NO_PROVIDER"));
+			this.sendMessage("&eEconomy (Vault): &6plugin found &cbut no registered service provider!");
 			return false;
 		}
 		this.economy = this.economyProvider.getProvider();
@@ -425,10 +410,10 @@ public class Skywars extends JavaPlugin {
 		cmds.put("leave", new LeaveCommand());
 		for (final String cmd : cmds.keySet()) {
 			if (!this.getConfig().getStringList("disabledCommands").contains(cmd)) {
-				this.sendDebugMessage(Messager.getFormattedMessage("LOADING_COMMAND_MESSAGE", null, null, null, cmd));
+				this.sendDebugMessage("&eLoading command &a%s&e...", cmd);
 				this.getCommand(cmd).setExecutor(cmds.get(cmd));
 			} else
-				this.sendDebugMessage(Messager.getFormattedMessage("SKIPPING_COMMAND_MESSAGE", null, null, null, cmd));
+				this.sendDebugMessage("&7Skipping command &c%s&e...", cmd);
 		}
 	}
 
@@ -780,7 +765,6 @@ public class Skywars extends JavaPlugin {
 		langConfig = ConfigurationUtils.loadConfiguration("lang/" + lang + ".yml", "lang/" + lang + ".yml",
 				"lang/en.yml");
 
-		this.sendDebugMessage(Messager.getFormattedMessage("SERVER_VERSION_INFO", null, null, null, this.packageName, this.serverPackageVersion));
 		this.sendDebugMessage("Loaded locale: " + lang + " - " + langConfig.getString("language_name"));
 
 		lobbyConfig = ConfigurationUtils.loadConfiguration("lobby.yml", "lobby.yml");
@@ -817,53 +801,5 @@ public class Skywars extends JavaPlugin {
 
 	public HologramController getHologramController() {
 		return this.hologramController;
-	}
-
-	/**
-	 * Extracts all language files to the plugin directory
-	 */
-	private void extractAllLanguageFiles() {
-		this.sendDebugMessage("&eExtracting all language files...");
-
-		// Create lang directory if it doesn't exist
-		final File langDir = new File(this.getDataFolder(), "lang");
-		if (!langDir.exists()) {
-			langDir.mkdirs();
-		}
-
-		// Extract all language files from the JAR by iterating through its entries
-		try {
-			// Get the plugin JAR file
-			java.io.File pluginJar = this.getFile();
-			java.util.jar.JarFile jar = new java.util.jar.JarFile(pluginJar);
-			java.util.Enumeration<java.util.jar.JarEntry> entries = jar.entries();
-			
-			while (entries.hasMoreElements()) {
-				java.util.jar.JarEntry entry = entries.nextElement();
-				String name = entry.getName();
-				
-				// Check if this is a language file in the lang directory
-				if (name.startsWith("lang/") && name.endsWith(".yml") && !name.equals("lang/")) {
-					// Extract just the filename part after lang/
-					String fileName = name.substring("lang/".length());
-					if (!fileName.isEmpty() && !entry.isDirectory()) {
-						final File targetFile = new File(langDir, fileName);
-						if (!targetFile.exists()) {
-							this.sendDebugMessage("&eExtracting language file: &a%s", targetFile.getName());
-							ConfigurationUtils.copyDefaultContentsToFile(name, targetFile);
-						} else {
-							this.sendDebugMessage("&7Language file already exists: &r%s", targetFile.getName());
-						}
-					}
-				}
-			}
-			
-			jar.close();
-		} catch (Exception e) {
-			this.sendDebugMessage("&cError extracting language files: &r%s", e.getMessage());
-			e.printStackTrace();
-		}
-
-		this.sendDebugMessage("&aFinished extracting language files.");
 	}
 }

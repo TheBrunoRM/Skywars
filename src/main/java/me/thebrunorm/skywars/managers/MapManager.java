@@ -81,7 +81,7 @@ public class MapManager {
 					// it may be a map configuration file
 					worldFolder.renameTo(new File(Skywars.mapsPath, worldFolder.getName()));
 				} else {
-					Skywars.get().sendMessage(Messager.getFormattedMessage("MAPMANAGER_UNKNOWN_WORLD_FILE", null, null, null, worldFolder.getName()));
+					Skywars.get().sendMessage("&6Unknown world file found: &b%s", worldFolder.getName());
 				}
 			}
 
@@ -103,7 +103,7 @@ public class MapManager {
 			mapConfig.save(mapFile);
 		} catch (final IOException e) {
 			e.printStackTrace();
-			Skywars.get().sendMessage(Messager.getFormattedMessage("MAPMANAGER_COULD_NOT_SAVE_CONFIG", null, null, null, worldFolder.getName()));
+			Skywars.get().sendMessage("Could not save map configuration file for world: %s", worldFolder.getName());
 		}
 		Skywars.get().sendDebugMessage("Saved map configuration file '%s' for world: %s", mapFile.getName(),
 				worldFolder.getName());

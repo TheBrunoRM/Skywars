@@ -25,11 +25,12 @@ public class GamesMenu implements Listener {
 		PlayerInventoryManager.setMenu(player, MenuType.GAMES_MENU);
 		final ItemStack item = new ItemStack(XMaterial.BOW.parseItem());
 		final ItemMeta meta = item.getItemMeta();
-				meta.setDisplayName(Messager.getMessage("GAMES_MENU_JOIN_RANDOM_GAME"));
-				final List<String> lore = new ArrayList<String>();
-				lore.add(Messager.getMessage("GAMES_MENU_LITERALLY_JUST_CLICK"));
-				lore.add(Messager.getMessage("GAMES_MENU_TO_JOIN_GAME"));
-				lore.add(Messager.getMessage("GAMES_MENU_MOST_PLAYERS"));		meta.setLore(lore);
+		meta.setDisplayName(Messager.color("&aclick to join random game"));
+		final List<String> lore = new ArrayList<String>();
+		lore.add(Messager.color("&eliterally just click this"));
+		lore.add(Messager.color("&eto join the game that"));
+		lore.add(Messager.color("&ehas the most players in it"));
+		meta.setLore(lore);
 		item.setItemMeta(meta);
 		inventory.setItem(11, item);
 		player.openInventory(inventory);
@@ -53,7 +54,7 @@ public class GamesMenu implements Listener {
 			event.setCancelled(true);
 			final Arena arena = Skywars.get().getRandomJoinableArena();
 			if (arena == null) {
-				player.sendMessage(Messager.getMessage("COULD_NOT_FIND_JOINABLE_ARENA"));
+				player.sendMessage("couldn't find joinable arena");
 				return;
 			}
 			arena.joinPlayer(player);

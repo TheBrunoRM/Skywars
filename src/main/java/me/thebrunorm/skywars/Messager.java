@@ -28,9 +28,6 @@ public class Messager {
 	}
 
 	public static String getMessage(String name, Object... format) {
-		if (Skywars.langConfig == null) {
-			return name; // Return the key itself if langConfig is not loaded yet
-		}
 		String msg = "";
 		if (Skywars.langConfig.get(name) instanceof List)
 			msg = String.join("\n", Skywars.langConfig.getStringList(name));
@@ -38,28 +35,15 @@ public class Messager {
 			msg = Skywars.langConfig.getString(name);
 		if (msg == null)
 			return name;
-		
-		// Handle %s placeholders by replacing them with numbered placeholders first, then handle numbered ones
-		if (format.length > 0) {
-			// Replace all %s occurrences with numbered placeholders {0}, {1}, etc.
-			for (int i = 0; i < format.length && msg.contains("%s"); i++) {
-				msg = msg.replaceFirst("%s", String.format("{%d}", i));
-			}
-		}
-		
-		// Handle numbered placeholders like {0}, {1}, etc.
 		for (int i = 0; i < format.length; i++) {
 			msg = msg.replaceAll(String.format("\\{%s\\}", i), String.valueOf(format[i]));
 		}
-		
 		return Messager.color(msg);
 	}
 
 	public static String getFormattedMessage(String name, Player player, Arena arena, SkywarsUser swp,
 			Object... format) {
-			if (Skywars.langConfig == null) {
-				return name; // Return the key itself if langConfig is not loaded yet
-			}
-			return Messager.color(SkywarsUtils.format(getMessage(name, format), player, arena, swp));
-		}
+		return Messager.color(SkywarsUtils.format(getMessage(name, format), player, arena, swp));
+	}
+
 }

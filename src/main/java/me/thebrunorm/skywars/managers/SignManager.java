@@ -56,18 +56,18 @@ public class SignManager implements Listener {
 		final String mapName = event.getLine(titleLine + 1);
 		final Player player = event.getPlayer();
 		if (mapName == null) {
-			player.sendMessage(Messager.getMessage("SIGN_NEED_MAP_NAME"));
+			player.sendMessage(Messager.color("&cYou need to specify the map name in the line below!"));
 			return;
 		}
 		final SkywarsMap map = Skywars.get().getMapManager().getMap(mapName);
 		if (map == null) {
-			player.sendMessage(Messager.getFormattedMessage("SIGN_MAP_NOT_FOUND", player, null, null, mapName));
+			player.sendMessage("&cCould not find a map with the name: &e" + mapName);
 			return;
 		}
 
 		final YamlConfiguration config = this.loadSignConfig();
 		if (config == null) {
-			player.sendMessage(Messager.getMessage("SIGN_COULD_NOT_SET_UP"));
+			player.sendMessage(Messager.color("&cCould not set up sign."));
 			return;
 		}
 		final List<String> signsConfig = config.getStringList("signs");
@@ -81,7 +81,7 @@ public class SignManager implements Listener {
 
 		this.signs.put(loc, map);
 
-		player.sendMessage(Messager.getFormattedMessage("SIGN_SUCCESSFULLY_SET_UP", player, null, null, map.getName()));
+		player.sendMessage(Messager.color("&eSuccessfully set up sign for map &b" + map.getName()));
 		event.setCancelled(true);
 		this.updateSign((Sign) event.getBlock().getState(), map);
 	}
@@ -91,7 +91,7 @@ public class SignManager implements Listener {
 			config.save(this.getSignConfigFile());
 		} catch (final IOException e) {
 			e.printStackTrace();
-			Skywars.get().sendMessage(Messager.getMessage("SIGN_COULD_NOT_SAVE_SIGNS"));
+			Skywars.get().sendMessage("&cCould not save signs!");
 		}
 	}
 
@@ -103,15 +103,15 @@ public class SignManager implements Listener {
 		for (final String s : signs) {
 			final String[] splitted = s.split("[^\\w\\s-]");
 			if (splitted.length < 4) {
-				Skywars.get().sendDebugMessage(Messager.getFormattedMessage("SIGN_LOADING_ERROR_FORMAT", null, null, null, splitted.length)
-						+ String.join(" - ", splitted));
+				Skywars.get().sendDebugMessage("&4Error loading signs.yml: &cincorrectly formatted sign (&4%s&c): &b"
+						+ String.join(" - ", splitted), splitted.length);
 				continue;
 			}
 			final String mapName = splitted[4];
 			final String worldName = splitted[0];
 			final World world = Bukkit.getWorld(worldName);
 			if (world == null) {
-				Skywars.get().sendMessage(Messager.getFormattedMessage("SIGN_COULD_NOT_FIND_WORLD", null, null, null, worldName));
+				Skywars.get().sendMessage("&4Error loading signs.yml: &ccould not find world: &b" + worldName);
 				continue;
 			}
 			final Location loc = new Location( //
@@ -121,23 +121,23 @@ public class SignManager implements Listener {
 					Double.parseDouble(splitted[3]));
 			if (!(loc.getBlock().getState() instanceof Sign)) {
 				newSigns.remove(s);
-				Skywars.get().sendMessage(Messager.getFormattedMessage("SIGN_IS_NOT_SIGN", null, null, null, loc.toString()));
+				Skywars.get().sendMessage("&4Error loading signs.yml: &csign is not sign: &b" + loc);
 				continue;
 			}
 
 			if (this.signs.get(loc) != null) {
-				Skywars.get().sendDebugMessage(Messager.getFormattedMessage("SIGN_DUPLICATED_SIGN", null, null, null, loc.toString()));
+				Skywars.get().sendDebugMessage("&4Error loading signs.yml: &cduplicated sign: &b" + loc);
 				continue;
 			}
 
 			final SkywarsMap map = Skywars.get().getMapManager().getMap(mapName);
 			if (map == null) {
 				newSigns.remove(s);
-				Skywars.get().sendMessage(Messager.getFormattedMessage("SIGN_COULD_NOT_FIND_MAP", null, null, null, mapName));
+				Skywars.get().sendMessage("&4Error loading signs.yml: &ccould not find map: &b" + mapName);
 				continue;
 			}
 			this.signs.put(loc, map);
-			Skywars.get().sendDebugMessage(Messager.getFormattedMessage("SIGN_LOADED_SIGN", null, null, null, s));
+			Skywars.get().sendDebugMessage("&eLoaded sign: &b", s);
 		}
 
 		config.set("signs", newSigns);
@@ -156,7 +156,7 @@ public class SignManager implements Listener {
 				signsFile.createNewFile();
 			} catch (final IOException e) {
 				e.printStackTrace();
-				Skywars.get().sendMessage(Messager.getMessage("SIGN_COULD_NOT_CREATE_SIGNS_FILE"));
+				Skywars.get().sendMessage("&cCould not create &bsigns.yml &cfile!");
 				return null;
 			}
 		}
@@ -167,7 +167,7 @@ public class SignManager implements Listener {
 		for (final Entry<Location, SkywarsMap> sign : this.signs.entrySet()) {
 			final BlockState state = sign.getKey().getBlock().getState();
 			if (!(state instanceof Sign)) {
-				Skywars.get().sendDebugMessage(Messager.getFormattedMessage("SIGN_UPDATE_WARNING", null, null, null, sign.getKey().toString()));
+				Skywars.get().sendDebugMessage("&4Warning updating signs: &csign is not sign: &b" + sign.getKey());
 			}
 			final Sign signState = (Sign) state;
 			this.updateSign(signState, sign.getValue());
@@ -175,7 +175,7 @@ public class SignManager implements Listener {
 	}
 
 	public void updateSign(Sign sign, SkywarsMap map) {
-		Skywars.get().sendDebugMessage(Messager.getFormattedMessage("SIGN_UPDATING_SIGN", null, null, null, map.getName(), sign.getLocation().toString()));
+		Skywars.get().sendDebugMessage("&eUpdating sign (&a%s&e): &b%s", map.getName(), sign.getLocation());
 		final ArrayList<Arena> arenas = ArenaManager.getArenasByMap(map);
 		sign.setLine(0, Messager.color("&a%s", map.getName()));
 		sign.setLine(1, Messager.color("&b%s &earenas", arenas.size()));

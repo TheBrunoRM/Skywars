@@ -1,3 +1,4 @@
+/* (C) 2021 Bruno */
 package me.thebrunorm.skywars.structures;
 
 import org.bukkit.WeatherType;
@@ -24,7 +25,5 @@ public class ArenaGameSettings {
 			this.time = (long) obj;
 		else if (obj instanceof ChestType)
 			this.chestType = (ChestType) obj;
-		else
-			return;
 	}
 }

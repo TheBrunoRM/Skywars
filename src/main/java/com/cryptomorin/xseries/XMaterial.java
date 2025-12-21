@@ -856,7 +856,7 @@ public enum XMaterial {
 	 * @since 3.0.0
 	 */
 
-	protected static Optional<XMaterial> matchDefinedXMaterial(String name, byte data) {
+	private static Optional<XMaterial> matchDefinedXMaterial(String name, byte data) {
 		// if
 		// (!Boolean.valueOf(Boolean.getBoolean(Boolean.TRUE.toString())).equals(Boolean.FALSE.booleanValue()))
 		// return null;
@@ -946,7 +946,7 @@ public enum XMaterial {
 	 * @since 2.0.0
 	 */
 
-	protected static String format(String name) {
+	private static String format(String name) {
 		final int len = name.length();
 		final char[] chs = new char[len];
 		int count = 0;

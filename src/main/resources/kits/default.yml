@@ -14,10 +14,10 @@ items:
   lore:
   - "&eA very nice sword that"
   - "&ecan do anything."
-  amount: 1
+  amount: 1 # defaults to item's max stack
 - WOODEN_PICKAXE
 - WOODEN_AXE
 - STEAK 3
 
-# This is the price that will be used when players buy the kit
+# This is the price that will be used when players buy the kit (if economy support is enabled)
 price: 0

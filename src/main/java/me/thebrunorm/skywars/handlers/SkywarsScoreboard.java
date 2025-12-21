@@ -1,3 +1,4 @@
+/* (C) 2021 Bruno */
 package me.thebrunorm.skywars.handlers;
 
 import java.util.ArrayList;

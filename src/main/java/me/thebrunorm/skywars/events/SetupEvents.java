@@ -43,9 +43,9 @@ public class SetupEvents implements Listener {
 			ConfigMenu.playerLocations.put(player, null);
 			ConfigMenu.currentArenas.remove(player);
 			event.getItemDrop().remove();
-			Skywars.get().NMS().sendTitle(player, Messager.getMessage("SETUP_DONE_TITLE"), Messager.getMessage("SETUP_SPAWNS_SAVED_SUBTITLE"));
+			Skywars.get().NMS().sendTitle(player, "&a&LDONE", "&eSaved spawns");
 			player.playSound(player.getLocation(), Sounds.LEVEL_UP.bukkitSound(), 3, 1);
-			player.sendMessage(Messager.getMessage("SETUP_EXIT_SPAWN_EDIT_MODE"));
+			player.sendMessage(Messager.color("&e&lYou exited &b&lspawn edit mode"));
 		}
 	}
 
@@ -54,10 +54,10 @@ public class SetupEvents implements Listener {
 		if (SetupEvents.item == null)
 			return;
 		final ItemStack newItem = event.getPlayer().getInventory().getItem(event.getNewSlot());
-		if (newItem != null && newItem.equals(SetupEvents.item)) {
-			Skywars.get().NMS().sendTitle(event.getPlayer(), Messager.getMessage("SETUP_PLEASE_TITLE"), Messager.getMessage("SETUP_DROP_TO_EXIT_EDIT_MODE"));
+		if (newItem.equals(SetupEvents.item)) {
+			Skywars.get().NMS().sendTitle(event.getPlayer(), "&6Please", "&eDrop the blaze rod to exit edit mode.");
 		} else {
-			Skywars.get().NMS().sendTitle(event.getPlayer(), Messager.getMessage("SETUP_WARNING_TITLE"), Messager.getMessage("SETUP_DROP_TO_EXIT_EDIT_MODE_EXCLAMATION"));
+			Skywars.get().NMS().sendTitle(event.getPlayer(), "&cWarning!", "&eDrop the blaze rod to exit edit mode!");
 		}
 	}
 
@@ -88,15 +88,15 @@ public class SetupEvents implements Listener {
 				final Vector vector = loc.subtract(arena.getCenterBlock()).toVector();
 				Skywars.get().sendDebugMessage("spawn set to vector " + vector);
 				map.setSpawn(n, vector);
-				Skywars.get().NMS().sendTitle(player, "", Messager.getFormattedMessage("SETUP_SPAWN_SET", player, null, null, n + 1));
+				Skywars.get().NMS().sendTitle(player, "", String.format("&eSpawn %s set!", n + 1));
 			} else if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 				n--;
 				if (map.getSpawns().get(n) == null) {
-					Skywars.get().NMS().sendTitle(player, "", Messager.getFormattedMessage("SETUP_NO_SPAWN", player, null, null, n));
+					Skywars.get().NMS().sendTitle(player, "", String.format("&cNo spawn &c!", n));
 					return;
 				}
 				map.getSpawns().remove(n);
-				Skywars.get().NMS().sendTitle(player, "", Messager.getFormattedMessage("SETUP_SPAWN_REMOVED", player, null, null, n + 1));
+				Skywars.get().NMS().sendTitle(player, "", String.format("&cSpawn %s removed!", n + 1));
 			}
 		}
 	}
