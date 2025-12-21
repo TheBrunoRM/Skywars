@@ -140,7 +140,7 @@ public class ConfigMenu implements Listener {
 					Messager.getMessage("CONFIG_MENU_THIS_WILL_DELETE_CURRENT_SPAWNS"));
 	
 			InventoryUtils.addItem(inventory, XMaterial.WOODEN_AXE.parseMaterial(), 20, pasteSchematicName,
-					"&cThis will regenerate the map.");
+					Messager.getMessage("CONFIG_MENU_THIS_WILL_REGENERATE_MAP"));
 	
 			InventoryUtils.addItem(inventory, XMaterial.BARRIER.parseMaterial(), 21, clearName);
 	
@@ -221,7 +221,7 @@ public class ConfigMenu implements Listener {
 					player.playSound(player.getLocation(), Sounds.NOTE_PLING.bukkitSound(), 3, 2);
 		
 					if (!currentMap.getSpawns().isEmpty())
-						player.sendMessage(Messager.getMessage("SPAWNS_CALCULATED_AND_SAVED"));
+						player.sendMessage(Messager.getMessage("SPAWNS_CALCULATED_AND_SAVED", currentMap.getSpawns().size()));
 					currentMap.getSpawns().clear();
 		
 					player.sendMessage(Messager.getMessage("SPAWN_EDIT_MODE_ENTERED"));
