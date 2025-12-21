@@ -1,8 +1,17 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.events;
 
-import java.util.List;
-
+import com.cryptomorin.xseries.XMaterial;
+import me.thebrunorm.skywars.*;
+import me.thebrunorm.skywars.commands.CommandsUtils;
+import me.thebrunorm.skywars.managers.ArenaManager;
+import me.thebrunorm.skywars.managers.SignManager;
+import me.thebrunorm.skywars.menus.GameOptionsMenu;
+import me.thebrunorm.skywars.menus.KitsMenu;
+import me.thebrunorm.skywars.menus.MapMenu;
+import me.thebrunorm.skywars.structures.Arena;
+import me.thebrunorm.skywars.structures.SkywarsMap;
+import me.thebrunorm.skywars.structures.SkywarsUser;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -19,21 +28,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.cryptomorin.xseries.XMaterial;
-
-import me.thebrunorm.skywars.ArenaStatus;
-import me.thebrunorm.skywars.Messager;
-import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.SkywarsUtils;
-import me.thebrunorm.skywars.commands.CommandsUtils;
-import me.thebrunorm.skywars.managers.ArenaManager;
-import me.thebrunorm.skywars.managers.SignManager;
-import me.thebrunorm.skywars.menus.GameOptionsMenu;
-import me.thebrunorm.skywars.menus.KitsMenu;
-import me.thebrunorm.skywars.menus.MapMenu;
-import me.thebrunorm.skywars.structures.Arena;
-import me.thebrunorm.skywars.structures.SkywarsMap;
-import me.thebrunorm.skywars.structures.SkywarsUser;
+import java.util.List;
 
 public class InteractEvent implements Listener {
 
@@ -71,8 +66,8 @@ public class InteractEvent implements Listener {
 		}
 	}
 
-	Material getConfiguredMaterial(FileConfiguration config, String key) {
-		return XMaterial.matchXMaterial(config.getString("item_types." + key))
+	Material getConfiguredMaterial(FileConfiguration config, SkywarsItemType key) {
+		return XMaterial.matchXMaterial(config.getString("item_types." + key.name()))
 			.map(XMaterial::parseMaterial).orElse(null);
 	}
 
@@ -88,19 +83,21 @@ public class InteractEvent implements Listener {
 		final FileConfiguration config = Skywars.get().getConfig();
 		Material itemType = item.getType();
 
-		if (itemType == getConfiguredMaterial(config, "KIT_SELECTOR") && !arena.started()) {
+		if (itemType == getConfiguredMaterial(config, SkywarsItemType.KIT_SELECTOR) && !arena.started()) {
 			event.setCancelled(true);
 			KitsMenu.open(player);
 		}
 
-		if (itemType == getConfiguredMaterial(config, "LEAVE") && displayName.equals(SkywarsUtils.getItemNameFromConfig("LEAVE"))) {
+		if (itemType == getConfiguredMaterial(config, SkywarsItemType.LEAVE)
+			&& displayName.equals(SkywarsUtils.getItemNameFromConfig(SkywarsItemType.LEAVE))) {
 			if (arena.getStatus() != ArenaStatus.PLAYING || swp.isSpectator()) {
 				event.setCancelled(true);
 				arena.leavePlayer(swp);
 			}
 		}
 
-		if (itemType == getConfiguredMaterial(config, "PLAY_AGAIN") && displayName.equals(SkywarsUtils.getItemNameFromConfig("PLAY_AGAIN"))) {
+		if (itemType == getConfiguredMaterial(config, SkywarsItemType.PLAY_AGAIN)
+			&& displayName.equals(SkywarsUtils.getItemNameFromConfig(SkywarsItemType.PLAY_AGAIN))) {
 			if (swp.isSpectator()) {
 				event.setCancelled(true);
 				player.sendMessage(Messager.color("&aSending you to another game..."));
@@ -109,17 +106,17 @@ public class InteractEvent implements Listener {
 			}
 		}
 
-		if (itemType == getConfiguredMaterial(config, "GAME_OPTIONS") && !swp.isSpectator() && !arena.started()) {
+		if (itemType == getConfiguredMaterial(config, SkywarsItemType.GAME_OPTIONS) && !swp.isSpectator() && !arena.started()) {
 			event.setCancelled(true);
 			GameOptionsMenu.open(player);
 		}
 
-		if (itemType == getConfiguredMaterial(config, "START_GAME") && !arena.started() && CommandsUtils.permissionCheckWithMessage(player, "skywars.start")) {
+		if (itemType == getConfiguredMaterial(config, SkywarsItemType.START_GAME) && !arena.started() && CommandsUtils.permissionCheckWithMessage(player, "skywars.start")) {
 			event.setCancelled(true);
 			arena.softStart(player);
 		}
 
-		if (itemType == getConfiguredMaterial(config, "STOP_GAME") && arena.started() && CommandsUtils.permissionCheckWithMessage(player, "skywars.stop")) {
+		if (itemType == getConfiguredMaterial(config, SkywarsItemType.STOP_GAME) && arena.started() && CommandsUtils.permissionCheckWithMessage(player, "skywars.stop")) {
 			event.setCancelled(true);
 			arena.clear();
 		}

@@ -1,20 +1,13 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars;
 
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import com.cryptomorin.xseries.XMaterial;
+import me.clip.placeholderapi.PlaceholderAPI;
+import me.thebrunorm.skywars.holograms.HologramController;
+import me.thebrunorm.skywars.structures.Arena;
+import me.thebrunorm.skywars.structures.SkywarsUser;
+import mrblobman.sounds.Sounds;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -30,19 +23,15 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
-import com.cryptomorin.xseries.XMaterial;
-
-import me.thebrunorm.skywars.holograms.HologramController;
-import me.thebrunorm.skywars.structures.Arena;
-import me.thebrunorm.skywars.structures.SkywarsUser;
-import me.clip.placeholderapi.PlaceholderAPI;
-import mrblobman.sounds.Sounds;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class SkywarsUtils {
 
 	public static final String URL = getUrl();
-	public static final String[] COLOR_SYMBOLS = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d",
-			"f" };
+	public static final String[] COLOR_SYMBOLS = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d",
+		"f"};
 
 	public static String format(String text, Player player, Arena arena, SkywarsUser swp) {
 		return format(text, player, arena, swp, false);
@@ -64,32 +53,32 @@ public class SkywarsUtils {
 		if (player != null) {
 
 			final String balance = Skywars.get().getEconomy() != null
-					? SkywarsUtils.formatDouble(Skywars.get().getEconomy().getBalance(player))
-					: "Vaultn't";
+				? SkywarsUtils.formatDouble(Skywars.get().getEconomy().getBalance(player))
+				: "Vaultn't";
 			text = text.replaceAll(getVariableCode("coins"), balance).replaceAll(getVariableCode("money"), balance)
-					.replaceAll(getVariableCode("balance"), balance).replaceAll(getVariableCode("economy"), balance)
-					.replaceAll(getVariableCode("souls"), String.valueOf(Skywars.get().getPlayerSouls(player)))
-					.replaceAll(getVariableCode("totalwins"), String.valueOf(Skywars.get().getPlayerTotalWins(player)))
-					.replaceAll(getVariableCode("totalkills"),
-							String.valueOf(Skywars.get().getPlayerTotalKills(player)))
-					.replaceAll(getVariableCode("totaldeaths"),
-							String.valueOf(Skywars.get().getPlayerTotalDeaths(player)))
-					.replaceAll(getVariableCode("kit"), Skywars.get().getPlayerKit(player).getDisplayName());
+				.replaceAll(getVariableCode("balance"), balance).replaceAll(getVariableCode("economy"), balance)
+				.replaceAll(getVariableCode("souls"), String.valueOf(Skywars.get().getPlayerSouls(player)))
+				.replaceAll(getVariableCode("totalwins"), String.valueOf(Skywars.get().getPlayerTotalWins(player)))
+				.replaceAll(getVariableCode("totalkills"),
+					String.valueOf(Skywars.get().getPlayerTotalKills(player)))
+				.replaceAll(getVariableCode("totaldeaths"),
+					String.valueOf(Skywars.get().getPlayerTotalDeaths(player)))
+				.replaceAll(getVariableCode("kit"), Skywars.get().getPlayerKit(player).getDisplayName());
 		}
 
 		if (arena != null) {
 			// this prevents a stack overflow error
 			if (!status)
 				text = text.replaceAll(getVariableCode("status"),
-						format(SkywarsUtils.getStatus(arena), player, arena, swp, true));
+					format(SkywarsUtils.getStatus(arena), player, arena, swp, true));
 
 			text = text.replaceAll(getVariableCode("map"), arena.getMap().getName())
-					.replaceAll(getVariableCode("arena"), arena.getMap().getName())
-					.replaceAll(getVariableCode("event"), arena.getNextEventText())
-					.replaceAll(getVariableCode("players"), Integer.toString(arena.getAlivePlayerCount()))
-					.replaceAll(getVariableCode("maxplayers"), Integer.toString(arena.getMap().getSpawns().size()))
-					.replaceAll(getVariableCode("seconds"), Integer.toString(arena.getCountdown()))
-					.replaceAll(getVariableCode("count"), Integer.toString(arena.getCountdown()));
+				.replaceAll(getVariableCode("arena"), arena.getMap().getName())
+				.replaceAll(getVariableCode("event"), arena.getNextEventText())
+				.replaceAll(getVariableCode("players"), Integer.toString(arena.getAlivePlayerCount()))
+				.replaceAll(getVariableCode("maxplayers"), Integer.toString(arena.getMap().getSpawns().size()))
+				.replaceAll(getVariableCode("seconds"), Integer.toString(arena.getCountdown()))
+				.replaceAll(getVariableCode("count"), Integer.toString(arena.getCountdown()));
 		}
 
 		if (swp != null) {
@@ -125,16 +114,16 @@ public class SkywarsUtils {
 
 	public static String getStatus(Arena arena) {
 		switch (arena.getStatus()) {
-		case WAITING:
-			return Messager.get("status.waiting");
-		case STARTING:
-			return Messager.get("status.starting");
-		case PLAYING:
-			return Messager.get("status.playing");
-		case RESTARTING:
-			return Messager.get("status.restarting");
-		default:
-			return Messager.get("status.unknown");
+			case WAITING:
+				return Messager.get("status.waiting");
+			case STARTING:
+				return Messager.get("status.starting");
+			case PLAYING:
+				return Messager.get("status.playing");
+			case RESTARTING:
+				return Messager.get("status.restarting");
+			default:
+				return Messager.get("status.unknown");
 		}
 	}
 
@@ -143,7 +132,7 @@ public class SkywarsUtils {
 	}
 
 	public static boolean teleportPlayerBackToTheLobbyOrToTheirLastLocationIfTheLobbyIsNotSet(Player player,
-			boolean force) {
+																							  boolean force) {
 		final Location lobby = Skywars.get().getLobby();
 		if (lobby != null) {
 			player.getPlayer().teleport(lobby);
@@ -257,7 +246,7 @@ public class SkywarsUtils {
 		if (arena.getAlivePlayerCount() >= spawns) {
 			if (player != null)
 				player.sendMessage(
-						Messager.color("this arena is full! (%s/%s players)", arena.getAlivePlayerCount(), spawns));
+					Messager.color("this arena is full! (%s/%s players)", arena.getAlivePlayerCount(), spawns));
 			return JoinProblem.ARENA_IS_FULL;
 		}
 		return null;
@@ -309,7 +298,7 @@ public class SkywarsUtils {
 
 	public static Color getRandomColor() {
 		return Color.fromRGB((int) Math.floor(Math.random() * 255), (int) Math.floor(Math.random() * 255),
-				(int) Math.floor(Math.random() * 255));
+			(int) Math.floor(Math.random() * 255));
 	}
 
 	public static void spawnRandomFirework(Location location) {
@@ -319,8 +308,8 @@ public class SkywarsUtils {
 		final FireworkMeta meta = firework.getFireworkMeta();
 		final FireworkEffect.Builder builder = FireworkEffect.builder();
 		builder.withTrail().withFlicker().with(FireworkEffect.Type.BALL_LARGE)
-				.withFade(SkywarsUtils.getRandomColor(), SkywarsUtils.getRandomColor(), SkywarsUtils.getRandomColor())
-				.withColor(SkywarsUtils.getRandomColor(), SkywarsUtils.getRandomColor(), SkywarsUtils.getRandomColor());
+			.withFade(SkywarsUtils.getRandomColor(), SkywarsUtils.getRandomColor(), SkywarsUtils.getRandomColor())
+			.withColor(SkywarsUtils.getRandomColor(), SkywarsUtils.getRandomColor(), SkywarsUtils.getRandomColor());
 		meta.addEffect(builder.build());
 		meta.setPower(1);
 		firework.setFireworkMeta(meta);
@@ -330,8 +319,8 @@ public class SkywarsUtils {
 		return new DecimalFormat(Skywars.get().getConfig().getString("decimalFormat")).format(d);
 	}
 
-	public static String getItemNameFromConfig(String itemName) {
-		String configName = Skywars.langConfig.getString("items." + itemName + ".name");
+	public static String getItemNameFromConfig(SkywarsItemType itemType) {
+		String configName = Skywars.langConfig.getString("items." + itemType.name() + ".name");
 		if (Skywars.langConfig.getBoolean("items.show_context")) {
 			final String context = Skywars.langConfig.getString("items.context");
 			if (context != null) {
@@ -343,50 +332,68 @@ public class SkywarsUtils {
 
 	public static void setPlayerInventory(Player player, String category) {
 		final ConfigurationSection itemsSection = Skywars.get().getConfig()
-				.getConfigurationSection("items." + category);
+			.getConfigurationSection("items." + category);
 
 		final ConfigurationSection itemTypes = Skywars.get().getConfig().getConfigurationSection("item_types");
 
 		for (final String slotName : itemsSection.getKeys(false)) {
-			final String itemName = itemsSection.getString(slotName);
-
-			switch (itemName) {
-			case "START_GAME":
-				if (!player.hasPermission("skywars.start"))
-					continue;
-				break;
-			case "STOP_GAME":
-				if (!player.hasPermission("skywars.stop"))
-					continue;
-				break;
-			}
-
-			final int slot = Integer.parseInt(slotName);
-			final String itemType = itemTypes.getString(itemName);
-			final Material material = XMaterial.matchXMaterial(itemType).get().parseMaterial();
-			if (material == null) {
-				Skywars.get().sendDebugMessage("material is null for inventory item: %s", itemType);
+			String itemName = itemsSection.getString(slotName);
+			if (itemName == null) {
+				Skywars.get().sendDebugMessage("Item is null in slot %s for item_types", slotName);
 				continue;
 			}
-			final ItemStack item = new ItemStack(material);
-			final ItemMeta itemMeta = item.getItemMeta();
-			final String configName = getItemNameFromConfig(itemName);
-			itemMeta.setDisplayName(Messager.color(configName));
-			final List<String> itemLore = new ArrayList<String>();
-			for (final String loreLine : Skywars.langConfig.getStringList("items." + itemName + ".description")) {
-				itemLore.add(Messager.color(loreLine));
+			try {
+				SkywarsItemType itemType = SkywarsItemType.valueOf(itemName);
+
+				switch (itemType) {
+					case START_GAME:
+						if (!player.hasPermission("skywars.start"))
+							continue;
+						break;
+					case STOP_GAME:
+						if (!player.hasPermission("skywars.stop"))
+							continue;
+						break;
+				}
+
+				int slot;
+				try {
+					slot = Integer.parseInt(slotName);
+				} catch (NumberFormatException ex) {
+					Skywars.get().sendDebugMessage("Invalid inventory slot '%s' for items.%s", slotName, category);
+					slot = player.getInventory().firstEmpty();
+				}
+				final String materialName = itemTypes.getString(itemType.name());
+				Material material = XMaterial.matchXMaterial(materialName)
+					.map(XMaterial::parseMaterial)
+					.orElse(null);
+				if (material == null) {
+					Skywars.get().sendDebugMessage("Material is not defined in config for item_types.%s", itemType);
+					// fallback
+					material = XMaterial.BEDROCK.parseMaterial();
+				}
+				final ItemStack item = new ItemStack(material);
+				final ItemMeta itemMeta = item.getItemMeta();
+				final String configName = getItemNameFromConfig(itemType);
+				itemMeta.setDisplayName(Messager.color(configName));
+				final List<String> itemLore = new ArrayList<String>();
+				for (final String loreLine : Skywars.langConfig.getStringList("items." + itemType.name() + ".description")) {
+					itemLore.add(Messager.color(loreLine));
+				}
+				itemMeta.setLore(itemLore);
+				item.setItemMeta(itemMeta);
+				player.getInventory().setItem(slot, item);
+			} catch (IllegalArgumentException ex) {
+				Skywars.get().sendDebugMessage("Invalid item type: %s", itemName);
 			}
-			itemMeta.setLore(itemLore);
-			item.setItemMeta(itemMeta);
-			player.getInventory().setItem(slot, item);
 		}
 	}
 
 	public static void playSound(Player player, String sound) {
 		final String[] splitted = sound.split(";");
 		player.playSound(player.getLocation(), Sounds.valueOf(splitted[0]).bukkitSound(),
-				splitted.length > 1 ? Float.parseFloat(splitted[1]) : 1,
-				splitted.length > 2 ? Float.parseFloat(splitted[2]) : 1);
+			splitted.length > 1 ? Float.parseFloat(splitted[1]) : 1,
+			splitted.length > 2 ? Float.parseFloat(splitted[2]) : 1);
 	}
 
 	public static void playSoundsFromConfig(Player player, String configLocation) {
