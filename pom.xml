@@ -102,13 +102,6 @@
                 </formats>
 
                 <java>
-                    <googleJavaFormat>
-                        <version>1.8</version>
-                        <style>AOSP</style>
-                        <reflowLongStrings>true</reflowLongStrings>
-                        <formatJavadoc>false</formatJavadoc>
-                    </googleJavaFormat>
-
                     <licenseHeader>
                         <content>/* (C)$YEAR Bruno */</content>
                     </licenseHeader>
