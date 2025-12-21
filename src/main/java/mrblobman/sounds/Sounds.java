@@ -151,8 +151,8 @@ public enum Sounds {
 	VILLAGER_IDLE("VILLAGER_IDLE", "ENTITY_VILLAGER_AMBIENT"), VILLAGER_NO("VILLAGER_NO", "ENTITY_VILLAGER_NO"),
 	VILLAGER_YES("VILLAGER_YES", "ENTITY_VILLAGER_YES");
 
-	private String pre19sound;
-	private String post19sound;
+	private final String pre19sound;
+	private final String post19sound;
 	private String testsound;
 	private Sound resolvedSound = null;
 

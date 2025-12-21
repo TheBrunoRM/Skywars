@@ -71,7 +71,7 @@ public class SkywarsUpdater {
 
 			final InputStream in = new URL(FILE_URL).openStream();
 			final Path path = Skywars.get().file().getAbsoluteFile().toPath();
-			Skywars.get().sendDebugMessage("Download path: " + path.toString());
+			Skywars.get().sendDebugMessage("Download path: " + path);
 
 			Files.write(path, IOUtils.toByteArray(in), StandardOpenOption.WRITE);
 

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
@@ -36,104 +37,100 @@ import me.thebrunorm.skywars.structures.SkywarsUser;
 
 public class InteractEvent implements Listener {
 
-	@EventHandler
-	void onInteract(PlayerInteractEvent event) {
-		final Player player = event.getPlayer();
-		final Arena arena = Skywars.get().getPlayerArena(player);
-		if (arena != null) {
-			final SkywarsUser swp = arena.getUser(player);
-			ItemStack item;
-			item = player.getItemInHand();
-			final ItemMeta meta = item.getItemMeta();
-			if (meta == null)
-				return;
-			final String displayName = meta.getDisplayName();
-			if (displayName == null)
-				return;
-			final FileConfiguration config = Skywars.get().getConfig();
-			if (item.getType() == XMaterial.matchXMaterial(config.getString("item_types.KIT_SELECTOR")).get()
-					.parseMaterial()) {
-				if (!arena.started()) {
-					event.setCancelled(true);
-					KitsMenu.open(player);
-				}
+	void handleNormalInteraction(PlayerInteractEvent event, Player player) {
+		final SignManager signManager = Skywars.get().getSignManager();
+		if (signManager == null)
+			return;
+		if (event.getClickedBlock() == null)
+			return;
+		if (!(event.getClickedBlock().getState() instanceof Sign sign))
+			return;
+		if (player.getGameMode() == GameMode.CREATIVE && player.isSneaking())
+			return;
+
+		final SkywarsMap map = signManager.getSigns().get(event.getClickedBlock().getLocation());
+
+		if (map != null) {
+			event.setCancelled(true);
+			ArenaManager.joinMap(map, player);
+			return;
+		}
+
+		String line1 = sign.getLine(1);
+		String line2 = sign.getLine(2);
+
+		if (line1.equals("random") && line2.equals("skywars")) {
+			event.setCancelled(true);
+			ArenaManager.joinRandomMap(player);
+		} else if (line1.equals("play") && line2.equals("skywars")) {
+			event.setCancelled(true);
+			MapMenu.open(player);
+		}
+	}
+
+	Material getConfiguredMaterial(FileConfiguration config, String key) {
+		return XMaterial.matchXMaterial(config.getString("item_types." + key)).get().parseMaterial();
+	}
+
+	void handleArenaInteraction(PlayerInteractEvent event, Player player, Arena arena) {
+		final SkywarsUser swp = arena.getUser(player);
+		final ItemStack item = player.getItemInHand();
+		final ItemMeta meta = item.getItemMeta();
+		if (meta == null) return;
+
+		final String displayName = meta.getDisplayName();
+		if (displayName == null) return;
+
+		final FileConfiguration config = Skywars.get().getConfig();
+		Material itemType = item.getType();
+
+		if (itemType == getConfiguredMaterial(config, "KIT_SELECTOR") && !arena.started()) {
+			event.setCancelled(true);
+			KitsMenu.open(player);
+		}
+
+		if (itemType == getConfiguredMaterial(config, "LEAVE") && displayName.equals(SkywarsUtils.getItemNameFromConfig("LEAVE"))) {
+			if (arena.getStatus() != ArenaStatus.PLAYING || swp.isSpectator()) {
+				event.setCancelled(true);
+				arena.leavePlayer(swp);
 			}
-			if (displayName.equals(SkywarsUtils.getItemNameFromConfig("LEAVE")) && item.getType() == XMaterial
-					.matchXMaterial(config.getString("item_types.LEAVE")).get().parseMaterial()) {
-				if (arena.getStatus() != ArenaStatus.PLAYING || swp.isSpectator()) {
-					event.setCancelled(true);
-					arena.leavePlayer(swp);
-				}
-			}
-			if (displayName.equals(SkywarsUtils.getItemNameFromConfig("PLAY_AGAIN")) && item.getType() == XMaterial
-					.matchXMaterial(config.getString("item_types.PLAY_AGAIN")).get().parseMaterial()) {
-				if (!swp.isSpectator())
-					return;
+		}
+
+		if (itemType == getConfiguredMaterial(config, "PLAY_AGAIN") && displayName.equals(SkywarsUtils.getItemNameFromConfig("PLAY_AGAIN"))) {
+			if (swp.isSpectator()) {
 				event.setCancelled(true);
 				player.sendMessage(Messager.color("&aSending you to another game..."));
 				arena.leavePlayer(swp);
 				ArenaManager.joinRandomMap(player);
 			}
-			if (item.getType() == XMaterial.matchXMaterial(config.getString("item_types.GAME_OPTIONS")).get()
-					.parseMaterial()) {
-				if (swp.isSpectator())
-					return;
-				if (arena.started())
-					return;
-				event.setCancelled(true);
-				GameOptionsMenu.open(player);
-			}
-			if (item.getType() == XMaterial.matchXMaterial(config.getString("item_types.START_GAME")).get()
-					.parseMaterial()) {
-				if (arena.started())
-					return;
-				if (!CommandsUtils.permissionCheckWithMessage(player, "skywars.start"))
-					return;
-				event.setCancelled(true);
-				arena.softStart(player);
-			}
-			if (item.getType() == XMaterial.matchXMaterial(config.getString("item_types.STOP_GAME")).get()
-					.parseMaterial()) {
-				if (!arena.started())
-					return;
-				if (!CommandsUtils.permissionCheckWithMessage(player, "skywars.stop"))
-					return;
-				event.setCancelled(true);
-				arena.clear();
-			}
-			return;
-		} else {
-			final SignManager signManager = Skywars.get().getSignManager();
-			if (signManager == null)
-				return;
-			if (event.getClickedBlock() == null)
-				return;
-			if (!(event.getClickedBlock().getState() instanceof Sign))
-				return;
-			if (player.getGameMode() == GameMode.CREATIVE && player.isSneaking())
-				return;
-
-			final SkywarsMap map = signManager.getSigns().get(event.getClickedBlock().getLocation());
-			if (map != null) {
-				event.setCancelled(true);
-				ArenaManager.joinMap(map, player);
-				return;
-			}
-
-			final Sign sign = (Sign) event.getClickedBlock().getState();
-			if (sign.getLine(1).equals("random")) {
-				if (sign.getLine(2).equals("skywars")) {
-					event.setCancelled(true);
-					ArenaManager.joinRandomMap(player);
-				}
-			}
-			if (sign.getLine(1).equals("play")) {
-				if (sign.getLine(2).equals("skywars")) {
-					event.setCancelled(true);
-					MapMenu.open(player);
-				}
-			}
 		}
+
+		if (itemType == getConfiguredMaterial(config, "GAME_OPTIONS") && !swp.isSpectator() && !arena.started()) {
+			event.setCancelled(true);
+			GameOptionsMenu.open(player);
+		}
+
+		if (itemType == getConfiguredMaterial(config, "START_GAME") && !arena.started() && CommandsUtils.permissionCheckWithMessage(player, "skywars.start")) {
+			event.setCancelled(true);
+			arena.softStart(player);
+		}
+
+		if (itemType == getConfiguredMaterial(config, "STOP_GAME") && arena.started() && CommandsUtils.permissionCheckWithMessage(player, "skywars.stop")) {
+			event.setCancelled(true);
+			arena.clear();
+		}
+	}
+
+
+	@EventHandler
+	void onInteract(PlayerInteractEvent event) {
+		final Player player = event.getPlayer();
+		final Arena arena = Skywars.get().getPlayerArena(player);
+
+		if (arena == null)
+			handleNormalInteraction(event, player);
+		else
+			handleArenaInteraction(event, player, arena);
 	}
 
 	@EventHandler

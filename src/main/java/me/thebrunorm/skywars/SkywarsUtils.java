@@ -114,7 +114,7 @@ public class SkywarsUtils {
 	public static String parseItemName(String text) {
 		final YamlConfiguration config = Skywars.langConfig;
 		String name = config.getString("items." + text);
-		if (config.getBoolean("items.show_context") == true) {
+		if (config.getBoolean("items.show_context")) {
 			final String context = config.getString("items.context");
 			if (context != null) {
 				name = name + " " + Messager.color(context);
@@ -332,7 +332,7 @@ public class SkywarsUtils {
 
 	public static String getItemNameFromConfig(String itemName) {
 		String configName = Skywars.langConfig.getString("items." + itemName + ".name");
-		if (Skywars.langConfig.getBoolean("items.show_context") == true) {
+		if (Skywars.langConfig.getBoolean("items.show_context")) {
 			final String context = Skywars.langConfig.getString("items.context");
 			if (context != null) {
 				configName = configName + " " + Messager.color(context);

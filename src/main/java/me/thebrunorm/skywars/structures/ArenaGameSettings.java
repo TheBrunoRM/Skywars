@@ -25,7 +25,5 @@ public class ArenaGameSettings {
 			this.time = (long) obj;
 		else if (obj instanceof ChestType)
 			this.chestType = (ChestType) obj;
-		else
-			return;
 	}
 }

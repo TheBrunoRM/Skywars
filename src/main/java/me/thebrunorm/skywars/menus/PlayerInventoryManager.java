@@ -13,7 +13,7 @@ import me.thebrunorm.skywars.Skywars;
 
 public class PlayerInventoryManager implements Listener {
 
-	private static HashMap<UUID, MenuType> currentMenu = new HashMap<>();
+	private static final HashMap<UUID, MenuType> currentMenu = new HashMap<>();
 
 	public static MenuType getCurrentMenu(Player player) {
 		return currentMenu.get(player.getUniqueId());

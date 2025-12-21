@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +37,6 @@ public class ConfigurationUtils {
 			while ((read = inputStream.read(bytes)) != -1) {
 				outputStream.write(bytes, 0, read);
 			}
-			outputStream.close();
 		}
 
 	}
@@ -89,19 +88,13 @@ public class ConfigurationUtils {
 	}
 
 	static YamlConfiguration getDefaultConfig(String defaultFileName) {
-		try {
-			final InputStream stream = Skywars.get().getResource(defaultFileName);
-			if (stream == null) {
-				Skywars.get().sendMessage("Could not get resource: " + defaultFileName);
-				return null;
-			}
-			final Reader defaultConfigStream = new InputStreamReader(stream, "UTF-8");
-			return YamlConfiguration.loadConfiguration(defaultConfigStream);
-		} catch (final UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		final InputStream stream = Skywars.get().getResource(defaultFileName);
+		if (stream == null) {
+			Skywars.get().sendMessage("Could not get resource: " + defaultFileName);
+			return null;
 		}
-		return null;
+		final Reader defaultConfigStream = new InputStreamReader(stream, StandardCharsets.UTF_8);
+		return YamlConfiguration.loadConfiguration(defaultConfigStream);
 	}
 
 	public static void copyDefaultContentsToFile(String defaultFileName, File file) {

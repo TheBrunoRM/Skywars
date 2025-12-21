@@ -3,10 +3,10 @@ package me.thebrunorm.skywars.holograms;
 
 import org.bukkit.Location;
 
-public abstract interface HologramController {
-	public abstract String createHologram(Object id, Location location, String text);
+public interface HologramController {
+	String createHologram(Object id, Location location, String text);
 
-	public abstract boolean changeHologram(Object id, String text, int line);
+	boolean changeHologram(Object id, String text, int line);
 
-	public abstract void removeHologram(Object id);
+	void removeHologram(Object id);
 }

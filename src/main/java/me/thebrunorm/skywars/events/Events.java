@@ -283,13 +283,12 @@ public class Events implements Listener {
 		if (arena == null)
 			return;
 		final SkywarsUser swp = arena.getUser(player);
-		if (swp == null)
-			return;
-		if (!swp.isSpectator())
+		if (swp == null || !swp.isSpectator())
 			return;
 
-		// TODO: do something since this cant be cancelled
-		// event.setCancelled(true);
+		// this event can't be cancelled
+		// TODO: check if this actually works
+		player.setTotalExperience(player.getTotalExperience());
 	}
 
 	// prevent spectators from clicking their inventory
