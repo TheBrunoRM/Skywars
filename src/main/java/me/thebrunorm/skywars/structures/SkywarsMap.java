@@ -127,16 +127,16 @@ public class SkywarsMap {
 		final Material glass = XMaterial.GLASS.parseMaterial();
 		for (final Block block : arena.getAllBlocksInMap(glass)) {
 			if (block.getLocation().add(1, 1, 0).getBlock().getState().getType() == glass
-					&& block.getLocation().add(-1, 1, 0).getBlock().getState().getType() == glass
-					&& block.getLocation().add(0, 1, 1).getBlock().getState().getType() == glass
-					&& block.getLocation().add(0, 1, -1).getBlock().getState().getType() == glass
-					&& block.getLocation().add(1, 2, 0).getBlock().getState().getType() == glass
-					&& block.getLocation().add(-1, 2, 0).getBlock().getState().getType() == glass
-					&& block.getLocation().add(0, 2, 1).getBlock().getState().getType() == glass
-					&& block.getLocation().add(0, 2, -1).getBlock().getState().getType() == glass) {
+				&& block.getLocation().add(-1, 1, 0).getBlock().getState().getType() == glass
+				&& block.getLocation().add(0, 1, 1).getBlock().getState().getType() == glass
+				&& block.getLocation().add(0, 1, -1).getBlock().getState().getType() == glass
+				&& block.getLocation().add(1, 2, 0).getBlock().getState().getType() == glass
+				&& block.getLocation().add(-1, 2, 0).getBlock().getState().getType() == glass
+				&& block.getLocation().add(0, 2, 1).getBlock().getState().getType() == glass
+				&& block.getLocation().add(0, 2, -1).getBlock().getState().getType() == glass) {
 				spawnLocations.add(block.getLocation().toVector().add(new Vector(0, 1, 0)));
 				Skywars.get()
-						.sendDebugMessage("added spawn location from glass cage: " + block.getLocation().toVector());
+					.sendDebugMessage("added spawn location from glass cage: " + block.getLocation().toVector());
 			}
 		}
 
@@ -163,7 +163,7 @@ public class SkywarsMap {
 			if (spawnLocations.size() > 1) {
 				for (final Vector currentSpawn : spawnLocations) {
 					if (SkywarsUtils.distance(previousSpawn, currentSpawn) < SkywarsUtils.distance(previousSpawn,
-							closest)) {
+						closest)) {
 						closest = currentSpawn;
 					}
 				}
@@ -233,7 +233,7 @@ public class SkywarsMap {
 		if (name == null)
 			return;
 		Skywars.get()
-				.sendDebugMessage("[debug] setting world name for map: " + this.getName() + " world name: " + name);
+			.sendDebugMessage("[debug] setting world name for map: " + this.getName() + " world name: " + name);
 		this.worldName = name;
 		final File baseWorld = new File(Bukkit.getWorldContainer(), name);
 		if (!baseWorld.isDirectory())
