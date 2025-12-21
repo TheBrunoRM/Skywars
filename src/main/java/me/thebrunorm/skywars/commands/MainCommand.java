@@ -336,30 +336,30 @@ public class MainCommand implements CommandExecutor {
 			} else if (args[0].equalsIgnoreCase("tinylittletest")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
-				final Player p = player;
-				int e = 0;
+				int count = 0;
+				final Player player1 = player;
 				for (int i = -arena.getMap().getCenterRadius(); i < arena.getMap().getCenterRadius(); i++) {
-					e++;
-					final int a = e;
+					count++;
+					final int value = count;
 					this.anotherTask = Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
 						@Override
 						public void run() {
-							p.sendBlockChange(arena.getVectorInArena(new Vector(a, a, a)),
+							player1.sendBlockChange(arena.getVectorInArena(new Vector(value, value, value)),
 								XMaterial.GREEN_STAINED_GLASS.parseMaterial(), (byte) 0);
 						}
-					}, e);
+					}, count);
 				}
 				for (int i = -arena.getMap().getCenterRadius(); i < arena.getMap().getCenterRadius(); i++) {
-					e++;
-					final int a = e;
+					count++;
+					final int a = count;
 					this.anotherTask = Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
 						@Override
 						public void run() {
 							final Location l = arena.getVectorInArena(new Vector(a, a, a));
 							final Block b = l.getBlock();
-							p.sendBlockChange(l, b.getType(), b.getData());
+							player1.sendBlockChange(l, b.getType(), b.getData());
 						}
-					}, e);
+					}, count);
 				}
 			} else if (args[0].equalsIgnoreCase("bigcase")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
