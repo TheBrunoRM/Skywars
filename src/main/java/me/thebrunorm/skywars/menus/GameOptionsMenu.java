@@ -3,6 +3,7 @@ package me.thebrunorm.skywars.menus;
 
 import com.cryptomorin.xseries.XMaterial;
 import me.thebrunorm.skywars.InventoryUtils;
+import me.thebrunorm.skywars.Messager;
 import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.structures.Arena;
 import me.thebrunorm.skywars.structures.ChestType;
@@ -30,35 +31,35 @@ public class GameOptionsMenu implements Listener {
 	public static void open(Player player, GameOptionType menu) {
 		Inventory inventory = null;
 		currentMenus.put(player.getUniqueId(), menu);
-		Skywars.get().sendDebugMessage("player %s open game options menu: " + menu, player.getName());
+		Skywars.get().sendDebugMessage(Messager.getMessage("GAME_OPTIONS_MENU_OPEN_DEBUG", player.getName(), menu), player.getName(), menu);
 		switch (menu) {
 		case MAIN:
-			inventory = Bukkit.createInventory(null, 9 * 3, "Game settings");
+			inventory = Bukkit.createInventory(null, 9 * 3, Messager.getMessage("GAME_OPTION_MENU_TITLE"));
 
-			InventoryUtils.addItem(inventory, XMaterial.NETHER_STAR.parseItem(), 10, "&aWeather");
-			InventoryUtils.addItem(inventory, XMaterial.CLOCK.parseItem(), 13, "&aTime");
-			InventoryUtils.addItem(inventory, XMaterial.CHEST.parseItem(), 16, "&aChests");
+			InventoryUtils.addItem(inventory, XMaterial.NETHER_STAR.parseItem(), 10, "&a" + Messager.getMessage("GAME_OPTION_VOTE_WEATHER"));
+			InventoryUtils.addItem(inventory, XMaterial.CLOCK.parseItem(), 13, "&a" + Messager.getMessage("GAME_OPTION_VOTE_TIME"));
+			InventoryUtils.addItem(inventory, XMaterial.CHEST.parseItem(), 16, "&a" + Messager.getMessage("GAME_OPTION_VOTE_CHESTS"));
 
 			break;
 		case WEATHER:
-			inventory = Bukkit.createInventory(null, 9 * 3, "Weather settings");
+			inventory = Bukkit.createInventory(null, 9 * 3, Messager.getMessage("GAME_OPTION_WEATHER_SETTINGS_TITLE"));
 
-			InventoryUtils.addItem(inventory, XMaterial.SUNFLOWER.parseItem(), 11, "&aSunny");
-			InventoryUtils.addItem(inventory, XMaterial.ENDER_PEARL.parseItem(), 15, "&aRainy");
+			InventoryUtils.addItem(inventory, XMaterial.SUNFLOWER.parseItem(), 11, "&a" + Messager.getMessage("weather.CLEAR"));
+			InventoryUtils.addItem(inventory, XMaterial.ENDER_PEARL.parseItem(), 15, "&a" + Messager.getMessage("weather.RAIN"));
 
 			break;
 		case CHESTS:
-			inventory = Bukkit.createInventory(null, 9 * 3, "Chest settings");
+			inventory = Bukkit.createInventory(null, 9 * 3, Messager.getMessage("GAME_OPTION_CHESTS_SETTINGS_TITLE"));
 
-			InventoryUtils.addItem(inventory, XMaterial.CHEST.parseItem(), 11, "&aNormal");
-			InventoryUtils.addItem(inventory, XMaterial.ENDER_CHEST.parseItem(), 15, "&cOverpowered");
+			InventoryUtils.addItem(inventory, XMaterial.CHEST.parseItem(), 11, "&a" + Messager.getMessage("chests.NORMAL"));
+			InventoryUtils.addItem(inventory, XMaterial.ENDER_CHEST.parseItem(), 15, "&c" + Messager.getMessage("chests.OVERPOWERED"));
 
 			break;
 		case TIME:
-			inventory = Bukkit.createInventory(null, 9 * 3, "Time settings");
+			inventory = Bukkit.createInventory(null, 9 * 3, Messager.getMessage("GAME_OPTION_TIME_SETTINGS_TITLE"));
 
-			InventoryUtils.addItem(inventory, XMaterial.SUNFLOWER.parseItem(), 11, "&aDay");
-			InventoryUtils.addItem(inventory, XMaterial.ENDER_PEARL.parseItem(), 15, "&aNight");
+			InventoryUtils.addItem(inventory, XMaterial.SUNFLOWER.parseItem(), 11, "&a" + Messager.getMessage("time.DAY"));
+			InventoryUtils.addItem(inventory, XMaterial.ENDER_PEARL.parseItem(), 15, "&a" + Messager.getMessage("time.NIGHT"));
 
 			break;
 		default:

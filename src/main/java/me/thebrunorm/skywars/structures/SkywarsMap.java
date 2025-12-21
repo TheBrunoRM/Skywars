@@ -77,7 +77,7 @@ public class SkywarsMap {
 		this.config.set("centerRadius", this.getCenterRadius());
 		this.config.set("world", this.getWorldName());
 		if (this.getSpawns() == null) {
-			Skywars.get().sendDebugMessage("warning: spawns is null");
+			Skywars.get().sendDebugMessage(Messager.getMessage("MAP_DEBUG_SPAWNS_NULL"));
 			return;
 		}
 		// Skywars.get().sendDebugMessage("setting spawns");
