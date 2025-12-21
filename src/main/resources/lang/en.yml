@@ -17,39 +17,39 @@ events:
 items:
   show_context: true
   context: '&7(Right Click)'
-  
+
   KIT_SELECTOR:
     name: '&a&lKit selector'
     description:
     - "&7Right-click to select your kit"
-    
-  GAME_OPTIONS: 
+
+  GAME_OPTIONS:
     name: '&b&lGame options'
     description:
     - "&7Right-click to change the game options"
-    
+
   START_GAME:
     name: "&6&lStart game"
-  
+
   STOP_GAME:
     name: "&c&lStop game"
-  
+
   SPECTATOR_OPTIONS:
     name: '&b&lSpectator options'
     description:
     - "&7Right-click to change your spectator options"
-    
+
   LEAVE:
     name: '&c&lLeave'
     description:
     - "&7Right-click to go back to the"
     - "&7main lobby."
-    
+
   PLAY_AGAIN:
     name: '&b&lPlay again'
     description:
     - "&7Right-click to play again"
-    
+
   TELEPORTER:
     name: '&b&lTeleporter'
     description:
@@ -151,10 +151,8 @@ chest_holograms:
 
 # Nuevas key añadidas
 WELCOME_MESSAGE: "&a&lSkyWars &e- /sw help"
-
 COMMAND_LIST: "&a&lCommand list - &b%s &a%s &eby &b%s"
-
-HELP_SETMAINLOBBY: "&b/skywars setmainlobby &e- sets the main lobby" 
+HELP_SETMAINLOBBY: "&b/skywars setmainlobby &e- sets the main lobby"
 HELP_LOBBY: "&b/skywars lobby &e- teleports you to the main lobby"
 HELP_CREATE: "&b/skywars create <arena> &e- creates an arena"
 HELP_DELETE: "&b/skywars delete <arena> &e- deletes an arena"
@@ -162,15 +160,17 @@ HELP_CONFIG: "&b/skywars config <arena> &e- opens the configuration menu"
 HELP_PLAY: "&b/skywars play &e- open the arenas menu"
 HELP_START: "&b/skywars start &e- starts a game"
 HELP_FORCESTART: "&b/skywars forcestart &e- starts a game immediately"
-
+HELP_LEAVE: "&b/skywars leave &e- leaves the game"
+HELP_OTHER_COMMANDS: "&b* You can use the shorthand version of the command: &e&l/sw"
 PLUGIN_INFO: "&b%s &eversion &a%s &emade by &b%s"
-
-SENDING_TO_ANOTHER_GAME: "&aSending you to another game..."
-
-SIGN_MAP_NOT_FOUND: "&cCould not find a map with the name: &e%s"
-SIGN_NEED_MAP_NAME: "&cYou need to specify the map name in the line below!"
-SIGN_COULD_NOT_SET_UP: "&cCould not set up sign."
-SIGN_SUCCESSFULLY_SET_UP: "&eSuccessfully set up sign for map &b%s&e!"
+SERVER_VERSION_BUKKIT_INFO: "Bukkit version:"
+SERVER_VERSION_BUKKIT: "Bukkit version: %s"
+SERVER_VERSION_SPIGOT_INFO: "Server version:"
+SERVER_VERSION_SPIGOT: "Server version: %s"
+TELEPORTED_TO_WORLD_NAMED: "Teleported to world: %s"
+CURRENT_WORLD_SETUP_NAMED: "current world setup: %s"
+AUTO_SAVE_STATUS_NAMED: "auto save: %s"
+COULD_NOT_LOAD_WORLD_NAMED: "Could not load world: %s"
 
 # SetupEvents related keys
 SETUP_DONE_TITLE: "&a&LDONE"
@@ -191,6 +191,57 @@ CONFIG_COULD_NOT_GET_RESOURCE: "Could not get resource: %s"
 CONFIG_COULD_NOT_GET_RESOURCE_2: "Could not get resource: %s"
 COULD_NOT_MAKE_BACKUP_OF_WORLD: "Could not make backup of world '%s' for map: %s"
 CONFIG_COULD_NOT_CREATE_MAP_FILE: "Could not create map file: %s"
+
+# Menu related keys
+GAMES_MENU_TITLE: "Skywars"
+KIT_MENU_TITLE: "Kits"
+KIT_MENU_SELECTED_KIT: "&6Selected kit"
+KIT_MENU_YOU_OWN_THIS_KIT: "&aYou own this kit!"
+KIT_MENU_PRICE: "&aPrice: %s"
+KIT_MENU_YOUR_MONEY: "&6Your money: &a%s"
+KIT_MENU_CLICK_TO_PURCHASE: "&aClick to purchase this kit!"
+KIT_MENU_NOT_ENOUGH_MONEY_PRICE: "&cPrice: %s"
+KIT_MENU_NOT_ENOUGH_MONEY_YOUR_MONEY: "&6Your money: &c%s"
+KIT_MENU_YOU_DONT_HAVE_THIS_KIT: "&cYou don't have this kit!"
+KIT_MENU_THIS_KIT_IS_FREE: "&aThis kit is free!"
+KIT_MENU_CLICK_TO_SELECT: "&eClick to select!"
+MAP_MENU_TITLE: "Maps"
+MAP_MENU_CURRENT_ARENAS: "&eCurrent arenas: &a%s"
+MAP_MENU_CURRENT_PLAYERS: "&eCurrent players: &a%s"
+MAP_MENU_CLICK_TO_PLAY: "&eClick to play!"
+CONFIG_MENU_TITLE: "&a&l%s"
+CONFIG_MENU_TEAM_SIZE: "&e&lTeam Size: &a&l%s"
+CONFIG_MENU_POSITION: "&e&lPosition: &a&l%s"
+CONFIG_MENU_SPAWN_SETUP: "&e&lSpawn Setup"
+CONFIG_MENU_WORLD: "&e&lWorld: &a&l%s"
+CONFIG_MENU_STATUS: "&e&lStatus: %s"
+CONFIG_MENU_CALCULATE_SPAWNS: "&6&lCalculate spawns"
+CONFIG_MENU_REGENERATE_CASES: "&6&lRegenerate cases"
+CONFIG_MENU_PASTE_SCHEMATIC: "&6&lPaste schematic"
+CONFIG_MENU_CLEAR: "&c&lClear"
+CONFIG_MENU_TELEPORT: "&6&lTeleport"
+CONFIG_MENU_FILL_CHESTS: "&6&lFill chests"
+CONFIG_MENU_WORLD_FOLDERS: "&aWorld folders"
+CONFIG_MENU_CLICK_TO_SELECT_FILE: "&eClick to select this file"
+CONFIG_MENU_CURRENT_WORLD_FOLDER: "&6Current world folder: %s"
+CONFIG_MENU_WARNING_WORLD_FOLDER_IN_USE: "&cWarning! %s already uses this world folder"
+CONFIG_MENU_LEFT_CLICK_ADD: "&eLeft-click to add"
+CONFIG_MENU_RIGHT_CLICK_REMOVE: "&eRight-click to remove"
+CONFIG_MENU_WHEN_ENTER_SPAWN_SETUP_MODE: "&eWhen you enter &bSpawn Setup Mode&e,"
+CONFIG_MENU_YOU_CAN_CLICK_BLOCKS_ON_ARENA: "&eyou can click blocks on the arena"
+CONFIG_MENU_TO_SET_SPAWNS_EASILY: "&eto set spawns easily."
+CONFIG_MENU_THIS_WILL_DELETE_CURRENT_SPAWNS: "&cThis will delete all current spawns."
+CONFIG_MENU_SPAWN_CONFIGURATOR: "&eSpawn Configurator"
+CONFIG_MENU_CLICK_THE_BLOCKS_THAT: "&eClick the blocks that"
+CONFIG_MENU_YOU_WANT_TO_ADD_SPAWNS_FOR: "&eyou want to add spawns for."
+CONFIG_MENU_YOU_CAN_ALSO_RIGHT_CLICK: "&eYou can also rightclick"
+CONFIG_MENU_TO_REMOVE_LAST_SET_SPAWN: "&eto remove the last set spawn"
+CONFIG_MENU_ENABLED: "&a&lENABLED"
+CONFIG_MENU_SPAWN_EDIT_MODE: "&eSpawn edit mode"
+CONFIG_MENU_YOU_CAN_CLICK_BLOCKS_ON_ARENA_HINT: "&eyou can click blocks on the arena"
+CONFIG_MENU_CLICK_BLOCKS_TO_ADD_SPAWNS: "&eClick blocks to add spawns"
+CONFIG_MENU_RIGHT_CLICK_TO_REMOVE_SPAWN: "&eYou can &c&lright-click &ea block to &c&lremove &4&lthe last set spawn"
+CONFIG_MENU_TO_EXIT_DROP_THE_BLAZE_ROD: "&eTo exit, &b&ldrop the blaze rod"
 
 # MapManager related keys
 MAPMANAGER_UNKNOWN_WORLD_FILE: "&6Unknown world file found: &b%s"
@@ -232,7 +283,6 @@ COULD_NOT_DELETE_WORLD_FOLDER: "&cCould not delete world folder: &b%s"
 LOBBY_WORLD_DOES_NOT_EXIST: "&cLobby world (&b%s&c) does not exist!"
 
 # Additional Skywars related keys
-SERVER_VERSION_INFO: "&bServer version: &e%s (&a%s&e)"
 SERVER_VERSION_ONLY_INFO: "Server version:"
 ECONOMY_PLUGIN_NAME: "&eEconomy (Vault): &a%s"
 ECONOMY_COULD_NOT_HOOK: "&eEconomy (Vault): &ccould not hook."
@@ -264,7 +314,6 @@ YOU_WANT_TO_ADD_SPAWNS_FOR: "&eyou want to add spawns for."
 YOU_CAN_ALSO_RIGHT_CLICK: "&eYou can also rightclick"
 TO_REMOVE_LAST_SET_SPAWN: "&eto remove the last set spawn"
 COULD_NOT_FIND_JOINABLE_ARENA: "&ccouldn't find joinable arena"
-NOT_SET: "not set"
 WORLD_NOT_SET: "&eworld not set"
 LOCATION_NOT_SET: "&eLocation not set"
 TELEPORTED_SUCCESSFULLY: "&eTeleported"
@@ -302,26 +351,9 @@ SKIPPED_BLOCKS_MESSAGE: "Skipped %s blocks: %s"
 SCHEMATIC_NOT_SUPPORTED_IN_VERSION: "Can't paste schematic: %s files are not supported in 1.13+"
 SCHEMATIC_SIZE_INFO: "size: %s, %s, %s"
 COULD_NOT_GET_MATERIAL_FOR: "Could not get material for: %s"
-TELEPORTING_PLAYERS_OUT_OF_WORLD: "Teleporting any players inside the world outside of it..."
-WORLD_EXISTS_STATUS: "World exists: %s"
-YOU_NEED_TO_BE_A_PLAYER: "You need to be a player!"
-TELEPORTED_TO_WORLD: "Teleported to world: %s"
-COULD_NOT_TELEPORT_TO_WORLD: "Could not teleport to world: %s"
-CURRENT_WORLD_SETUP: "current world setup: %s"
-AUTO_SAVE_STATUS: "auto save: %s"
-SET_UP_WORLD: "Set up world: %s"
-WORLD_FOLDER_DOES_NOT_EXIST: "World folder does not exist!"
-LOADED_WORLD: "Loaded world: %s"
-COULD_NOT_LOAD_WORLD: "Could not load world: %s"
-UNLOADED_WORLD: "Unloaded world: %s"
 COULD_NOT_UNLOAD_WORLD: "Could not unload world: %s"
 COULD_NOT_UNLOAD_WORLD_NAMED: "Could not unload world '%s' for map '%s'"
 COULD_NOT_DELETE_WORLD_NAMED: "Could not delete world '%s' for map '%s'"
-SCHEMATIC_NOT_LOADED: "schematic not loaded"
-BLOCK_DATA_INFO: "data: %s"
-FILE_NOT_FOUND: "file not found: %s"
-LOADED_SCHEMATIC: "Loaded schematic %s"
-TESTING_BOOLEAN_RESULT: "xd: %s"
 NO_ARENA_FOUND_BY_NAME: "No arena found by '%s'"
 SPAWNS_OF_ARENA_INFO: "spawns of arena %s (%s)"
 SPAWN_NULL_INFO: "%s: null"
@@ -388,7 +420,6 @@ FILE_NOT_FOUND: "file not found: %s"
 LOADED_SCHEMATIC: "Loaded schematic %s"
 TESTING_BOOLEAN_RESULT: "xd: %s"
 NOT_SET: "not set"
-WORLDS_LIST: "Worlds: %s"
 REGENERATED_CASES: "regenerated"
 NULL_VALUE: "null"
 COULD_NOT_END_ARENA: "could not end"
@@ -459,7 +490,7 @@ tablist:
 
 scoreboard:
   title: '&e&lSkyWars'
-  
+
   lobby:
   - '&7%date%'
   - ''
@@ -470,7 +501,7 @@ scoreboard:
   - 'Deaths: &c%totaldeaths%'
   - ''
   - '&e%url%'
-  
+
   arena:
     player:
     - '&7%date%'
@@ -485,7 +516,7 @@ scoreboard:
     - 'Map: &a%map%'
     - ''
     - '&e%url%'
-    
+
     spectator:
     - '&7%date%'
     - ''
@@ -498,7 +529,7 @@ scoreboard:
     - 'Players left: &a%players%'
     - ''
     - '&e%url%'
-    
+
     intermission:
     - '&7%date%'
     - ''

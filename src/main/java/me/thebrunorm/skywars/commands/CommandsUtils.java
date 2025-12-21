@@ -18,21 +18,21 @@ public class CommandsUtils {
 	public static boolean lacksPermission(CommandSender sender, String permission) {
 		if (sender.hasPermission(permission))
 			return false;
-		sender.sendMessage(Messager.color(Skywars.langConfig.getString("NO_PERMISSION")));
+		sender.sendMessage(Messager.getMessage("NO_PERMISSION"));
 		return true;
 	}
 
 	public static boolean hasPermission(Player player, String permission) {
 		if (player.hasPermission(permission))
 			return true;
-		player.sendMessage(Messager.color(Skywars.langConfig.getString("NO_PERMISSION")));
+		player.sendMessage(Messager.getMessage("NO_PERMISSION"));
 		return false;
 	}
 
 	public static boolean isInArenaJoined(Player player) {
 		if (Skywars.get().getPlayerArena(player) != null)
 			return true;
-		player.sendMessage(Messager.color(Skywars.langConfig.getString("NOT_JOINED")));
+		player.sendMessage(Messager.getMessage("NOT_JOINED"));
 		return false;
 	}
 }

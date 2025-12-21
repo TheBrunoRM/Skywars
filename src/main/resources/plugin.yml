@@ -1,7 +1,9 @@
 main: me.thebrunorm.skywars.Skywars
 version: ${project.version}
 name: ${project.name}
-author: BrunoRM
+authors:
+    - BrunoRM
+    - 梦幻网络：不穿胖次の小奶猫(NyaNyagulugulu)
 softdepend:
   - Vault
   - WorldEdit

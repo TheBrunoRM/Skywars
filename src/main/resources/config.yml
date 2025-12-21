@@ -135,6 +135,11 @@ autoUpdate: true
 
 # 尚为实现，计划完成 Not yet achieved, planned for completion
 # 大厅服务器
+
+# 规划：
+# 如果启用BC那么只允许设置一张地图并且不再使用lobby大厅
+# 玩家加入后直接将玩家送进游戏地图。返回将修改为send server 到"lobbyserver"中
+# 不启用bc则按照源逻辑继续
 # lobby Server
 
 # BungeeCord configuration is based on BedwarsRel
