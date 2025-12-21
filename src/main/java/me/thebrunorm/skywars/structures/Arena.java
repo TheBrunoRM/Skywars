@@ -1,36 +1,7 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.structures;
 
-import java.io.File;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.apache.commons.io.FileUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Chest;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.util.Vector;
-
 import com.cryptomorin.xseries.XMaterial;
-
 import me.thebrunorm.skywars.ArenaStatus;
 import me.thebrunorm.skywars.Messager;
 import me.thebrunorm.skywars.Skywars;
@@ -41,6 +12,22 @@ import me.thebrunorm.skywars.managers.ArenaManager;
 import me.thebrunorm.skywars.managers.ChestManager;
 import me.thebrunorm.skywars.managers.MapManager;
 import mrblobman.sounds.Sounds;
+import org.apache.commons.io.FileUtils;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Chest;
+import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
+
+import java.io.File;
+import java.time.Instant;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class Arena {
 
@@ -80,7 +67,7 @@ public class Arena {
 	private final ArrayList<SkywarsEvent> events = new ArrayList<SkywarsEvent>();
 
 	// TODO store chest locations and types (normal or center chests)
-	private final ArrayList<Chest> chests = new ArrayList<Chest>();
+	private final ArrayList<Chest> activeChests = new ArrayList<Chest>();
 	private final HashMap<Chest, String> chestHolograms = new HashMap<Chest, String>();
 
 	public ArrayList<SkywarsTeam> getTeams() {
@@ -840,32 +827,6 @@ public class Arena {
 		return null;
 	}
 
-	public void calculateChests() {
-		Skywars.get().sendDebugMessage("calculating chests for arena: " + this.getMap().getName());
-		this.chests.clear();
-
-		for (final BlockState state : this.getAllBlockStatesInMap(Material.CHEST)) {
-			this.chests.add((Chest) state);
-			Skywars.get().sendDebugMessage("Added chest for map %s at location: %s", this.getMap().getName(),
-				state.getLocation());
-		}
-
-		Skywars.get().sendDebugMessage("Calculated %s chests!", this.chests.size());
-
-		final YamlConfiguration config = this.getMap().getConfig();
-		int i = 0;
-		for (final Chest chest : this.chests) {
-			final Block block = chest.getBlock();
-			config.set("chest." + i + ".x", block.getX());
-			config.set("chest." + i + ".y", block.getY());
-			config.set("chest." + i + ".z", block.getZ());
-			i++;
-		}
-
-		this.map.saveConfig();
-		Skywars.get().sendDebugMessage("Saved chests in config: " + this.getMap().getName());
-	}
-
 	public ArrayList<Chunk> getAllChunksInMap() {
 		final ArrayList<Chunk> list = new ArrayList<Chunk>();
 
@@ -939,23 +900,22 @@ public class Arena {
 	}
 
 	public void fillChests() {
-		if (this.chests.size() <= 0) {
-			this.chests.clear();
+		if (this.getMap().getChests().isEmpty()) {
+			Skywars.get().sendDebugMessage("&6Tried to fill chests but list is empty. Calculating chests for map: %s",
+				this.getMap().getName());
+			this.getMap().calculateChests();
+		}
+
+		if (this.activeChests.isEmpty()) {
 			for (final Vector chestPos : this.getMap().getChests().values()) {
 				final Block block = this.getWorld().getBlockAt(chestPos.toLocation(this.getWorld()));
 				if (block.getState().getType() != XMaterial.CHEST.parseMaterial())
 					continue;
-				this.chests.add((Chest) block.getState());
+				this.activeChests.add((Chest) block.getState());
 			}
 		}
 
-		if (this.chests.size() <= 0) {
-			Skywars.get().sendDebugMessage("&cCould not retrieve chest information from config: %s",
-				this.getMap().getName());
-			this.calculateChests();
-		}
-
-		for (final Chest chest : this.chests) {
+		for (final Chest chest : this.activeChests) {
 			final Block block = chest.getBlock();
 			if (!(block.getState() instanceof Chest))
 				continue;
@@ -967,11 +927,6 @@ public class Arena {
 
 	public Vector getCenterBlock() {
 		return new Vector(0, 0, 0);
-	}
-
-	public void calculateAndFillChests() {
-		this.calculateChests();
-		this.fillChests();
 	}
 
 	public boolean softStart(Player player) {
@@ -1103,8 +1058,8 @@ public class Arena {
 		this.winner = winner;
 	}
 
-	public ArrayList<Chest> getChests() {
-		return this.chests;
+	public ArrayList<Chest> getActiveChests() {
+		return this.activeChests;
 	}
 
 	public boolean removeChest(Chest chest) {
@@ -1112,7 +1067,7 @@ public class Arena {
 			return true;
 		if (this.chestHolograms.containsKey(chest))
 			Skywars.get().getHologramController().removeHologram(this.chestHolograms.remove(chest));
-		return this.chests.remove(chest);
+		return this.activeChests.remove(chest);
 	}
 
 	public boolean addChestHologram(Chest chest) {

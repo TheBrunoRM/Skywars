@@ -1,13 +1,14 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.structures;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-
+import com.cryptomorin.xseries.XMaterial;
+import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.SkywarsUtils;
+import me.thebrunorm.skywars.managers.ArenaManager;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.time.StopWatch;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -15,11 +16,10 @@ import org.bukkit.block.BlockState;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.util.Vector;
 
-import com.cryptomorin.xseries.XMaterial;
-
-import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.SkywarsUtils;
-import me.thebrunorm.skywars.managers.ArenaManager;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class SkywarsMap {
 
@@ -257,5 +257,57 @@ public class SkywarsMap {
 
 	public void setTeamSize(int n) {
 		this.teamSize = n;
+	}
+
+	public void calculateChests() {
+		Skywars.get().sendDebugMessage("calculating chests for arena: " + this.getName());
+		this.chests.clear();
+
+		final Arena arena = ArenaManager.getArenaByMap(this, true);
+
+		for (final BlockState state : arena.getAllBlockStatesInMap(XMaterial.CHEST.parseMaterial())) {
+			Vector vector = state.getBlock().getLocation().toVector();
+			this.chests.put(this.chests.size(), vector);
+			Skywars.get().sendDebugMessage("Added chest from state for map %s at location: %s", this.getName(), vector);
+		}
+
+		StopWatch timer = new StopWatch();
+		timer.start();
+
+		for (final Chunk chunk : arena.getAllChunksInMap()) {
+			for (int x = 0; x <= 15; x++) {
+				for (int z = 0; z <= 15; z++) {
+					for (int y = 0; y < chunk.getWorld().getMaxHeight(); y++) {
+						final Block block = chunk.getBlock(x, y, z);
+						if (block.getType() != XMaterial.CHEST.parseMaterial()) continue;
+						/*
+						final BlockState state = block.getState();
+						if(!(state instanceof Chest)) continue;
+						this.chests.add((Chest) state);
+						*/
+						Vector vector = block.getLocation().toVector();
+						arena.getMap().getChests().put(arena.getMap().getChests().size(), vector);
+						Skywars.get().sendDebugMessage("Added chest from block for map %s at location: %s",
+							arena.getMap().getName(), vector);
+					}
+				}
+			}
+		}
+
+		timer.stop();
+		Skywars.get().sendDebugMessage("Calculated %s chests in %s", arena.getMap().getChests().size(), timer.getTime());
+
+		final YamlConfiguration config = arena.getMap().getConfig();
+
+		int i = 0;
+		for (final Vector vector : arena.getMap().getChests().values()) {
+			config.set("chest." + i + ".x", vector.getX());
+			config.set("chest." + i + ".y", vector.getY());
+			config.set("chest." + i + ".z", vector.getZ());
+			i++;
+		}
+
+		saveConfig();
+		Skywars.get().sendDebugMessage("Saved chests in config: " + arena.getMap().getName());
 	}
 }

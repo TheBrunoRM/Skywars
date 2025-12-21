@@ -1,16 +1,17 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.menus;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import com.cryptomorin.xseries.XMaterial;
+import me.thebrunorm.skywars.ConfigurationUtils;
+import me.thebrunorm.skywars.InventoryUtils;
+import me.thebrunorm.skywars.Messager;
+import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.events.SetupEvents;
+import me.thebrunorm.skywars.managers.ArenaManager;
+import me.thebrunorm.skywars.structures.Arena;
+import me.thebrunorm.skywars.structures.SkywarsMap;
+import mrblobman.sounds.Sounds;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -22,17 +23,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
-import com.cryptomorin.xseries.XMaterial;
-
-import me.thebrunorm.skywars.ConfigurationUtils;
-import me.thebrunorm.skywars.InventoryUtils;
-import me.thebrunorm.skywars.Messager;
-import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.events.SetupEvents;
-import me.thebrunorm.skywars.managers.ArenaManager;
-import me.thebrunorm.skywars.structures.Arena;
-import me.thebrunorm.skywars.structures.SkywarsMap;
-import mrblobman.sounds.Sounds;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class ConfigMenu implements Listener {
 
@@ -284,7 +278,8 @@ public class ConfigMenu implements Listener {
 
 		if (name.equals(Messager.color(chestsName))) {
 			currentArena.fillChests();
-			player.sendMessage("Chests filled");
+			player.sendMessage(Messager.color("Filled %s chests for map &b%s",
+				currentArena.getActiveChests().size(), currentArena.getMap().getName()));
 			return;
 		}
 

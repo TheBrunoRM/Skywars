@@ -1,34 +1,20 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars.events;
 
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.EntityTargetEvent;
-import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerExpChangeEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-
 import me.thebrunorm.skywars.ArenaStatus;
 import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.structures.Arena;
 import me.thebrunorm.skywars.structures.SkywarsUser;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.entity.*;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.*;
 
 public class Events implements Listener {
 
@@ -201,7 +187,7 @@ public class Events implements Listener {
 		if (!(block.getState() instanceof Chest))
 			return;
 		final Chest chest = (Chest) block.getState();
-		if (!arena.getChests().contains(chest))
+		if (!arena.getActiveChests().contains(chest))
 			return;
 		arena.removeChest(chest);
 	}
@@ -227,7 +213,7 @@ public class Events implements Listener {
 		if (!(block.getState() instanceof Chest))
 			return;
 		final Chest chest = (Chest) block.getState();
-		if (!arena.getChests().contains(chest))
+		if (!arena.getActiveChests().contains(chest))
 			return;
 
 		arena.addChestHologram(chest);
