@@ -9,11 +9,12 @@ Compatible with Bukkit and Spigot, from versions 1.8 upwards.
 [![view on SpigotMC](https://img.shields.io/badge/view%20on-spigotmc-orange.svg)](https://www.spigotmc.org/resources/98709)
 
 # Table of Contents
+
 1. [How to install](#how-to-install)
 2. [How to use](#how-to-use)
-   * [How to play](#how-to-play)
-   * [Creating an arena](#creating-an-arena)
-   * [Creating signs](#creating-signs)
+	* [How to play](#how-to-play)
+	* [Creating an arena](#creating-an-arena)
+	* [Creating signs](#creating-signs)
 3. [Current features](#current-features)
 4. [To do](#to-do)
 5. [Compatibility issues](#compatibility-issues)
@@ -56,61 +57,67 @@ You can set the arena's world through the configuration menu
 ### Creating signs
 
 To create a sign, make it like this:
+
 * 2nd line: [SkyWars]
 * 3rd line: the arena name.
 
 \* The casing of the signs is not relevant; there cannot be two arenas with the same name but different casing.
 
-![Sign image](https://cdn.discordapp.com/attachments/835594221456064544/876946375110189146/unknown.png)
-
 To remove a sign, sneak (shift) while on creative mode and left click.
 
 ## Plugin hooks
-The plugin will hook to other plugins to add extra functionality.
-### Economy
-#### Current economy features:
-  * Coins
-#### Currently implemented economy plugin APIS ([Skywars.java](https://github.com/TheBrunoRM/Skywars/blob/master/src/main/java/me/brunorm/skywars/Skywars.java#L250)):
-  * Vault
-### Holograms
-#### Current hologram features:
-  * Holograms above chests to indicate refill time.
 
-#### Currently implemented hologram plugins APIs ([HologramController.java](https://github.com/TheBrunoRM/Skywars/blob/master/src/main/java/me/brunorm/skywars/holograms/HologramController.java)):
-  * HolographicDisplays
-  * DecentHolograms
+The plugin will hook to other plugins to add extra functionality.
+
+### Economy
+
+The plugin supports Vault for kit purchases
+
+### Holograms
+
+#### Current hologram features:
+
+* Holograms above chests to indicate refill time.
+
+#### Currently implemented hologram plugins APIs:
+
+* HolographicDisplays
+* DecentHolograms
 
 ## Current features
-  * Maps
-  * Kits
-  * Easy map setup menu
-  * Custom language file (not 100% of the messages, still working on it)
-  * Configuration options
-  * Chest refills
-  * 1.13+ compatible (still working on it, but it kinda works)
-  * Vault support (economy)
+
+* Easy map setup menu
+* Kit customization
+* Custom language files (around 50% of the messages are translated)
+* Solo and team games
+* Game options: time, weather and chests
+* Compatibility through 1.8-1.13+
+* Vault support for economy (tested with Essentials)
+* Game events:
+	* Chest refills
+	* Endgame Dragon
 
 ## To do
-  * More game events
-  * More configuration options
-  * Party options (?)
-  * Team games
-  * Custom cases (schematic)
-  * Ability to buy kits (inside and outside a game)
-  * Ability to change case (inside and outside a game)
-  * Game options (time, weather, chests, etc)
-  * Code optimization
-  * Plugin API events and methods
+
+* More game events
+* More configuration options
+* Party options
+* Custom cases with schematics
+* Ability to buy kits inside and outside a game
+* Ability to change case inside and outside a game
+* Code optimization
+* Plugin API events and methods
 
 ## Compatibility issues
-  * **Schematic files**\
-    The plugin no longer works with schematic files.\
-    I've decided to drop support for these type of files\
-    for various reasons like compatibility.\
-    I may consider implementing a new system for this.\
-    For now, the plugin works with world files.
-  * **Actionbar messages on Bukkit**\
-    do not work because of Bukkit limitations on message sending.\
-    If you find a way to send an actionbar message on Bukkit, please open an issue or a pull request.
+
+* **Schematic files**\
+  The plugin no longer works with schematic files.\
+  I've decided to drop support for these type of files\
+  for various reasons like compatibility.\
+  I may consider implementing a new system for this.\
+  For now, the plugin works with world files.
+* **Actionbar messages on Bukkit**\
+  do not work because of Bukkit limitations on message sending.\
+  If you find a way to send an actionbar message on Bukkit, please open an issue or a pull request.
 
 Contact me in Discord: brunorm
