@@ -291,10 +291,10 @@ public class Skywars extends JavaPlugin {
 		}
 		if (this.hologramController == null) {
 			this.hologramController = new DefaultHologramController();
-			this.sendMessage("&eHolograms: &cno supported holograms plugin found!");
+			this.sendMessage(MessageUtils.get("console.holograms.not_found"));
 		} else {
 			holograms = true;
-			this.sendMessage("&eHolograms: &a" + this.hologramController.getClass().getSimpleName());
+			this.sendMessage(MessageUtils.get("console.holograms.hooked", this.hologramController.getClass().getSimpleName()));
 		}
 
 		SkywarsEconomy.setup();
@@ -302,10 +302,9 @@ public class Skywars extends JavaPlugin {
 		placeholderAPI = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
 		this.sendMessage("&ePlaceholderAPI: " + (placeholderAPI ? "&ahooked." : "&cnot found."));
 
-		if (placeholderAPI)
-			new SkywarsPlaceholderExpansion().register();
+		if (placeholderAPI) new SkywarsPlaceholderExpansion().register();
 
-		this.sendMessage("&ahas been enabled: &bv%s", this.version);
+		this.sendMessage(MessageUtils.get("plugin_enabled", this.version));
 
 		restartTask();
 		SkywarsWorldCleanup.cleanupWorlds();

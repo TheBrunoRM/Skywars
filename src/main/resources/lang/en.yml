@@ -251,6 +251,10 @@ console:
   error_config: "Could not load configuration files!"
   disabling_plugin: "Disabling plugin."
   server_version: "&bServer version: &e{0} (&a{1}&e)"
+  plugin_enabled: "&aPlugin enabled: &bv{0}"
+  holograms:
+    not_found: "&cNo supported holograms plugin found!"
+    hooked: "&eHooked to &a{0}&e!"
   command:
     loading: "&eLoading command &a{0}&e..."
     skipping: "&7Skipping command &c{0}&7..."
