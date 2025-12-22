@@ -183,7 +183,7 @@ public class MainCommand implements CommandExecutor {
 			} else if (args[0].equalsIgnoreCase("reload") || args[0].equalsIgnoreCase("rl")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
-				Skywars.get().Reload();
+				Skywars.get().reload();
 				sender.sendMessage(MessageUtils.get("RELOADED"));
 			}
 

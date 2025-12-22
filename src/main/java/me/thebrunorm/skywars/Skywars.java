@@ -31,6 +31,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,6 +69,7 @@ public class Skywars extends JavaPlugin {
 	boolean updated = false;
 	ChestManager chestManager = new ChestManager();
 	MapManager mapManager = new MapManager();
+	BukkitTask taskUpdate;
 	private String serverPackageVersion;
 	private ReflectionNMS nmsHandler;
 
@@ -91,16 +93,35 @@ public class Skywars extends JavaPlugin {
 		return this.getFile();
 	}
 
-	public void Reload() {
-		this.loadConfig();
+	public void reload() {
+		if (getConfig().getBoolean("tabListEnabled"))
+			for (Player player : Bukkit.getOnlinePlayers())
+				Skywars.get().NMS().sendTablist(player, "", "");
+
+		this.reloadConfig();
 		this.mapManager.loadMaps();
 		this.chestManager.loadChests();
 		this.signManager.loadSigns();
 		this.loadKits();
+		this.restartTask();
 	}
 
 	public ReflectionNMS NMS() {
 		return this.nmsHandler;
+	public void restartTask() {
+		if (Skywars.get().getConfig().getBoolean("taskUpdate.disabled")) return;
+
+		if (taskUpdate != null)
+			taskUpdate.cancel();
+
+		taskUpdate = Bukkit.getScheduler().runTaskTimer(Skywars.get(), () -> {
+			for (final Player player : Bukkit.getOnlinePlayers()) {
+				SkywarsScoreboard.update(player);
+				SkywarsActionbar.update(player);
+				SkywarsTabList.update(player);
+			}
+		}, 0L, Skywars.get().getConfig().getLong("taskUpdate.interval") * 20);
+	}
 	}
 
 	public String getServerPackageVersion() {
@@ -226,14 +247,7 @@ public class Skywars extends JavaPlugin {
 
 		this.sendMessage("&ahas been enabled: &bv%s", this.version);
 
-		if (!Skywars.get().getConfig().getBoolean("taskUpdate.disabled"))
-			Bukkit.getScheduler().runTaskTimer(Skywars.get(), () -> {
-				for (final Player player : Bukkit.getOnlinePlayers()) {
-					SkywarsScoreboard.update(player);
-					SkywarsActionbar.update(player);
-					SkywarsTabList.update(player);
-				}
-			}, 0L, Skywars.get().getConfig().getLong("taskUpdate.interval") * 20);
+		restartTask();
 	}
 
 	public void sendMessage(String text, Object... format) {
