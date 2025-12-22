@@ -20,7 +20,7 @@ import java.util.List;
 public class GamesMenu implements Listener {
 
 	public static void open(Player player) {
-		final Inventory inventory = Bukkit.createInventory(null, 9 * 3, "Skywars");
+		final Inventory inventory = Bukkit.createInventory(null, 9 * 3, MessageUtils.get("menu_titles.main_menu"));
 		PlayerInventoryManager.setMenu(player, MenuType.GAMES_MENU);
 		final ItemStack item = new ItemStack(XMaterial.BOW.parseItem());
 		final ItemMeta meta = item.getItemMeta();

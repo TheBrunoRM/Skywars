@@ -245,6 +245,11 @@ countdown:
     color: c
     range: 5-1
 
+menu_titles:
+  main_menu: "&aSkywars"
+  maps: "&aMaps"
+  kits: "&aKits"
+
 kits:
   bought: "&bBought kit &e{0}"
   owned: "&aYou own this kit!"

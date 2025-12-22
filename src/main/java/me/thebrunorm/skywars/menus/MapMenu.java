@@ -24,7 +24,7 @@ import java.util.List;
 public class MapMenu implements Listener {
 
 	public static void open(Player player) {
-		final Inventory inventory = Bukkit.createInventory(null, 9 * 6, MessageUtils.color("&aMaps"));
+		final Inventory inventory = Bukkit.createInventory(null, 9 * 6, MessageUtils.get("menu_titles.maps"));
 		PlayerInventoryManager.setMenu(player, MenuType.MAP_SELECTION);
 
 		int index = 10;
