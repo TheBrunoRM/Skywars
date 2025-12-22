@@ -17,11 +17,9 @@ import me.thebrunorm.skywars.schematics.SchematicHandler;
 import me.thebrunorm.skywars.structures.Arena;
 import me.thebrunorm.skywars.structures.Kit;
 import me.thebrunorm.skywars.structures.SkywarsUser;
-import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -168,40 +166,19 @@ public class Skywars extends JavaPlugin {
 
 		for (final Player player : Bukkit.getOnlinePlayers()) {
 			final Arena arena = this.getPlayerArena(player);
-			if (arena != null) {
-				arena.exitPlayer(player);
-			}
+			if (arena == null) continue;
+			arena.exitPlayer(player);
 		}
 
 		final ItemStack item = SetupEvents.item;
 		ConfigMenu.currentArenas.forEach((player, arena) -> {
-			if (item == null)
-				return;
+			if (item == null) return;
 			player.getInventory().removeItem(item);
 			SkywarsUtils.teleportPlayerLobbyOrLastLocation(player);
 		});
 
 		this.sendDebugMessage("Stopping arenas...");
-		// add world names to a file
-		// to try to delete those worlds
-		// the next time the plugin starts up
-		final List<String> worldNames = new ArrayList<>(this.arenas.size());
-		for (final Arena arena : this.arenas) {
-			arena.clear(false);
-			worldNames.add(arena.getWorldName());
-		}
-		final File file = new File(this.getDataFolder(), "delete_worlds.yml");
-		final YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		worldNames.addAll(config.getStringList("worlds"));
-		config.set("worlds", worldNames);
-		try {
-			if (!file.exists())
-				file.createNewFile();
-			config.save(file);
-		} catch (final IOException e) {
-			e.printStackTrace();
-			this.sendMessage("Could not write world list to file.");
-		}
+		SkywarsWorldCleanup.saveWorldList();
 		this.arenas.clear();
 	}
 
@@ -221,35 +198,7 @@ public class Skywars extends JavaPlugin {
 
 		this.sendDebugMessage("&bServer version: &e%s (&a%s&e)", packageName, this.serverPackageVersion);
 
-		final File worldsToDeleteFile = new File(this.getDataFolder(), "delete_worlds.yml");
-		if (worldsToDeleteFile.exists()) {
-			final YamlConfiguration deleteWorldsConfig = YamlConfiguration.loadConfiguration(worldsToDeleteFile);
-			final List<String> list = deleteWorldsConfig.getStringList("worlds");
-			for (final String worldName : new ArrayList<>(list)) {
-				final World world = Bukkit.getWorld(worldName);
-				if (world != null) {
-					for (final Player p : world.getPlayers())
-						SkywarsUtils.teleportPlayerLobbyOrLastLocation(p, true);
-					Bukkit.unloadWorld(worldName, false);
-				}
-				final File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
-				if (worldFolder.exists() && worldFolder.isDirectory())
-					try {
-						FileUtils.deleteDirectory(worldFolder);
-					} catch (final IOException e) {
-						e.printStackTrace();
-						Skywars.get().sendMessage("&cCould not delete world folder: &b" + worldFolder.getPath());
-					}
-				list.remove(worldName);
-			}
-			deleteWorldsConfig.set("worlds", list);
-			try {
-				deleteWorldsConfig.save(worldsToDeleteFile);
-			} catch (final IOException e) {
-				e.printStackTrace();
-				this.sendMessage("Could not save the world deletion list to file: " + worldsToDeleteFile.getPath());
-			}
-		}
+		SkywarsWorldCleanup.cleanupWorlds();
 
 		if (!this.loadConfig()) {
 			this.sendMessage("Could not load configuration files! Disabling plugin.");
