@@ -194,8 +194,8 @@ public class Arena {
 						final String[] splitted = sound.split(";");
 						player.getPlayer().playSound(player.getPlayer().getLocation(),
 								Sounds.valueOf(splitted[0]).bukkitSound(),
-								splitted.length > 1 ? Float.parseFloat(splitted[1]):1,
-								splitted.length > 2 ? Float.parseFloat(splitted[2]):1);
+								splitted.length > 1 ? Float.parseFloat(splitted[1]) : 1,
+								splitted.length > 2 ? Float.parseFloat(splitted[2]) : 1);
 
 						for (final Object object : Skywars.langConfig.getList("countdown")) {
 							@SuppressWarnings("unchecked") final HashMap<Object, Object> hash = (HashMap<Object, Object>) object;
@@ -211,7 +211,7 @@ public class Arena {
 									SkywarsUtils.format(subtitle, player.getPlayer(), Arena.this.get(), player), 0,
 									50, 0);
 							final String msg = Skywars.langConfig
-									.getString(this.time == 1 ? "GAME_STARTING_SECOND":"GAME_STARTING_SECONDS");
+									.getString(this.time == 1 ? "GAME_STARTING_SECOND" : "GAME_STARTING_SECONDS");
 							player.getPlayer()
 									.sendMessage(MessageUtils.color(SkywarsUtils.format(
 											msg.replaceAll("%count%", "&" + color + "%count%")
@@ -675,8 +675,8 @@ public class Arena {
 				final String[] splitted = sound.split(";");
 				players.getPlayer().playSound(players.getPlayer().getLocation(),
 						Sounds.valueOf(splitted[0]).bukkitSound(),
-						splitted.length > 1 ? Float.parseFloat(splitted[1]):1,
-						splitted.length > 2 ? Float.parseFloat(splitted[2]):1);
+						splitted.length > 1 ? Float.parseFloat(splitted[1]) : 1,
+						splitted.length > 2 ? Float.parseFloat(splitted[2]) : 1);
 			}
 		}
 
@@ -703,11 +703,11 @@ public class Arena {
 
 		final TimeType time = SkywarsUtils.mostFrequentElement(this.timeVotes.values());
 		if (time != null)
-			this.gameSettings.time = time == TimeType.NIGHT ? 14000:0;
+			this.gameSettings.time = time == TimeType.NIGHT ? 14000 : 0;
 
 		final me.thebrunorm.skywars.enums.WeatherType weather = SkywarsUtils.mostFrequentElement(this.weatherVotes.values());
 		if (weather != null)
-			this.gameSettings.weather = weather == me.thebrunorm.skywars.enums.WeatherType.RAIN ? org.bukkit.WeatherType.DOWNFALL:org.bukkit.WeatherType.CLEAR;
+			this.gameSettings.weather = weather == me.thebrunorm.skywars.enums.WeatherType.RAIN ? org.bukkit.WeatherType.DOWNFALL : org.bukkit.WeatherType.CLEAR;
 
 		for (final SkywarsUser user : this.getUsers()) {
 			user.getPlayer().setPlayerTime(this.gameSettings.time, true);
@@ -903,6 +903,7 @@ public class Arena {
 
 	public void broadcastEventMessage(SkywarsEventType eventType) {
 		for (final SkywarsUser player : this.getUsers()) {
+			SkywarsUtils.playSoundsFromConfig(player.getPlayer(), String.format("sounds.events.%s", eventType));
 			player.getPlayer().sendMessage(MessageUtils.get(String.format("events.%s.message", eventType)));
 			Skywars.get().NMS().sendTitle(player.getPlayer(), MessageUtils.get(String.format("events.%s.title", eventType)),
 					MessageUtils.get(String.format("events.%s.subtitle", eventType)));
@@ -1069,7 +1070,7 @@ public class Arena {
 					.filter(i -> i != null && i.getType() != XMaterial.AIR.parseMaterial()).collect(Collectors.toList())
 					.size();
 			controller.changeHologram(hologram, MessageUtils.color(text), 0);
-			controller.changeHologram(hologram, contents <= 0 ? MessageUtils.get("chest_holograms.empty"):"", 1);
+			controller.changeHologram(hologram, contents <= 0 ? MessageUtils.get("chest_holograms.empty") : "", 1);
 		}
 
 		for (Chest chest : toRemove) removeChest(chest);

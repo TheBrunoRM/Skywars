@@ -27,6 +27,8 @@ sounds: # sound name; volume; pitch
   start:
     - NOTE_PLING; 0.5; 1
     - PORTAL_TRIGGER; 0.5; 5
+  REFILL: LEVEL_UP; 1; 1
+  ENDER_DRAGON: ENDERDRAGON_GROWL; 1; 1
 
 # this is the reset cooldown for last hits (in seconds)
 lastHitResetCooldown: 15
