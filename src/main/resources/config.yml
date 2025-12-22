@@ -13,6 +13,7 @@ dateFormat: "dd/MM/yyyy"
 minPlayers: 2
 
 # you may want to disable these
+tabListEnabled: true
 signsEnabled: true
 messageSounds:
   enabled: true
@@ -36,10 +37,15 @@ defaultArenaCenterHeight: 100
 # map size used for boundary calculation; in blocks
 maxMapSize: 200
 
-# the worlds where the lobby scoreboard shows
-# leave empty to show in all worlds:
-# scoreboardWorlds: []
-scoreboardWorlds:
+scoreboard:
+  enabled: true
+  # you can change this if there is a name collision
+  objective_name: skywars
+
+# filter where the lobby scoreboard and tablist shows
+# leave empty to show in all worlds
+# lobby_worlds: []
+lobby_worlds:
   - world
   - lobby
 

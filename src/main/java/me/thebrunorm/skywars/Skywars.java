@@ -6,7 +6,7 @@ import me.thebrunorm.skywars.commands.*;
 import me.thebrunorm.skywars.events.*;
 import me.thebrunorm.skywars.handlers.SkywarsActionbar;
 import me.thebrunorm.skywars.handlers.SkywarsScoreboard;
-import me.thebrunorm.skywars.handlers.SkywarsTablist;
+import me.thebrunorm.skywars.handlers.SkywarsTabList;
 import me.thebrunorm.skywars.holograms.*;
 import me.thebrunorm.skywars.managers.ChestManager;
 import me.thebrunorm.skywars.managers.MapManager;
@@ -231,7 +231,7 @@ public class Skywars extends JavaPlugin {
 				for (final Player player : Bukkit.getOnlinePlayers()) {
 					SkywarsScoreboard.update(player);
 					SkywarsActionbar.update(player);
-					SkywarsTablist.update(player);
+					SkywarsTabList.update(player);
 				}
 			}, 0L, Skywars.get().getConfig().getLong("taskUpdate.interval") * 20);
 	}
