@@ -99,6 +99,7 @@ The plugin supports Vault for kit purchases
 
 ## To do
 
+* BungeeCord support
 * More game events
 * More configuration options
 * Party options
