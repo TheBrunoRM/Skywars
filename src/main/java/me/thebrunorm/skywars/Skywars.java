@@ -171,10 +171,7 @@ public class Skywars extends JavaPlugin {
 			arena.exitPlayer(player);
 		}
 
-		final ItemStack item = SetupEvents.item;
 		ConfigMenu.currentArenas.forEach((player, arena) -> {
-			if (item == null) return;
-			player.getInventory().removeItem(item);
 			SkywarsUtils.teleportPlayerLobbyOrLastLocation(player);
 		});
 

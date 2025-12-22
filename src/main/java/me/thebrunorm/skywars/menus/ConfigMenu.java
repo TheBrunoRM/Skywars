@@ -35,7 +35,6 @@ public class ConfigMenu implements Listener {
 	public final static HashMap<Player, Arena> currentArenas = new HashMap<>();
 	final static String teamSizeName = "&e&lTeam Size: &a&l%s";
 	final static String positionName = "&e&lPosition: &a&l%s";
-	final static String spawnName = "&e&lSpawn Setup";
 	final static String worldFolderName = "&e&lWorld: &a&l%s";
 	final static String statusName = "&e&lStatus: %s";
 	final static String calculateSpawnsName = "&6&lCalculate spawns";
@@ -92,31 +91,23 @@ public class ConfigMenu implements Listener {
 		InventoryUtils.addItem(inventory, XMaterial.GLASS.parseMaterial(), 15,
 				MessageUtils.color(statusName, "&6&lYES"));
 
-		final List<String> spawnLore = new ArrayList<>();
-		spawnLore.add(MessageUtils.color("&eWhen you enter &bSpawn Setup Mode&e,"));
-		spawnLore.add(MessageUtils.color("&eyou can click blocks on the arena"));
-		spawnLore.add(MessageUtils.color("&eto set spawns easily."));
-		if (!currentMap.getSpawns().isEmpty()) {
-			spawnLore.add(MessageUtils.color(""));
-			spawnLore.add(MessageUtils.color("&cThis will delete all current spawns."));
-		}
-
-		InventoryUtils.addItem(inventory, XMaterial.BLAZE_ROD.parseMaterial(), 16, spawnName,
-				spawnLore.toArray(new String[0]));
-
 		InventoryUtils.addItem(inventory, XMaterial.GLASS.parseMaterial(), 18, regenerateCasesName);
 
 		InventoryUtils.addItem(inventory, XMaterial.BEACON.parseMaterial(), 19, calculateSpawnsName,
+				"&eSet spawns based on beacons placed on the map",
 				"&cThis will override current spawns.");
 
-		InventoryUtils.addItem(inventory, XMaterial.WOODEN_AXE.parseMaterial(), 20, pasteSchematicName,
-				"&cThis will regenerate the map.");
+		InventoryUtils.addItem(inventory, XMaterial.WOODEN_AXE.parseMaterial(), 21, reloadWorld,
+				"&cAll changes to the arena will be lost!");
 
-		InventoryUtils.addItem(inventory, XMaterial.BARRIER.parseMaterial(), 21, clearName);
+		InventoryUtils.addItem(inventory, XMaterial.WRITABLE_BOOK.parseMaterial(), 22, saveWorld,
+				"&eThe arena world will be saved as it is");
 
-		InventoryUtils.addItem(inventory, XMaterial.COMPASS.parseMaterial(), 22, teleportName);
+		InventoryUtils.addItem(inventory, XMaterial.BARRIER.parseMaterial(), 24, clearName);
 
-		InventoryUtils.addItem(inventory, XMaterial.CHEST.parseMaterial(), 23, chestsName);
+		InventoryUtils.addItem(inventory, XMaterial.COMPASS.parseMaterial(), 25, teleportName);
+
+		InventoryUtils.addItem(inventory, XMaterial.CHEST.parseMaterial(), 26, chestsName);
 
 	}
 
@@ -150,50 +141,6 @@ public class ConfigMenu implements Listener {
 			int n = currentMap.getTeamSize() + (event.getClick() == ClickType.LEFT ? 1:-1);
 			n = Math.max(n, 0);
 			currentMap.setTeamSize(n);
-		}
-
-		String currentWorldName = currentMap.getWorldName();
-		if (currentWorldName == null)
-			currentWorldName = "none";
-
-		if (name.equals(MessageUtils.color(spawnName))) {
-			final Arena arena = currentArenas.get(player);
-			final ItemStack item = new ItemStack(Objects.requireNonNull(XMaterial.BLAZE_ROD.parseItem()));
-			final ItemMeta meta = item.getItemMeta();
-			final List<String> lore = new ArrayList<>();
-			lore.add(MessageUtils.color("&eClick the blocks that"));
-			lore.add(MessageUtils.color("&eyou want to add spawns for."));
-			lore.add(MessageUtils.color("&eYou can also rightclick"));
-			lore.add(MessageUtils.color("&eto remove the last set spawn."));
-			meta.setDisplayName(MessageUtils.color("&eSpawn Configurator"));
-			meta.setLore(lore);
-			item.setItemMeta(meta);
-
-			SetupEvents.item = item;
-			player.getInventory().setItem(player.getInventory().getHeldItemSlot(), SetupEvents.item);
-			player.closeInventory();
-
-			playerLocations.put(player, player.getLocation());
-			player.teleport(arena.getCenterBlock().toLocation(arena.getWorld()).clone().add(new Vector(0, 5, 0)));
-			player.setVelocity(new Vector(0, 1f, 0));
-
-			player.setAllowFlight(true);
-			player.setFlying(true);
-
-			Skywars.get().NMS().sendTitle(player, "&a&lENABLED", "&eSpawn edit mode");
-			player.playSound(player.getLocation(), Sounds.NOTE_PLING.bukkitSound(), 3, 2);
-
-			if (!currentMap.getSpawns().isEmpty())
-				player.sendMessage(MessageUtils.color("&6Old arena spawns deleted."));
-			currentMap.getSpawns().clear();
-
-			player.sendMessage(MessageUtils.color("&eYou are now in &a&lspawn edit mode"));
-			player.sendMessage(MessageUtils.color("&eUse the &6&lblaze rod &eto &b&lset and remove spawns"));
-			player.sendMessage(MessageUtils.color("&eYou can &a&lright-click &ea block to &a&ladd an spawn"));
-			player.sendMessage(
-					MessageUtils.color("&eYou can &c&lright-click &ea block to &c&lremove &4&lthe last set spawn"));
-			player.sendMessage(MessageUtils.color("&e&lTo exit, &b&ldrop the blaze rod"));
-			return;
 		}
 
 		if (name.equals(MessageUtils.color(calculateSpawnsName))) {
@@ -239,13 +186,9 @@ public class ConfigMenu implements Listener {
 			return;
 		}
 
-		if (name.equals(MessageUtils.color(clearName))) {
-			ArenaManager.removeArena(currentArena);
-			currentArenas.remove(player);
-			currentArena = null;
-			player.sendMessage("Cleared");
-			player.closeInventory();
-		}
+		String currentWorldName = currentMap.getWorldName();
+		if (currentWorldName == null)
+			currentWorldName = "none";
 
 		if (name.equals(MessageUtils.color(worldFolderName, currentWorldName))) {
 			if (this.worldsFolder.exists() && this.worldsFolder.listFiles().length <= 0) {
