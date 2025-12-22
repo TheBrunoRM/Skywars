@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ArenaManager {
+public enum ArenaManager {
+	;
 
 	public static Arena getJoinableArenaByMap(SkywarsMap map) {
 		if (map == null)

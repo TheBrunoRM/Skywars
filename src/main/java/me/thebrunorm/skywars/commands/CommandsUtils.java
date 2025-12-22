@@ -6,7 +6,8 @@ import me.thebrunorm.skywars.Skywars;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class CommandsUtils {
+public enum CommandsUtils {
+	;
 
 	public static boolean consoleCheck(CommandSender sender) {
 		if (sender instanceof Player)

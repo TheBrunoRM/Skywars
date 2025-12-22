@@ -8,7 +8,9 @@ import me.thebrunorm.skywars.structures.Arena;
 import me.thebrunorm.skywars.structures.SkywarsUser;
 import org.bukkit.entity.Player;
 
-public class SkywarsTablist {
+public enum SkywarsTablist {
+	;
+
 	public static void update(Player player) {
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		SkywarsUser swp = null;

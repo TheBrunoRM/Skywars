@@ -9,7 +9,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InventoryUtils {
+public enum InventoryUtils {
+	;
 
 	public static Inventory addItem(Inventory inventory, ItemStack item, int slot, String displayName,
 			String... loreLines) {

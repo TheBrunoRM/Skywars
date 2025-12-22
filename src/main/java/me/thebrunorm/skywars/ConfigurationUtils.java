@@ -20,7 +20,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-public class ConfigurationUtils {
+public enum ConfigurationUtils {
+	;
 
 	public static final int DEFAULT_BUFFER_SIZE = 8192;
 

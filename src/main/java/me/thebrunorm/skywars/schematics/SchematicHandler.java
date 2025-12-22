@@ -28,7 +28,8 @@ import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-public class SchematicHandler {
+public enum SchematicHandler {
+	;
 
 	static Class<?> blockClass;
 	static Class<?> slabType;

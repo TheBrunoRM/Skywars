@@ -9,7 +9,8 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public class MessageUtils {
+public enum MessageUtils {
+	;
 
 	public static final char ALT_COLOR_CHAR = '&';
 
