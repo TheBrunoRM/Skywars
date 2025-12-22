@@ -10,16 +10,14 @@ import me.thebrunorm.skywars.holograms.HologramController;
 import me.thebrunorm.skywars.managers.ArenaManager;
 import me.thebrunorm.skywars.managers.ChestManager;
 import me.thebrunorm.skywars.managers.MapManager;
-import me.thebrunorm.skywars.singletons.MessageUtils;
-import me.thebrunorm.skywars.singletons.SkywarsCaseCreator;
-import me.thebrunorm.skywars.singletons.SkywarsEconomy;
-import me.thebrunorm.skywars.singletons.SkywarsUtils;
+import me.thebrunorm.skywars.singletons.*;
 import mrblobman.sounds.Sounds;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
@@ -739,6 +737,11 @@ public class Arena {
 	}
 
 	public Vector getCenterBlock() {
+		ConfigurationSection section = getMap().getConfig().getConfigurationSection("center");
+
+		if (section != null)
+			return ConfigurationUtils.getVectorFromConfigSection(section);
+
 		return new Vector(0, Skywars.get().getConfig().getInt("defaultArenaCenterHeight", 100), 0);
 	}
 
