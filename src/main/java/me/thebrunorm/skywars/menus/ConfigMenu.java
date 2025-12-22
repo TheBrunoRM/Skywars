@@ -79,34 +79,37 @@ public class ConfigMenu implements Listener {
 			return;
 		final SkywarsMap currentMap = currentArena.getMap();
 
-		InventoryUtils.addItem(inventory, XMaterial.SADDLE.parseMaterial(), 11,
-				MessageUtils.color(teamSizeName, currentMap.getTeamSize()), "&eLeft-click to add",
-				"&eRight-click to remove");
-
 		String currentWorldFile = currentMap.getWorldName();
 		if (currentWorldFile == null)
 			currentWorldFile = "none";
 
-		InventoryUtils.addItem(inventory, XMaterial.PAPER.parseMaterial(), 14,
-				MessageUtils.color(worldFolderName, currentWorldFile));
+		InventoryUtils.addItem(inventory, XMaterial.GLASS.parseMaterial(), 9, regenerateCasesName,
+				"&eCurrent spawns: " + currentMap.getSpawns().size());
 
-		InventoryUtils.addItem(inventory, XMaterial.GLASS.parseMaterial(), 18, regenerateCasesName);
-
-		InventoryUtils.addItem(inventory, XMaterial.BEACON.parseMaterial(), 19, calculateSpawnsName,
+		InventoryUtils.addItem(inventory, XMaterial.BEACON.parseMaterial(), 10, calculateSpawnsName,
 				"&eSet spawns based on beacons placed on the map",
 				"&cThis will override current spawns.");
 
-		InventoryUtils.addItem(inventory, XMaterial.WOODEN_AXE.parseMaterial(), 21, reloadWorld,
+		InventoryUtils.addItem(inventory, XMaterial.SADDLE.parseMaterial(), 11,
+				MessageUtils.color(teamSizeName, currentMap.getTeamSize()), "&eLeft-click to add",
+				"&eRight-click to remove");
+
+		InventoryUtils.addItem(inventory, XMaterial.WOODEN_AXE.parseMaterial(), 12, reloadWorld,
 				"&cAll changes to the arena will be lost!");
 
-		InventoryUtils.addItem(inventory, XMaterial.WRITABLE_BOOK.parseMaterial(), 22, saveWorld,
+		InventoryUtils.addItem(inventory, XMaterial.WRITABLE_BOOK.parseMaterial(), 13, saveWorld,
 				"&eThe arena world will be saved as it is");
 
-		InventoryUtils.addItem(inventory, XMaterial.BARRIER.parseMaterial(), 24, clearName);
+		InventoryUtils.addItem(inventory, XMaterial.BARRIER.parseMaterial(), 14, clearName);
 
-		InventoryUtils.addItem(inventory, XMaterial.COMPASS.parseMaterial(), 25, teleportName);
+		InventoryUtils.addItem(inventory, XMaterial.PAPER.parseMaterial(), 15,
+				MessageUtils.color(worldFolderName, currentWorldFile));
 
-		InventoryUtils.addItem(inventory, XMaterial.CHEST.parseMaterial(), 26, chestsName);
+		InventoryUtils.addItem(inventory, XMaterial.COMPASS.parseMaterial(), 16, teleportName);
+
+		InventoryUtils.addItem(inventory, XMaterial.CHEST.parseMaterial(), 17, chestsName,
+				"&eCurrent chests in map config: &b" + currentMap.getChests().size(),
+				"&eActive chests in arena: &b" + currentArena.getActiveChests().size());
 
 	}
 
@@ -122,7 +125,7 @@ public class ConfigMenu implements Listener {
 	void onClick(InventoryClickEvent event) {
 		final Player player = (Player) event.getWhoClicked();
 		final MenuType currentMenu = PlayerInventoryManager.getCurrentMenu(player);
-		if (currentMenu != MenuType.MAP_CONFIGURATION && currentMenu != MenuType.MAP_SCHEMATIC)
+		if (currentMenu != MenuType.MAP_CONFIGURATION && currentMenu != MenuType.MAP_CONFIG_WORLD_SELECTION)
 			return;
 		event.setCancelled(true);
 		final ItemStack clicked = event.getCurrentItem();
@@ -140,14 +143,17 @@ public class ConfigMenu implements Listener {
 			int n = currentMap.getTeamSize() + (event.getClick() == ClickType.LEFT ? 1:-1);
 			n = Math.max(n, 0);
 			currentMap.setTeamSize(n);
+			currentMap.saveParametersInConfig();
+			currentMap.saveConfig();
 		}
 
 		if (name.equals(MessageUtils.color(calculateSpawnsName))) {
-			currentMap.calculateSpawns();
-			player.sendMessage(MessageUtils.color("&aSuccessfully &bcalculated &aand &bsaved &6%s spawns&a.",
+			if (!currentMap.calculateSpawns())
+				player.sendMessage(MessageUtils.color("&cNo beacons found in the arena. Nothing changed."));
+			else player.sendMessage(MessageUtils.color(
+					"&aSuccessfully &bcalculated &aand &bsaved &6%s spawns&a.",
 					currentMap.getSpawns().size()));
-			if (currentMap.getSpawns().size() <= 0)
-				player.sendMessage(MessageUtils.color("&cWarning: &7did you place beacons on the map?"));
+			return;
 		}
 
 		if (name.equals(MessageUtils.color(regenerateCasesName))) {
@@ -236,7 +242,6 @@ public class ConfigMenu implements Listener {
 			currentArena.fillChests();
 			player.sendMessage(MessageUtils.color("Filled %s chests for map &b%s",
 					currentArena.getActiveChests().size(), currentArena.getMap().getName()));
-			return;
 		}
 
 		String currentWorldName = currentMap.getWorldName();
@@ -258,13 +263,12 @@ public class ConfigMenu implements Listener {
 			Skywars.get().sendDebugMessage("current file: " + worldFolder.getName());
 			if (worldFolder.getName().equals(worldFolderName)) {
 				currentMap.setWorldName(worldFolderName);
+				currentMap.saveParametersInConfig();
+				currentMap.saveConfig();
 				player.sendMessage(MessageUtils.color("&eWorld set to &b%s", currentMap.getWorldName()));
 				break;
 			}
 		}
-
-		currentMap.saveParametersInConfig();
-		currentMap.saveConfig();
 
 		UpdateInventory(player);
 	}
@@ -305,7 +309,7 @@ public class ConfigMenu implements Listener {
 		}
 
 		player.openInventory(inventory);
-		PlayerInventoryManager.setMenu(player, MenuType.MAP_SCHEMATIC);
+		PlayerInventoryManager.setMenu(player, MenuType.MAP_CONFIG_WORLD_SELECTION);
 	}
 
 }

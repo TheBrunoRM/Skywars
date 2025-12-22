@@ -33,6 +33,7 @@ public class SkywarsMap {
 	String worldName;
 	HashMap<Integer, Vector> spawns = new HashMap<>();
 	HashMap<Integer, Vector> chests = new HashMap<>();
+
 	public SkywarsMap(String name, int teamSize) {
 		this.name = name;
 		this.teamSize = teamSize;
@@ -52,7 +53,7 @@ public class SkywarsMap {
 		}
 	}
 
-	public void calculateSpawns() {
+	public boolean calculateSpawns() {
 
 		Skywars.get().sendDebugMessage("&bCalculating spawns for map &6" + this.name);
 
@@ -95,7 +96,7 @@ public class SkywarsMap {
 		Skywars.get().sendDebugMessage("got %s spawns", totalSpawnLocations);
 
 		if (totalSpawnLocations <= 0)
-			return;
+			return false;
 
 		// set the first spawn
 		this.spawns.put(0, spawnLocations.get(0));
@@ -120,6 +121,7 @@ public class SkywarsMap {
 		this.saveParametersInConfig();
 		this.saveConfig();
 		Skywars.get().sendDebugMessage("spawns calculated and saved in config");
+		return true;
 	}
 
 	public void saveParametersInConfig() {
