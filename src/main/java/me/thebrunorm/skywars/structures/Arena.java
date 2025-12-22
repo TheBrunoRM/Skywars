@@ -822,10 +822,10 @@ public class Arena {
 			}, 20 * 10);
 		}
 
-		if (Skywars.configuration.invencibilityEnabled) {
+		if (Skywars.configuration.invincibilityEnabled) {
 			this.setInvincibility(true);
 			Bukkit.getScheduler().runTaskLater(Skywars.get(),
-					() -> Arena.this.setInvincibility(false), Skywars.configuration.invencibilityTicks);
+					() -> Arena.this.setInvincibility(false), Skywars.configuration.invincibilityTicks);
 		}
 
 		return true;
