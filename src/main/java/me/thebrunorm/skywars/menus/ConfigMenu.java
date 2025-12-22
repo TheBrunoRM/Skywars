@@ -3,14 +3,12 @@ package me.thebrunorm.skywars.menus;
 
 import com.cryptomorin.xseries.XMaterial;
 import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.events.SetupEvents;
 import me.thebrunorm.skywars.managers.ArenaManager;
-import me.thebrunorm.skywars.singletons.ConfigurationUtils;
 import me.thebrunorm.skywars.singletons.InventoryUtils;
 import me.thebrunorm.skywars.singletons.MessageUtils;
+import me.thebrunorm.skywars.singletons.SkywarsUtils;
 import me.thebrunorm.skywars.structures.Arena;
 import me.thebrunorm.skywars.structures.SkywarsMap;
-import mrblobman.sounds.Sounds;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,9 +19,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.util.Vector;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +41,8 @@ public class ConfigMenu implements Listener {
 	final static String statusName = "&e&lStatus: %s";
 	final static String calculateSpawnsName = "&6&lCalculate spawns";
 	final static String regenerateCasesName = "&6&lRegenerate cases";
-	final static String pasteSchematicName = "&6&lPaste schematic";
+	final static String reloadWorld = "&6&lReload world";
+	final static String saveWorld = "&b&lSave world";
 	final static String clearName = "&c&lClear";
 	final static String teleportName = "&6&lTeleport";
 	final static String chestsName = "&6&lFill chests";
@@ -159,23 +162,77 @@ public class ConfigMenu implements Listener {
 			return;
 		}
 
-		final World arenaWorld = currentArena.getWorld();
+		if (name.equals(MessageUtils.color(clearName))) {
+			ArenaManager.removeArena(currentArena);
+			currentArenas.remove(player);
+			player.sendMessage("Cleared");
+			player.closeInventory();
+		}
 
-		if (name.equals(MessageUtils.color(teleportName))) {
-			if (arenaWorld == null) {
-				player.sendMessage("world not set");
+		if (name.equals(MessageUtils.color(reloadWorld))) {
+			ArenaManager.removeArena(currentArena);
+			currentArenas.put(player, ArenaManager.getArenaByMap(currentMap, true));
+			return;
+		}
+
+		if (name.equals(MessageUtils.color(saveWorld))) {
+			Path worldsPath = Skywars.get().getDataFolder().toPath().resolve("worlds").toAbsolutePath().normalize();
+			Path newFolder = worldsPath.resolve(currentMap.getName()).normalize();
+			if (newFolder.toFile().exists()) {
+				String backupWorldName = currentMap.getName() + "_old" + System.currentTimeMillis();
+				Path oldWorldsPath = Skywars.get().getDataFolder().toPath().resolve("old_worlds").toAbsolutePath().normalize();
+				if (!oldWorldsPath.toFile().exists())
+					if (!oldWorldsPath.toFile().mkdirs())
+						player.sendMessage("Could not create old_worlds directory: " + oldWorldsPath.toAbsolutePath());
+				Path worldBackup = oldWorldsPath.resolve(backupWorldName).toAbsolutePath().normalize();
+				try {
+					Files.move(newFolder, worldBackup, StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException e) {
+					player.sendMessage("Error moving world folder: " + e.getMessage());
+					player.sendMessage("\nCould not move world\nFrom: "
+							+ newFolder + "\nTo: " + worldBackup);
+				}
+			}
+
+			World currentWorld = currentArena.getWorld();
+
+			player.sendMessage("Teleporting any players inside the world outside of it...");
+			for (final Player p : currentWorld.getPlayers())
+				SkywarsUtils.teleportPlayerLobbyOrLastLocation(p, true);
+
+			currentWorld.save();
+			player.sendMessage("Saved the world for arena: " + currentMap.getName());
+
+			/*
+			if (!Bukkit.unloadWorld(currentWorld, true)) {
+				player.sendMessage("Could not unload world :(");
 				return;
 			}
-			Location loc = ConfigurationUtils.getLocationConfig(arenaWorld,
-					currentArena.getMap().getConfig().getConfigurationSection("center"));
-			if (loc == null)
-				loc = currentArena.getWorld().getSpawnLocation();
-			if (loc == null)
-				player.sendMessage("Location not set");
-			else {
-				player.teleport(loc);
-				player.sendMessage("Teleported");
+			player.sendMessage("Unloaded the world for arena: " + currentMap.getName());
+			*/
+
+			File worldFolder = currentWorld.getWorldFolder();
+			Path worldPath = Paths.get(worldFolder.getAbsolutePath()).normalize();
+
+			if (!worldFolder.isDirectory()) {
+				player.sendMessage("The world folder does not exist or is not a directory: " + worldPath);
+				return;
 			}
+
+			try {
+				Files.copy(worldPath, newFolder, StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				player.sendMessage("Error moving world folder: " + e.getMessage());
+				player.sendMessage("\nCould not move world\nFrom: "
+						+ worldPath + "\nTo: " + newFolder);
+			}
+
+			return;
+		}
+
+		if (name.equals(MessageUtils.color(teleportName))) {
+			currentArena.goBackToCenter(player);
+			player.setGameMode(GameMode.CREATIVE);
 			return;
 		}
 
