@@ -1,31 +1,23 @@
 /* (C) 2021 Bruno */
 package me.thebrunorm.skywars;
 
+import com.google.gson.Gson;
+import org.apache.commons.io.IOUtils;
+import org.bukkit.plugin.PluginDescriptionFile;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.bukkit.plugin.PluginDescriptionFile;
-
-import com.google.gson.Gson;
-
-class Asset {
-	String browser_download_url;
-}
-
-class Release {
-	String tag_name;
-	List<Asset> assets;
-}
-
-public class SkywarsUpdater {
+public enum SkywarsUpdater {
+	;
 
 	public static final PluginDescriptionFile pdf = Skywars.get().getDescription();
 
@@ -89,7 +81,7 @@ public class SkywarsUpdater {
 		BufferedReader reader = null;
 		try {
 			final URL url = new URL(urlString);
-			reader = new BufferedReader(new InputStreamReader(url.openStream()));
+			reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
 			final StringBuffer buffer = new StringBuffer();
 			int read;
 			final char[] chars = new char[1024];
@@ -102,4 +94,13 @@ public class SkywarsUpdater {
 				reader.close();
 		}
 	}
+}
+
+class Asset {
+	String browser_download_url;
+}
+
+class Release {
+	String tag_name;
+	List<Asset> assets;
 }
