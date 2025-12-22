@@ -78,6 +78,30 @@ public class Arena {
 	}
 
 	public boolean joinPlayer(Player player) {
+
+		// join checks
+
+		final Location spawn = this.getVectorInArena(this.getSpawn(team.getNumber()));
+		if (spawn == null) {
+			player.sendMessage(String.format("spawn %s of arena %s not set", team.getNumber(), this.map.getName()));
+			return false;
+		}
+
+		if (SkywarsUtils.getJoinProblems(this, player) != null)
+			return false;
+
+		if (!this.checkProblems()) {
+			for (final String problem : this.getProblems()) {
+				player.sendMessage("problem when joining map: " + problem);
+			}
+			return false;
+		}
+
+		if (this.hasPlayer(player))
+			return false;
+
+		// arena switching
+
 		Arena currentArena = Skywars.get().getPlayerArena(player);
 		if (currentArena != null) {
 			if (currentArena == this) {
@@ -87,27 +111,16 @@ public class Arena {
 			currentArena.leavePlayer(player);
 		}
 
-		if (SkywarsUtils.getJoinProblems(this, player) != null)
-			return false;
-		if (!this.checkProblems()) {
-			for (final String problem : this.getProblems()) {
-				player.sendMessage("problem when joining map: " + problem);
-			}
-			return false;
-		}
-		if (this.hasPlayer(player))
-			return false;
+		// joining
+
 		this.joinable = this.getAlivePlayerCount() < this.map.getMaxPlayers();
 		final SkywarsTeam team = this.getNextFreeTeamOrCreateIfItDoesntExist();
-		final Location spawn = this.getVectorInArena(this.getSpawn(team.getNumber()));
-		if (spawn == null) {
-			player.sendMessage(String.format("spawn %s of arena %s not set", team.getNumber(), this.map.getName()));
-			return false;
-		}
 		final SkywarsUser swPlayer = new SkywarsUser(player, team, team.getNumber());
 		this.users.add(swPlayer);
-		if (Skywars.config.getBoolean("debug.enabled"))
-			MessageUtils.send(player, "[DEBUG] You joined team %s as player %s", team.getNumber(), getAlivePlayerCount());
+
+		Skywars.get().sendDebugMessage("arena %s -> %s joined team %s as player %s",
+				getMap().getName(), player.getName(), team.getNumber(), getAlivePlayerCount());
+
 		for (final SkywarsUser players : this.getUsers()) {
 			MessageUtils.sendTranslated(players.getPlayer(), "ARENA_JOINED",
 					player.getName(), this.getAlivePlayerCount(), this.map.getMaxPlayers());
