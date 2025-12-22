@@ -4,36 +4,35 @@ package me.thebrunorm.skywars;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-public class SkywarsEconomy {
+public enum SkywarsEconomy {
+	;
 
 	static Economy economy;
-	Skywars plugin;
-	RegisteredServiceProvider<Economy> economyProvider;
-
-	public SkywarsEconomy(Skywars plugin) {
-		this.plugin = plugin;
-	}
+	static RegisteredServiceProvider<Economy> economyProvider;
 
 	public static Economy getEconomy() {
 		return economy;
 	}
 
-	private void setup() {
+	public static void setup() {
+		Skywars plugin = Skywars.get();
 		boolean economyEnabled = Skywars.get().getConfig().getBoolean("economy.enabled");
-		if (economyEnabled)
-			try {
-				if (setupEconomy()) {
-					plugin.sendMessage("&eEconomy (Vault): &a" + this.economyProvider.getPlugin().getName());
-				}
-			} catch (final Exception e) {
-				plugin.sendMessage("&eEconomy (Vault): &ccould not hook.");
-				e.printStackTrace();
-			}
-		else
+		if (!economyEnabled) {
 			plugin.sendMessage("&eEconomy (Vault): &6disabled in config.");
+			return;
+		}
+
+		try {
+			if (setupEconomy())
+				plugin.sendMessage("&eEconomy (Vault): &a" + economyProvider.getPlugin().getName());
+		} catch (final Exception e) {
+			e.printStackTrace();
+			plugin.sendMessage("&eEconomy (Vault): &ccould not hook.");
+		}
 	}
 
-	private boolean setupEconomy() {
+	private static boolean setupEconomy() {
+		Skywars plugin = Skywars.get();
 		if (plugin.getServer().getPluginManager().getPlugin("Vault") == null) {
 			plugin.sendMessage("&eEconomy (Vault): &6plugin not found.");
 			return false;

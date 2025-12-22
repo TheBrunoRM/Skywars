@@ -85,10 +85,6 @@ public class Skywars extends JavaPlugin {
 		return plugin;
 	}
 
-	public SkywarsEconomy getEconomy() {
-		return this.economy;
-	}
-
 	public SignManager getSignManager() {
 		return this.signManager;
 	}
@@ -297,7 +293,7 @@ public class Skywars extends JavaPlugin {
 			this.sendMessage("&eHolograms: &a" + this.hologramController.getClass().getSimpleName());
 		}
 
-		economy = new SkywarsEconomy(this);
+		SkywarsEconomy.setup();
 
 		// placeholder api
 		if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
