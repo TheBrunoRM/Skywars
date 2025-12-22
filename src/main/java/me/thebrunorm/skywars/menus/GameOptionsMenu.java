@@ -5,10 +5,10 @@ import com.cryptomorin.xseries.XMaterial;
 import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.enums.ChestType;
 import me.thebrunorm.skywars.enums.TimeType;
-import me.thebrunorm.skywars.enums.WeatherType;
 import me.thebrunorm.skywars.singletons.InventoryUtils;
 import me.thebrunorm.skywars.structures.Arena;
 import org.bukkit.Bukkit;
+import org.bukkit.WeatherType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -56,10 +56,10 @@ public class GameOptionsMenu implements Listener {
 				return;
 			case TIME:
 				switch (event.getSlot()) {
-					case 11: // day
+					case 11:
 						arena.voteTime(player, TimeType.DAY);
 						break;
-					case 15: // night
+					case 15:
 						arena.voteTime(player, TimeType.NIGHT);
 						break;
 				}
@@ -70,7 +70,7 @@ public class GameOptionsMenu implements Listener {
 						arena.voteWeather(player, WeatherType.CLEAR);
 						break;
 					case 15:
-						arena.voteWeather(player, WeatherType.RAIN);
+						arena.voteWeather(player, WeatherType.DOWNFALL);
 						break;
 				}
 				break;

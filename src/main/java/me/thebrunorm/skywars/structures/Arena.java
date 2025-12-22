@@ -4,8 +4,10 @@ package me.thebrunorm.skywars.structures;
 import com.cryptomorin.xseries.XMaterial;
 import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.commands.CommandsUtils;
-import me.thebrunorm.skywars.enums.*;
-import me.thebrunorm.skywars.enums.WeatherType;
+import me.thebrunorm.skywars.enums.ArenaStatus;
+import me.thebrunorm.skywars.enums.ChestType;
+import me.thebrunorm.skywars.enums.SkywarsEventType;
+import me.thebrunorm.skywars.enums.TimeType;
 import me.thebrunorm.skywars.holograms.HologramController;
 import me.thebrunorm.skywars.managers.ArenaManager;
 import me.thebrunorm.skywars.managers.ChestManager;
@@ -33,7 +35,7 @@ import java.util.stream.Collectors;
 public class Arena {
 
 	final HashMap<UUID, TimeType> timeVotes = new HashMap<>();
-	final HashMap<UUID, me.thebrunorm.skywars.enums.WeatherType> weatherVotes = new HashMap<>();
+	final HashMap<UUID, WeatherType> weatherVotes = new HashMap<>();
 	final HashMap<UUID, ChestType> chestVotes = new HashMap<>();
 	private final ArenaGameSettings gameSettings = new ArenaGameSettings(this);
 	private final SkywarsMap map;
@@ -82,7 +84,7 @@ public class Arena {
 		// join checks
 
 		final SkywarsTeam team = this.getNextFreeTeamOrCreateIfItDoesntExist();
-		
+
 		final Location spawn = this.getVectorInArena(this.getSpawn(team.getNumber()));
 		if (spawn == null) {
 			player.sendMessage(String.format("spawn %s of arena %s not set", team.getNumber(), this.map.getName()));
@@ -715,13 +717,17 @@ public class Arena {
 
 	private void applyGameSettings() {
 
-		final TimeType time = SkywarsUtils.mostFrequentElement(this.timeVotes.values());
-		if (time != null)
-			this.gameSettings.time = time == TimeType.NIGHT ? 14000 : 0;
+		if (!timeVotes.isEmpty()) {
+			final TimeType time = SkywarsUtils.mostFrequentElement(this.timeVotes.values());
+			if (time != null)
+				this.gameSettings.time = time == TimeType.NIGHT ? 14000 : 0;
+		}
 
-		final me.thebrunorm.skywars.enums.WeatherType weather = SkywarsUtils.mostFrequentElement(this.weatherVotes.values());
-		if (weather != null)
-			this.gameSettings.weather = weather == me.thebrunorm.skywars.enums.WeatherType.RAIN ? org.bukkit.WeatherType.DOWNFALL : org.bukkit.WeatherType.CLEAR;
+		if (!weatherVotes.isEmpty()) {
+			final WeatherType weather = SkywarsUtils.mostFrequentElement(this.weatherVotes.values());
+			if (weather != null)
+				this.gameSettings.weather = weather;
+		}
 
 		for (final SkywarsUser user : this.getUsers()) {
 			user.getPlayer().setPlayerTime(this.gameSettings.time, true);
