@@ -1,7 +1,8 @@
-/* (C) 2021 Bruno */
-package me.thebrunorm.skywars;
+// Copyright (c) 2025 Bruno
+package me.thebrunorm.skywars.singletons;
 
 import com.cryptomorin.xseries.XMaterial;
+import me.thebrunorm.skywars.Skywars;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 

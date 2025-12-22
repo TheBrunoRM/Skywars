@@ -1,10 +1,10 @@
-/* (C) 2021 Bruno */
+// Copyright (c) 2025 Bruno
 package me.thebrunorm.skywars.structures;
 
 import com.cryptomorin.xseries.XMaterial;
 import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.SkywarsUtils;
 import me.thebrunorm.skywars.managers.ArenaManager;
+import me.thebrunorm.skywars.singletons.SkywarsUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.bukkit.Bukkit;
@@ -31,14 +31,8 @@ public class SkywarsMap {
 	File file;
 
 	String worldName;
-
-	public String getWorldName() {
-		return this.worldName;
-	}
-
 	HashMap<Integer, Vector> spawns = new HashMap<>();
 	HashMap<Integer, Vector> chests = new HashMap<>();
-
 	public SkywarsMap(String name, int teamSize) {
 		this.name = name;
 		this.teamSize = teamSize;
@@ -58,14 +52,74 @@ public class SkywarsMap {
 		}
 	}
 
-	public void setVectorConfig(String string, Vector vector) {
-		if (vector == null) {
-			this.config.set(string, null);
-		} else {
-			this.config.set(string + ".x", vector.getBlockX());
-			this.config.set(string + ".y", vector.getBlockY());
-			this.config.set(string + ".z", vector.getBlockZ());
+	public void calculateSpawns() {
+
+		Skywars.get().sendDebugMessage("&bCalculating spawns for map &6" + this.name);
+
+		final ArrayList<Vector> spawnLocations = new ArrayList<>();
+
+		// get beacon locations from world
+
+		final Arena arena = ArenaManager.getArenaByMap(this, true);
+		Skywars.get().sendDebugMessage("[debug, skywarsmap-calculateSpawns] arena: " + arena);
+		for (final BlockState state : arena.getAllBlockStatesInMap(XMaterial.BEACON.parseMaterial())) {
+			spawnLocations.add(state.getLocation().toVector());
+			Skywars.get().sendDebugMessage("added beacon location from world: " + state.getLocation().toVector());
 		}
+
+		// get spawns from cages
+
+		final Material glass = XMaterial.GLASS.parseMaterial();
+		for (final Block block : arena.getAllBlocksInMap(glass)) {
+			if (block.getLocation().add(1, 1, 0).getBlock().getState().getType() == glass
+					&& block.getLocation().add(-1, 1, 0).getBlock().getState().getType() == glass
+					&& block.getLocation().add(0, 1, 1).getBlock().getState().getType() == glass
+					&& block.getLocation().add(0, 1, -1).getBlock().getState().getType() == glass
+					&& block.getLocation().add(1, 2, 0).getBlock().getState().getType() == glass
+					&& block.getLocation().add(-1, 2, 0).getBlock().getState().getType() == glass
+					&& block.getLocation().add(0, 2, 1).getBlock().getState().getType() == glass
+					&& block.getLocation().add(0, 2, -1).getBlock().getState().getType() == glass) {
+				spawnLocations.add(block.getLocation().toVector().add(new Vector(0, 1, 0)));
+				Skywars.get()
+						.sendDebugMessage("added spawn location from glass cage: " + block.getLocation().toVector());
+			}
+		}
+
+		// clear spawns
+		this.spawns.clear();
+		this.config.set("spawn", null);
+
+		// saving the number of spawn locations
+		// before modifying the list
+		final int totalSpawnLocations = spawnLocations.size();
+		Skywars.get().sendDebugMessage("got %s spawns", totalSpawnLocations);
+
+		if (totalSpawnLocations <= 0)
+			return;
+
+		// set the first spawn
+		this.spawns.put(0, spawnLocations.get(0));
+		spawnLocations.remove(0);
+
+		// make the spawns be in circular order
+		for (int i = 1; i < totalSpawnLocations; i++) {
+			final Vector previousSpawn = this.spawns.get(i - 1);
+			Vector closest = spawnLocations.get(0);
+			if (spawnLocations.size() > 1) {
+				for (final Vector currentSpawn : spawnLocations) {
+					if (SkywarsUtils.distance(previousSpawn, currentSpawn) < SkywarsUtils.distance(previousSpawn,
+							closest)) {
+						closest = currentSpawn;
+					}
+				}
+				spawnLocations.remove(closest);
+			}
+			this.spawns.put(i, closest);
+		}
+
+		this.saveParametersInConfig();
+		this.saveConfig();
+		Skywars.get().sendDebugMessage("spawns calculated and saved in config");
 	}
 
 	public void saveParametersInConfig() {
@@ -107,90 +161,42 @@ public class SkywarsMap {
 		}
 	}
 
-	public void calculateSpawns() {
-
-		Skywars.get().sendDebugMessage("&bCalculating spawns for map &6" + this.name);
-
-		final ArrayList<Vector> spawnLocations = new ArrayList<>();
-
-		// get beacon locations from world
-
-		final Arena arena = ArenaManager.getArenaByMap(this, true);
-		Skywars.get().sendDebugMessage("[debug, skywarsmap-calculateSpawns] arena: " + arena);
-		for (final BlockState state : arena.getAllBlockStatesInMap(XMaterial.BEACON.parseMaterial())) {
-			spawnLocations.add(state.getLocation().toVector());
-			Skywars.get().sendDebugMessage("added beacon location from world: " + state.getLocation().toVector());
-		}
-
-		// get spawns from cages
-
-		final Material glass = XMaterial.GLASS.parseMaterial();
-		for (final Block block : arena.getAllBlocksInMap(glass)) {
-			if (block.getLocation().add(1, 1, 0).getBlock().getState().getType() == glass
-				&& block.getLocation().add(-1, 1, 0).getBlock().getState().getType() == glass
-				&& block.getLocation().add(0, 1, 1).getBlock().getState().getType() == glass
-				&& block.getLocation().add(0, 1, -1).getBlock().getState().getType() == glass
-				&& block.getLocation().add(1, 2, 0).getBlock().getState().getType() == glass
-				&& block.getLocation().add(-1, 2, 0).getBlock().getState().getType() == glass
-				&& block.getLocation().add(0, 2, 1).getBlock().getState().getType() == glass
-				&& block.getLocation().add(0, 2, -1).getBlock().getState().getType() == glass) {
-				spawnLocations.add(block.getLocation().toVector().add(new Vector(0, 1, 0)));
-				Skywars.get()
-					.sendDebugMessage("added spawn location from glass cage: " + block.getLocation().toVector());
-			}
-		}
-
-		// clear spawns
-		this.spawns.clear();
-		this.config.set("spawn", null);
-
-		// saving the number of spawn locations
-		// before modifying the list
-		final int totalSpawnLocations = spawnLocations.size();
-		Skywars.get().sendDebugMessage("got %s spawns", totalSpawnLocations);
-
-		if (totalSpawnLocations <= 0)
-			return;
-
-		// set the first spawn
-		this.spawns.put(0, spawnLocations.get(0));
-		spawnLocations.remove(0);
-
-		// make the spawns be in circular order
-		for (int i = 1; i < totalSpawnLocations; i++) {
-			final Vector previousSpawn = this.spawns.get(i - 1);
-			Vector closest = spawnLocations.get(0);
-			if (spawnLocations.size() > 1) {
-				for (final Vector currentSpawn : spawnLocations) {
-					if (SkywarsUtils.distance(previousSpawn, currentSpawn) < SkywarsUtils.distance(previousSpawn,
-						closest)) {
-						closest = currentSpawn;
-					}
-				}
-				spawnLocations.remove(closest);
-			}
-			this.spawns.put(i, closest);
-		}
-
-		this.saveParametersInConfig();
-		this.saveConfig();
-		Skywars.get().sendDebugMessage("spawns calculated and saved in config");
+	public File getFile() {
+		return this.file;
 	}
 
-	public HashMap<Integer, Vector> getChests() {
-		return this.chests;
+	public int getTeamSize() {
+		return this.teamSize;
+	}
+
+	public int getCenterRadius() {
+		return this.centerRadius;
+	}
+
+	public String getWorldName() {
+		return this.worldName;
 	}
 
 	public HashMap<Integer, Vector> getSpawns() {
 		return this.spawns;
 	}
 
-	public Vector getSpawn(Object key) {
-		return this.spawns.get(key);
+	public void setVectorConfig(String string, Vector vector) {
+		if (vector == null) {
+			this.config.set(string, null);
+		} else {
+			this.config.set(string + ".x", vector.getBlockX());
+			this.config.set(string + ".y", vector.getBlockY());
+			this.config.set(string + ".z", vector.getBlockZ());
+		}
 	}
 
-	public void setSpawn(int spawn, Vector vector) {
-		this.spawns.put(spawn, vector);
+	public String getName() {
+		return this.name;
+	}
+
+	public void setConfigFile(File file) {
+		this.file = file;
 	}
 
 	public YamlConfiguration getConfig() {
@@ -201,39 +207,11 @@ public class SkywarsMap {
 		this.config = config;
 	}
 
-	public String getName() {
-		return this.name;
-	}
-
-	public int getMaxPlayers() {
-		return this.getSpawns().size() * getTeamSize();
-	}
-
-	public int getTeamSize() {
-		return this.teamSize;
-	}
-
-	public File getFile() {
-		return this.file;
-	}
-
-	public void setConfigFile(File file) {
-		this.file = file;
-	}
-
-	public int getCenterRadius() {
-		return this.centerRadius;
-	}
-
-	public void setCenterRadius(int centerRadius) {
-		this.centerRadius = centerRadius;
-	}
-
 	public void setWorldName(String name) {
 		if (name == null)
 			return;
 		Skywars.get()
-			.sendDebugMessage("[debug] setting world name for map: " + this.getName() + " world name: " + name);
+				.sendDebugMessage("[debug] setting world name for map: " + this.getName() + " world name: " + name);
 		this.worldName = name;
 		final File baseWorld = new File(Bukkit.getWorldContainer(), name);
 		if (!baseWorld.isDirectory())
@@ -255,8 +233,24 @@ public class SkywarsMap {
 		}
 	}
 
+	public void setCenterRadius(int centerRadius) {
+		this.centerRadius = centerRadius;
+	}
+
 	public void setTeamSize(int n) {
 		this.teamSize = n;
+	}
+
+	public Vector getSpawn(Object key) {
+		return this.spawns.get(key);
+	}
+
+	public void setSpawn(int spawn, Vector vector) {
+		this.spawns.put(spawn, vector);
+	}
+
+	public int getMaxPlayers() {
+		return this.getSpawns().size() * getTeamSize();
 	}
 
 	public void calculateChests() {
@@ -288,7 +282,7 @@ public class SkywarsMap {
 						Vector vector = block.getLocation().toVector();
 						arena.getMap().getChests().put(arena.getMap().getChests().size(), vector);
 						Skywars.get().sendDebugMessage("Added chest from block for map %s at location: %s",
-							arena.getMap().getName(), vector);
+								arena.getMap().getName(), vector);
 					}
 				}
 			}
@@ -309,5 +303,9 @@ public class SkywarsMap {
 
 		saveConfig();
 		Skywars.get().sendDebugMessage("Saved chests in config: " + arena.getMap().getName());
+	}
+
+	public HashMap<Integer, Vector> getChests() {
+		return this.chests;
 	}
 }

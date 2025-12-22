@@ -1,9 +1,9 @@
-/* (C) 2021 Bruno */
+// Copyright (c) 2025 Bruno
 package me.thebrunorm.skywars.managers;
 
-import me.thebrunorm.skywars.ConfigurationUtils;
-import me.thebrunorm.skywars.MessageUtils;
 import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.singletons.ConfigurationUtils;
+import me.thebrunorm.skywars.singletons.MessageUtils;
 import me.thebrunorm.skywars.structures.SkywarsMap;
 import org.bukkit.Difficulty;
 import org.bukkit.World;
@@ -20,20 +20,34 @@ import java.util.stream.Collectors;
 public class MapManager {
 	private final ArrayList<SkywarsMap> maps = new ArrayList<>();
 
-	public SkywarsMap getMap(String name) {
-		for (final SkywarsMap map : this.maps) {
-			if (map.getName().equalsIgnoreCase(name))
-				return map;
+	public static void setupWorld(World world) {
+		if (world == null) {
+			Skywars.get().sendDebugMessage("Can't set up world because it is null");
+			return;
 		}
-		return null;
+
+		world.setDifficulty(Difficulty.NORMAL);
+		world.setSpawnFlags(true, true);
+		world.setPVP(true);
+		world.setStorm(false);
+		world.setThundering(false);
+		world.setWeatherDuration(Integer.MAX_VALUE);
+		world.setKeepSpawnInMemory(false);
+		world.setTicksPerAnimalSpawns(1);
+		world.setTicksPerMonsterSpawns(1);
+		world.setAutoSave(false);
+
+		world.setGameRuleValue("doMobSpawning", "false");
+		world.setGameRuleValue("mobGriefing", "false");
+		world.setGameRuleValue("doFireTick", "false");
+		world.setGameRuleValue("showDeathMessages", "false");
+		world.setGameRuleValue("announceAdvancements", "false");
+
+		Skywars.get().sendDebugMessage("Successfully set up world settings: &b%s", world.getName());
 	}
 
 	public SkywarsMap getRandomMap() {
 		return this.maps.get((int) (Math.floor(Math.random() * this.maps.size() + 1) - 1));
-	}
-
-	public ArrayList<SkywarsMap> getMaps() {
-		return this.maps;
 	}
 
 	public boolean createMap(String name) {
@@ -51,6 +65,14 @@ public class MapManager {
 		map.saveConfig();
 		this.maps.add(map);
 		return true;
+	}
+
+	public SkywarsMap getMap(String name) {
+		for (final SkywarsMap map : this.maps) {
+			if (map.getName().equalsIgnoreCase(name))
+				return map;
+		}
+		return null;
 	}
 
 	public boolean deleteMap(String name) {
@@ -92,6 +114,10 @@ public class MapManager {
 				this.loadMapFromFile(mapFile);
 			}
 		}
+	}
+
+	public ArrayList<SkywarsMap> getMaps() {
+		return this.maps;
 	}
 
 	public File createMapFileFromWorldFolder(File worldFolder) {
@@ -196,31 +222,5 @@ public class MapManager {
 			this.loadMapFromFile(file);
 		}
 		Skywars.get().sendDebugMessage("&eFinished loading maps.");
-	}
-
-	public static void setupWorld(World world) {
-		if (world == null) {
-			Skywars.get().sendDebugMessage("Can't set up world because it is null");
-			return;
-		}
-
-		world.setDifficulty(Difficulty.NORMAL);
-		world.setSpawnFlags(true, true);
-		world.setPVP(true);
-		world.setStorm(false);
-		world.setThundering(false);
-		world.setWeatherDuration(Integer.MAX_VALUE);
-		world.setKeepSpawnInMemory(false);
-		world.setTicksPerAnimalSpawns(1);
-		world.setTicksPerMonsterSpawns(1);
-		world.setAutoSave(false);
-
-		world.setGameRuleValue("doMobSpawning", "false");
-		world.setGameRuleValue("mobGriefing", "false");
-		world.setGameRuleValue("doFireTick", "false");
-		world.setGameRuleValue("showDeathMessages", "false");
-		world.setGameRuleValue("announceAdvancements", "false");
-
-		Skywars.get().sendDebugMessage("Successfully set up world settings: &b%s", world.getName());
 	}
 }

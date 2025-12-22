@@ -1,7 +1,7 @@
-/* (C) 2021 Bruno */
+// Copyright (c) 2025 Bruno
 package me.thebrunorm.skywars.commands;
 
-import me.thebrunorm.skywars.MessageUtils;
+import me.thebrunorm.skywars.singletons.MessageUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

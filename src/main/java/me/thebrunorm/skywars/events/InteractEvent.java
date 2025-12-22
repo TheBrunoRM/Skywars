@@ -1,14 +1,18 @@
-/* (C) 2021 Bruno */
+// Copyright (c) 2025 Bruno
 package me.thebrunorm.skywars.events;
 
 import com.cryptomorin.xseries.XMaterial;
-import me.thebrunorm.skywars.*;
+import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.commands.CommandsUtils;
+import me.thebrunorm.skywars.enums.ArenaStatus;
+import me.thebrunorm.skywars.enums.SkywarsItemType;
 import me.thebrunorm.skywars.managers.ArenaManager;
 import me.thebrunorm.skywars.managers.SignManager;
 import me.thebrunorm.skywars.menus.GameOptionsMenu;
 import me.thebrunorm.skywars.menus.KitsMenu;
 import me.thebrunorm.skywars.menus.MapMenu;
+import me.thebrunorm.skywars.singletons.MessageUtils;
+import me.thebrunorm.skywars.singletons.SkywarsUtils;
 import me.thebrunorm.skywars.structures.Arena;
 import me.thebrunorm.skywars.structures.SkywarsMap;
 import me.thebrunorm.skywars.structures.SkywarsUser;
@@ -31,6 +35,17 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.List;
 
 public class InteractEvent implements Listener {
+
+	@EventHandler
+	void onInteract(PlayerInteractEvent event) {
+		final Player player = event.getPlayer();
+		final Arena arena = Skywars.get().getPlayerArena(player);
+
+		if (arena == null)
+			handleNormalInteraction(event, player);
+		else
+			handleArenaInteraction(event, player, arena);
+	}
 
 	void handleNormalInteraction(PlayerInteractEvent event, Player player) {
 		final SignManager signManager = Skywars.get().getSignManager();
@@ -66,11 +81,6 @@ public class InteractEvent implements Listener {
 		}
 	}
 
-	Material getConfiguredMaterial(FileConfiguration config, SkywarsItemType key) {
-		return XMaterial.matchXMaterial(config.getString("item_types." + key.name()))
-			.map(XMaterial::parseMaterial).orElse(null);
-	}
-
 	void handleArenaInteraction(PlayerInteractEvent event, Player player, Arena arena) {
 		final SkywarsUser swp = arena.getUser(player);
 		final ItemStack item = player.getItemInHand();
@@ -89,7 +99,7 @@ public class InteractEvent implements Listener {
 		}
 
 		if (itemType == getConfiguredMaterial(config, SkywarsItemType.LEAVE)
-			&& displayName.equals(SkywarsUtils.getItemNameFromConfig(SkywarsItemType.LEAVE))) {
+				&& displayName.equals(SkywarsUtils.getItemNameFromConfig(SkywarsItemType.LEAVE))) {
 			if (arena.getStatus() != ArenaStatus.PLAYING || swp.isSpectator()) {
 				event.setCancelled(true);
 				arena.leavePlayer(swp);
@@ -97,7 +107,7 @@ public class InteractEvent implements Listener {
 		}
 
 		if (itemType == getConfiguredMaterial(config, SkywarsItemType.PLAY_AGAIN)
-			&& displayName.equals(SkywarsUtils.getItemNameFromConfig(SkywarsItemType.PLAY_AGAIN))) {
+				&& displayName.equals(SkywarsUtils.getItemNameFromConfig(SkywarsItemType.PLAY_AGAIN))) {
 			if (swp.isSpectator()) {
 				event.setCancelled(true);
 				player.sendMessage(MessageUtils.color("&aSending you to another game..."));
@@ -122,16 +132,9 @@ public class InteractEvent implements Listener {
 		}
 	}
 
-
-	@EventHandler
-	void onInteract(PlayerInteractEvent event) {
-		final Player player = event.getPlayer();
-		final Arena arena = Skywars.get().getPlayerArena(player);
-
-		if (arena == null)
-			handleNormalInteraction(event, player);
-		else
-			handleArenaInteraction(event, player, arena);
+	Material getConfiguredMaterial(FileConfiguration config, SkywarsItemType key) {
+		return XMaterial.matchXMaterial(config.getString("item_types." + key.name()))
+				.map(XMaterial::parseMaterial).orElse(null);
 	}
 
 	@EventHandler

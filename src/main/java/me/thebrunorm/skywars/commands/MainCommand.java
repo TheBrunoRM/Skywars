@@ -1,8 +1,9 @@
-/* (C) 2021 Bruno */
+// Copyright (c) 2025 Bruno
 package me.thebrunorm.skywars.commands;
 
 import com.cryptomorin.xseries.XMaterial;
-import me.thebrunorm.skywars.*;
+import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.enums.SkywarsEventType;
 import me.thebrunorm.skywars.handlers.SkywarsScoreboard;
 import me.thebrunorm.skywars.managers.ArenaManager;
 import me.thebrunorm.skywars.managers.ChestManager;
@@ -12,7 +13,14 @@ import me.thebrunorm.skywars.menus.GamesMenu;
 import me.thebrunorm.skywars.menus.MapMenu;
 import me.thebrunorm.skywars.schematics.Schematic;
 import me.thebrunorm.skywars.schematics.SchematicHandler;
-import me.thebrunorm.skywars.structures.*;
+import me.thebrunorm.skywars.singletons.MessageUtils;
+import me.thebrunorm.skywars.singletons.SkywarsCaseCreator;
+import me.thebrunorm.skywars.singletons.SkywarsLobby;
+import me.thebrunorm.skywars.singletons.SkywarsUtils;
+import me.thebrunorm.skywars.structures.Arena;
+import me.thebrunorm.skywars.structures.ArenaEventManager;
+import me.thebrunorm.skywars.structures.SkywarsMap;
+import me.thebrunorm.skywars.structures.SkywarsUser;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;

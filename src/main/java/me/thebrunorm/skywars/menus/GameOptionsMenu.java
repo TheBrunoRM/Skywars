@@ -1,13 +1,13 @@
-/* (C) 2021 Bruno */
+// Copyright (c) 2025 Bruno
 package me.thebrunorm.skywars.menus;
 
 import com.cryptomorin.xseries.XMaterial;
-import me.thebrunorm.skywars.InventoryUtils;
 import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.enums.ChestType;
+import me.thebrunorm.skywars.enums.TimeType;
+import me.thebrunorm.skywars.enums.WeatherType;
+import me.thebrunorm.skywars.singletons.InventoryUtils;
 import me.thebrunorm.skywars.structures.Arena;
-import me.thebrunorm.skywars.structures.ChestType;
-import me.thebrunorm.skywars.structures.TimeType;
-import me.thebrunorm.skywars.structures.WeatherType;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,51 +22,6 @@ import java.util.UUID;
 public class GameOptionsMenu implements Listener {
 
 	final static HashMap<UUID, GameOptionType> currentMenus = new HashMap<>();
-
-	public static void open(Player player) {
-		open(player, GameOptionType.MAIN);
-	}
-
-	public static void open(Player player, GameOptionType menu) {
-		Inventory inventory = null;
-		currentMenus.put(player.getUniqueId(), menu);
-		Skywars.get().sendDebugMessage("player %s open game options menu: " + menu, player.getName());
-		switch (menu) {
-		case MAIN:
-			inventory = Bukkit.createInventory(null, 9 * 3, "Game settings");
-
-			InventoryUtils.addItem(inventory, XMaterial.NETHER_STAR.parseItem(), 10, "&aWeather");
-			InventoryUtils.addItem(inventory, XMaterial.CLOCK.parseItem(), 13, "&aTime");
-			InventoryUtils.addItem(inventory, XMaterial.CHEST.parseItem(), 16, "&aChests");
-
-			break;
-		case WEATHER:
-			inventory = Bukkit.createInventory(null, 9 * 3, "Weather settings");
-
-			InventoryUtils.addItem(inventory, XMaterial.SUNFLOWER.parseItem(), 11, "&aSunny");
-			InventoryUtils.addItem(inventory, XMaterial.ENDER_PEARL.parseItem(), 15, "&aRainy");
-
-			break;
-		case CHESTS:
-			inventory = Bukkit.createInventory(null, 9 * 3, "Chest settings");
-
-			InventoryUtils.addItem(inventory, XMaterial.CHEST.parseItem(), 11, "&aNormal");
-			InventoryUtils.addItem(inventory, XMaterial.ENDER_CHEST.parseItem(), 15, "&cOverpowered");
-
-			break;
-		case TIME:
-			inventory = Bukkit.createInventory(null, 9 * 3, "Time settings");
-
-			InventoryUtils.addItem(inventory, XMaterial.SUNFLOWER.parseItem(), 11, "&aDay");
-			InventoryUtils.addItem(inventory, XMaterial.ENDER_PEARL.parseItem(), 15, "&aNight");
-
-			break;
-		default:
-			break;
-		}
-		player.openInventory(inventory);
-		PlayerInventoryManager.setMenu(player, MenuType.GAME_OPTIONS);
-	}
 
 	@EventHandler
 	void onClick(InventoryClickEvent event) {
@@ -84,54 +39,99 @@ public class GameOptionsMenu implements Listener {
 		if (arena == null)
 			return;
 		switch (currentMenu) {
-		case MAIN:
-			switch (event.getSlot()) {
-			case 10:
-				open(player, GameOptionType.WEATHER);
+			case MAIN:
+				switch (event.getSlot()) {
+					case 10:
+						open(player, GameOptionType.WEATHER);
+						break;
+					case 13:
+						open(player, GameOptionType.TIME);
+						break;
+					case 16:
+						open(player, GameOptionType.CHESTS);
+						break;
+					default:
+						open(player, GameOptionType.MAIN);
+				}
+				return;
+			case TIME:
+				switch (event.getSlot()) {
+					case 11: // day
+						arena.voteTime(player, TimeType.DAY);
+						break;
+					case 15: // night
+						arena.voteTime(player, TimeType.NIGHT);
+						break;
+				}
 				break;
-			case 13:
-				open(player, GameOptionType.TIME);
+			case WEATHER:
+				switch (event.getSlot()) {
+					case 11:
+						arena.voteWeather(player, WeatherType.CLEAR);
+						break;
+					case 15:
+						arena.voteWeather(player, WeatherType.RAIN);
+						break;
+				}
 				break;
-			case 16:
-				open(player, GameOptionType.CHESTS);
+			case CHESTS:
+				switch (event.getSlot()) {
+					case 11:
+						arena.voteChests(player, ChestType.NORMAL);
+						break;
+					case 15:
+						arena.voteChests(player, ChestType.OVERPOWERED);
+						break;
+				}
 				break;
 			default:
-				open(player, GameOptionType.MAIN);
-			}
-			return;
-		case TIME:
-			switch (event.getSlot()) {
-			case 11: // day
-				arena.voteTime(player, TimeType.DAY);
 				break;
-			case 15: // night
-				arena.voteTime(player, TimeType.NIGHT);
-				break;
-			}
-			break;
-		case WEATHER:
-			switch (event.getSlot()) {
-			case 11:
-				arena.voteWeather(player, WeatherType.CLEAR);
-				break;
-			case 15:
-				arena.voteWeather(player, WeatherType.RAIN);
-				break;
-			}
-			break;
-		case CHESTS:
-			switch (event.getSlot()) {
-			case 11:
-				arena.voteChests(player, ChestType.NORMAL);
-				break;
-			case 15:
-				arena.voteChests(player, ChestType.OVERPOWERED);
-				break;
-			}
-			break;
-		default:
-			break;
 		}
 		open(player);
+	}
+
+	public static void open(Player player, GameOptionType menu) {
+		Inventory inventory = null;
+		currentMenus.put(player.getUniqueId(), menu);
+		Skywars.get().sendDebugMessage("player %s open game options menu: " + menu, player.getName());
+		switch (menu) {
+			case MAIN:
+				inventory = Bukkit.createInventory(null, 9 * 3, "Game settings");
+
+				InventoryUtils.addItem(inventory, XMaterial.NETHER_STAR.parseItem(), 10, "&aWeather");
+				InventoryUtils.addItem(inventory, XMaterial.CLOCK.parseItem(), 13, "&aTime");
+				InventoryUtils.addItem(inventory, XMaterial.CHEST.parseItem(), 16, "&aChests");
+
+				break;
+			case WEATHER:
+				inventory = Bukkit.createInventory(null, 9 * 3, "Weather settings");
+
+				InventoryUtils.addItem(inventory, XMaterial.SUNFLOWER.parseItem(), 11, "&aSunny");
+				InventoryUtils.addItem(inventory, XMaterial.ENDER_PEARL.parseItem(), 15, "&aRainy");
+
+				break;
+			case CHESTS:
+				inventory = Bukkit.createInventory(null, 9 * 3, "Chest settings");
+
+				InventoryUtils.addItem(inventory, XMaterial.CHEST.parseItem(), 11, "&aNormal");
+				InventoryUtils.addItem(inventory, XMaterial.ENDER_CHEST.parseItem(), 15, "&cOverpowered");
+
+				break;
+			case TIME:
+				inventory = Bukkit.createInventory(null, 9 * 3, "Time settings");
+
+				InventoryUtils.addItem(inventory, XMaterial.SUNFLOWER.parseItem(), 11, "&aDay");
+				InventoryUtils.addItem(inventory, XMaterial.ENDER_PEARL.parseItem(), 15, "&aNight");
+
+				break;
+			default:
+				break;
+		}
+		player.openInventory(inventory);
+		PlayerInventoryManager.setMenu(player, MenuType.GAME_OPTIONS);
+	}
+
+	public static void open(Player player) {
+		open(player, GameOptionType.MAIN);
 	}
 }

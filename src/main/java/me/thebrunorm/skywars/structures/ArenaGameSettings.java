@@ -1,6 +1,7 @@
-/* (C) 2021 Bruno */
+// Copyright (c) 2025 Bruno
 package me.thebrunorm.skywars.structures;
 
+import me.thebrunorm.skywars.enums.ChestType;
 import org.bukkit.WeatherType;
 
 public class ArenaGameSettings {

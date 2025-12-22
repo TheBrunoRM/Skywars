@@ -1,0 +1,7 @@
+// Copyright (c) 2025 Bruno
+package me.thebrunorm.skywars.enums;
+
+public enum JoinProblem {
+	ALREADY_JOINED, ARENA_DOES_NOT_EXIST, ARENA_IS_DISABLED, ARENA_IS_ENDING, ARENA_IS_PLAYING, WORLD_NOT_SET,
+	ARENA_IS_FULL
+}

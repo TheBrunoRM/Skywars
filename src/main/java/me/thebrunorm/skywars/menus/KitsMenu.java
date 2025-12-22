@@ -1,9 +1,9 @@
-/* (C) 2021 Bruno */
+// Copyright (c) 2025 Bruno
 package me.thebrunorm.skywars.menus;
 
-import me.thebrunorm.skywars.MessageUtils;
 import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.SkywarsEconomy;
+import me.thebrunorm.skywars.singletons.MessageUtils;
+import me.thebrunorm.skywars.singletons.SkywarsEconomy;
 import me.thebrunorm.skywars.structures.Kit;
 import net.milkbowl.vault.economy.Economy;
 import org.apache.commons.lang.WordUtils;

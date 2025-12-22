@@ -1,8 +1,8 @@
-/* (C) 2021 Bruno */
+// Copyright (c) 2025 Bruno
 package me.thebrunorm.skywars.events;
 
-import me.thebrunorm.skywars.ArenaStatus;
 import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.enums.ArenaStatus;
 import me.thebrunorm.skywars.structures.Arena;
 import me.thebrunorm.skywars.structures.SkywarsUser;
 import org.bukkit.block.Block;

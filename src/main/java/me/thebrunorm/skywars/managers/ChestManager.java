@@ -1,10 +1,10 @@
-/* (C) 2021 Bruno */
+// Copyright (c) 2025 Bruno
 package me.thebrunorm.skywars.managers;
 
 import com.cryptomorin.xseries.XMaterial;
-import me.thebrunorm.skywars.ConfigurationUtils;
 import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.SkywarsUtils;
+import me.thebrunorm.skywars.singletons.ConfigurationUtils;
+import me.thebrunorm.skywars.singletons.SkywarsUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -19,10 +19,6 @@ import java.util.Objects;
 public class ChestManager {
 
 	final HashMap<String, YamlConfiguration> chestConfigurations = new HashMap<>();
-
-	public HashMap<String, YamlConfiguration> getChestConfigurations() {
-		return this.chestConfigurations;
-	}
 
 	public static void fillChest(Location location, boolean overpowered) {
 		final Block block = location.getBlock();
@@ -39,6 +35,10 @@ public class ChestManager {
 				continue;
 			inventory.setItem(SkywarsUtils.getRandomSlot(inventory), item);
 		}
+	}
+
+	public HashMap<String, YamlConfiguration> getChestConfigurations() {
+		return this.chestConfigurations;
 	}
 
 	public void loadChests() {

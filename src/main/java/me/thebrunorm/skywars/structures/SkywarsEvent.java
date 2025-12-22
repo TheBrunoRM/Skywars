@@ -1,7 +1,8 @@
-/* (C) 2021 Bruno */
+// Copyright (c) 2025 Bruno
 package me.thebrunorm.skywars.structures;
 
-import me.thebrunorm.skywars.MessageUtils;
+import me.thebrunorm.skywars.enums.SkywarsEventType;
+import me.thebrunorm.skywars.singletons.MessageUtils;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
@@ -23,6 +24,12 @@ public class SkywarsEvent {
 		return this.arena;
 	}
 
+	public void decreaseTime() {
+		this.setTime(this.getTime() - 1);
+		if (this.getType() == SkywarsEventType.REFILL)
+			this.arena.displayChestHolograms(this.arena.getEventManager().getNextEventText());
+	}
+
 	public int getTime() {
 		return this.time;
 	}
@@ -37,12 +44,6 @@ public class SkywarsEvent {
 
 	public void setType(SkywarsEventType type) {
 		this.type = type;
-	}
-
-	public void decreaseTime() {
-		this.setTime(this.getTime() - 1);
-		if (this.getType() == SkywarsEventType.REFILL)
-			this.arena.displayChestHolograms(this.arena.getEventManager().getNextEventText());
 	}
 
 	public void run() {

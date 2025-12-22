@@ -1,8 +1,11 @@
+// Copyright (c) 2025 Bruno
+
 package me.thebrunorm.skywars.structures;
 
-import me.thebrunorm.skywars.ArenaStatus;
-import me.thebrunorm.skywars.MessageUtils;
 import me.thebrunorm.skywars.Skywars;
+import me.thebrunorm.skywars.enums.ArenaStatus;
+import me.thebrunorm.skywars.enums.SkywarsEventType;
+import me.thebrunorm.skywars.singletons.MessageUtils;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -31,8 +34,8 @@ public class ArenaEventManager {
 		final String timeString = String.format("%d:%02d", minutes, seconds);
 		final String eventNameKey = String.format("events.%s.name", event.getType().name());
 		return MessageUtils.color(Skywars.langConfig.getString("events.format", "<events.format>")
-			.replaceAll("%name%", Skywars.langConfig.getString(eventNameKey, String.format("<%s>", eventNameKey)))
-			.replaceAll("%time%", timeString));
+				.replaceAll("%name%", Skywars.langConfig.getString(eventNameKey, String.format("<%s>", eventNameKey)))
+				.replaceAll("%time%", timeString));
 
 	}
 

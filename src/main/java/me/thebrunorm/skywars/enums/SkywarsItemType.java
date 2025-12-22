@@ -1,0 +1,7 @@
+// Copyright (c) 2025 Bruno
+package me.thebrunorm.skywars.enums;
+
+public enum SkywarsItemType {
+	KIT_SELECTOR, GAME_OPTIONS, SPECTATOR_OPTIONS, PLAY_AGAIN, LEAVE, TELEPORTER, ARENAS_MENU, JOIN_RANDOM_ARENA,
+	START_GAME, STOP_GAME
+}

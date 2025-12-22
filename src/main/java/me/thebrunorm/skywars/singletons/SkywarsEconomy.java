@@ -1,6 +1,7 @@
 // Copyright (c) 2025 Bruno
-package me.thebrunorm.skywars;
+package me.thebrunorm.skywars.singletons;
 
+import me.thebrunorm.skywars.Skywars;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
@@ -45,6 +46,6 @@ public enum SkywarsEconomy {
 			return false;
 		}
 		economy = economyProvider.getProvider();
-		return plugin.economy != null;
+		return economy != null;
 	}
 }

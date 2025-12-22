@@ -1,13 +1,19 @@
-/* (C) 2021 Bruno */
+// Copyright (c) 2025 Bruno
 package me.thebrunorm.skywars.structures;
 
 import com.cryptomorin.xseries.XMaterial;
-import me.thebrunorm.skywars.*;
+import me.thebrunorm.skywars.Skywars;
 import me.thebrunorm.skywars.commands.CommandsUtils;
+import me.thebrunorm.skywars.enums.*;
+import me.thebrunorm.skywars.enums.WeatherType;
 import me.thebrunorm.skywars.holograms.HologramController;
 import me.thebrunorm.skywars.managers.ArenaManager;
 import me.thebrunorm.skywars.managers.ChestManager;
 import me.thebrunorm.skywars.managers.MapManager;
+import me.thebrunorm.skywars.singletons.MessageUtils;
+import me.thebrunorm.skywars.singletons.SkywarsCaseCreator;
+import me.thebrunorm.skywars.singletons.SkywarsEconomy;
+import me.thebrunorm.skywars.singletons.SkywarsUtils;
 import mrblobman.sounds.Sounds;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.*;
@@ -29,7 +35,7 @@ import java.util.stream.Collectors;
 public class Arena {
 
 	final HashMap<UUID, TimeType> timeVotes = new HashMap<>();
-	final HashMap<UUID, WeatherType> weatherVotes = new HashMap<>();
+	final HashMap<UUID, me.thebrunorm.skywars.enums.WeatherType> weatherVotes = new HashMap<>();
 	final HashMap<UUID, ChestType> chestVotes = new HashMap<>();
 	private final ArenaGameSettings gameSettings = new ArenaGameSettings(this);
 	private final SkywarsMap map;
@@ -692,9 +698,9 @@ public class Arena {
 		if (time != null)
 			this.gameSettings.time = time == TimeType.NIGHT ? 14000:0;
 
-		final WeatherType weather = SkywarsUtils.mostFrequentElement(this.weatherVotes.values());
+		final me.thebrunorm.skywars.enums.WeatherType weather = SkywarsUtils.mostFrequentElement(this.weatherVotes.values());
 		if (weather != null)
-			this.gameSettings.weather = weather == WeatherType.RAIN ? org.bukkit.WeatherType.DOWNFALL:org.bukkit.WeatherType.CLEAR;
+			this.gameSettings.weather = weather == me.thebrunorm.skywars.enums.WeatherType.RAIN ? org.bukkit.WeatherType.DOWNFALL:org.bukkit.WeatherType.CLEAR;
 
 		for (final SkywarsUser user : this.getUsers()) {
 			user.getPlayer().setPlayerTime(this.gameSettings.time, true);

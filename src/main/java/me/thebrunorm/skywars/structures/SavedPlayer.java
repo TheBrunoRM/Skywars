@@ -1,15 +1,14 @@
-/* (C) 2021 Bruno */
+// Copyright (c) 2025 Bruno
 package me.thebrunorm.skywars.structures;
 
-import java.util.Collection;
-
+import me.thebrunorm.skywars.singletons.SkywarsUtils;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 
-import me.thebrunorm.skywars.SkywarsUtils;
+import java.util.Collection;
 
 public class SavedPlayer {
 

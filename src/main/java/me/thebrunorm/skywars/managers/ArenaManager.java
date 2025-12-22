@@ -1,8 +1,8 @@
-/* (C) 2021 Bruno */
+// Copyright (c) 2025 Bruno
 package me.thebrunorm.skywars.managers;
 
 import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.SkywarsUtils;
+import me.thebrunorm.skywars.singletons.SkywarsUtils;
 import me.thebrunorm.skywars.structures.Arena;
 import me.thebrunorm.skywars.structures.SkywarsMap;
 import org.apache.commons.io.FileUtils;
@@ -41,26 +41,16 @@ public enum ArenaManager {
 		return list;
 	}
 
-	public static Arena getArenaByMap(SkywarsMap map) {
-		Skywars.get().sendDebugMessage("all arenas: %s", Skywars.get().getArenas().size());
-		if (map == null)
-			return null;
-		for (final Arena arena : Skywars.get().getArenas()) {
-			if (arena.getMap() == map)
-				return arena;
+	public static void joinRandomMap(Player player) {
+		Optional<Arena> arena = Skywars.get().getArenas().stream()
+				.filter(a -> !a.started() && !a.isUnusable())
+				.min((a, b) -> b.getUsers().size() - a.getUsers().size());
+		if (!arena.isPresent()) {
+			final SkywarsMap map = Skywars.get().getMapManager().getRandomMap();
+			joinMap(map, player);
+			return;
 		}
-		return null;
-	}
-
-	public static Arena getArenaByMap(SkywarsMap map, boolean createIfNotFound) {
-		if (map == null)
-			return null;
-		final Arena arena = getArenaByMap(map);
-		if (arena != null)
-			return arena;
-		if (!createIfNotFound)
-			return null;
-		return createNewArena(map);
+		joinMap(arena.get().getMap(), player);
 	}
 
 	public static boolean joinMap(SkywarsMap map, Player player) {
@@ -78,16 +68,26 @@ public enum ArenaManager {
 		return true;
 	}
 
-	public static void joinRandomMap(Player player) {
-		Optional<Arena> arena = Skywars.get().getArenas().stream()
-			.filter(a -> !a.started() && !a.isUnusable())
-			.min((a, b) -> b.getUsers().size() - a.getUsers().size());
-		if (!arena.isPresent()) {
-			final SkywarsMap map = Skywars.get().getMapManager().getRandomMap();
-			joinMap(map, player);
-			return;
+	public static Arena getArenaByMap(SkywarsMap map, boolean createIfNotFound) {
+		if (map == null)
+			return null;
+		final Arena arena = getArenaByMap(map);
+		if (arena != null)
+			return arena;
+		if (!createIfNotFound)
+			return null;
+		return createNewArena(map);
+	}
+
+	public static Arena getArenaByMap(SkywarsMap map) {
+		Skywars.get().sendDebugMessage("all arenas: %s", Skywars.get().getArenas().size());
+		if (map == null)
+			return null;
+		for (final Arena arena : Skywars.get().getArenas()) {
+			if (arena.getMap() == map)
+				return arena;
 		}
-		joinMap(arena.get().getMap(), player);
+		return null;
 	}
 
 	public static Arena createNewArena(SkywarsMap map) {
@@ -115,7 +115,7 @@ public enum ArenaManager {
 		final List<Player> players = world.getPlayers();
 		if (players.size() > 0) {
 			Skywars.get().sendDebugMessage("There are %s players in the world,"
-				+ " teleporting them back to the lobby or to their last location...", players.size());
+					+ " teleporting them back to the lobby or to their last location...", players.size());
 			for (final Player p : players)
 				SkywarsUtils.teleportPlayerLobbyOrLastLocation(p, true);
 		}
@@ -132,12 +132,12 @@ public enum ArenaManager {
 			for (final Player p : world.getPlayers()) {
 				Skywars.get().sendDebugMessage("Teleporting player %s to another world", p.getName());
 				p.teleport(Bukkit.getWorlds().stream().filter(w -> w.getName() != world.getName()).findFirst().get()
-					.getSpawnLocation());
+						.getSpawnLocation());
 			}
 			unloaded = Bukkit.unloadWorld(world, false);
 			if (unloaded) {
 				Skywars.get().sendDebugMessage("Successfully unloaded world '%s' for map '%s'", world.getName(),
-					map.getName());
+						map.getName());
 			}
 		}
 
@@ -147,7 +147,7 @@ public enum ArenaManager {
 		try {
 			FileUtils.deleteDirectory(world.getWorldFolder());
 			Skywars.get().sendDebugMessage("Sucessfully deleted world '%s' for map '%s'", world.getName(),
-				map.getName());
+					map.getName());
 		} catch (final Exception e) {
 			e.printStackTrace();
 			Skywars.get().sendMessage("Could not delete world '%s' for map '%s'", world.getName(), map.getName());

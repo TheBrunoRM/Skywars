@@ -1,4 +1,4 @@
-/* (C) 2021 Bruno */
+// Copyright (c) 2025 Bruno
 package me.thebrunorm.skywars;
 
 import com.cryptomorin.xseries.XMaterial;
@@ -14,6 +14,7 @@ import me.thebrunorm.skywars.managers.SignManager;
 import me.thebrunorm.skywars.menus.*;
 import me.thebrunorm.skywars.nms.ReflectionNMS;
 import me.thebrunorm.skywars.schematics.SchematicHandler;
+import me.thebrunorm.skywars.singletons.*;
 import me.thebrunorm.skywars.structures.Arena;
 import me.thebrunorm.skywars.structures.Kit;
 import me.thebrunorm.skywars.structures.SkywarsUser;
