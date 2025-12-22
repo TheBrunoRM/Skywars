@@ -31,7 +31,7 @@ public class SkywarsUtils {
 
 	public static final String URL = getUrl();
 	public static final String[] COLOR_SYMBOLS = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d",
-		"f"};
+			"f"};
 
 	public static String format(String text, Player player, Arena arena, SkywarsUser swp) {
 		return format(text, player, arena, swp, false);
@@ -52,33 +52,33 @@ public class SkywarsUtils {
 
 		if (player != null) {
 
-			final String balance = Skywars.get().getEconomy() != null
-				? SkywarsUtils.formatDouble(Skywars.get().getEconomy().getBalance(player))
-				: "Vaultn't";
+			final String balance = SkywarsEconomy.getEconomy() != null
+					? SkywarsUtils.formatDouble(SkywarsEconomy.getEconomy().getBalance(player))
+					:"Vaultn't";
 			text = text.replaceAll(getVariableCode("coins"), balance).replaceAll(getVariableCode("money"), balance)
-				.replaceAll(getVariableCode("balance"), balance).replaceAll(getVariableCode("economy"), balance)
-				.replaceAll(getVariableCode("souls"), String.valueOf(Skywars.get().getPlayerSouls(player)))
-				.replaceAll(getVariableCode("totalwins"), String.valueOf(Skywars.get().getPlayerTotalWins(player)))
-				.replaceAll(getVariableCode("totalkills"),
-					String.valueOf(Skywars.get().getPlayerTotalKills(player)))
-				.replaceAll(getVariableCode("totaldeaths"),
-					String.valueOf(Skywars.get().getPlayerTotalDeaths(player)))
-				.replaceAll(getVariableCode("kit"), Skywars.get().getPlayerKit(player).getDisplayName());
+					.replaceAll(getVariableCode("balance"), balance).replaceAll(getVariableCode("economy"), balance)
+					.replaceAll(getVariableCode("souls"), String.valueOf(Skywars.get().getPlayerSouls(player)))
+					.replaceAll(getVariableCode("totalwins"), String.valueOf(Skywars.get().getPlayerTotalWins(player)))
+					.replaceAll(getVariableCode("totalkills"),
+							String.valueOf(Skywars.get().getPlayerTotalKills(player)))
+					.replaceAll(getVariableCode("totaldeaths"),
+							String.valueOf(Skywars.get().getPlayerTotalDeaths(player)))
+					.replaceAll(getVariableCode("kit"), Skywars.get().getPlayerKit(player).getDisplayName());
 		}
 
 		if (arena != null) {
 			// this prevents a stack overflow error
 			if (!status)
 				text = text.replaceAll(getVariableCode("status"),
-					format(SkywarsUtils.getStatus(arena), player, arena, swp, true));
+						format(SkywarsUtils.getStatus(arena), player, arena, swp, true));
 
 			text = text.replaceAll(getVariableCode("map"), arena.getMap().getName())
-				.replaceAll(getVariableCode("arena"), arena.getMap().getName())
-				.replaceAll(getVariableCode("event"), arena.getEventManager().getNextEventText())
-				.replaceAll(getVariableCode("players"), Integer.toString(arena.getAlivePlayerCount()))
-				.replaceAll(getVariableCode("maxplayers"), Integer.toString(arena.getMap().getSpawns().size()))
-				.replaceAll(getVariableCode("seconds"), Integer.toString(arena.getCountdown()))
-				.replaceAll(getVariableCode("count"), Integer.toString(arena.getCountdown()));
+					.replaceAll(getVariableCode("arena"), arena.getMap().getName())
+					.replaceAll(getVariableCode("event"), arena.getEventManager().getNextEventText())
+					.replaceAll(getVariableCode("players"), Integer.toString(arena.getAlivePlayerCount()))
+					.replaceAll(getVariableCode("maxplayers"), Integer.toString(arena.getMap().getSpawns().size()))
+					.replaceAll(getVariableCode("seconds"), Integer.toString(arena.getCountdown()))
+					.replaceAll(getVariableCode("count"), Integer.toString(arena.getCountdown()));
 		}
 
 		if (swp != null) {
@@ -133,7 +133,7 @@ public class SkywarsUtils {
 
 	public static boolean teleportPlayerLobbyOrLastLocation(Player player,
 															boolean force) {
-		final Location lobby = Skywars.get().getLobby();
+		final Location lobby = SkywarsLobby.getLobby();
 		if (lobby != null) {
 			player.getPlayer().teleport(lobby);
 			return true;
@@ -154,23 +154,12 @@ public class SkywarsUtils {
 		return true;
 	}
 
-	public static void resetPlayerServer(Player player) {
-		// synchronizes the player's time and weather with the server time and weather
-		player.resetPlayerTime();
-		player.resetPlayerWeather();
-	}
-
 	public static void clearPlayer(Player player, boolean sync) {
 		clearPlayer(player);
 		if (sync) {
 			resetPlayerServer(player);
 			clearPlayerScreen(player);
 		}
-	}
-
-	public static void clearPlayerScreen(Player player) {
-		Skywars.get().NMS().sendTitle(player, "", "", 0, 0, 0);
-		Skywars.get().NMS().sendActionbar(player, "");
 	}
 
 	public static void clearPlayer(Player player) {
@@ -204,6 +193,17 @@ public class SkywarsUtils {
 		for (final PotionEffect e : player.getActivePotionEffects()) {
 			player.removePotionEffect(e.getType());
 		}
+	}
+
+	public static void resetPlayerServer(Player player) {
+		// synchronizes the player's time and weather with the server time and weather
+		player.resetPlayerTime();
+		player.resetPlayerWeather();
+	}
+
+	public static void clearPlayerScreen(Player player) {
+		Skywars.get().NMS().sendTitle(player, "", "", 0, 0, 0);
+		Skywars.get().NMS().sendActionbar(player, "");
 	}
 
 	public static JoinProblem joinableCheck(Arena arena) {
@@ -246,7 +246,7 @@ public class SkywarsUtils {
 		if (arena.getAlivePlayerCount() >= spawns) {
 			if (player != null)
 				player.sendMessage(
-					MessageUtils.color("this arena is full! (%s/%s players)", arena.getAlivePlayerCount(), spawns));
+						MessageUtils.color("this arena is full! (%s/%s players)", arena.getAlivePlayerCount(), spawns));
 			return JoinProblem.ARENA_IS_FULL;
 		}
 		return null;
@@ -254,25 +254,6 @@ public class SkywarsUtils {
 
 	public static Location getCenteredLocation(Location loc) {
 		return loc.clone().add(new Vector(0.5, 0, 0.5));
-	}
-
-	Location calculateClosestLocation(Location loc, ArrayList<Location> locations) {
-		if (locations.size() <= 1)
-			return loc;
-		Location closest = locations.get(0);
-		for (final Location l : locations) {
-			if (distance(loc.toVector(), l.toVector()) < distance(loc.toVector(), closest.toVector())) {
-				closest = l;
-			}
-		}
-		return closest;
-	}
-
-	public static double distance(Vector vec1, Vector vec2) {
-		final double dx = vec2.getX() - vec1.getX();
-		final double dy = vec2.getY() - vec1.getY();
-		final double dz = vec2.getZ() - vec1.getZ();
-		return Math.sqrt(dx * dx + dy * dy + dz * dz);
 	}
 
 	public static Block getTargetBlock(Player player, int range) {
@@ -296,11 +277,6 @@ public class SkywarsUtils {
 		return a + (b - a) * t;
 	}
 
-	public static Color getRandomColor() {
-		return Color.fromRGB((int) Math.floor(Math.random() * 255), (int) Math.floor(Math.random() * 255),
-			(int) Math.floor(Math.random() * 255));
-	}
-
 	public static void spawnRandomFirework(Location location) {
 		if (location == null)
 			return;
@@ -308,31 +284,25 @@ public class SkywarsUtils {
 		final FireworkMeta meta = firework.getFireworkMeta();
 		final FireworkEffect.Builder builder = FireworkEffect.builder();
 		builder.withTrail().withFlicker().with(FireworkEffect.Type.BALL_LARGE)
-			.withFade(SkywarsUtils.getRandomColor(), SkywarsUtils.getRandomColor(), SkywarsUtils.getRandomColor())
-			.withColor(SkywarsUtils.getRandomColor(), SkywarsUtils.getRandomColor(), SkywarsUtils.getRandomColor());
+				.withFade(SkywarsUtils.getRandomColor(), SkywarsUtils.getRandomColor(), SkywarsUtils.getRandomColor())
+				.withColor(SkywarsUtils.getRandomColor(), SkywarsUtils.getRandomColor(), SkywarsUtils.getRandomColor());
 		meta.addEffect(builder.build());
 		meta.setPower(1);
 		firework.setFireworkMeta(meta);
+	}
+
+	public static Color getRandomColor() {
+		return Color.fromRGB((int) Math.floor(Math.random() * 255), (int) Math.floor(Math.random() * 255),
+				(int) Math.floor(Math.random() * 255));
 	}
 
 	public static String formatDouble(double d) {
 		return new DecimalFormat(Skywars.get().getConfig().getString("decimalFormat")).format(d);
 	}
 
-	public static String getItemNameFromConfig(SkywarsItemType itemType) {
-		String configName = Skywars.langConfig.getString("items." + itemType.name() + ".name");
-		if (Skywars.langConfig.getBoolean("items.show_context")) {
-			final String context = Skywars.langConfig.getString("items.context");
-			if (context != null) {
-				configName = configName + " " + MessageUtils.color(context);
-			}
-		}
-		return MessageUtils.color(configName);
-	}
-
 	public static void setPlayerInventory(Player player, String category) {
 		final ConfigurationSection itemsSection = Skywars.get().getConfig()
-			.getConfigurationSection("items." + category);
+				.getConfigurationSection("items." + category);
 
 		final ConfigurationSection itemTypes = Skywars.get().getConfig().getConfigurationSection("item_types");
 
@@ -365,8 +335,8 @@ public class SkywarsUtils {
 				}
 				final String materialName = itemTypes.getString(itemType.name());
 				Material material = XMaterial.matchXMaterial(materialName)
-					.map(XMaterial::parseMaterial)
-					.orElse(null);
+						.map(XMaterial::parseMaterial)
+						.orElse(null);
 				if (material == null) {
 					Skywars.get().sendDebugMessage("Material is not defined in config for item_types.%s", itemType);
 					// fallback
@@ -389,11 +359,15 @@ public class SkywarsUtils {
 		}
 	}
 
-	public static void playSound(Player player, String sound) {
-		final String[] splitted = sound.split(";");
-		player.playSound(player.getLocation(), Sounds.valueOf(splitted[0]).bukkitSound(),
-			splitted.length > 1 ? Float.parseFloat(splitted[1]) : 1,
-			splitted.length > 2 ? Float.parseFloat(splitted[2]) : 1);
+	public static String getItemNameFromConfig(SkywarsItemType itemType) {
+		String configName = Skywars.langConfig.getString("items." + itemType.name() + ".name");
+		if (Skywars.langConfig.getBoolean("items.show_context")) {
+			final String context = Skywars.langConfig.getString("items.context");
+			if (context != null) {
+				configName = configName + " " + MessageUtils.color(context);
+			}
+		}
+		return MessageUtils.color(configName);
 	}
 
 	public static void playSoundsFromConfig(Player player, String configLocation) {
@@ -406,6 +380,13 @@ public class SkywarsUtils {
 		else if (singleSound != null) {
 			playSound(player, singleSound);
 		}
+	}
+
+	public static void playSound(Player player, String sound) {
+		final String[] splitted = sound.split(";");
+		player.playSound(player.getLocation(), Sounds.valueOf(splitted[0]).bukkitSound(),
+				splitted.length > 1 ? Float.parseFloat(splitted[1]):1,
+				splitted.length > 2 ? Float.parseFloat(splitted[2]):1);
 	}
 
 	public static boolean checkClass(String name) {
@@ -435,7 +416,7 @@ public class SkywarsUtils {
 		int mostFreqCount = -1;
 		for (final E e : iterable) {
 			Integer count = freqMap.get(e);
-			freqMap.put(e, count = (count == null ? 1 : count + 1));
+			freqMap.put(e, count = (count == null ? 1:count + 1));
 			// maintain the most frequent in a single pass.
 			if (count > mostFreqCount) {
 				mostFreq = e;
@@ -443,5 +424,24 @@ public class SkywarsUtils {
 			}
 		}
 		return mostFreq;
+	}
+
+	Location calculateClosestLocation(Location loc, ArrayList<Location> locations) {
+		if (locations.size() <= 1)
+			return loc;
+		Location closest = locations.get(0);
+		for (final Location l : locations) {
+			if (distance(loc.toVector(), l.toVector()) < distance(loc.toVector(), closest.toVector())) {
+				closest = l;
+			}
+		}
+		return closest;
+	}
+
+	public static double distance(Vector vec1, Vector vec2) {
+		final double dx = vec2.getX() - vec1.getX();
+		final double dy = vec2.getY() - vec1.getY();
+		final double dz = vec2.getZ() - vec1.getZ();
+		return Math.sqrt(dx * dx + dy * dy + dz * dz);
 	}
 }

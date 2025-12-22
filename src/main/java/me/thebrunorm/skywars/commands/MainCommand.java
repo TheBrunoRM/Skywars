@@ -2,9 +2,7 @@
 package me.thebrunorm.skywars.commands;
 
 import com.cryptomorin.xseries.XMaterial;
-import me.thebrunorm.skywars.MessageUtils;
-import me.thebrunorm.skywars.Skywars;
-import me.thebrunorm.skywars.SkywarsUtils;
+import me.thebrunorm.skywars.*;
 import me.thebrunorm.skywars.handlers.SkywarsScoreboard;
 import me.thebrunorm.skywars.managers.ArenaManager;
 import me.thebrunorm.skywars.managers.ChestManager;
@@ -59,22 +57,17 @@ public class MainCommand implements CommandExecutor {
 	 */
 
 	String[] helpLines = {
-		MessageUtils.color("&a&lCommand list - &b%s &a%s &eby &b%s", Skywars.get().name, Skywars.get().version,
-			String.join(", ", Skywars.get().authors)),
-		"&b/skywars setmainlobby &e- sets the main lobby", "&b/skywars lobby &e- teleports you to the main lobby",
-		"&b/skywars create <arena> &e- creates an arena", "&b/skywars delete <arena> &e- deletes an arena",
-		"&b/skywars config <arena> &e- opens the configuration menu", "&b/skywars play &e- open the arenas menu",
-		"&b/skywars start &e- starts a game", "&b/skywars forcestart &e- starts a game immediately"};
+			MessageUtils.color("&a&lCommand list - &b%s &a%s &eby &b%s", Skywars.get().name, Skywars.get().version,
+					String.join(", ", Skywars.get().authors)),
+			"&b/skywars setmainlobby &e- sets the main lobby", "&b/skywars lobby &e- teleports you to the main lobby",
+			"&b/skywars create <arena> &e- creates an arena", "&b/skywars delete <arena> &e- deletes an arena",
+			"&b/skywars config <arena> &e- opens the configuration menu", "&b/skywars play &e- open the arenas menu",
+			"&b/skywars start &e- starts a game", "&b/skywars forcestart &e- starts a game immediately"};
 
 	Schematic schematic;
 
 	BukkitTask task;
 	BukkitTask anotherTask;
-
-	void cancelTimer() {
-		if (this.task != null)
-			this.task.cancel();
-	}
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -100,7 +93,7 @@ public class MainCommand implements CommandExecutor {
 				if (CommandsUtils.consoleCheck(sender))
 					return true;
 				if (CommandsUtils.hasPermission(player, "skywars.setmainlobby")) {
-					Skywars.get().setLobby(player.getLocation());
+					SkywarsLobby.saveLobby(player.getLocation());
 					player.sendMessage(MessageUtils.getMessage("MAIN_LOBBY_SET"));
 				}
 			} else if (args[0].equalsIgnoreCase("lobby")) {
@@ -109,8 +102,9 @@ public class MainCommand implements CommandExecutor {
 				if (joined) {
 					Skywars.get().getPlayerArena(player).leavePlayer(player);
 				}
-				if (Skywars.get().getLobby() != null) {
-					player.teleport(Skywars.get().getLobby());
+				Location lobbyLocation = SkywarsLobby.getLobby();
+				if (lobbyLocation != null) {
+					player.teleport(lobbyLocation);
 					player.sendMessage(MessageUtils.getMessage("TELEPORTED_TO_MAIN_LOBBY"));
 				} else {
 					player.sendMessage(MessageUtils.getMessage("MAIN_LOBBY_NOT_SET"));
@@ -156,9 +150,9 @@ public class MainCommand implements CommandExecutor {
 				// if(!SkywarsUtils.JoinableCheck(arena, player)) return true;
 				ArenaManager.joinMap(map, player);
 			} else if (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("about")
-				|| args[0].equalsIgnoreCase("ver") || args[0].equalsIgnoreCase("version")) {
+					|| args[0].equalsIgnoreCase("ver") || args[0].equalsIgnoreCase("version")) {
 				sender.sendMessage(MessageUtils.color("&b%s &eversion &a%s &emade by &b%s", Skywars.get().name,
-					Skywars.get().version, String.join(", ", Skywars.get().authors)));
+						Skywars.get().version, String.join(", ", Skywars.get().authors)));
 			} else if (args[0].equalsIgnoreCase("server")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
@@ -196,8 +190,8 @@ public class MainCommand implements CommandExecutor {
 					return true;
 				}
 				MessageUtils.send(sender, "&eEvents: &b%s",
-					events.getEvents().stream().map(event -> event.getType().name())
-						.collect(Collectors.joining(", ")));
+						events.getEvents().stream().map(event -> event.getType().name())
+								.collect(Collectors.joining(", ")));
 			} else if (args[0].equalsIgnoreCase("skip")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
@@ -207,7 +201,7 @@ public class MainCommand implements CommandExecutor {
 					return true;
 				}
 				MessageUtils.send(sender, "&6Executed &b%s&6. &eNext event: &a%s",
-					events.executeEvent().getType().name(), events.getNextEventText());
+						events.executeEvent().getType().name(), events.getNextEventText());
 			} else if (args[0].equalsIgnoreCase("testconfig")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
@@ -309,8 +303,8 @@ public class MainCommand implements CommandExecutor {
 				final List<Player> players = Bukkit.getWorld(worldName).getPlayers();
 				if (players.size() > 0) {
 					final Location spawnLoc = Bukkit.getServer().getWorlds().stream()
-						.filter(world -> world.getName() != worldName).collect(Collectors.toList()).get(0)
-						.getSpawnLocation();
+							.filter(world -> world.getName() != worldName).collect(Collectors.toList()).get(0)
+							.getSpawnLocation();
 					players.forEach(p -> p.teleport(spawnLoc));
 				}
 				if (Bukkit.getServer().unloadWorld(worldName, false))
@@ -358,7 +352,7 @@ public class MainCommand implements CommandExecutor {
 						@Override
 						public void run() {
 							player1.sendBlockChange(arena.getVectorInArena(new Vector(value, value, value)),
-								XMaterial.GREEN_STAINED_GLASS.parseMaterial(), (byte) 0);
+									XMaterial.GREEN_STAINED_GLASS.parseMaterial(), (byte) 0);
 						}
 					}, count);
 				}
@@ -377,7 +371,7 @@ public class MainCommand implements CommandExecutor {
 			} else if (args[0].equalsIgnoreCase("bigcase")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
-				Skywars.createBigCase(player.getLocation(), XMaterial.LIME_STAINED_GLASS);
+				SkywarsCaseCreator.createBigCase(player.getLocation(), XMaterial.LIME_STAINED_GLASS);
 			} else if (args[0].equalsIgnoreCase("actionbar")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
@@ -473,7 +467,7 @@ public class MainCommand implements CommandExecutor {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
 				sender.sendMessage("Worlds: " + String.join(", ", Bukkit.getServer().getWorlds().stream()
-					.map(world -> world.getName()).collect(Collectors.toList())));
+						.map(world -> world.getName()).collect(Collectors.toList())));
 			} else if (args[0].equalsIgnoreCase("where")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
@@ -560,11 +554,11 @@ public class MainCommand implements CommandExecutor {
 					return true;
 				map.calculateSpawns();
 			} else if (args[0].equalsIgnoreCase("joined")) {
-				sender.sendMessage(Skywars.get().getPlayerArena(player) != null ? "joined" : "not joined");
+				sender.sendMessage(Skywars.get().getPlayerArena(player) != null ? "joined":"not joined");
 			} else if (args[0].equalsIgnoreCase("case")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
-				Skywars.createCase(player.getLocation(), XMaterial.GLASS);
+				SkywarsCaseCreator.createCase(player.getLocation(), XMaterial.GLASS);
 			} else if (args[0].equalsIgnoreCase("spawn")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
@@ -583,23 +577,23 @@ public class MainCommand implements CommandExecutor {
 							continue;
 						}
 						player.sendMessage(String.format("%s: %s, %s, %s", i, mapSpawn.getSpawn(i).getX(),
-							mapSpawn.getSpawn(i).getY(), mapSpawn.getSpawn(i).getZ()));
+								mapSpawn.getSpawn(i).getY(), mapSpawn.getSpawn(i).getZ()));
 					}
 					return true;
 				}
 				final int spawn = Integer.parseInt(args[3]);
 				if (args[1].equalsIgnoreCase("nullcheck")) {
 					final Vector arenaSpawnLocation = mapSpawn.getSpawn(spawn);
-					sender.sendMessage(arenaSpawnLocation == null ? "spawn is null" : "spawn exists");
+					sender.sendMessage(arenaSpawnLocation == null ? "spawn is null":"spawn exists");
 				} else if (args[1].equalsIgnoreCase("set")) {
 					// TODO calculate location relative to arena location
 					// mapSpawn.setSpawn(spawn, player.getLocation().toVector());
 					player.sendMessage(String.format("Set spawn %s of arena '%s' to your current location", spawn,
-						mapSpawn.getName()));
+							mapSpawn.getName()));
 				} else if (args[1].equalsIgnoreCase("tp")) {
 					player.teleport(arena.getVectorInArena(mapSpawn.getSpawn(spawn)));
 					player.sendMessage(
-						String.format("Teleported to spawn %s of arena '%s'", spawn, mapSpawn.getName()));
+							String.format("Teleported to spawn %s of arena '%s'", spawn, mapSpawn.getName()));
 				}
 			} else if (args[0].equalsIgnoreCase("arenas")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
@@ -607,7 +601,7 @@ public class MainCommand implements CommandExecutor {
 				final List<Arena> arenas = Skywars.get().getArenas();
 				if (arenas != null && arenas.size() > 0) {
 					final List<String> arenaNames = arenas.stream().map(m -> m.getMap().getName())
-						.collect(Collectors.toList());
+							.collect(Collectors.toList());
 					sender.sendMessage(String.format("Arenas: %s", String.join(", ", arenaNames)));
 				} else
 					sender.sendMessage("No arenas");
@@ -665,6 +659,11 @@ public class MainCommand implements CommandExecutor {
 			e.printStackTrace();
 		}
 		return true;
+	}
+
+	void cancelTimer() {
+		if (this.task != null)
+			this.task.cancel();
 	}
 
 }
