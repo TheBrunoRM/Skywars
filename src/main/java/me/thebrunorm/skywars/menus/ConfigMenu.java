@@ -38,7 +38,6 @@ public class ConfigMenu implements Listener {
 	final static String teamSizeName = "&e&lTeam Size: &a&l%s";
 	final static String positionName = "&e&lPosition: &a&l%s";
 	final static String worldFolderName = "&e&lWorld: &a&l%s";
-	final static String statusName = "&e&lStatus: %s";
 	final static String calculateSpawnsName = "&6&lCalculate spawns";
 	final static String regenerateCasesName = "&6&lRegenerate cases";
 	final static String reloadWorld = "&6&lReload world";
@@ -90,9 +89,6 @@ public class ConfigMenu implements Listener {
 
 		InventoryUtils.addItem(inventory, XMaterial.PAPER.parseMaterial(), 14,
 				MessageUtils.color(worldFolderName, currentWorldFile));
-
-		InventoryUtils.addItem(inventory, XMaterial.GLASS.parseMaterial(), 15,
-				MessageUtils.color(statusName, "&6&lYES"));
 
 		InventoryUtils.addItem(inventory, XMaterial.GLASS.parseMaterial(), 18, regenerateCasesName);
 
