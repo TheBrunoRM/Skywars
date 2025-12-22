@@ -99,7 +99,7 @@ COULD_NOT_SEND_BACK: "&cCould not send you back!"
 MAIN_LOBBY_SET: "&eThe main lobby has been set to your current position."
 COUNTDOWN_STOPPED: "&eCountdown stopped, not enough players to start the game!"
 
-JOIN: "&7{0} &ehas joined (&b{1}&e/&b{2}&e)!"
+ARENA_JOINED: "&7{0} &ehas joined (&b{1}&e/&b{2}&e)!"
 
 LEAVE: "&7{0} &eleaved (&b{1}&e/&b{2}&e)"
 LEAVE_SELF: "&eYou leaved arena &b%arena%"

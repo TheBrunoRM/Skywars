@@ -98,7 +98,7 @@ COULD_NOT_SEND_BACK: "&c¡No te pudimos llevar a donde estabas antes!"
 MAIN_LOBBY_SET: "&eEl lobby principal se estableció a tu posición actual."
 COUNTDOWN_STOPPED: "&eCuenta regresiva detenida, ¡no hay suficientes jugadores para empezar el juego!"
 
-JOIN: "&e¡&7{0} &ese unió (&b{1}&e/&b{2}&e)!"
+ARENA_JOINED: "&e¡&7{0} &ese unió (&b{1}&e/&b{2}&e)!"
 
 LEAVE: "&7{0} &ese salió (&b{1}&e/&b{2}&e)"
 LEAVE_SELF: "&eTe saliste de la arena &b%arena%"

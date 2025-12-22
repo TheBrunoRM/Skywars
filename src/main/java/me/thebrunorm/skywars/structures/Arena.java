@@ -111,7 +111,7 @@ public class Arena {
 		if (Skywars.config.getBoolean("debug.enabled"))
 			MessageUtils.send(player, "[DEBUG] You joined team %s as player %s", team.getNumber(), getAlivePlayerCount());
 		for (final SkywarsUser players : this.getUsers()) {
-			MessageUtils.sendTranslated(players.getPlayer(), "JOIN",
+			MessageUtils.sendTranslated(players.getPlayer(), "ARENA_JOINED",
 					player.getName(), this.getAlivePlayerCount(), this.map.getMaxPlayers());
 			SkywarsUtils.playSoundsFromConfig(player.getPlayer(), "sounds.join");
 		}
