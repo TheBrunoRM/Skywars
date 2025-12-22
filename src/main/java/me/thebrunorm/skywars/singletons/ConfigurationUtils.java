@@ -173,7 +173,7 @@ public enum ConfigurationUtils {
 		final Material mat = xmat.get().parseMaterial();
 		if (mat == null) return null;
 
-		final int amount = getItemAmountOrDefault(splitted[1], mat);
+		final int amount = getItemAmountOrDefault(splitted.length > 1 ? splitted[1] : "", mat);
 		return new ItemStack(mat, amount);
 	}
 
@@ -190,16 +190,16 @@ public enum ConfigurationUtils {
 			return new ItemStack(mat, amount);
 		}
 
-		final Optional<XMaterial> xmat = XMaterial.matchXMaterial(hashmap.get("type").toString());
+		final Optional<XMaterial> xmat = XMaterial.matchXMaterial(String.valueOf(hashmap.get("type")));
 
 		Material mat = xmat.isPresent() ? xmat.get().parseMaterial() : Material.BEDROCK;
-		int amount = getItemAmountOrDefault(hashmap.get("amount").toString(), mat);
+		int amount = getItemAmountOrDefault(String.valueOf(hashmap.get("amount")), mat);
 
 		ItemStack item = new ItemStack(mat, amount);
 		ItemMeta meta = item.getItemMeta();
 
 		if (hashmap.containsKey("name"))
-			meta.setDisplayName(MessageUtils.color(hashmap.get("name").toString()));
+			meta.setDisplayName(MessageUtils.color(String.valueOf(hashmap.get("name"))));
 
 		if (hashmap.containsKey("lore")) {
 			List<String> lore = new ArrayList<>();
