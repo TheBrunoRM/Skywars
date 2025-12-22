@@ -81,6 +81,8 @@ public class Arena {
 
 		// join checks
 
+		final SkywarsTeam team = this.getNextFreeTeamOrCreateIfItDoesntExist();
+		
 		final Location spawn = this.getVectorInArena(this.getSpawn(team.getNumber()));
 		if (spawn == null) {
 			player.sendMessage(String.format("spawn %s of arena %s not set", team.getNumber(), this.map.getName()));
@@ -114,7 +116,6 @@ public class Arena {
 		// joining
 
 		this.joinable = this.getAlivePlayerCount() < this.map.getMaxPlayers();
-		final SkywarsTeam team = this.getNextFreeTeamOrCreateIfItDoesntExist();
 		final SkywarsUser swPlayer = new SkywarsUser(player, team, team.getNumber());
 		this.users.add(swPlayer);
 
