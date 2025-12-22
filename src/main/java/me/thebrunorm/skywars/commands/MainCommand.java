@@ -439,6 +439,10 @@ public class MainCommand implements CommandExecutor {
 				}
 				SchematicHandler.loadSchematic(file);
 				sender.sendMessage("Loaded schematic " + file.getName());
+			} else if (args[0].equalsIgnoreCase("tablist")) {
+				String text = Arrays.stream(args).skip(1).collect(Collectors.joining(" "));
+				String[] splitted = text.split(" / ");
+				Skywars.get().NMS().sendTablist(player, splitted[0], splitted[1]);
 			} else if (args[0].equalsIgnoreCase("nms")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
