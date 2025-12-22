@@ -156,7 +156,9 @@ public class MainCommand implements CommandExecutor {
 				if (CommandsUtils.consoleCheck(sender))
 					return true;
 				// if(!SkywarsUtils.JoinableCheck(arena, player)) return true;
-				ArenaManager.joinMap(map, player);
+				if (map != null)
+					ArenaManager.joinMap(map, player);
+				else ArenaManager.joinRandomMap(player);
 			} else if (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("about")
 					|| args[0].equalsIgnoreCase("ver") || args[0].equalsIgnoreCase("version")) {
 				sender.sendMessage(MessageUtils.color("&b%s &eversion &a%s &emade by &b%s", Skywars.get().name,
