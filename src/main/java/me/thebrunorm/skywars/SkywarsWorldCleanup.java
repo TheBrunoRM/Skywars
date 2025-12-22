@@ -1,3 +1,5 @@
+// Copyright (c) 2025 Bruno
+
 package me.thebrunorm.skywars;
 
 import me.thebrunorm.skywars.structures.Arena;
@@ -11,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 public enum SkywarsWorldCleanup {
 	;
@@ -33,21 +36,27 @@ public enum SkywarsWorldCleanup {
 			if (worldFolder.exists() && worldFolder.isDirectory())
 				try {
 					FileUtils.deleteDirectory(worldFolder);
-				} catch (final IOException e) {
-					e.printStackTrace();
-					Skywars.get().sendMessage("&cCould not delete world folder: &b" + worldFolder.getPath());
+				} catch (IOException exception) {
+					Skywars.get().getLogger().log(
+							Level.SEVERE,
+							"Could not delete world folder: " + worldFolder.getAbsolutePath(),
+							exception
+					);
 				}
 			list.remove(worldName);
 		}
 		deleteWorldsConfig.set("worlds", list);
 		try {
 			deleteWorldsConfig.save(worldsToDeleteFile);
-		} catch (final IOException e) {
-			e.printStackTrace();
-			Skywars.get().sendMessage("Could not save the world deletion list to file: " + worldsToDeleteFile.getPath());
+		} catch (IOException exception) {
+			Skywars.get().getLogger().log(
+					Level.SEVERE,
+					"Could not save the world deletion list to file: " + worldsToDeleteFile.getAbsolutePath(),
+					exception
+			);
 		}
 	}
-	
+
 	public static void saveWorldList() {
 		final List<String> worldNames = new ArrayList<>(Skywars.get().getArenas().size());
 		for (final Arena arena : Skywars.get().getArenas()) {
@@ -62,9 +71,12 @@ public enum SkywarsWorldCleanup {
 				if (!worldsToDeleteFile.createNewFile())
 					Skywars.get().sendMessage("Could not create world list file.");
 			config.save(worldsToDeleteFile);
-		} catch (final IOException e) {
-			e.printStackTrace();
-			Skywars.get().sendMessage("Could not write world list to file.");
+		} catch (IOException exception) {
+			Skywars.get().getLogger().log(
+					Level.SEVERE,
+					"Could not write world list to file: " + worldsToDeleteFile.getAbsolutePath(),
+					exception
+			);
 		}
 	}
 }
