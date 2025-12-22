@@ -25,6 +25,7 @@ public enum MessageUtils {
 	}
 
 	public static String color(String text) {
+		if (text == null) text = "";
 		return ChatColor.translateAlternateColorCodes(ALT_COLOR_CHAR, text);
 	}
 
