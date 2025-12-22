@@ -102,6 +102,8 @@ The plugin supports Vault for kit purchases
 * More game events
 * More configuration options
 * Party options
+* Quests (games played, games won, kills)
+* Ranked mode (with elo)
 * Custom cases with schematics
 * Ability to buy kits inside and outside a game
 * Ability to change case inside and outside a game
