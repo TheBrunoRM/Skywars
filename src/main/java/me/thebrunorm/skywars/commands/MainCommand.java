@@ -568,7 +568,7 @@ public class MainCommand implements CommandExecutor {
 					return true;
 				map.calculateSpawns();
 			} else if (args[0].equalsIgnoreCase("joined")) {
-				sender.sendMessage(Skywars.get().getPlayerArena(player) != null ? "joined":"not joined");
+				sender.sendMessage(Skywars.get().getPlayerArena(player) != null ? "joined" : "not joined");
 			} else if (args[0].equalsIgnoreCase("case")) {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
@@ -598,7 +598,7 @@ public class MainCommand implements CommandExecutor {
 				final int spawn = Integer.parseInt(args[3]);
 				if (args[1].equalsIgnoreCase("nullcheck")) {
 					final Vector arenaSpawnLocation = mapSpawn.getSpawn(spawn);
-					sender.sendMessage(arenaSpawnLocation == null ? "spawn is null":"spawn exists");
+					sender.sendMessage(arenaSpawnLocation == null ? "spawn is null" : "spawn exists");
 				} else if (args[1].equalsIgnoreCase("set")) {
 					// TODO calculate location relative to arena location
 					// mapSpawn.setSpawn(spawn, player.getLocation().toVector());
