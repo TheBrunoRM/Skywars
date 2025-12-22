@@ -150,7 +150,7 @@ chest_holograms:
   empty: "&cEmpty"
   refilled: "&eRefilled!"
 
-tablist:
+tabList:
   lobby:
     header:
       - "&b&lSKYWARS"

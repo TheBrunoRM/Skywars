@@ -28,7 +28,7 @@ public enum SkywarsScoreboard {
 
 		final ArrayList<String> texts = new ArrayList<>();
 		final Arena arena = Skywars.get().getPlayerArena(player);
-		final SkywarsUser user = arena.getUser(player);
+		final SkywarsUser user = arena == null ? null : arena.getUser(player);
 		List<String> stringList = getStringList(arena, user, player);
 
 		// TODO maybe there's a way to reutilize the board
@@ -84,6 +84,7 @@ public enum SkywarsScoreboard {
 		if (user.isSpectator()) {
 			return Skywars.langConfig.getStringList("scoreboard.arena.spectator");
 		}
+
 		if (arena.getStatus() == ArenaStatus.PLAYING) {
 			return Skywars.langConfig.getStringList("scoreboard.arena.player");
 		}

@@ -42,7 +42,7 @@ scoreboard:
   # you can change this if there is a name collision
   objective_name: skywars
 
-# filter where the lobby scoreboard and tablist shows
+# filter where the lobby scoreboard and tabList shows
 # leave empty to show in all worlds
 # lobby_worlds: []
 lobby_worlds:
@@ -58,7 +58,7 @@ time: # seconds
   starting: 10
   ending: 10
 
-# the amount of fireworks throwed at the end of a game
+# the amount of fireworks threw at the end of a game
 endFireworks: 3
 
 # invincibility at the start of the game

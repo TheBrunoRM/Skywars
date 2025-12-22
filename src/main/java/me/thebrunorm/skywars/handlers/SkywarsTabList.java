@@ -15,7 +15,7 @@ public enum SkywarsTabList {
 		if (!Skywars.get().getConfig().getBoolean("tabListEnabled", true)) return;
 
 		final Arena arena = Skywars.get().getPlayerArena(player);
-		final SkywarsUser user = arena.getUser(player);
+		final SkywarsUser user = arena == null ? null : arena.getUser(player);
 
 		String tabList = getTabList(player, user, arena);
 
@@ -35,7 +35,7 @@ public enum SkywarsTabList {
 				tabList += "intermission";
 				break;
 			case PLAYING:
-				tabList += user.isSpectator() ? "spectator":"player";
+				tabList += user.isSpectator() ? "spectator" : "player";
 				break;
 			default:
 				break;

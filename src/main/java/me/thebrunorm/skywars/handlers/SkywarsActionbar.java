@@ -14,12 +14,12 @@ public enum SkywarsActionbar {
 	public static void update(Player player) {
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null) return;
-		final SkywarsUser swp = arena.getUser(player);
-		if (swp.isSpectator())
+		final SkywarsUser user = arena.getUser(player);
+		if (user.isSpectator())
 			Skywars.get().NMS().sendActionbar(player, MessageUtils
-					.color(SkywarsUtils.format(Skywars.langConfig.getString("actionbar.spectating"), player, arena, swp)));
+					.color(SkywarsUtils.format(Skywars.langConfig.getString("actionbar.spectating"), player, arena, user)));
 		else if (!arena.started())
 			Skywars.get().NMS().sendActionbar(player, MessageUtils
-					.color(SkywarsUtils.format(Skywars.langConfig.getString("actionbar.waiting"), player, arena, swp)));
+					.color(SkywarsUtils.format(Skywars.langConfig.getString("actionbar.waiting"), player, arena, user)));
 	}
 }
