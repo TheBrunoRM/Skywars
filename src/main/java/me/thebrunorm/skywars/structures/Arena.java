@@ -1037,14 +1037,6 @@ public class Arena {
 		return this.gameSettings;
 	}
 
-	public void removeChest(Chest chest) {
-		if (!Skywars.holograms)
-			return;
-		if (this.chestHolograms.containsKey(chest))
-			Skywars.get().getHologramController().removeHologram(this.chestHolograms.remove(chest));
-		this.activeChests.remove(chest);
-	}
-
 	public void addChestHologram(Chest chest) {
 		if (!Skywars.holograms)
 			return;
@@ -1063,8 +1055,15 @@ public class Arena {
 			return;
 
 		final HologramController controller = Skywars.get().getHologramController();
-		for (final Entry<Chest, String> entry : this.chestHolograms.entrySet()) {
+
+		List<Chest> toRemove = new ArrayList<>();
+
+		for (Entry<Chest, String> entry : this.chestHolograms.entrySet()) {
 			final Chest chest = entry.getKey();
+			if (chest.getBlock().getType() != Material.CHEST) {// || !(chest.getBlock() instanceof Chest)) {
+				toRemove.add(chest);
+				continue;
+			}
 			final String hologram = entry.getValue();
 			final int contents = Arrays.asList(chest.getInventory().getContents()).stream()
 					.filter(i -> i != null && i.getType() != XMaterial.AIR.parseMaterial()).collect(Collectors.toList())
@@ -1073,6 +1072,15 @@ public class Arena {
 			controller.changeHologram(hologram, contents <= 0 ? MessageUtils.get("chest_holograms.empty"):"", 1);
 		}
 
+		for (Chest chest : toRemove) removeChest(chest);
+	}
+
+	public void removeChest(Chest chest) {
+		if (!Skywars.holograms)
+			return;
+		if (this.chestHolograms.containsKey(chest))
+			Skywars.get().getHologramController().removeHologram(this.chestHolograms.remove(chest));
+		this.activeChests.remove(chest);
 	}
 
 	public void voteTime(Player player, TimeType time) {

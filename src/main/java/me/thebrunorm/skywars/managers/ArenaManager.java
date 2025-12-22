@@ -97,6 +97,14 @@ public enum ArenaManager {
 		return arena;
 	}
 
+	public static Arena getArenaForWorld(World world) {
+		for (final Arena arena : Skywars.get().getArenas()) {
+			if (arena.getWorld() == world)
+				return arena;
+		}
+		return null;
+	}
+
 	public static void removeArena(Arena arena) {
 		Skywars.get().sendDebugMessage("removing arena " + arena.getMap().getName());
 		Skywars.get().getArenas().remove(arena);
