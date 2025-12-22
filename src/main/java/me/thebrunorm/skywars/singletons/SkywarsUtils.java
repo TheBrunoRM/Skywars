@@ -215,12 +215,6 @@ public class SkywarsUtils {
 	}
 
 	public static JoinProblem getJoinProblems(Arena arena, Player player) {
-		// TODO add messages
-		if (player != null)
-			if (Skywars.get().getPlayerArena(player) != null) {
-				player.sendMessage("already joined");
-				return JoinProblem.ALREADY_JOINED;
-			}
 		if (arena == null) {
 			if (player != null)
 				player.sendMessage("arena doesnt exist");

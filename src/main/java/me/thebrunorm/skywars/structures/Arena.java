@@ -80,6 +80,15 @@ public class Arena {
 	}
 
 	public boolean joinPlayer(Player player) {
+		Arena currentArena = Skywars.get().getPlayerArena(player);
+		if (currentArena != null) {
+			if (currentArena == this) {
+				player.sendMessage("Already joined to this arena!");
+				return true;
+			}
+			currentArena.leavePlayer(player);
+		}
+
 		if (SkywarsUtils.getJoinProblems(this, player) != null)
 			return false;
 		if (!this.checkProblems()) {
