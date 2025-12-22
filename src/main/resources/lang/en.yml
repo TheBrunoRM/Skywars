@@ -245,6 +245,21 @@ countdown:
     color: c
     range: 5-1
 
+kits:
+  bought: "&bBought kit &e{0}"
+  owned: "&aYou own this kit!"
+  unowned: "&cYou don't have this kit!"
+  selected: "&aSelected kit &e{0}"
+  select_error: "&cError: &7could not select kit"
+  current_selected: "&6Selected kit"
+  current_free: "&aThis kit is free!"
+  click_select: "&eClick to select!"
+  click_purchase: "&aClick to purchase!"
+  price_good: "&aPrice: {0}"
+  price_bad: "&cPrice: {0}"
+  your_money_more: "&6Your money: &a{0}"
+  your_money_less: "&6Your money: &c{0}"
+
 console:
   update_finished: "&6The plugin has been updated and disabled."
   stopping_arenas: "&6Stopping arenas..."
