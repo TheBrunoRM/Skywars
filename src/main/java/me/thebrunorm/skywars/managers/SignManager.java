@@ -47,7 +47,7 @@ public class SignManager implements Listener {
 
 		final String mapName = event.getLine(titleLine + 1);
 		final Player player = event.getPlayer();
-		if (mapName == null) {
+		if (mapName == null || mapName.isEmpty()) {
 			player.sendMessage(MessageUtils.color("&cYou need to specify the map name in the line below!"));
 			return;
 		}
@@ -115,9 +115,9 @@ public class SignManager implements Listener {
 		sign.setLine(0, MessageUtils.color("&a%s", map.getName()));
 		sign.setLine(1, MessageUtils.color("&b%s &earenas", arenas.size()));
 		sign.setLine(2, MessageUtils.color("&b%s &eplayers",
-				arenas.stream().map(arena -> arena.getAlivePlayerCount()).reduce(0, (a, b) -> a + b)));
+				arenas.stream().map(Arena::getAlivePlayerCount).reduce(0, Integer::sum)));
 		final Arena joinable = ArenaManager.getJoinableArenaByMap(map);
-		final int count = joinable != null ? joinable.getAlivePlayerCount():0;
+		final int count = joinable != null ? joinable.getAlivePlayerCount() : 0;
 		if (joinable != null && count > 0) {
 			sign.setLine(3, MessageUtils.color("&b%s &eof &c%s &eplayers waiting", count, map.getMaxPlayers()));
 		} else {
@@ -184,7 +184,8 @@ public class SignManager implements Listener {
 		for (final Entry<Location, SkywarsMap> sign : this.signs.entrySet()) {
 			final BlockState state = sign.getKey().getBlock().getState();
 			if (!(state instanceof Sign)) {
-				Skywars.get().sendDebugMessage("&4Warning updating signs: &csign is not sign: &b" + sign.getKey());
+				Skywars.get().sendDebugMessage("&4Error updating signs: &csign is not sign: &b" + sign.getKey());
+				continue;
 			}
 			final Sign signState = (Sign) state;
 			this.updateSign(signState, sign.getValue());
