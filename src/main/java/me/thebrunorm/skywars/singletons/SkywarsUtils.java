@@ -58,7 +58,7 @@ public class SkywarsUtils {
 
 			final String balance = SkywarsEconomy.getEconomy() != null
 					? SkywarsUtils.formatDouble(SkywarsEconomy.getEconomy().getBalance(player))
-					:"Vaultn't";
+					: "Vaultn't";
 			text = text.replaceAll(getVariableCode("coins"), balance).replaceAll(getVariableCode("money"), balance)
 					.replaceAll(getVariableCode("balance"), balance).replaceAll(getVariableCode("economy"), balance)
 					.replaceAll(getVariableCode("souls"), String.valueOf(Skywars.get().getPlayerSouls(player)))
@@ -371,7 +371,7 @@ public class SkywarsUtils {
 	public static void playSoundsFromConfig(Player player, String configLocation) {
 		final List<String> list = Skywars.config.getStringList(configLocation);
 		final String singleSound = Skywars.config.getString(configLocation);
-		if (list.size() > 0)
+		if (!list.isEmpty())
 			for (final String sound : list) {
 				playSound(player, sound);
 			}
@@ -383,8 +383,8 @@ public class SkywarsUtils {
 	public static void playSound(Player player, String sound) {
 		final String[] splitted = sound.split(";");
 		player.playSound(player.getLocation(), Sounds.valueOf(splitted[0]).bukkitSound(),
-				splitted.length > 1 ? Float.parseFloat(splitted[1]):1,
-				splitted.length > 2 ? Float.parseFloat(splitted[2]):1);
+				splitted.length > 1 ? Float.parseFloat(splitted[1]) : 1,
+				splitted.length > 2 ? Float.parseFloat(splitted[2]) : 1);
 	}
 
 	public static boolean checkClass(String name) {
@@ -414,7 +414,7 @@ public class SkywarsUtils {
 		int mostFreqCount = -1;
 		for (final E e : iterable) {
 			Integer count = freqMap.get(e);
-			freqMap.put(e, count = (count == null ? 1:count + 1));
+			freqMap.put(e, count = (count == null ? 1 : count + 1));
 			// maintain the most frequent in a single pass.
 			if (count > mostFreqCount) {
 				mostFreq = e;
