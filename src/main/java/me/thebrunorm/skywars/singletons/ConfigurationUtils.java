@@ -9,8 +9,12 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
@@ -146,7 +150,7 @@ public enum ConfigurationUtils {
 		Vector vector = getVectorFromConfigSection(section);
 		return new Location(world, vector.getX(), vector.getY(), vector.getZ());
 	}
-	
+
 	public static Vector getVectorFromConfigSection(ConfigurationSection section) {
 		return new Vector(section.getInt("x"), section.getInt("y"), section.getInt("z"));
 	}
@@ -164,57 +168,93 @@ public enum ConfigurationUtils {
 		final String[] splitted = a.split("[\\s\\W]+");
 		final Optional<XMaterial> xmat = XMaterial.matchXMaterial(splitted[0]);
 
-		if (xmat.isEmpty())
-			return null;
+		if (!xmat.isPresent()) return null;
 
 		final Material mat = xmat.get().parseMaterial();
-		final int amount = splitted.length > 1 ? Integer.parseInt(splitted[1]):mat.getMaxStackSize();
+		if (mat == null) return null;
+
+		final int amount = getItemAmountOrDefault(splitted[1], mat);
 		return new ItemStack(mat, amount);
 	}
 
+	@SuppressWarnings("unchecked")
 	private static @Nullable ItemStack parseItemFromHashMap(HashMap<Object, Object> hashmap) {
+
 		if (hashmap.size() == 1) {
 			final Entry<Object, Object> b = hashmap.entrySet().iterator().next();
 			final Optional<XMaterial> xmat = XMaterial.matchXMaterial(b.getKey().toString());
-			if (xmat.isEmpty())
-				return null;
+			if (!xmat.isPresent()) return null;
+
 			final Material mat = xmat.get().parseMaterial();
 			final int amount = Integer.parseInt(b.getValue().toString());
 			return new ItemStack(mat, amount);
 		}
 
 		final Optional<XMaterial> xmat = XMaterial.matchXMaterial(hashmap.get("type").toString());
-		if (xmat.isEmpty())
-			return null;
 
-		final Material mat = xmat.get().parseMaterial();
-		int amount = mat.getMaxStackSize();
-		if (hashmap.containsKey("amount"))
-			try {
-				amount = Integer.parseInt(hashmap.get("amount").toString());
-			} catch (final NumberFormatException ignored) {
-			}
+		Material mat = xmat.isPresent() ? xmat.get().parseMaterial() : Material.BEDROCK;
+		int amount = getItemAmountOrDefault(hashmap.get("amount").toString(), mat);
 
-		final ItemStack item = new ItemStack(mat, amount);
-		final ItemMeta meta = item.getItemMeta();
+		ItemStack item = new ItemStack(mat, amount);
+		ItemMeta meta = item.getItemMeta();
 
-		if (hashmap.containsKey("name")) {
-			final String itemName = hashmap.get("name").toString();
-			meta.setDisplayName(MessageUtils.color(itemName));
+		if (hashmap.containsKey("name"))
+			meta.setDisplayName(MessageUtils.color(hashmap.get("name").toString()));
+
+		if (hashmap.containsKey("lore")) {
+			List<String> lore = new ArrayList<>();
+			Object loreObj = hashmap.get("lore");
+
+			if (loreObj instanceof List<?>)
+				for (Object line : (List<?>) loreObj)
+					lore.add(MessageUtils.color(line.toString()));
+			else
+				lore.add(MessageUtils.color(loreObj.toString()));
+
+			meta.setLore(lore);
 		}
 
-		final Object lore = hashmap.get("lore");
-		if (lore != null) {
-			final List<String> loreLines = new ArrayList<>();
-			if (lore instanceof String)
-				loreLines.add(MessageUtils.color(lore.toString()));
-			else if (lore instanceof ArrayList)
-				for (final String loreLine : ((ArrayList<String>) lore))
-					loreLines.add(MessageUtils.color(loreLine));
-			meta.setLore(loreLines);
+		if (hashmap.containsKey("enchants")) {
+			HashMap<String, Object> enchants = (HashMap<String, Object>) hashmap.get("enchants");
+			for (Entry<String, Object> e : enchants.entrySet()) {
+				Enchantment enchant = Enchantment.getByName(e.getKey().toUpperCase());
+				if (enchant != null)
+					meta.addEnchant(enchant, Integer.parseInt(e.getValue().toString()), true);
+			}
+		}
+
+		if (meta instanceof PotionMeta) {
+
+			PotionMeta potionMeta = (PotionMeta) meta;
+
+			// Custom effects
+			if (hashmap.containsKey("effects")) {
+				HashMap<String, Object> effects = (HashMap<String, Object>) hashmap.get("effects");
+
+				for (Entry<String, Object> e : effects.entrySet()) {
+					PotionEffectType effect = PotionEffectType.getByName(e.getKey().toUpperCase());
+					if (effect != null) {
+						int level = Integer.parseInt(e.getValue().toString()) - 1;
+						potionMeta.addCustomEffect(
+								new PotionEffect(effect, 20 * 30, level),
+								true
+						);
+					}
+				}
+			}
 		}
 
 		item.setItemMeta(meta);
 		return item;
 	}
+
+	static int getItemAmountOrDefault(String text, Material mat) {
+		if (!text.isEmpty())
+			try {
+				return Integer.parseInt(text);
+			} catch (Exception ignored) {
+			}
+		return mat.getMaxStackSize();
+	}
+
 }
