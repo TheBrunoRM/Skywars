@@ -397,14 +397,10 @@ public class SkywarsUtils {
 	}
 
 	public static String getHologramsAPIName(HologramController hologramController) {
-		if (hologramController == null)
-			return "None";
+		if (hologramController == null) return "None";
 		final String name = hologramController.getClass().getName();
-		if (name == null)
-			return "None";
 		final String[] bits = name.split(".");
-		if (bits.length < 1)
-			return "None";
+		if (bits.length < 1) return "None";
 		return bits[bits.length - 1];
 	}
 
