@@ -11,6 +11,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -142,7 +143,12 @@ public enum ConfigurationUtils {
 	public static Location getLocationConfig(World world, ConfigurationSection section) {
 		if (section == null)
 			return null;
-		return new Location(world, section.getInt("x"), section.getInt("y"), section.getInt("z"));
+		Vector vector = getVectorFromConfigSection(section);
+		return new Location(world, vector.getX(), vector.getY(), vector.getZ());
+	}
+	
+	public static Vector getVectorFromConfigSection(ConfigurationSection section) {
+		return new Vector(section.getInt("x"), section.getInt("y"), section.getInt("z"));
 	}
 
 	@SuppressWarnings("unchecked")
