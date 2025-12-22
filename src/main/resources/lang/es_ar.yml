@@ -154,6 +154,89 @@ chest_holograms:
   empty: "&cVacío"
   refilled: "&e¡Rellenado!"
 
+tablist:
+  lobby:
+    header:
+      - "&b&lSKYWARS"
+    footer:
+      - "&e%url%"
+  arena:
+    player:
+      header:
+        - "&a&lSkyWars"
+        - "&eKit actual: &b%kit%"
+        - "&eMapa: &b%map%"
+      footer:
+        - "&c%players% &ejugadores restantes"
+        - "&eSiguiente evento: &b%event%"
+    spectator:
+      header:
+        - "&a&lSkyWars"
+        - "&bEstás en modo espectador"
+        - "&eMapa: &b%map%"
+      footer:
+        - "&c%players% &ejugadores restantes"
+        - "&eSiguiente evento: &b%event%"
+    intermission:
+      header:
+        - "&a&lSkywars"
+        - "&eMapa: &b%map%"
+      footer:
+        - ""
+        - "%status%"
+
+scoreboard:
+  title: '&e&lSkyWars'
+
+  lobby:
+    - '&7%date%'
+    - ''
+    - 'Monedas: &6%coins%'
+    - 'Almas: &b%souls%'
+    - 'Victorias: &a%totalwins%'
+    - 'Asesinatos: &6%totalkills%'
+    - 'Muertes: &c%totaldeaths%'
+    - ''
+    - '&e%url%'
+
+  arena:
+    player:
+      - '&7%date%'
+      - ''
+      - 'Siguiente evento:'
+      - '%event%'
+      - ''
+      - 'Jugadores restantes: &a%players%'
+      - ''
+      - 'Muertes: &a%kills%'
+      - ''
+      - 'Mapa: &a%map%'
+      - ''
+      - '&e%url%'
+
+    spectator:
+      - '&7%date%'
+      - ''
+      - 'Siguiente evento:'
+      - '%event%'
+      - ''
+      - '%status%'
+      - ''
+      - 'Mapa: &a%map%'
+      - 'Jugadores restantes: &a%players%'
+      - ''
+      - '&e%url%'
+
+    intermission:
+      - '&7%date%'
+      - ''
+      - '%status%'
+      - ''
+      - 'Mapa: &a%map%'
+      - 'Jugadores: &a%players%/%maxplayers%'
+      - ''
+      - '&e%url%'
+
 countdown:
   - title: "&e%count% segundos"
     subtitle: "&e¡Hacé clic derecho con el arco para seleccionar tu kit!"
