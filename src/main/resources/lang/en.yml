@@ -244,3 +244,20 @@ countdown:
     subtitle: "&ePrepare to fight!"
     color: c
     range: 5-1
+
+console:
+  update_finished: "&6The plugin has been updated and disabled."
+  stopping_arenas: "&6Stopping arenas..."
+  error_config: "Could not load configuration files!"
+  disabling_plugin: "Disabling plugin."
+  server_version: "&bServer version: &e{0} (&a{1}&e)"
+  command:
+    loading: "&eLoading command &a{0}&e..."
+    skipping: "&7Skipping command &c{0}&7..."
+  kits:
+    error:
+      folder: "&cCould not create kits folder: &6{0}"
+      icon: "&cCould not load icon item of kit: &6{0}"
+    loaded_single: "&eLoaded kit: &a{0}"
+    finished_loading: "&aFinished loading &b{0} &akits."
+    default: "Setting up default kit."

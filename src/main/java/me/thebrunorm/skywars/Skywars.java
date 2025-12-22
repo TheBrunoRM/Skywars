@@ -60,8 +60,6 @@ public class Skywars extends JavaPlugin {
 	public HashMap<Player, Location> playerLocations = new HashMap<>();
 	PluginDescriptionFile pdf = this.getDescription();
 	public String name = this.pdf.getName();
-	private final String prefix = MessageUtils.color("&6[&e%s&6]&e", this.name);
-	private final String debugPrefix = MessageUtils.color("&7[&c%s&7]&e", this.name);
 	public String version = this.pdf.getVersion();
 	public List<String> authors = this.pdf.getAuthors();
 	HologramController hologramController;
@@ -71,6 +69,8 @@ public class Skywars extends JavaPlugin {
 	ChestManager chestManager = new ChestManager();
 	MapManager mapManager = new MapManager();
 	BukkitTask taskUpdate;
+	private String prefix;
+	private String debugPrefix;
 	private String serverPackageVersion;
 	private ReflectionNMS nmsHandler;
 
@@ -96,6 +96,7 @@ public class Skywars extends JavaPlugin {
 				Skywars.get().NMS().sendTablist(player, "", "");
 
 		this.reloadConfig();
+		this.loadPrefixes();
 		this.mapManager.loadMaps();
 		this.chestManager.loadChests();
 		this.signManager.loadSigns();
@@ -111,14 +112,19 @@ public class Skywars extends JavaPlugin {
 		return plugin;
 	}
 
+	void loadPrefixes() {
+		prefix = MessageUtils.color(String.format(getConfig().getString("prefix", "&6[&e%s&6]&e"), this.name));
+		debugPrefix = MessageUtils.color(String.format(getConfig().getString("debug_prefix", "&7[&c%s&7]&e"), this.name));
+	}
+
 	public void loadKits() {
 		this.kits.clear();
 		final File folder = new File(kitsPath);
 		if (!folder.exists() && folder.mkdirs())
-			this.sendDebugMessage("&cCould not create kits folder.");
+			this.sendDebugMessage(MessageUtils.get("console.kits.error.folder"));
 		File[] files = Objects.requireNonNull(folder.listFiles());
 		if (files.length <= 0) {
-			this.sendDebugMessage("&eSetting up default kit.");
+			this.sendDebugMessage(MessageUtils.get("console.kits.default"));
 			ConfigurationUtils.copyDefaultContentsToFile("kits/default.yml", new File(kitsPath, "default.yml"));
 		}
 		for (final File file : files) {
@@ -143,16 +149,16 @@ public class Skywars extends JavaPlugin {
 			kit.setItems(items.toArray(new ItemStack[0]));
 			ItemStack iconItem = XMaterial.valueOf(config.getString("icon", "BEDROCK")).parseItem();
 			if (iconItem == null) {
-				Skywars.get().sendDebugMessage("Could not load icon item of kit " + file.getAbsolutePath());
+				Skywars.get().sendDebugMessage(MessageUtils.get("console.kits.error.icon", file.getAbsolutePath()));
 				iconItem = new ItemStack(Material.BEDROCK);
 			}
 			kit.setIcon(iconItem);
 			kit.setPrice(config.getDouble("price", 0));
 
 			this.kits.add(kit);
-			this.sendDebugMessage("&eLoaded kit: &a%s", kit.getName());
+			this.sendDebugMessage(MessageUtils.get("console.kits.loaded_single", kit.getName()));
 		}
-		this.sendDebugMessage("Finished loading kits.");
+		this.sendDebugMessage(MessageUtils.get("console.kits.finished_loading", kits.size()));
 	}
 
 	public void restartTask() {
@@ -210,38 +216,10 @@ public class Skywars extends JavaPlugin {
 		return this.serverPackageVersion;
 	}
 
-	public void loadCommands() {
-		final HashMap<String, CommandExecutor> cmds = new HashMap<>();
-		cmds.put("skywars", new MainCommand());
-		cmds.put("where", new WhereCommand());
-		cmds.put("start", new StartCommand());
-		cmds.put("forcestart", new ForceStartCommand());
-		cmds.put("leave", new LeaveCommand());
-		for (final String cmd : cmds.keySet()) {
-			if (!this.getConfig().getStringList("disabledCommands").contains(cmd)) {
-				this.sendDebugMessage("&eLoading command &a%s&e...", cmd);
-				this.getCommand(cmd).setExecutor(cmds.get(cmd));
-			} else
-				this.sendDebugMessage("&7Skipping command &c%s&e...", cmd);
-		}
-	}
-
-	public ChestManager getChestManager() {
-		return this.chestManager;
-	}
-
-	public MapManager getMapManager() {
-		return this.mapManager;
-	}
-
-	public List<Kit> getKits() {
-		return this.kits;
-	}
-
 	@Override
 	public void onDisable() {
 		if (this.updated) {
-			this.sendMessage("&6The plugin has been updated and disabled.");
+			this.sendMessage(MessageUtils.get("console.update_finished"));
 			return;
 		}
 
@@ -255,7 +233,7 @@ public class Skywars extends JavaPlugin {
 			SkywarsUtils.teleportPlayerLobbyOrLastLocation(player);
 		});
 
-		this.sendDebugMessage("Stopping arenas...");
+		this.sendDebugMessage(MessageUtils.get("console.stopping_arenas"));
 		SkywarsWorldCleanup.saveWorldList();
 		this.arenas.clear();
 	}
@@ -271,15 +249,10 @@ public class Skywars extends JavaPlugin {
 		playersPath = this.getDataFolder() + "/players";
 		chestsPath = this.getDataFolder() + "/chests";
 
-		String packageName = this.getServer().getClass().getPackage().getName();
-		this.serverPackageVersion = packageName.substring(packageName.lastIndexOf('.') + 1);
-
-		this.sendDebugMessage("&bServer version: &e%s (&a%s&e)", packageName, this.serverPackageVersion);
-
-		SkywarsWorldCleanup.cleanupWorlds();
+		loadPrefixes();
 
 		if (!this.loadConfig()) {
-			this.sendMessage("Could not load configuration files! Disabling plugin.");
+			this.sendMessage(MessageUtils.get("error_config") + " " + MessageUtils.get("disabling_plugin"));
 			this.setEnabled(false);
 			return;
 		}
@@ -289,6 +262,11 @@ public class Skywars extends JavaPlugin {
 			this.setEnabled(false);
 			return;
 		}
+
+		String packageName = this.getServer().getClass().getPackage().getName();
+		this.serverPackageVersion = packageName.substring(packageName.lastIndexOf('.') + 1);
+
+		this.sendDebugMessage(MessageUtils.get("server_version", packageName, this.serverPackageVersion));
 
 		this.loadCommands();
 		this.loadEvents();
@@ -330,6 +308,7 @@ public class Skywars extends JavaPlugin {
 		this.sendMessage("&ahas been enabled: &bv%s", this.version);
 
 		restartTask();
+		SkywarsWorldCleanup.cleanupWorlds();
 	}
 
 	public void sendMessage(String text, Object... format) {
@@ -345,6 +324,34 @@ public class Skywars extends JavaPlugin {
 			}
 		}
 		return null;
+	}
+
+	public ChestManager getChestManager() {
+		return this.chestManager;
+	}
+
+	public MapManager getMapManager() {
+		return this.mapManager;
+	}
+
+	public List<Kit> getKits() {
+		return this.kits;
+	}
+
+	public void loadCommands() {
+		final HashMap<String, CommandExecutor> cmds = new HashMap<>();
+		cmds.put("skywars", new MainCommand());
+		cmds.put("where", new WhereCommand());
+		cmds.put("start", new StartCommand());
+		cmds.put("forcestart", new ForceStartCommand());
+		cmds.put("leave", new LeaveCommand());
+		for (final String cmd : cmds.keySet()) {
+			if (!this.getConfig().getStringList("disabledCommands").contains(cmd)) {
+				this.sendDebugMessage(MessageUtils.get("console.command.loading", cmd));
+				this.getCommand(cmd).setExecutor(cmds.get(cmd));
+			} else
+				this.sendDebugMessage(MessageUtils.get("console.command.skipping", cmd));
+		}
 	}
 
 	public List<Arena> getArenas() {
