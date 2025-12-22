@@ -20,6 +20,7 @@ import me.thebrunorm.skywars.structures.Kit;
 import me.thebrunorm.skywars.structures.SkywarsUser;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -81,10 +82,6 @@ public class Skywars extends JavaPlugin {
 		super(loader, description, dataFolder, file);
 	}
 
-	public static Skywars get() {
-		return plugin;
-	}
-
 	public SignManager getSignManager() {
 		return this.signManager;
 	}
@@ -108,6 +105,56 @@ public class Skywars extends JavaPlugin {
 
 	public ReflectionNMS NMS() {
 		return this.nmsHandler;
+	}
+
+	public static Skywars get() {
+		return plugin;
+	}
+
+	public void loadKits() {
+		this.kits.clear();
+		final File folder = new File(kitsPath);
+		if (!folder.exists() && folder.mkdirs())
+			this.sendDebugMessage("&cCould not create kits folder.");
+		File[] files = Objects.requireNonNull(folder.listFiles());
+		if (files.length <= 0) {
+			this.sendDebugMessage("&eSetting up default kit.");
+			ConfigurationUtils.copyDefaultContentsToFile("kits/default.yml", new File(kitsPath, "default.yml"));
+		}
+		for (final File file : files) {
+			final String name = file.getName().replaceFirst("[.][^.]+$", "");
+			final YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+			ConfigurationUtils.createMissingKeys(config, ConfigurationUtils.getDefaultConfig("kits/default.yml"),
+					file.getPath());
+
+			final Kit kit = new Kit(name);
+			kit.setConfig(config);
+			kit.setFile(file);
+			kit.setDisplayName(config.getString("name"));
+
+			final List<ItemStack> items = new ArrayList<>();
+
+			for (final Object a : config.getList("items")) {
+				final ItemStack item = ConfigurationUtils.parseItemFromConfig(a);
+				if (item == null) continue;
+				items.add(item);
+			}
+
+			kit.setItems(items.toArray(new ItemStack[0]));
+			ItemStack iconItem = XMaterial.valueOf(config.getString("icon", "BEDROCK")).parseItem();
+			if (iconItem == null) {
+				Skywars.get().sendDebugMessage("Could not load icon item of kit " + file.getAbsolutePath());
+				iconItem = new ItemStack(Material.BEDROCK);
+			}
+			kit.setIcon(iconItem);
+			kit.setPrice(config.getDouble("price", 0));
+
+			this.kits.add(kit);
+			this.sendDebugMessage("&eLoaded kit: &a%s", kit.getName());
+		}
+		this.sendDebugMessage("Finished loading kits.");
+	}
+
 	public void restartTask() {
 		if (Skywars.get().getConfig().getBoolean("taskUpdate.disabled")) return;
 
@@ -122,6 +169,41 @@ public class Skywars extends JavaPlugin {
 			}
 		}, 0L, Skywars.get().getConfig().getLong("taskUpdate.interval") * 20);
 	}
+
+	public void sendDebugMessage(String text, Object... format) {
+		if (Skywars.config != null && !Skywars.config.getBoolean("debug.enabled"))
+			return;
+		this.sendMessageWithPrefix(this.debugPrefix, text, format);
+	}
+
+	public void sendMessageWithPrefix(String prefix, String text, Object... format) {
+		Bukkit.getConsoleSender().sendMessage(MessageUtils.color(prefix) + " " + MessageUtils.color(text, format));
+	}
+
+	public void loadEvents() {
+		final FileConfiguration config = this.getConfig();
+		final PluginManager pluginManager = this.getServer().getPluginManager();
+
+		if (config.getBoolean("signsEnabled")) {
+			this.signManager = new SignManager();
+			pluginManager.registerEvents(this.signManager, this);
+		}
+
+		if (config.getBoolean("messageSounds.enabled"))
+			pluginManager.registerEvents(new MessageSound(), this);
+
+		if (config.getBoolean("disableWeather"))
+			pluginManager.registerEvents(new DisableWeather(), this);
+
+		if (config.getBoolean("debug.projectileTests"))
+			pluginManager.registerEvents(new ProjectileTrails(), this);
+
+		final Listener[] listeners = {new InteractEvent(), new Events(), new GamesMenu(), new MapMenu(),
+				new KitsMenu(), new ConfigMenu(), new GameOptionsMenu(),
+				new PlayerInventoryManager(),};
+		for (final Listener listener : listeners) {
+			pluginManager.registerEvents(listener, this);
+		}
 	}
 
 	public String getServerPackageVersion() {
@@ -240,7 +322,7 @@ public class Skywars extends JavaPlugin {
 		SkywarsEconomy.setup();
 
 		placeholderAPI = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
-		this.sendMessage("&ePlaceholderAPI: " + (placeholderAPI ? "&ahooked.":"&cnot found."));
+		this.sendMessage("&ePlaceholderAPI: " + (placeholderAPI ? "&ahooked." : "&cnot found."));
 
 		if (placeholderAPI)
 			new SkywarsPlaceholderExpansion().register();
@@ -263,86 +345,6 @@ public class Skywars extends JavaPlugin {
 			}
 		}
 		return null;
-	}
-
-	public void sendDebugMessage(String text, Object... format) {
-		if (Skywars.config != null && !Skywars.config.getBoolean("debug.enabled"))
-			return;
-		this.sendMessageWithPrefix(this.debugPrefix, text, format);
-	}
-
-	public void sendMessageWithPrefix(String prefix, String text, Object... format) {
-		Bukkit.getConsoleSender().sendMessage(MessageUtils.color(prefix) + " " + MessageUtils.color(text, format));
-	}
-
-	public void loadEvents() {
-		final FileConfiguration config = this.getConfig();
-		final PluginManager pluginManager = this.getServer().getPluginManager();
-		if (config.getBoolean("signsEnabled")) {
-			this.signManager = new SignManager();
-			pluginManager.registerEvents(this.signManager, this);
-		}
-
-		if (config.getBoolean("messageSounds.enabled"))
-			pluginManager.registerEvents(new MessageSound(), this);
-		if (config.getBoolean("disableWeather"))
-			pluginManager.registerEvents(new DisableWeather(), this);
-		if (config.getBoolean("debug.projectileTests"))
-			pluginManager.registerEvents(new ProjectileTrails(), this);
-
-		final Listener[] listeners = {new InteractEvent(), new Events(), new GamesMenu(), new MapMenu(),
-				new KitsMenu(), new ConfigMenu(), new GameOptionsMenu(),
-				new PlayerInventoryManager(),};
-		for (final Listener listener : listeners) {
-			pluginManager.registerEvents(listener, this);
-		}
-	}
-
-	public void loadKits() {
-		this.kits.clear();
-		final File folder = new File(kitsPath);
-		if (!folder.exists()) {
-			folder.mkdirs();
-		}
-		File[] files = Objects.requireNonNull(folder.listFiles());
-		if (files.length <= 0) {
-			this.sendDebugMessage("&eSetting up default kit.");
-			ConfigurationUtils.copyDefaultContentsToFile("kits/default.yml", new File(kitsPath, "default.yml"));
-		}
-		for (final File file : files) {
-			final String name = file.getName().replaceFirst("[.][^.]+$", "");
-			final YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-			ConfigurationUtils.createMissingKeys(config, ConfigurationUtils.getDefaultConfig("kits/default.yml"),
-					file.getPath());
-
-			// create kit and set values from config
-			final Kit kit = new Kit(name);
-			kit.setConfig(config);
-			kit.setFile(file);
-			kit.setDisplayName(config.getString("name"));
-
-			// load items
-			final List<ItemStack> items = new ArrayList<>();
-
-			for (final Object a : config.getList("items")) {
-				final ItemStack item = ConfigurationUtils.parseItemFromConfig(a);
-				if (item == null)
-					continue;
-				items.add(item);
-			}
-
-			kit.setItems(items.toArray(new ItemStack[0]));
-			String iconItem = config.getString("icon");
-			if (iconItem == null)
-				iconItem = "BEDROCK";
-			kit.setIcon(XMaterial.valueOf(iconItem).parseItem());
-			kit.setPrice(config.getDouble("price", 0));
-
-			// add kit to the arena list
-			this.kits.add(kit);
-			this.sendDebugMessage("&eLoaded kit: &a%s", kit.getName());
-		}
-		this.sendDebugMessage("Finished loading kits.");
 	}
 
 	public List<Arena> getArenas() {
