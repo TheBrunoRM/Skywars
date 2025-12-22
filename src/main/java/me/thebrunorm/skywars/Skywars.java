@@ -50,7 +50,7 @@ public class Skywars extends JavaPlugin {
 	public static String chestsPath;
 	public static SkywarsConfiguration configuration;
 	public static boolean holograms = false;
-	public static boolean placeholders = false;
+	public static boolean placeholderAPI = false;
 	public static YamlConfiguration config;
 	public static YamlConfiguration langConfig;
 	public static Skywars plugin;
@@ -69,7 +69,6 @@ public class Skywars extends JavaPlugin {
 	boolean updated = false;
 	ChestManager chestManager = new ChestManager();
 	MapManager mapManager = new MapManager();
-	SkywarsLobby skywarsLobby;
 	private String serverPackageVersion;
 	private ReflectionNMS nmsHandler;
 
@@ -295,17 +294,13 @@ public class Skywars extends JavaPlugin {
 
 		SkywarsEconomy.setup();
 
-		// placeholder api
-		if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-			placeholders = true;
-		}
-		this.sendMessage("&ePlaceholderAPI: " + (placeholders ? "&ahooked.":"&cnot found."));
+		placeholderAPI = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
+		this.sendMessage("&ePlaceholderAPI: " + (placeholderAPI ? "&ahooked.":"&cnot found."));
 
-		// done
-		this.sendMessage("&ahas been enabled: &bv%s", this.version);
-
-		if (placeholders)
+		if (placeholderAPI)
 			new SkywarsPlaceholderExpansion().register();
+
+		this.sendMessage("&ahas been enabled: &bv%s", this.version);
 
 		if (!Skywars.get().getConfig().getBoolean("taskUpdate.disabled"))
 			Bukkit.getScheduler().runTaskTimer(Skywars.get(), () -> {

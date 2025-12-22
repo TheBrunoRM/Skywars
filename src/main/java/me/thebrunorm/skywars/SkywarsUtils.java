@@ -46,7 +46,7 @@ public class SkywarsUtils {
 			return "";
 		final SimpleDateFormat formatter = new SimpleDateFormat(format);
 		final String strDate = formatter.format(date);
-		if (Skywars.placeholders)
+		if (Skywars.placeholderAPI)
 			text = PlaceholderAPI.setPlaceholders(player, text);
 		text = text.replaceAll(getVariableCode("date"), strDate).replaceAll(getVariableCode("url"), URL);
 
