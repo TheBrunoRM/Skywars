@@ -252,7 +252,7 @@ public class Skywars extends JavaPlugin {
 		loadPrefixes();
 
 		if (!this.loadConfig()) {
-			this.sendMessage(MessageUtils.get("error_config") + " " + MessageUtils.get("disabling_plugin"));
+			this.sendMessage(MessageUtils.get("console.error_config") + " " + MessageUtils.get("console.disabling_plugin"));
 			this.setEnabled(false);
 			return;
 		}
@@ -266,7 +266,7 @@ public class Skywars extends JavaPlugin {
 		String packageName = this.getServer().getClass().getPackage().getName();
 		this.serverPackageVersion = packageName.substring(packageName.lastIndexOf('.') + 1);
 
-		this.sendDebugMessage(MessageUtils.get("server_version", packageName, this.serverPackageVersion));
+		this.sendDebugMessage(MessageUtils.get("console.server_version", packageName, this.serverPackageVersion));
 
 		this.loadCommands();
 		this.loadEvents();
