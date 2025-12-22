@@ -102,7 +102,7 @@ public class MainCommand implements CommandExecutor {
 					return true;
 				if (CommandsUtils.hasPermission(player, "skywars.setmainlobby")) {
 					SkywarsLobby.saveLobby(player.getLocation());
-					player.sendMessage(MessageUtils.getMessage("MAIN_LOBBY_SET"));
+					player.sendMessage(MessageUtils.get("MAIN_LOBBY_SET"));
 				}
 			} else if (args[0].equalsIgnoreCase("lobby")) {
 				if (CommandsUtils.consoleCheck(sender))
@@ -113,9 +113,9 @@ public class MainCommand implements CommandExecutor {
 				Location lobbyLocation = SkywarsLobby.getLobby();
 				if (lobbyLocation != null) {
 					player.teleport(lobbyLocation);
-					player.sendMessage(MessageUtils.getMessage("TELEPORTED_TO_MAIN_LOBBY"));
+					player.sendMessage(MessageUtils.get("TELEPORTED_TO_MAIN_LOBBY"));
 				} else {
-					player.sendMessage(MessageUtils.getMessage("MAIN_LOBBY_NOT_SET"));
+					player.sendMessage(MessageUtils.get("MAIN_LOBBY_NOT_SET"));
 				}
 			} else if (args[0].equalsIgnoreCase("play")) {
 				MapMenu.open(player);
@@ -129,7 +129,7 @@ public class MainCommand implements CommandExecutor {
 				final String _name = String.join(" ", list);
 				final SkywarsMap _map = Skywars.get().getMapManager().getMap(_name);
 				if (_map == null) {
-					player.sendMessage(MessageUtils.getMessage("NO_MAP"));
+					player.sendMessage(MessageUtils.get("NO_MAP"));
 					return true;
 				}
 				ConfigMenu.OpenConfigurationMenu(player, _map);
@@ -182,7 +182,7 @@ public class MainCommand implements CommandExecutor {
 				if (CommandsUtils.lacksPermission(sender, "skywars.admin"))
 					return true;
 				Skywars.get().Reload();
-				sender.sendMessage(MessageUtils.getMessage("RELOADED"));
+				sender.sendMessage(MessageUtils.get("RELOADED"));
 			}
 
 			// else if(!CommandsUtils.permissionCheckWithMessage(player, "skywars.test"))

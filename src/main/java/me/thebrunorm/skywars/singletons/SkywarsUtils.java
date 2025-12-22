@@ -119,15 +119,15 @@ public class SkywarsUtils {
 	public static String getStatus(Arena arena) {
 		switch (arena.getStatus()) {
 			case WAITING:
-				return MessageUtils.get("status.waiting");
+				return MessageUtils.resolve("status.waiting");
 			case STARTING:
-				return MessageUtils.get("status.starting");
+				return MessageUtils.resolve("status.starting");
 			case PLAYING:
-				return MessageUtils.get("status.playing");
+				return MessageUtils.resolve("status.playing");
 			case RESTARTING:
-				return MessageUtils.get("status.restarting");
+				return MessageUtils.resolve("status.restarting");
 			default:
-				return MessageUtils.get("status.unknown");
+				return MessageUtils.resolve("status.unknown");
 		}
 	}
 

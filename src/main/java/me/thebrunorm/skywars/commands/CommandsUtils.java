@@ -12,7 +12,7 @@ public enum CommandsUtils {
 	public static boolean consoleCheck(CommandSender sender) {
 		if (sender instanceof Player)
 			return false;
-		sender.sendMessage(MessageUtils.getMessage("CANT_EXECUTE_COMMAND_IN_CONSOLE"));
+		sender.sendMessage(MessageUtils.get("CANT_EXECUTE_COMMAND_IN_CONSOLE"));
 		return true;
 	}
 

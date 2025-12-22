@@ -115,7 +115,7 @@ public class Arena {
 		}
 
 		if (this.getTask() != null && this.getStatus() == ArenaStatus.STARTING)
-			player.sendMessage(MessageUtils.getMessage("GAME_STARTING", this.getCountdown()));
+			player.sendMessage(MessageUtils.get("GAME_STARTING", this.getCountdown()));
 
 		SkywarsCaseCreator.createCase(spawn, Skywars.get().getPlayerCaseXMaterial(player));
 
@@ -172,7 +172,7 @@ public class Arena {
 			if (this.forcedStart && this.forcedStartPlayer != null) {
 				for (final SkywarsUser player : this.getUsers()) {
 					player.getPlayer()
-							.sendMessage(MessageUtils.getMessage("FORCED_START", this.forcedStartPlayer.getName()));
+							.sendMessage(MessageUtils.get("FORCED_START", this.forcedStartPlayer.getName()));
 				}
 			}
 			this.task = Bukkit.getScheduler().runTaskTimer(Skywars.get(), new Runnable() {
@@ -507,8 +507,8 @@ public class Arena {
 			Bukkit.getScheduler().runTaskLater(Skywars.get(), new Runnable() {
 				@Override
 				public void run() {
-					Skywars.get().NMS().sendTitle(player, MessageUtils.getMessage("died.title"),
-							MessageUtils.getMessage("died.subtitle"), 0, 80, 0);
+					Skywars.get().NMS().sendTitle(player, MessageUtils.get("died.title"),
+							MessageUtils.get("died.subtitle"), 0, 80, 0);
 				}
 			}, 20);
 	}
@@ -548,7 +548,7 @@ public class Arena {
 		// Si aún hay más de un equipo vivo, solo actualizamos el número de jugadores restantes.
 		for (final SkywarsUser p : this.getUsers()) {
 			Skywars.get().NMS().sendActionbar(p.getPlayer(),
-					MessageUtils.getMessage("PLAYERS_REMAINING", this.getAlivePlayerCount()));
+					MessageUtils.get("PLAYERS_REMAINING", this.getAlivePlayerCount()));
 		}
 	}
 
@@ -636,8 +636,8 @@ public class Arena {
 
 		for (final SkywarsUser user : this.getUsers()) {
 			if (winningTeam != null && winningTeam.getUsers().contains(user)) {
-				Skywars.get().NMS().sendTitle(user.getPlayer(), MessageUtils.getMessage("won.title"),
-						MessageUtils.getMessage("won.subtitle"), 0, 80, 0);
+				Skywars.get().NMS().sendTitle(user.getPlayer(), MessageUtils.get("won.title"),
+						MessageUtils.get("won.subtitle"), 0, 80, 0);
 			} else {
 				Skywars.get().NMS().sendTitle(user.getPlayer(),
 						"&c&lGAME ENDED", "&7You didn't win this time.", 0, 80, 0);
@@ -689,7 +689,7 @@ public class Arena {
 			// Skywars.get().sendDebugMessage("stopping start cooldown");
 			this.setStatus(ArenaStatus.WAITING);
 			for (final SkywarsUser players : this.getUsers()) {
-				players.getPlayer().sendMessage(MessageUtils.getMessage("COUNTDOWN_STOPPED", this.getTeams().size()));
+				players.getPlayer().sendMessage(MessageUtils.get("COUNTDOWN_STOPPED", this.getTeams().size()));
 			}
 			this.cancelTimer();
 		}
@@ -810,9 +810,9 @@ public class Arena {
 					player.getPlayer().getInventory().addItem(item);
 				}
 			}
-			player.getPlayer().sendMessage(MessageUtils.getMessage("arena_start.message"));
-			Skywars.get().NMS().sendTitle(player.getPlayer(), MessageUtils.getMessage("arena_start.title"),
-					MessageUtils.getMessage("arena_start.subtitle"));
+			player.getPlayer().sendMessage(MessageUtils.get("arena_start.message"));
+			Skywars.get().NMS().sendTitle(player.getPlayer(), MessageUtils.get("arena_start.title"),
+					MessageUtils.get("arena_start.subtitle"));
 			SkywarsUtils.playSoundsFromConfig(player.getPlayer(), "sounds.start");
 
 			Bukkit.getScheduler().runTaskLater(Skywars.get(), () -> {
@@ -903,9 +903,9 @@ public class Arena {
 
 	public void broadcastEventMessage(SkywarsEventType eventType) {
 		for (final SkywarsUser player : this.getUsers()) {
-			player.getPlayer().sendMessage(MessageUtils.getMessage(String.format("events.%s.message", eventType)));
-			Skywars.get().NMS().sendTitle(player.getPlayer(), MessageUtils.getMessage(String.format("events.%s.title", eventType)),
-					MessageUtils.getMessage(String.format("events.%s.subtitle", eventType)));
+			player.getPlayer().sendMessage(MessageUtils.get(String.format("events.%s.message", eventType)));
+			Skywars.get().NMS().sendTitle(player.getPlayer(), MessageUtils.get(String.format("events.%s.title", eventType)),
+					MessageUtils.get(String.format("events.%s.subtitle", eventType)));
 		}
 	}
 

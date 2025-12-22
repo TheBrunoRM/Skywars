@@ -27,7 +27,7 @@ public class ArenaEventManager {
 			return Skywars.langConfig.getString("status.ended");
 		final SkywarsEvent event = this.getNextEvent();
 		if (event == null)
-			return MessageUtils.getMessage("events.no_event");
+			return MessageUtils.get("events.no_event");
 		final int time = event.getTime();
 		final int minutes = time / 60;
 		final int seconds = time % 60;
