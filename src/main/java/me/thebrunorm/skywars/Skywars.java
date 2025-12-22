@@ -107,29 +107,6 @@ public class Skywars extends JavaPlugin {
 		return this.serverPackageVersion;
 	}
 
-	public void loadEvents() {
-		final FileConfiguration config = this.getConfig();
-		final PluginManager pluginManager = this.getServer().getPluginManager();
-		if (config.getBoolean("signsEnabled")) {
-			this.signManager = new SignManager();
-			pluginManager.registerEvents(this.signManager, this);
-		}
-
-		if (config.getBoolean("messageSounds.enabled"))
-			pluginManager.registerEvents(new MessageSound(), this);
-		if (config.getBoolean("disableWeather"))
-			pluginManager.registerEvents(new DisableWeather(), this);
-		if (config.getBoolean("debug.projectileTests"))
-			pluginManager.registerEvents(new ProjectileTrails(), this);
-
-		final Listener[] listeners = {new InteractEvent(), new Events(), new GamesMenu(), new MapMenu(),
-				new KitsMenu(), new SetupEvents(), new ConfigMenu(), new GameOptionsMenu(),
-				new PlayerInventoryManager(),};
-		for (final Listener listener : listeners) {
-			pluginManager.registerEvents(listener, this);
-		}
-	}
-
 	public void loadCommands() {
 		final HashMap<String, CommandExecutor> cmds = new HashMap<>();
 		cmds.put("skywars", new MainCommand());
@@ -282,6 +259,29 @@ public class Skywars extends JavaPlugin {
 
 	public void sendMessageWithPrefix(String prefix, String text, Object... format) {
 		Bukkit.getConsoleSender().sendMessage(MessageUtils.color(prefix) + " " + MessageUtils.color(text, format));
+	}
+
+	public void loadEvents() {
+		final FileConfiguration config = this.getConfig();
+		final PluginManager pluginManager = this.getServer().getPluginManager();
+		if (config.getBoolean("signsEnabled")) {
+			this.signManager = new SignManager();
+			pluginManager.registerEvents(this.signManager, this);
+		}
+
+		if (config.getBoolean("messageSounds.enabled"))
+			pluginManager.registerEvents(new MessageSound(), this);
+		if (config.getBoolean("disableWeather"))
+			pluginManager.registerEvents(new DisableWeather(), this);
+		if (config.getBoolean("debug.projectileTests"))
+			pluginManager.registerEvents(new ProjectileTrails(), this);
+
+		final Listener[] listeners = {new InteractEvent(), new Events(), new GamesMenu(), new MapMenu(),
+				new KitsMenu(), new ConfigMenu(), new GameOptionsMenu(),
+				new PlayerInventoryManager(),};
+		for (final Listener listener : listeners) {
+			pluginManager.registerEvents(listener, this);
+		}
 	}
 
 	public void loadKits() {
