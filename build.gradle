@@ -1,0 +1,107 @@
+// Copyright (c) 2025 Bruno
+
+plugins {
+    id 'java'
+    id 'com.diffplug.spotless' version '6.25.0'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+
+    maven {
+        name = "spigotmc-repo"
+        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+    maven {
+        name = "jitpack"
+        url = "https://jitpack.io"
+    }
+    maven {
+        name = "codemc"
+        url = "https://repo.codemc.io/repository/maven-public/"
+    }
+    maven {
+        name = "papermc"
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
+    maven {
+        name = "placeholderapi"
+        url = "https://repo.extendedclip.com/content/repositories/placeholderapi/"
+    }
+}
+
+dependencies {
+    implementation("commons-io:commons-io:2.16.1")
+
+    // Spigot
+    compileOnly("org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT")
+
+    // Logging
+    implementation("org.slf4j:log4j-over-slf4j:2.0.6")
+
+    // Testing
+    testImplementation("com.github.seeseemelk:MockBukkit-v1.19:2.29.0")
+
+    // Plugin APIs (provided)
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
+    compileOnly("me.filoghost.holographicdisplays:holographicdisplays-api:3.0.0-SNAPSHOT")
+    compileOnly("com.gmail.filoghost.holographicdisplays:holographicdisplays-api:2.4.9")
+    compileOnly("com.github.decentsoftware-eu:decentholograms:2.8.6")
+    compileOnly("me.clip:placeholderapi:2.11.6")
+
+    // NBT library
+    implementation("com.github.Querz:NBT:6.1")
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = encoding
+}
+
+processResources {
+    filteringCharset = encoding
+
+    inputs.properties([
+            name   : project.name,
+            version: project.version,
+            author : author
+    ])
+
+    filesMatching('plugin.yml') {
+        expand(
+                name: project.name,
+                version: project.version,
+                author: author
+        )
+    }
+}
+
+tasks.register('moveJar', Copy) {
+    dependsOn tasks.jar
+
+    from(tasks.jar.archiveFile)
+    into(file(pluginsFolderSkywars))
+}
+
+tasks.jar {
+    archiveBaseName.set(project.name)
+    archiveVersion.set("")
+
+    finalizedBy tasks.moveJar
+}
+
+tasks.register('debugPaths') {
+    doLast {
+        println "Jar file: " + tasks.jar.archiveFile.get().asFile
+        println "Target dir: " + file(pluginsFolderSkywars)
+    }
+}

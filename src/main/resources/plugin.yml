@@ -1,7 +1,7 @@
 main: me.thebrunorm.skywars.Skywars
-version: ${project.version}
-name: ${project.name}
-author: BrunoRM
+version: ${version}
+name: ${name}
+author: ${author}
 softdepend:
   - Vault
   - WorldEdit
