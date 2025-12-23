@@ -368,15 +368,13 @@ public class SkywarsUtils {
 		return MessageUtils.color(configName);
 	}
 
-	public static void playSoundsFromConfig(Player player, String configLocation) {
-		final List<String> list = Skywars.config.getStringList(configLocation);
-		final String singleSound = Skywars.config.getString(configLocation);
-		if (!list.isEmpty())
-			for (final String sound : list) {
+	public static void playSoundsFromConfig(Player player, String path) {
+		if (Skywars.config.isString(path)) {
+			playSound(player, Skywars.config.getString(path));
+		} else if (Skywars.config.isList(path)) {
+			for (String sound : Skywars.config.getStringList(path)) {
 				playSound(player, sound);
 			}
-		else if (singleSound != null) {
-			playSound(player, singleSound);
 		}
 	}
 
