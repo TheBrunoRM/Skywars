@@ -223,9 +223,7 @@ public enum ConfigurationUtils {
 			}
 		}
 
-		if (meta instanceof PotionMeta) {
-
-			PotionMeta potionMeta = (PotionMeta) meta;
+		if (meta instanceof PotionMeta potionMeta) {
 
 			// Custom effects
 			if (hashmap.containsKey("effects")) {

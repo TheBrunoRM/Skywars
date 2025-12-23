@@ -53,9 +53,8 @@ public class Events implements Listener {
 	@EventHandler
 	void onDamage(EntityDamageEvent event) {
 		final Entity entity = event.getEntity();
-		if (!(entity instanceof Player))
+		if (!(entity instanceof Player player))
 			return;
-		final Player player = (Player) entity;
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;
@@ -89,13 +88,11 @@ public class Events implements Listener {
 	@EventHandler
 	void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
 		final Entity entity = event.getEntity();
-		if (!(entity instanceof LivingEntity))
+		if (!(entity instanceof LivingEntity livingEntity))
 			return;
-		final LivingEntity livingEntity = (LivingEntity) entity;
 		final Entity damager = event.getDamager();
-		if (!(damager instanceof Player))
+		if (!(damager instanceof Player attacker))
 			return;
-		final Player attacker = (Player) damager;
 
 		final Arena attackerArena = Skywars.get().getPlayerArena(attacker);
 		if (attackerArena != null) {
@@ -104,9 +101,8 @@ public class Events implements Listener {
 				event.setCancelled(true);
 			}
 		}
-		if (!(entity instanceof Player))
+		if (!(entity instanceof Player victim))
 			return;
-		final Player victim = (Player) entity;
 		final Arena victimArena = Skywars.get().getPlayerArena(victim);
 		if (victimArena == null)
 			return;
@@ -125,9 +121,8 @@ public class Events implements Listener {
 	// prevent spectators from being targeted by mobs
 	@EventHandler
 	public void onMobTarget(EntityTargetLivingEntityEvent event) {
-		if (!(event.getTarget() instanceof Player))
+		if (!(event.getTarget() instanceof Player player))
 			return;
-		final Player player = (Player) event.getTarget();
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;
@@ -141,9 +136,8 @@ public class Events implements Listener {
 	@EventHandler
 	void onFoodLevelChange(FoodLevelChangeEvent event) {
 		final Entity entity = event.getEntity();
-		if (!(entity instanceof Player))
+		if (!(entity instanceof Player player))
 			return;
-		final Player player = (Player) entity;
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;
@@ -180,10 +174,9 @@ public class Events implements Listener {
 
 		checkChest(event.getBlock(), arena);
 	}
-	
+
 	void checkChest(Block block, Arena arena) {
-		if (!(block.getState() instanceof Chest)) return;
-		final Chest chest = (Chest) block.getState();
+		if (!(block.getState() instanceof Chest chest)) return;
 		if (!arena.getActiveChests().contains(chest)) return;
 		arena.removeChest(chest);
 	}
@@ -218,9 +211,8 @@ public class Events implements Listener {
 		final Block block = event.getClickedBlock();
 		if (block == null)
 			return;
-		if (!(block.getState() instanceof Chest))
+		if (!(block.getState() instanceof Chest chest))
 			return;
-		final Chest chest = (Chest) block.getState();
 		if (!arena.getActiveChests().contains(chest))
 			return;
 
@@ -251,10 +243,9 @@ public class Events implements Listener {
 			return;
 
 		final Entity target = event.getTarget();
-		if (!(target instanceof Player))
+		if (!(target instanceof Player player))
 			return;
 
-		final Player player = (Player) target;
 		final Arena arena = Skywars.get().getPlayerArena(player);
 
 		if (arena == null)
@@ -294,9 +285,8 @@ public class Events implements Listener {
 	@EventHandler
 	void onInventoryClick(InventoryClickEvent event) {
 		final HumanEntity whoClicked = event.getWhoClicked();
-		if (!(whoClicked instanceof Player))
+		if (!(whoClicked instanceof Player player))
 			return;
-		final Player player = (Player) whoClicked;
 		final Arena arena = Skywars.get().getPlayerArena(player);
 		if (arena == null)
 			return;

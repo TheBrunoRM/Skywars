@@ -11,8 +11,7 @@ public class WhereCommand implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String cmd, String[] args) {
-		if (sender instanceof Player) {
-			final Player player = (Player) sender;
+		if (sender instanceof Player player) {
 			sender.sendMessage(MessageUtils.get("where", player.getWorld().getName()));
 		} else {
 			sender.sendMessage(MessageUtils.get("where", MessageUtils.get("the_console")));

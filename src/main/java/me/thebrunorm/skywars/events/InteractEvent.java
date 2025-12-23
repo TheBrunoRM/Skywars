@@ -54,7 +54,7 @@ public class InteractEvent implements Listener {
 		if (event.getClickedBlock() == null)
 			return;
 		BlockState blockState = event.getClickedBlock().getState();
-		if (!(blockState instanceof Sign))
+		if (!(blockState instanceof Sign sign))
 			return;
 		if (player.getGameMode() == GameMode.CREATIVE && player.isSneaking())
 			return;
@@ -66,8 +66,6 @@ public class InteractEvent implements Listener {
 			ArenaManager.joinMap(map, player);
 			return;
 		}
-
-		Sign sign = (Sign) blockState;
 
 		String line1 = sign.getLine(1);
 		String line2 = sign.getLine(2);

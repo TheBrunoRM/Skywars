@@ -183,11 +183,10 @@ public class SignManager implements Listener {
 	public void updateSigns() {
 		for (final Entry<Location, SkywarsMap> sign : this.signs.entrySet()) {
 			final BlockState state = sign.getKey().getBlock().getState();
-			if (!(state instanceof Sign)) {
+			if (!(state instanceof Sign signState)) {
 				Skywars.get().sendDebugMessage("&4Error updating signs: &csign is not sign: &b" + sign.getKey());
 				continue;
 			}
-			final Sign signState = (Sign) state;
 			this.updateSign(signState, sign.getValue());
 		}
 	}

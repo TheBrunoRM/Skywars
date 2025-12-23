@@ -1,4 +1,4 @@
-/* (C) 2021 Bruno */
+// Copyright (c) 2025 Bruno
 package me.thebrunorm.skywars.schematics;
 
 import com.cryptomorin.xseries.XMaterial;
@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 public enum SchematicHandler {
 	;
 
+	public static HashMap<String, String> materials = new HashMap<>();
 	static Class<?> blockClass;
 	static Class<?> slabType;
 	static Class<?> blockDataClass;
@@ -62,6 +64,12 @@ public enum SchematicHandler {
 		return new Vector(x, y, z);
 	}
 
+	public static Vector calculatePositionWithOffset(Map<String, IntTag> values, Vector offset) {
+		final Vector vector = getVector(values);
+		return new Vector(vector.getX() + offset.getBlockX(), vector.getY() + offset.getBlockY(),
+				vector.getZ() + offset.getBlockZ());
+	}
+
 	public static Vector getVector(Map<String, IntTag> values) {
 		final int x = values.get("x").asInt();
 		final int y = values.get("y").asInt();
@@ -69,43 +77,10 @@ public enum SchematicHandler {
 		return new Vector(x, y, z);
 	}
 
-	public static Vector calculatePositionWithOffset(Map<String, IntTag> values, Vector offset) {
-		final Vector vector = getVector(values);
-		return new Vector(vector.getX() + offset.getBlockX(), vector.getY() + offset.getBlockY(),
-				vector.getZ() + offset.getBlockZ());
-	}
-
 	public static Location calculatePositionWithOffset(Map<String, IntTag> values, World world, Vector offset) {
 		final Vector vector = getVector(values);
 		return new Location(world, vector.getX() + offset.getBlockX(), vector.getY() + offset.getBlockY(),
 				vector.getZ() + offset.getBlockZ());
-	}
-
-	public static HashMap<String, String> materials = new HashMap<>();
-
-	public static void loadMaterials() {
-		Skywars.get().sendMessage("Loading materials...");
-		final InputStream stream = Skywars.get().getResource("items.tsv");
-		final Scanner myReader = new Scanner(stream);
-		while (myReader.hasNextLine()) {
-			final String d = myReader.nextLine();
-			final String[] s = d.split("\t");
-			final String _id = s[0];
-			final String _data = s[1];
-			String _mat = s[3].toUpperCase();
-			if (Material.matchMaterial(_mat) == null)
-				_mat = s[2].replaceAll(" ", "_").toUpperCase();
-			// if(Material.matchMaterial(_mat) == null)
-			// Skywars.get().sendDebugMessage("Could not find material for " +
-			// String.join(", ", s));
-			materials.put(_id + ":" + _data, _mat);
-		}
-		myReader.close();
-		Skywars.get().sendDebugMessage("Loaded materials");
-	}
-
-	public static String getMaterialNameByIDAndData(int id, int data) {
-		return materials.get(id + ":" + data);
 	}
 
 	public static void clear(Location loc, Schematic schematic) {
@@ -150,56 +125,6 @@ public enum SchematicHandler {
 		}
 	}
 
-	public static String getColor(int id) {
-		switch (id) {
-		case 0:
-			return "WHITE";
-		case 1:
-			return "ORANGE";
-		case 2:
-			return "MAGENTA";
-		case 3:
-			return "LIGHT_BLUE";
-		case 4:
-			return "YELLOW";
-		case 5:
-			return "LIME";
-		case 6:
-			return "PINK";
-		case 7:
-			return "GRAY";
-		case 8:
-			return "LIGHT_GRAY";
-		case 9:
-			return "CYAN";
-		case 10:
-			return "PURPLE";
-		case 11:
-			return "BLUE";
-		case 12:
-			return "BROWN";
-		case 13:
-			return "GREEN";
-		case 14:
-			return "RED";
-		case 15:
-			return "BLACK";
-		default:
-			return "WHITE";
-		}
-	}
-
-	public static String getColorableMaterialName(int id) {
-		switch (id) {
-		case 35:
-			return "WOOL";
-		case 160:
-			return "STAINED_GLASS_PANE";
-		default:
-			return null;
-		}
-	}
-
 	@SuppressWarnings("deprecation")
 	public static void pasteSchematic_old(Location loc, Schematic_old schematic) {
 		loadMaterials();
@@ -231,20 +156,20 @@ public enum SchematicHandler {
 						// 1.13+ method for setting blocks
 						String name = null;
 						switch (id) {
-						case 17: // log
-							name = getMaterialNameByIDAndData(id, blockData[index] % 4);
-							break;
-						case (byte) 162: // log2
-							name = getMaterialNameByIDAndData(id, blockData[index] % 2);
-							break;
-						case 50: // torch
-						case 54: // chest
-						case 61: // furnace
-						case 66: // rail
-							name = getMaterialNameByIDAndData(id, 0);
-							break;
-						default:
-							name = getMaterialNameByIDAndData(id, blockData[index]);
+							case 17: // log
+								name = getMaterialNameByIDAndData(id, blockData[index] % 4);
+								break;
+							case (byte) 162: // log2
+								name = getMaterialNameByIDAndData(id, blockData[index] % 2);
+								break;
+							case 50: // torch
+							case 54: // chest
+							case 61: // furnace
+							case 66: // rail
+								name = getMaterialNameByIDAndData(id, 0);
+								break;
+							default:
+								name = getMaterialNameByIDAndData(id, blockData[index]);
 						}
 						if (name != null) {
 							boolean doubleSlab = false;
@@ -320,13 +245,88 @@ public enum SchematicHandler {
 			final Block block = new Location(world, x + loc.getX() + offset.getX(), y + loc.getY() + offset.getY(),
 					z + loc.getZ() + offset.getZ()).getBlock();
 			switch (values.getString("id")) {
-			case "Beacon":
-				block.setType(XMaterial.BEACON.parseMaterial());
-				break;
-			case "Chest":
-				// block.setType(XMaterial.CHEST.parseMaterial());
-				break;
+				case "Beacon":
+					block.setType(XMaterial.BEACON.parseMaterial());
+					break;
+				case "Chest":
+					// block.setType(XMaterial.CHEST.parseMaterial());
+					break;
 			}
+		}
+	}
+
+	public static void loadMaterials() {
+		Skywars.get().sendMessage("Loading materials...");
+		final InputStream stream = Skywars.get().getResource("items.tsv");
+		final Scanner myReader = new Scanner(stream, StandardCharsets.UTF_8);
+		while (myReader.hasNextLine()) {
+			final String d = myReader.nextLine();
+			final String[] s = d.split("\t");
+			final String _id = s[0];
+			final String _data = s[1];
+			String _mat = s[3].toUpperCase();
+			if (Material.matchMaterial(_mat) == null)
+				_mat = s[2].replaceAll(" ", "_").toUpperCase();
+			// if(Material.matchMaterial(_mat) == null)
+			// Skywars.get().sendDebugMessage("Could not find material for " +
+			// String.join(", ", s));
+			materials.put(_id + ":" + _data, _mat);
+		}
+		myReader.close();
+		Skywars.get().sendDebugMessage("Loaded materials");
+	}
+
+	public static String getMaterialNameByIDAndData(int id, int data) {
+		return materials.get(id + ":" + data);
+	}
+
+	public static String getColorableMaterialName(int id) {
+		switch (id) {
+			case 35:
+				return "WOOL";
+			case 160:
+				return "STAINED_GLASS_PANE";
+			default:
+				return null;
+		}
+	}
+
+	public static String getColor(int id) {
+		switch (id) {
+			case 0:
+				return "WHITE";
+			case 1:
+				return "ORANGE";
+			case 2:
+				return "MAGENTA";
+			case 3:
+				return "LIGHT_BLUE";
+			case 4:
+				return "YELLOW";
+			case 5:
+				return "LIME";
+			case 6:
+				return "PINK";
+			case 7:
+				return "GRAY";
+			case 8:
+				return "LIGHT_GRAY";
+			case 9:
+				return "CYAN";
+			case 10:
+				return "PURPLE";
+			case 11:
+				return "BLUE";
+			case 12:
+				return "BROWN";
+			case 13:
+				return "GREEN";
+			case 14:
+				return "RED";
+			case 15:
+				return "BLACK";
+			default:
+				return "WHITE";
 		}
 	}
 
@@ -336,16 +336,16 @@ public enum SchematicHandler {
 
 	public static byte getHorizontalIndex(String direction, byte offset) {
 		switch (direction.toLowerCase()) {
-		case "south":
-			return (byte) (offset + 1);
-		case "west":
-			return (byte) (offset + 2);
-		case "east":
-			return (byte) (offset + 3);
-		case "north":
-			return (byte) (offset + 4);
-		default:
-			return 0;
+			case "south":
+				return (byte) (offset + 1);
+			case "west":
+				return (byte) (offset + 2);
+			case "east":
+				return (byte) (offset + 3);
+			case "north":
+				return (byte) (offset + 4);
+			default:
+				return 0;
 		}
 	}
 
@@ -424,21 +424,21 @@ public enum SchematicHandler {
 
 		for (final CompoundTag values : blockEntities) {
 			switch (values.getString("id").toLowerCase()) {
-			case "sign":
-				// TODO: parse sign
-				break;
-			case "beacon":
-				/*
-				 * final int x = values.getInt("x"); final int y = values.getInt("y"); final int
-				 * z = values.getInt("z");
-				 *
-				 * final Block block = new Location(world, x + loc.getX() + offset.getX(), y +
-				 * loc.getY() + offset.getY(), z + loc.getZ() + offset.getZ()).getBlock();
-				 * block.setType(XMaterial.BEACON.parseMaterial());
-				 */
-				break;
-			case "chest":
-				break;
+				case "sign":
+					// TODO: parse sign
+					break;
+				case "beacon":
+					/*
+					 * final int x = values.getInt("x"); final int y = values.getInt("y"); final int
+					 * z = values.getInt("z");
+					 *
+					 * final Block block = new Location(world, x + loc.getX() + offset.getX(), y +
+					 * loc.getY() + offset.getY(), z + loc.getZ() + offset.getZ()).getBlock();
+					 * block.setType(XMaterial.BEACON.parseMaterial());
+					 */
+					break;
+				case "chest":
+					break;
 			}
 		}
 	}
