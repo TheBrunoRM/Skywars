@@ -6,6 +6,8 @@ import me.thebrunorm.skywars.Skywars;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 
+import java.util.logging.Level;
+
 public enum SkywarsCaseCreator {
 	;
 
@@ -75,15 +77,15 @@ public enum SkywarsCaseCreator {
 	}
 
 	private static void setAirBlocks(Location location, int[][] offsets) {
-		for (int[] o : offsets) {
-			Block block = location.getBlock().getRelative(o[0], o[1], o[2]);
+		for (int[] relative : offsets) {
+			Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
 			block.setType(XMaterial.AIR.parseMaterial());
 		}
 	}
 
 	private static void setMaterialBlocks(Location location, int[][] offsets, XMaterial material) {
-		for (int[] o : offsets) {
-			Block block = location.getBlock().getRelative(o[0], o[1], o[2]);
+		for (int[] relative : offsets) {
+			Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
 			block.setType(material.parseMaterial());
 
 			if (XMaterial.isNewVersion()) continue;
@@ -93,7 +95,7 @@ public enum SkywarsCaseCreator {
 						.getMethod("setData", byte.class)
 						.invoke(block, material.getData());
 			} catch (Exception e) {
-				e.printStackTrace();
+				Skywars.get().getLogger().log(Level.SEVERE, "Could not set block data for case", e);
 			}
 		}
 	}
