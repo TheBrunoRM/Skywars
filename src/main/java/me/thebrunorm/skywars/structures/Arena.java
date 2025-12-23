@@ -124,6 +124,14 @@ public class Arena {
 		Skywars.get().sendDebugMessage("arena %s -> %s joined team %s as player %s",
 				getMap().getName(), player.getName(), team.getNumber(), getAlivePlayerCount());
 
+		SkywarsCaseCreator.createCase(spawn, Skywars.get().getPlayerCaseXMaterial(player));
+
+		Skywars.get().playerLocations.put(player, player.getLocation());
+		swPlayer.setSavedPlayer(new SavedPlayer(player));
+		player.teleport(SkywarsUtils.getCenteredLocation(spawn));
+		SkywarsUtils.clearPlayer(player, true);
+		SkywarsUtils.setPlayerInventory(player, "waiting");
+
 		for (final SkywarsUser players : this.getUsers()) {
 			MessageUtils.sendTranslated(players.getPlayer(), "ARENA_JOINED",
 					player.getName(), this.getAlivePlayerCount(), this.map.getMaxPlayers());
@@ -132,14 +140,6 @@ public class Arena {
 
 		if (this.getTask() != null && this.getStatus() == ArenaStatus.STARTING)
 			player.sendMessage(MessageUtils.get("GAME_STARTING", this.getCountdown()));
-
-		SkywarsCaseCreator.createCase(spawn, Skywars.get().getPlayerCaseXMaterial(player));
-
-		Skywars.get().playerLocations.put(player, player.getLocation());
-		swPlayer.setSavedPlayer(new SavedPlayer(player));
-		player.teleport(SkywarsUtils.getCenteredLocation(spawn));
-		SkywarsUtils.clearPlayer(player, true);
-		SkywarsUtils.setPlayerInventory(player, "waiting");
 
 		Skywars.get().NMS().sendTitle(player, Skywars.langConfig.getString("arena_join.title"),
 				Skywars.langConfig.getString("arena_join.subtitle"));
