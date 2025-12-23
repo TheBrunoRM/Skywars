@@ -95,7 +95,7 @@ public class Skywars extends JavaPlugin {
 			for (Player player : Bukkit.getOnlinePlayers())
 				Skywars.get().NMS().sendTablist(player, "", "");
 
-		this.reloadConfig();
+		this.loadConfig();
 		this.loadPrefixes();
 		this.mapManager.loadMaps();
 		this.chestManager.loadChests();
