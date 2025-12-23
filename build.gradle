@@ -88,11 +88,13 @@ processResources {
 tasks.register('moveJar', Copy) {
     dependsOn tasks.jar
 
-    from(tasks.jar.archiveFile)
-
-    if (project.findProperty("pluginsFolderSkywars") != null) {
-        into(file(project.property("pluginsFolderSkywars")))
+    if (project.findProperty("pluginsFolderSkywars") == null) {
+        enabled = false
+        return
     }
+
+    from(tasks.jar.archiveFile)
+    into(file(project.property("pluginsFolderSkywars")))
 }
 
 tasks.jar {
