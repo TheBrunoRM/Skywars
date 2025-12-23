@@ -21,9 +21,9 @@ messageSounds:
 disableWeather: true
 
 sounds: # sound name; volume; pitch
-  join: HORSE_ARMOR; 5; 0.1
-  leave: ITEM_PICKUP; 5; 0.1
-  countdown: NOTE_STICKS; 5; 1
+  join: HORSE_ARMOR; .75; .75
+  leave: ITEM_PICKUP; 1; 0.1
+  countdown: NOTE_STICKS; 3; 1
   start:
     - NOTE_PLING; 0.5; 1
     - PORTAL_TRIGGER; 0.5; 5
