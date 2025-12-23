@@ -88,6 +88,11 @@ processResources {
 tasks.register('moveJar', Copy) {
     dependsOn tasks.jar
 
+    onlyIf {
+        project.hasProperty("pluginsFolderSkywars") &&
+                file(pluginsFolderSkywars).exists()
+    }
+
     from(tasks.jar.archiveFile)
     into(file(pluginsFolderSkywars))
 }
