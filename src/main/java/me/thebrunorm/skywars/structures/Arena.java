@@ -124,7 +124,7 @@ public class Arena {
 		Skywars.get().sendDebugMessage("arena %s -> %s joined team %s as player %s",
 				getMap().getName(), player.getName(), team.getNumber(), getAlivePlayerCount());
 
-		SkywarsCaseCreator.createCase(spawn, Skywars.get().getPlayerCaseXMaterial(player));
+		createCase(spawn, Skywars.get().getPlayerCaseXMaterial(player));
 
 		Skywars.get().playerLocations.put(player, player.getLocation());
 		swPlayer.setSavedPlayer(new SavedPlayer(player));
@@ -739,8 +739,14 @@ public class Arena {
 
 	public void resetCases() {
 		for (final Vector spawn : this.map.getSpawns().values()) {
-			SkywarsCaseCreator.createCase(this.getVectorInArena(spawn), XMaterial.RED_STAINED_GLASS);
+			createCase(this.getVectorInArena(spawn), XMaterial.RED_STAINED_GLASS);
 		}
+	}
+
+	private void createCase(Location spawn, XMaterial material) {
+		if (getMap().getTeamSize() > 1)
+			SkywarsCaseCreator.createBigCase(spawn, material);
+		else SkywarsCaseCreator.createCase(spawn, material);
 	}
 
 	public Location getVectorInArena(Vector vector) {
@@ -819,7 +825,7 @@ public class Arena {
 		this.fillChests();
 		this.applyGameSettings();
 		for (final Vector spawn : this.map.getSpawns().values()) {
-			SkywarsCaseCreator.createCase(this.getVectorInArena(spawn), XMaterial.AIR);
+			createCase(this.getVectorInArena(spawn), XMaterial.AIR);
 		}
 		for (final SkywarsUser player : this.getAlivePlayers()) {
 			SkywarsUtils.clearPlayer(player.getPlayer());

@@ -14,6 +14,7 @@ public enum SkywarsCaseCreator {
 			createBigCase(location, material);
 			return;
 		}
+
 		final int[][] blocks = {
 				// first layer
 				{-1, 0, 0}, {1, 0, 0}, {0, 0, -1}, {0, 0, 1},
@@ -27,22 +28,11 @@ public enum SkywarsCaseCreator {
 				{-1, -1, 0}, {1, -1, 0}, {0, -1, -1}, {0, -1, 1},
 				// top joints
 				{-1, 3, 0}, {1, 3, 0}, {0, 3, -1}, {0, 3, 1},};
+
 		final int[][] airBlocks = {{0, 0, 0}, {0, 1, 0}, {0, 2, 0}};
-		for (final int[] relative : airBlocks) {
-			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
-			block.setType(XMaterial.AIR.parseMaterial());
-		}
-		for (final int[] relative : blocks) {
-			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
-			block.setType(material.parseMaterial());
-			if (!XMaterial.isNewVersion()) {
-				try {
-					block.getClass().getMethod("setData", byte.class).invoke(block, material.getData());
-				} catch (final Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
+
+		setAirBlocks(location, airBlocks);
+		setMaterialBlocks(location, blocks, material);
 	}
 
 	public static void createBigCase(Location location, XMaterial material) {
@@ -70,6 +60,7 @@ public enum SkywarsCaseCreator {
 				// back wall
 				{-1, 0, -2}, {0, 0, -2}, {1, 0, -2}, {-1, 1, -2}, {0, 1, -2}, {1, 1, -2}, {-1, 2, -2},
 				{0, 2, -2}, {1, 2, -2},};
+
 		final int[][] airBlocks = {{-1, 0, -1}, {0, 0, -1}, {1, 0, -1}, {-1, 0, 0}, {0, 0, 0}, {1, 0, 0},
 				{-1, 0, 1}, {0, 0, 1}, {1, 0, 1},
 
@@ -78,18 +69,30 @@ public enum SkywarsCaseCreator {
 
 				{-1, 2, -1}, {0, 2, -1}, {1, 2, -1}, {-1, 2, 0}, {0, 2, 0}, {1, 2, 0}, {-1, 2, 1},
 				{0, 2, 1}, {1, 2, 1},};
-		for (final int[] relative : airBlocks) {
-			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
+
+		setAirBlocks(location, airBlocks);
+		setMaterialBlocks(location, blocks, material);
+	}
+
+	private static void setAirBlocks(Location location, int[][] offsets) {
+		for (int[] o : offsets) {
+			Block block = location.getBlock().getRelative(o[0], o[1], o[2]);
 			block.setType(XMaterial.AIR.parseMaterial());
 		}
-		for (final int[] relative : blocks) {
-			final Block block = location.getBlock().getRelative(relative[0], relative[1], relative[2]);
+	}
+
+	private static void setMaterialBlocks(Location location, int[][] offsets, XMaterial material) {
+		for (int[] o : offsets) {
+			Block block = location.getBlock().getRelative(o[0], o[1], o[2]);
 			block.setType(material.parseMaterial());
+
 			if (XMaterial.isNewVersion()) continue;
 
 			try {
-				block.getClass().getMethod("setData", byte.class).invoke(block, material.getData());
-			} catch (final Exception e) {
+				block.getClass()
+						.getMethod("setData", byte.class)
+						.invoke(block, material.getData());
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
