@@ -88,12 +88,11 @@ processResources {
 tasks.register('moveJar', Copy) {
     dependsOn tasks.jar
 
-    onlyIf {
-        project.findProperty("pluginsFolderSkywars") != null
-    }
-
     from(tasks.jar.archiveFile)
-    into(providers.gradleProperty("pluginsFolderSkywars").map { file(it) })
+
+    if (project.findProperty("pluginsFolderSkywars") != null) {
+        into(file(project.property("pluginsFolderSkywars")))
+    }
 }
 
 tasks.jar {
