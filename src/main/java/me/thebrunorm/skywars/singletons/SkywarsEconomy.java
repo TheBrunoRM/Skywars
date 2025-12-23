@@ -21,15 +21,15 @@ public enum SkywarsEconomy {
 		Skywars plugin = Skywars.get();
 		boolean economyEnabled = Skywars.get().getConfig().getBoolean("economy.enabled");
 		if (!economyEnabled) {
-			plugin.getLogger().info("&eEconomy (Vault): &6disabled in config.");
+			plugin.sendMessage("&eEconomy (Vault): &6disabled in config.");
 			return;
 		}
 
 		try {
 			if (setupEconomy())
-				plugin.getLogger().info("&eEconomy (Vault): &a" + economyProvider.getPlugin().getName());
+				plugin.sendMessage("&eEconomy (Vault): &a" + economyProvider.getPlugin().getName());
 		} catch (final Exception e) {
-			plugin.getLogger().log(Level.SEVERE, "&eEconomy (Vault): &ccould not hook.", e);
+			plugin.getLogger().log(Level.SEVERE, "Could not hook to Vault", e);
 		}
 	}
 

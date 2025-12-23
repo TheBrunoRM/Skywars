@@ -294,7 +294,7 @@ public class Skywars extends JavaPlugin {
 
 		if (placeholderAPI) new SkywarsPlaceholderExpansion().register();
 
-		this.sendMessage(MessageUtils.get("plugin_enabled", this.version));
+		this.sendMessage(MessageUtils.get("console.plugin_enabled", this.version));
 
 		restartTask();
 		SkywarsWorldCleanup.cleanupWorlds();
