@@ -82,12 +82,8 @@ public class Skywars extends JavaPlugin {
 		super(loader, description, dataFolder, file);
 	}
 
-	public SignManager getSignManager() {
-		return this.signManager;
-	}
-
-	public File file() {
-		return this.getFile();
+	public static Skywars get() {
+		return plugin;
 	}
 
 	public void reload() {
@@ -104,12 +100,16 @@ public class Skywars extends JavaPlugin {
 		this.restartTask();
 	}
 
-	public ReflectionNMS NMS() {
-		return this.nmsHandler;
+	public SignManager getSignManager() {
+		return this.signManager;
 	}
 
-	public static Skywars get() {
-		return plugin;
+	public File file() {
+		return this.getFile();
+	}
+
+	public ReflectionNMS NMS() {
+		return this.nmsHandler;
 	}
 
 	void loadPrefixes() {
@@ -174,16 +174,6 @@ public class Skywars extends JavaPlugin {
 				SkywarsTabList.update(player);
 			}
 		}, 0L, Skywars.get().getConfig().getLong("taskUpdate.interval") * 20);
-	}
-
-	public void sendDebugMessage(String text, Object... format) {
-		if (Skywars.config != null && !Skywars.config.getBoolean("debug.enabled"))
-			return;
-		this.sendMessageWithPrefix(this.debugPrefix, text, format);
-	}
-
-	public void sendMessageWithPrefix(String prefix, String text, Object... format) {
-		Bukkit.getConsoleSender().sendMessage(MessageUtils.color(prefix) + " " + MessageUtils.color(text, format));
 	}
 
 	public void loadEvents() {
@@ -323,6 +313,16 @@ public class Skywars extends JavaPlugin {
 			}
 		}
 		return null;
+	}
+
+	public void sendDebugMessage(String text, Object... format) {
+		if (Skywars.config != null && !Skywars.config.getBoolean("debug.enabled"))
+			return;
+		this.sendMessageWithPrefix(this.debugPrefix, text, format);
+	}
+
+	public void sendMessageWithPrefix(String prefix, String text, Object... format) {
+		Bukkit.getConsoleSender().sendMessage(MessageUtils.color(prefix) + " " + MessageUtils.color(text, format));
 	}
 
 	public ChestManager getChestManager() {
