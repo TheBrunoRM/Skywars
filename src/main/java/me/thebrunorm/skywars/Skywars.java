@@ -194,6 +194,9 @@ public class Skywars extends JavaPlugin {
 		if (config.getBoolean("debug.projectileTests"))
 			pluginManager.registerEvents(new ProjectileTrails(), this);
 
+		if (config.getBoolean("end_portal_joins_random_game"))
+			pluginManager.registerEvents(new EndPortalJoinsRandomGame(), this);
+
 		final Listener[] listeners = {new InteractEvent(), new Events(), new GamesMenu(), new MapMenu(),
 				new KitsMenu(), new ConfigMenu(), new GameOptionsMenu(),
 				new PlayerInventoryManager(),};

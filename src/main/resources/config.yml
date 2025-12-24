@@ -30,6 +30,8 @@ sounds: # sound name; volume; pitch
   REFILL: LEVEL_UP; 1; 1
   ENDER_DRAGON: ENDERDRAGON_GROWL; 1; 1
 
+end_portal_joins_random_game: true
+
 # this is the reset cooldown for last hits (in seconds)
 lastHitResetCooldown: 15
 
